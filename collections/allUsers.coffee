@@ -39,6 +39,5 @@ if Meteor.isServer
           if giveAdminRole
             Roles.addUsersToRoles(newUserId, ['admin'])
           Accounts.sendEnrollmentEmail(newUserId)
-          Router.go('admins')
       else
         throw new Meteor.Error(403, "Not authorized")

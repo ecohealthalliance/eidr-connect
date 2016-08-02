@@ -20,7 +20,7 @@ if Meteor.isServer
       return Roles.userIsInRole(Meteor.userId(), ['admin'])
 
 Meteor.methods
-  addUserEvent: (name, summary, locations) ->
+  addUserEvent: (name, summary) ->
     if Roles.userIsInRole(Meteor.userId(), ['admin'])
       trimmedName = name.trim()
       user = Meteor.user()
@@ -36,10 +36,7 @@ Meteor.methods
           lastModifiedDate: now,
           lastModifiedByUserId: user._id,
           lastModifiedByUserName: user.profile.name
-        }, (error, result) ->
-          if result
-            Meteor.call("addEventLocations", result, locations)
-        )
+        })
 
   updateUserEvent: (id, name, summary) ->
     if Roles.userIsInRole(Meteor.userId(), ['admin'])

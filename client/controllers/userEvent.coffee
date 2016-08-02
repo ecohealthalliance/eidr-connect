@@ -51,21 +51,7 @@ Template.createEvent.events
     newEvent = e.target.eventName.value
     summary = e.target.eventSummary.value
 
-    $new = $("#location-select2")
-    locations = []
-
-    for option in $new.select2("data")
-      locations.push({
-        geonameId: option.item.geonameId,
-        name: option.item.name,
-        displayName: option.item.toponymName,
-        countryName: option.item.countryName,
-        latitude: option.item.lat,
-        longitude: option.item.lng,
-        subdivision: option.item.adminName1
-      })
-
-    Meteor.call("addUserEvent", newEvent, summary, locations, (error, result) ->
+    Meteor.call("addUserEvent", newEvent, summary, (error, result) ->
       if result
         Router.go('user-event', {_id: result})
     )
