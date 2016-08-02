@@ -34,5 +34,12 @@ Template.createAccount.events
       Meteor.call('createAccount', email, name, makeAdmin, (error, result) ->
         if error
           if error.error is 'allUsers.createAccount.exists'
-            alert("The specified email address is already being used.")
+            toastr.error("The specified email address is already being used.")
+          else
+            toastr.error(error.error)
+        else
+          Router.go('admins')
+          toastr.success("Account created for "+ email)	
       )
+    else
+      toastr.error("Enter an email address and name.")
