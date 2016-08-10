@@ -12,7 +12,7 @@ Meteor.methods
           placeNames.push(object.geoname.name)
     
     if geonameIds.length
-      geonameLocations = HTTP.call("GET", "http://api.geonames.org/searchJSON", {
+      geonameLocations = HTTP.call("GET", "https://api.geonames.org/searchJSON", {
         params: {
           name: placeNames.toString(),
           username: "eha_eidr",
