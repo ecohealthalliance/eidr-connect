@@ -17,6 +17,19 @@ Examples of compose files here:
 https://github.com/ecohealthalliance/infrastructure/tree/master/docker/containers
 
 
+## Testing
+
+Install Chimp by running
+`meteor npm install`
+
+Install mongoDB by following the appropriate installation instructions on the official site:
+https://www.mongodb.com/download-center
+
+Run the meteor application on port 13000
+`meteor -p 13000`
+
+Execute `run-tests.sh`
+
 ## License
 
 Copyright 2016 EcoHealth Alliance

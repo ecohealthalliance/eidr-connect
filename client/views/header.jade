@@ -14,7 +14,7 @@ template(name="navLinks")
   ul.nav.navbar-nav
     if isInRole "admin"
       li(class="dropdown {{checkActive 'create-account'}} {{checkActive 'admins'}}")
-        a.dropdown-toggle-nav(href="#" role="button" data-toggle="dropdown") Admins
+        a.dropdown-toggle-nav(id="admins-menu" href="#" role="button" data-toggle="dropdown") Admins
           span.caret
         ul.dropdown-menu.nav-dd
           li(class="{{checkActive 'create-account'}}")

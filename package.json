@@ -3,5 +3,8 @@
   "private": true,
   "scripts": {
     "start": "meteor -p 3000 --settings settings-dev.json"
+  },
+  "devDependencies": {
+    "chimp": "0.39.3"
   }
 }
