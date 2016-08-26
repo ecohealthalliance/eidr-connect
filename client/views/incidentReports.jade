@@ -26,15 +26,22 @@ template(name="incidentReports")
                   option(value="cases") Case Count
                   option(value="deaths") Death Count
                   option(value="other") Other
-            .form-group
-              if showCountForm
+            if showCountForm
+              .form-group
                 label.col-lg-3.control-label Count
                 .col-lg-9
                   input.form-control(name="count" type="number" min="0" required)
-              if showOtherForm
+            if showOtherForm
+              .form-group
                 label.col-lg-3.control-label Specify Other
                 .col-lg-9
                   input.form-control(name="other" type="text" required)
+            .form-group
+              .col-lg-9.col-lg-offset-3
+                .checkbox
+                  label
+                    input(type="checkbox" value="1" name="travelRelated")
+                    | Travel related
             .form-group
               .col-lg-4.col-lg-offset-8.col-sm-12
                 button.btn.btn-primary.btn-block(type="submit") Add Report
@@ -76,6 +83,11 @@ template(name="incidentReport")
           +incidentDetails label="Deaths" value=deaths
         if specify
           +incidentDetails label="Other" value=specify
+      .row
+        .col-sm-2.control-label Travel Related:
+        .col-sm-10
+          p.form-control-static
+            i.fa.fa-lg(class="{{travelIcon}}")
 
 template(name="incidentDetails")
   .col-sm-2.control-label {{label}}:

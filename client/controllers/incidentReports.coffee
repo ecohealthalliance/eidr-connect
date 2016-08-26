@@ -67,7 +67,7 @@ Template.incidentReports.events
 
     incidentCount = if e.target.count then e.target.count.value.trim() else e.target.other.value.trim()
 
-    Meteor.call("addIncidentReport", templateInstance.data.userEvent._id, article, allLocations, e.target.incidentType.value, incidentCount, e.target.date.value, (error, result) ->
+    Meteor.call("addIncidentReport", templateInstance.data.userEvent._id, article, allLocations, e.target.incidentType.value, incidentCount, e.target.date.value, e.target.travelRelated.checked, (error, result) ->
       if not error
         countId = result
         # $articleSelect.select2('val', '')
