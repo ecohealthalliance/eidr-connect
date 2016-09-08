@@ -14,6 +14,15 @@ dependencies:
 test:
   override:
     - echo "Continuous integration is not set up to run tests yet."
+    - 'printf ''{ "private": { "initial_user": { "email": "%s", password: "%s" } } }'' "test@eha.io" "Pa55w0rd1!" > settings-dev.json'
+    - meteor run -p 13000 --settings settings-dev.json > meteor.log:
+        background: true
+    - |
+      tail -f meteor.log | while read LOGLINE
+        do
+           [[ "${LOGLINE}" == *"=> App running at: http://localhost:13000/"* ]] && pkill -P $$ tail
+        done
+    - npm run chimp-test
 
 deployment:
   master:
