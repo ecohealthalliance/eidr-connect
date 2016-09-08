@@ -1,2 +1,5 @@
+.gitignore
 .meteor/local
-
+node_modules
+tests
+Dockerfile
