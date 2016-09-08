@@ -1,0 +1,32 @@
+machine:
+  services:
+    - docker
+
+# Add some environment variables
+  environment:
+    PACKAGE_DIRS: "/home/ubuntu"
+    MONGO_URL: "mongodb://127.0.0.1:27017/eidr-connect"
+
+dependencies:
+  override:
+    - curl https://install.meteor.com/ | sh
+
+test:
+  override:
+    - echo "Continuous integration is not set up to run tests yet."
+
+deployment:
+  master:
+    branch: master
+    commands:
+      - 'printf ''{ "private": { "initial_user": { "email": "%s", password: "%s" } } }'' "$eidr_email" "$eidr_password" > settings-production.json'
+      - docker build -t eha/eidr-connect .
+      - docker save eha/eidr-connect | gzip -9 > eidr-connect.docker.tgz
+
+general:
+  artifacts:
+    - "eidr-connect.docker.tgz"
+    - "eidr-connect.yml"
+  branches:
+    ignore:
+      - gh-pages

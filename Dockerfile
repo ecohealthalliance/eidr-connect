@@ -24,5 +24,5 @@ WORKDIR /build/bundle
 RUN cd programs/server && npm install
 
 # modify settings-production.json if necessary
-COPY settings-dev.json settings.json
+COPY settings-production.json settings.json
 CMD METEOR_SETTINGS="$(cat settings.json)" node main.js
