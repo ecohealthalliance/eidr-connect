@@ -14,7 +14,7 @@ dependencies:
 test:
   override:
     - echo "Continuous integration is not set up to run tests yet."
-    - 'printf ''{ "private": { "initial_user": { "email": "%s", password: "%s" } } }'' "test@eha.io" "Pa55w0rd1!" > settings-dev.json'
+    - 'printf ''{ "private": { "initial_user": { "email": "%s", "password": "%s" } } }'' "test@eha.io" "password" > settings-dev.json'
     - meteor run -p 13000 --settings settings-dev.json > meteor.log:
         background: true
     - |
@@ -28,7 +28,7 @@ deployment:
   master:
     branch: master
     commands:
-      - 'printf ''{ "private": { "initial_user": { "email": "%s", password: "%s" } } }'' "$eidr_email" "$eidr_password" > settings-production.json'
+      - 'printf ''{ "private": { "initial_user": { "email": "%s", "password": "%s" } } }'' "$eidr_email" "$eidr_password" > settings-production.json'
       - docker build -t eha/eidr-connect .
       - docker save eha/eidr-connect | gzip -9 > eidr-connect.docker.tgz
 
