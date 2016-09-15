@@ -2,33 +2,23 @@ eidr-connect.eha.io:
   image: eidr-connect
   container_name: eidr-connect.eha.io
   environment:
-    - MONGO_URL=mongodb://10.0.0.165:27017/eidr-connect
+    - MONGO_URL=mongodb://eidr-connect-mongo:27017/eidr-connect
     - ROOT_URL=https://eidr-connect.eha.io
     - PORT=3000
   ports:
     - "3000:3000"
   restart: always
-  command: supervisord --nodaemon --config /etc/supervisor/supervisord.conf
+  links:
+    - eidr-connect-mongo:mongo
   volumes:
     - /shared:/shared
 
-mongodb:
-  container_name: mongodb
-  image: mongodb
+eidr-connect-mongo:
+  container_name: eidr-connect-mongo
+  image: mongo
   ports:
     - "27017:27017"
   restart: always
   volumes:
     - /mnt/mongo:/var/lib
     - /var/log:/var/log
-
-app-router:
-  container_name: app-router
-  image: app-router
-  ports:
-    - "80:80"
-    - "443:443"
-  restart: always
-  volumes:
-    - /etc/letsencrypt:/etc/letsencrypt:ro
-

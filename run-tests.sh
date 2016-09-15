@@ -17,13 +17,15 @@ if [ "$WATCH" == "true" ]; then
 fi
 
 # Clean-up
-function finish {
+function finish() {
+  rv=$?
   echo "Cleaning-up..."
   $mongo/mongo.js localhost:13001/meteor .scripts/drop-database.js
   echo "Restoring the original 'meteor' db from a dump file..."
   $mongo/mongorestore.js -h 127.0.0.1 --port 13001 -d meteor tests/dump/meteor --quiet
   echo "done."
   rm -rf tests/dump/ # cle
+  exit $rv
 }
 trap finish EXIT
 trap finish INT
