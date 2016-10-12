@@ -1,20 +1,6 @@
 CuratorSources = require '/imports/collections/curatorSources.coffee'
 createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
 
-createInboxSections = () ->
-  sections = []
-  recordedDates = {}
-  allPosts = CuratorSources.find({}, {sort: {addedDate: -1}}).fetch()
-  if allPosts.length == 0
-    return []
-  for post in allPosts
-    date = new Date(post.addedDate.getFullYear(), post.addedDate.getMonth(), post.addedDate.getDate())
-    recordedDates[date.getTime()] = date
-  for key of recordedDates
-    sections.push recordedDates[key]
-  sections.sort
-  return sections
-
 createNewCalendar = () ->
   createInlineDateRangePicker($("#date-picker"), {maxDate: new Date(), useDefaultDate: true})
   calendar = $('#date-picker').data('daterangepicker')
@@ -28,27 +14,35 @@ Template.curatorInbox.onCreated ->
   @calendarState = new ReactiveVar false
   @ready = new ReactiveVar false
   @selectedArticle = false
-  @days = []
+  @dateRange = new ReactiveVar
+    startDate: moment().subtract(1, 'weeks').toDate()
+    endDate: new Date()
   @textFilter = new ReactiveTable.Filter('curator-inbox-article-filter', ['url'])
   @reviewFilter = new ReactiveTable.Filter('curator-inbox-review-filter', ['reviewed'])
-
-  self = @
-
-  Meteor.call 'fetchPromedPosts', 100, null, () ->
-    self.sub = Meteor.subscribe "curatorSources", () ->
-      self.days = createInboxSections()
-      self.ready.set(true)
+  
+  @autorun =>
+    Meteor.call 'fetchPromedPosts', 100, @dateRange.get(), (err) ->
+      if err
+        console.log(err)
+        return toastr.error(err.reason)
+      console.log "source cache updated"
+    @subscribe "curatorSources", @dateRange.get(), () =>
+      @ready.set(true)
 
 Template.curatorInbox.onRendered ->
   $(document).ready =>
     createNewCalendar()
 
-Template.curatorInbox.onDestroyed ->
-  @sub.stop()
-
 Template.curatorInbox.helpers
   days: ->
-    return Template.instance().days
+    {startDate, endDate} = Template.instance().dateRange.get()
+    days = _.range(moment(endDate).diff(startDate, 'days') + 1).map (dayOffset)->
+      moment(startDate).add(dayOffset, 'days').set(
+        hours:0
+        minutes:0
+        seconds:0
+      ).toDate()
+    return days.reverse()
 
   calendarState: ->
     return Template.instance().calendarState.get()
@@ -85,7 +79,6 @@ Template.curatorInbox.events
   "click #calendar-btn-apply": (event, template) ->
     template.calendarState.set(false)
     template.ready.set(false)
-    template.sub.stop()
 
     range = null
     startDate = $('#date-picker').data('daterangepicker').startDate
@@ -96,26 +89,20 @@ Template.curatorInbox.events
 
     if startDate and endDate
       range = {
-        startDate: startDate.format()
-        endDate: endDate.format()
+        startDate: startDate.toDate()
+        endDate: endDate.toDate()
       }
-
-      Meteor.call 'fetchPromedPosts', 300, range, () ->
-        template.sub = Meteor.subscribe "curatorSources", 2000, range, () ->
-          template.days = createInboxSections()
-          template.ready.set(true)
+      template.dateRange.set range
 
   "click #calendar-btn-reset": (event, template) ->
     template.calendarState.set(false)
     template.ready.set(false)
-    template.sub.stop()
 
     createNewCalendar()
 
-    Meteor.call 'fetchPromedPosts', 100, null, () ->
-      template.sub = Meteor.subscribe "curatorSources", 100, null, () ->
-        template.days = createInboxSections()
-        template.ready.set(true)
+    template.dateRange.set
+      startDate: moment().subtract(1, 'weeks').toDate()
+      endDate: new Date()
 
   "click #calendar-btn-cancel": (event, template) ->
     template.calendarState.set(false)
@@ -143,15 +130,20 @@ Template.curatorInboxSection.onCreated ->
       key: 'publishDate'
       description: 'Date the article was published.'
       label: 'Published'
+      sortOrder: 0
       sortDirection: -1
+      sortFn: (value, ctx)->
+        value
       fn: (value) ->
-        return moment(value).fromNow()
+        if moment(value).diff(new Date(), 'days') > -7
+          moment(value).fromNow()
+        else
+          moment(value).format('YYYY-MM-DD')
     }, 
     {
       key: 'addedDate'
       description: 'Date the article was added.'
       label: 'Added'
-      sortOrder: 0
       sortDirection: -1
       hidden: true
       fn: (value) ->
@@ -164,16 +156,13 @@ Template.curatorInboxSection.onCreated ->
     }
   ]
 
-  today = Template.instance().data.date
-  tomorrow = new Date(today)
-  tomorrow.setDate(tomorrow.getDate() + 1)
-
-  @filterId = 'inbox-date-filter-'+today.getTime()
-  @filter = new ReactiveTable.Filter(@filterId, ['addedDate'])
-  @filter.set({
-    $gte: today
-    $lt: tomorrow
-  })
+  sectionDate = Template.instance().data.date
+  @filterId = 'inbox-date-filter-'+sectionDate.getTime()
+  @filter = new ReactiveTable.Filter(@filterId, ['publishDate'])
+  @filter.set(
+    $gte: sectionDate
+    $lt: moment(sectionDate).add(1, 'day').toDate()
+  )
 
   @isOpen = new ReactiveVar(@data.index < 5)
 
@@ -185,18 +174,7 @@ Template.curatorInboxSection.helpers
   formattedDate: ->
     return moment(Template.instance().data.date).format('MMMM DD, YYYY')
   settings: ->
-    fields = []
-    for field in Template.instance().curatorInboxFields
-      fields.push {
-        key: field.key
-        label: field.label
-        sortOrder: field.sortOrder || 99
-        sortDirection: field.sortDirection || 99
-        sortable: false
-        hidden: field.hidden
-        cellClass: field.cellClass
-        fn: field.fn
-      }
+    fields = Template.instance().curatorInboxFields
 
     return {
       id: 'article-curation-table'

@@ -5,6 +5,7 @@ eidr-connect.eha.io:
     - MONGO_URL=mongodb://10.0.0.165:27017/eidr-connect
     - ROOT_URL=https://eidr-connect.eha.io
     - PORT=3000
+    - SPA_MONGO_URL=mongodb://spa.eha.io:27017/promed
   ports:
     - "3000:3000"
   restart: always

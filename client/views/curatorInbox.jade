@@ -56,16 +56,6 @@ template(name="curatorSourceDetails")
       h2 {{title}}
       i.fa.fa-check-circle.reviewed-icon
     .curator-article-details-content
-      h3 Content
-      .col-xs-12
-        p {{content}}
-        if largeContent
-          a#content-show-more
-            if contentIsOpen
-              p Show less.
-            else
-              p Show more.
-        br
       .row
         .col-xs-12
           +curatorEvents

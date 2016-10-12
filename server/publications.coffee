@@ -26,18 +26,20 @@ Meteor.publish "userEvents", () ->
 
 # Curator Sources
 ReactiveTable.publish "curatorSources", CuratorSources, {}
-Meteor.publish "curatorSources", (limit, range) ->
-  query = {addedDate: {$exists: true}}
-  if range and range.startDate and range.endDate
-    query = {
-      addedDate: {
-        $gte: new Date(range.startDate)
-        $lte: new Date(range.endDate)
-      }
-    }
+Meteor.publish "curatorSources", (range) ->
+  endDate = new Date()
+  if range?.endDate
+    endDate = range.endDate
+  startDate = moment(endDate).subtract(2, 'weeks').toDate()
+  if range?.startDate
+    startDate = range.startDate
+  query =
+    publishDate:
+      $gte: new Date(startDate)
+      $lte: new Date(endDate)
   CuratorSources.find(query, {
-    sort: {addedDate: -1}
-    limit: limit || 100
+    sort:
+      publishDate: -1
   })
 
 Meteor.publish "eventArticles", (ueId) ->
