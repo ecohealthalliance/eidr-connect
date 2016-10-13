@@ -5,9 +5,7 @@ if Meteor.isServer
   Meteor.methods
     fetchPromedPosts: (limit, range) ->
       @unblock
-      endDate = new Date()
-      if range?.endDate
-        endDate = range.endDate
+      endDate = range?.endDate || new Date()
       startDate = moment(endDate).subtract(2, 'weeks').toDate()
       if range?.startDate
         startDate = range.startDate

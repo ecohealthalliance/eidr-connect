@@ -27,9 +27,7 @@ Meteor.publish "userEvents", () ->
 # Curator Sources
 ReactiveTable.publish "curatorSources", CuratorSources, {}
 Meteor.publish "curatorSources", (range) ->
-  endDate = new Date()
-  if range?.endDate
-    endDate = range.endDate
+  endDate = range?.endDate || new Date()
   startDate = moment(endDate).subtract(2, 'weeks').toDate()
   if range?.startDate
     startDate = range.startDate

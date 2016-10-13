@@ -25,7 +25,6 @@ Template.curatorInbox.onCreated ->
       if err
         console.log(err)
         return toastr.error(err.reason)
-      console.log "source cache updated"
     @subscribe "curatorSources", @dateRange.get(), () =>
       @ready.set(true)
 
