@@ -42,7 +42,7 @@ module.exports =
         if latLng not in uniqueEventLocations
           if not mapLocations[latLng]
             mapLocations[latLng] = {name: location.name, events: []}
-          mapLocations[latLng].events.push({id: event._id, name: event.eventName, mapColorRGB: rgbColor})
+          mapLocations[latLng].events.push({id: event._id, eventName: event.eventName, incidents: event.incidents, mapColorRGB: rgbColor})
           uniqueEventLocations.push(latLng)
 
   addMarkersToMap: (map, instance, mapLocations) ->
