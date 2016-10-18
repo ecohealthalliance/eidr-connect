@@ -96,9 +96,11 @@ Template.mapFilters.events
     if selectedEvents.findOne(id: id)
       selectedEvents.remove id: id
     else
+      event = _.find(instance.data.templateEvents.get(), (e) -> e._id == id)
       selectedEvents.insert
         id: id
         rgbColor: @rgbColor
+        eventName: event.eventName
         incidents: @incidents
         selected: true
 

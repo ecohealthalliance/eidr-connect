@@ -10,7 +10,7 @@ template(name="mapFilters")
     ul.map-event-list.list-group
       each getEvents
         li.map-event-list--item.list-group-item(class="{{#if selected}} selected {{/if}}")
-          span.name=name
+          span.name=eventName
           span.date Last Incident Date: {{formatDate lastIncidentDate}}
           .circle(style="background-color:rgb(#{rgbColor})")
       else
