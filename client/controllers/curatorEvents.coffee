@@ -82,7 +82,7 @@ Template.curatorEvents.events
       Blaze.renderWithData(Template.curatorEventIncidents, this, $tr[0])
   "click .open-add-event-form": (event, template) ->
     template.addEventMenuIsOpen.set !template.addEventMenuIsOpen.get()
-  "click #associate-events tr": (event, template) ->
+  "click #associate-events tr, click #associated-events tr": (event, template) ->
     articleId = template.data._id
     Meteor.call 'associateEventWithSource', articleId, @_id
 

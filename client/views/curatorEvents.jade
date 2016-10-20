@@ -6,21 +6,31 @@ template(name="curatorEvents")
       a.btn.btn-primary.open-add-event-form(href="")
         i.fa.fa-plus
         span Edit Associated Events
+  table#associated-events.table
+    thead
+      tr
+        th.eventName Associated Events
+    tbody
+      each associatedUserEvents
+        tr
+          td 
+            if addEventMenuIsOpen
+              i.fa.fa-minus-circle  
+            {{eventName}}
   if addEventMenuIsOpen
     table#associate-events.table.table-hover
+      thead
+        tr
+          th.suggestionName Suggested Events
       tbody
         each userEvents
           tr(class="{{#if associated}}details-open{{/if}}")
-            td {{eventName}}
-  if associatedUserEvents
-    table#associated-events.table
-      thead
-        tr
-          th.eventName Associated Events
-      tbody
-        each associatedUserEvents
-          tr
-            td {{eventName}}
+            td 
+              if associated
+                i.fa.fa-minus-circle
+              else
+                i.fa.fa-plus-circle
+              {{eventName}}
 
 template(name="curatorEventIncidents")
   td(colspan="2" class="tr-incidents-wrapper")
