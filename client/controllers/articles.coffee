@@ -11,7 +11,8 @@ Template.articles.helpers
         key: "url"
         label: "Title"
         fn: (value, object, key) ->
-          return value
+          # switching over to displaying the title in this column.  If that's not loaded in the DB show the URL.
+          return object.title || value
       },
       {
         key: "addedDate"
