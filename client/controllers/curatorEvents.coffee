@@ -49,32 +49,30 @@ Template.curatorEvents.helpers
     CuratorSources.findOne({ _id: articleId, relatedEvents: this._id })
 
   settings: ->
-    return {
-      id: 'curator-events-table'
-      fields: [
-        {
-          key: 'eventName'
-          label: 'Event Name'
-          sortDirection: 1
-          tmpl: Template.curatorEventSearchRow
-        }
-        {
-          key: 'creationDate'
-          label: 'Creation Date'
-          sortOrder: 0
-          sortDirection: -1
-          hidden: true
-        }
-      ]
-      filters: ['curatorEventsFilter']
-      noDataTmpl: Template.noCuratorEvents
-      showNavigationRowsPerPage: false
-      showColumnToggles: false
-      showRowCount: false
-      currentPage: 1
-      rowsPerPage: 5
-      class: "table table-hover col-sm-12"
-    }
+    id: 'curator-events-table'
+    class: 'table curator-events-table'
+    fields: [
+      {
+        key: 'eventName'
+        label: 'Event Name'
+        sortDirection: 1
+        tmpl: Template.curatorEventSearchRow
+      }
+      {
+        key: 'creationDate'
+        label: 'Creation Date'
+        sortOrder: 0
+        sortDirection: -1
+        hidden: true
+      }
+    ]
+    filters: ['curatorEventsFilter']
+    noDataTmpl: Template.noCuratorEvents
+    showNavigationRowsPerPage: false
+    showColumnToggles: false
+    showRowCount: false
+    currentPage: 1
+    rowsPerPage: 5
 
 Template.curatorEvents.events
   "click .curator-events-table .curator-events-table-row": (event, template) ->
@@ -96,7 +94,7 @@ Template.curatorEvents.events
       publishDate: template.data.publishDate
       publishDateTZ: "EST"
     })
-  "click .deassociate-event": (event, template) ->
+  "click .disassociate-event": (event, template) ->
     Meteor.call('removeEventSource', template.associatedEventIdsToArticles.get()[@_id])
   "click .suggest-incidents": (event, template) ->
     Modal.show("suggestedIncidentsModal", {
