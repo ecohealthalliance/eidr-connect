@@ -98,3 +98,8 @@ Template.curatorEvents.events
     })
   "click .deassociate-event": (event, template) ->
     Meteor.call('removeEventSource', template.associatedEventIdsToArticles.get()[@_id])
+  "click .suggest-incidents": (event, template) ->
+    Modal.show("suggestedIncidentsModal", {
+        userEventId: @_id
+        article: template.associatedEventIdsToArticles.get()[@_id]
+      })

@@ -8,8 +8,11 @@ template(name="curatorEvents")
           each associatedUserEvents
             tr
               td
-                i.fa.fa-minus-circle.deassociate-event
-                a(href="/user-event/#{_id}")=eventName
+                .col-lg-11
+                  i.fa.fa-minus-circle.deassociate-event
+                  a(href="/user-event/#{_id}")=eventName
+                .col-lg-1
+                  i.fa.fa-file-o.suggest-incidents
     else
       p.no-events.muted-text Currently no associated events
 
