@@ -25,6 +25,7 @@ USER meteor
 
 # Install Meteor
 RUN curl https://install.meteor.com/ | sh
+ENV PATH=$PATH:$HOME/.meteor
 
 RUN meteor npm install
 RUN meteor build /build --directory
