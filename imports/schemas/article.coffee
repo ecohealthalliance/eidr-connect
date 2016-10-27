@@ -13,6 +13,8 @@ articleSchema = new SimpleSchema(
   # The timezone used to specify the publishDate in the article.
   publishDateTZ:
     type: String
+  title:
+    type: String
   url:
     type: String
   userEventId:
