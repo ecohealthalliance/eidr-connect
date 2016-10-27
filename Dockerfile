@@ -18,14 +18,13 @@ ENV PATH $PATH:/node-v4.4.7-linux-x64/bin
 ADD . /eidr-connect
 WORKDIR /eidr-connect
 
+# Install Meteor
+RUN curl https://install.meteor.com/ | sh
+
 #Create and use meteor user
 RUN groupadd meteor && adduser --ingroup meteor --home /home/meteor meteor
 RUN chown -R meteor:meteor /eidr-connect
 USER meteor
-
-# Install Meteor
-RUN curl https://install.meteor.com/ | sh
-ENV PATH=$PATH:$HOME/.meteor
 
 RUN meteor npm install
 RUN meteor build /build --directory
