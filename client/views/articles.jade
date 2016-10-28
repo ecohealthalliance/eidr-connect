@@ -23,7 +23,7 @@ template(name="articles")
               | Add Source
       .col-md-6.event-sources-detail
         if selectedSource
-          h2= selectedSource.url
+          h2= formatUrl(selectedSource.url)
           .row.event-source-info
             .col-lg-1
               a.ref-link(href="{{selectedSource.url}}" target="_blank" rel="noopener noreferrer")

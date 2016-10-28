@@ -89,7 +89,7 @@ Template.curatorEvents.events
       Blaze.renderWithData(Template.curatorEventIncidents, this, $tr[0])
   "click .associate-event": (event, template) ->
     Meteor.call('addEventSource', {
-      url: "http://www.promedmail.org/post/" + template.data.selectedSourceId.get(),
+      url: "promedmail.org/post/" + template.data.selectedSourceId.get(),
       userEventId: @_id
       publishDate: template.data.publishDate
       publishDateTZ: "EST"

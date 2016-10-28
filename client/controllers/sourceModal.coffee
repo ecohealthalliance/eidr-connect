@@ -1,6 +1,8 @@
 convertDate = require "/imports/convertDate.coffee"
-utils = require '/imports/utils.coffee'
 Articles = require '/imports/collections/articles.coffee'
+
+import {UTCOffsets, cleanUrl} from '/imports/utils.coffee'
+
 
 Template.sourceModal.onCreated ->
   @tzIsSpecified = false
@@ -8,7 +10,7 @@ Template.sourceModal.onCreated ->
   @currentTitle = new ReactiveVar()
   if @data.publishDate
     @timezoneFixedPublishDate = convertDate(@data.publishDate, "local",
-                                              utils.UTCOffsets[@data.publishDateTZ])
+                                              UTCOffsets[@data.publishDateTZ])
   @suggestedArticles = new Mongo.Collection(null)
   Meteor.call 'queryForSuggestedArticles', @data.userEventId, (error, result) =>
     if result
@@ -42,7 +44,7 @@ Template.sourceModal.helpers
   timezones: ->
     timezones = []
     defaultTimezone = if moment().isDST() then 'EDT' else 'EST'
-    for tzKey, tzOffset of utils.UTCOffsets
+    for tzKey, tzOffset of UTCOffsets
       timezones.push({name: tzKey, offset: tzOffset})
       if @publishDateTZ
         if @publishDateTZ is tzKey
@@ -87,7 +89,7 @@ Template.sourceModal.events
 
     source = {
       userEventId: templateInstance.data.userEventId
-      url: article
+      url: cleanUrl(article)
       publishDateTZ: form.publishDateTZ.value
       title: templateInstance.currentTitle.get()
     }
@@ -101,7 +103,7 @@ Template.sourceModal.events
       if form.publishTime.value.length
         selectedDate.set({hour: time.get("hour"), minute: time.get("minute")})
         selectedDate = convertDate(selectedDate,
-                                    utils.UTCOffsets[source.publishDateTZ], "local")
+                                    UTCOffsets[source.publishDateTZ], "local")
       source.publishDate = selectedDate.toDate()
 
     enhance = form.enhance.checked
@@ -150,7 +152,7 @@ Template.sourceModal.events
       if form.publishTime.value.length
         selectedDate.set({hour: time.get("hour"), minute: time.get("minute")})
         selectedDate = convertDate(selectedDate,
-                                    utils.UTCOffsets[source.publishDateTZ], "local")
+                                    UTCOffsets[source.publishDateTZ], "local")
       source.publishDate = selectedDate.toDate()
 
     Meteor.call("updateEventSource", source, (error, result) ->
@@ -175,7 +177,7 @@ Template.sourceModal.events
           daylightSavings = daylightSavings and moment.utc(
             date.year() + "-11-01") >= date
           tz = if daylightSavings then "EDT" else "EST"
-          date = date.utcOffset(utils.UTCOffsets[tz])
+          date = date.utcOffset(UTCOffsets[tz])
           templateInstance.$("#publishDateTZ").val(tz)
           templateInstance.$('#publishDate').data("DateTimePicker").date(date)
           templateInstance.$('#publishTime').data("DateTimePicker").date(date)

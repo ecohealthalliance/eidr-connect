@@ -1,4 +1,35 @@
-module.exports.incidentReportFormToIncident = (form)->
+###
+# cleanUrl - takes an existing url and removes the last match of the applied
+#   regular expressions.
+#
+# @param {string} existingUrl, the url to be cleaned
+# @param {array} [regexps], (optional) an array of compiled regular expressions
+# @returns {string} cleanedUrl, an url that has been cleaned
+###
+export cleanUrl = (existingUrl, regexps) ->
+  regexps = regexps || [new RegExp('^(https?:\/\/)', 'i'), new RegExp('^(www\.)', 'i')]
+  cleanedUrl = existingUrl
+  regexps.forEach (r) ->
+    found = false
+    match = cleanedUrl.match(r)
+    if match && match.length > 0
+      cleanedUrl = cleanedUrl.replace(match[match.length-1], '')
+  return cleanedUrl
+
+###
+# formatUrl - takes an cleaned url and adds 'http' so that a browser can open
+#
+# @param {string} existingUrl, the url to be formatted
+# @returns {string} formattedUrl, an url that has 'http' added
+###
+export formatUrl = (existingUrl) ->
+  regexp = new RegExp('^(https?:\/\/)', 'i')
+  if regexp.test existingUrl
+    return existingUrl
+  else
+    return 'http://' + existingUrl
+
+export incidentReportFormToIncident = (form)->
   $form = $(form)
   $articleSelect = $(form.articleSource)
   if $form.find("#singleDate").hasClass("active")
@@ -60,7 +91,7 @@ module.exports.incidentReportFormToIncident = (form)->
     incident.locations.push(item)
   return incident
 
-module.exports.UTCOffsets =
+export UTCOffsets =
   ADT:  '-0300'
   AKDT: '-0800'
   AKST: '-0900'
@@ -84,7 +115,7 @@ module.exports.UTCOffsets =
   WGST: '-0200'
   WGT: '-0300'
 
-module.exports.regexEscape = (s)->
+export regexEscape = (s)->
   # Based on bobince's regex escape function.
   # source: http://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711#3561711
   s.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&')

@@ -1,7 +1,9 @@
 UserEvents = require '/imports/collections/userEvents.coffee'
 Articles = require '/imports/collections/articles.coffee'
-utils = require '/imports/utils.coffee'
 PromedPosts = require '/imports/collections/promedPosts.coffee'
+
+import { formatUrl } from '/imports/utils.coffee'
+
 
 DateRegEx = /<span class="blue">Published Date:<\/span> ([^<]+)/
 
@@ -18,7 +20,8 @@ Meteor.methods
         api_key: "Cr9LPAtL"
         returnSourceContent: true
         showKeypoints: true
-        url: url
+        # formatUrl takes a database cleanUrl and adds 'http://'
+        url: formatUrl(url)
     })
     if result.data.error
       throw new Meteor.Error("grits-error", result.data.error)

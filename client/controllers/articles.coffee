@@ -1,6 +1,9 @@
 Incidents = require '/imports/collections/incidentReports.coffee'
 Articles = require '/imports/collections/articles.coffee'
 
+import {formatUrl} from '/imports/utils.coffee'
+
+
 Template.articles.onCreated ->
   @selectedSourceId = new ReactiveVar null
 
@@ -71,6 +74,8 @@ Template.articles.helpers
         locations[location.id] = location.name
     )
     _.flatten locations
+  formatUrl: (url) ->
+    formatUrl(url)
 
 Template.articles.events
   "click .reactive-table tbody tr": (event, template) ->

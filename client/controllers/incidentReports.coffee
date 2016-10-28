@@ -20,6 +20,9 @@ tooltipTmpl = """
   </div>
 """
 
+import { formatUrl } from '/imports/utils.coffee'
+
+
 Template.incidentReports.onDestroyed ->
   if @plot
     @plot.destroy()
@@ -92,6 +95,8 @@ Template.incidentReports.onRendered ->
       return
 
 Template.incidentReports.helpers
+  formatUrl: (url) ->
+    formatUrl(url)
   getSettings: ->
     fields = [
       {
@@ -192,7 +197,6 @@ Template.incidentReports.events
       template.plot.removeFilter('notCumulative')
       template.plot.addFilter('cumulative', template.filters.cumulative)
       template.updatePlot()
-
   "click #scatterPlot-resetZoom": (event, template) ->
     template.plot.resetZoom()
   "click #event-incidents-table th": (event, template) ->

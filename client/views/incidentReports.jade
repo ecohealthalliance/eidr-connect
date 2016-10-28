@@ -35,7 +35,7 @@ template(name="incidentReport")
         .col-sm-10
           each val in url
             p.form-control-static
-              a.ref-link(href="{{val}}" target="_blank") {{val}}
+              a.ref-link(href="{{formatUrl(val)}}" target="_blank") {{formatUrl(val)}}
       if dateRange
         .row
           .col-sm-2.control-label Date:

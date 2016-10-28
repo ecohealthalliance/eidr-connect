@@ -201,7 +201,7 @@ Template.suggestedIncidentsModal.events
     content = Template.instance().content.get()
     displayCharacters = 150
     [start, end] = incident.countAnnotation.textOffsets[0]
-    
+
     startingIndex = Math.min(incident.locationTerritory?.territoryStart or start,
       incident.dateTerritory?.territoryStart or start)
     precedingText = content.slice(startingIndex, start)
