@@ -64,4 +64,12 @@ Meteor.methods
   # @returns {array} userEvents, an array of userEvents
   ###
   searchUserEvents: (search) ->
-    UserEvents.find({$text: {$search: search}}, {fields: {score: {$meta: 'textScore'}}, sort: {score: {$meta: 'textScore'}}}).fetch()
+    console.log search
+    UserEvents.find({
+      $text: {$search: search}
+    }, {
+      fields:
+        score: {$meta: 'textScore'}
+      sort:
+        score: {$meta: 'textScore'}
+    }).fetch()
