@@ -6,6 +6,19 @@ PromedPosts = require '/imports/collections/promedPosts.coffee'
 CuratorSources = require '/imports/collections/curatorSources'
 
 Meteor.startup ->
+  # update articles to include their title
+  noTitles = Articles.find({title: null}).fetch()
+  console.log "found " + noTitles.length + " articles without titles.  Attempting to set titles now."
+  for article in noTitles
+    promedId = /promedmail\.org\/post\/(\d+)$/ig.exec(article.url)?[1]
+    if promedId
+      article.title = PromedPosts.findOne({promedId: promedId}, {"subject.raw": 1}).subject.raw
+      Articles.update(article._id, $set: article)
+    else
+      console.log "non-ProMED Article:", article.url
+  console.log "Done setting titles."
+
+  # set incident dates
   incidents = Incidents.find().fetch()
   for incident in incidents
     try

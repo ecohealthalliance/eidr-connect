@@ -7,6 +7,7 @@ import {UTCOffsets, cleanUrl} from '/imports/utils.coffee'
 Template.sourceModal.onCreated ->
   @tzIsSpecified = false
   @proMEDRegEx = /promedmail\.org\/post\/(\d+)/ig
+  @currentTitle = new ReactiveVar()
   if @data.publishDate
     @timezoneFixedPublishDate = convertDate(@data.publishDate, "local",
                                               UTCOffsets[@data.publishDateTZ])
@@ -90,6 +91,7 @@ Template.sourceModal.events
       userEventId: templateInstance.data.userEventId
       url: cleanUrl(article)
       publishDateTZ: form.publishDateTZ.value
+      title: templateInstance.currentTitle.get()
     }
 
     if date
@@ -182,6 +184,7 @@ Template.sourceModal.events
 
   "click #suggested-articles a": (event, templateInstance) ->
     event.preventDefault()
+    templateInstance.currentTitle.set(event.currentTarget.innerText)
     url = event.currentTarget.getAttribute 'href'
     input = templateInstance.find('#article')
     input.value = url

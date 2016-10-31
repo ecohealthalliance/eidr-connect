@@ -3,13 +3,15 @@ template(name="curatorEvents")
     .curator-events-header
       h3 Associated Events
     if associatedUserEvents.count
-      table#associated-events.table
+      table#associated-events.table.curator-events-table
         tbody
           each associatedUserEvents
             tr
               td
-                i.fa.fa-minus-circle.deassociate-event
-                a(href="/user-event/#{_id}")=eventName
+                +curatorEventSearchRow(
+                  associated=true
+                  eventName=eventName
+                  _id=_id)
     else
       p.no-events.muted-text Currently no associated events
 
@@ -30,10 +32,17 @@ template(name="noCuratorEvents")
     p No Events Found
 
 template(name="curatorEventSearchRow")
-  i.fa.fa-plus-circle.associate-event(tabindex="0")
+  i.fa.fa-plus-circle(
+    tabindex="0"
+    class="{{#if associated}} disassociate{{else}} associate{{/if}}-event")
   span=eventName
-  a.fa.fa-info-circle.event-info(href="/user-event/#{_id}" target="_blank")
+  .secondary-actions
+    if associated
+      a.fa.fa-file-o.suggest-incidents
+    a.fa.fa-info-circle.event-info(href="/user-event/#{_id}" target="_blank")
 
 template(name="curatorEventIncidents")
   td(colspan="2" class="tr-incidents-wrapper")
-    +reactiveTable collection="curatorEventIncidents" settings=settings
+    +reactiveTable(
+      collection="curatorEventIncidents"
+      settings=settings)

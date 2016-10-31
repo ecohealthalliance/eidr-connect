@@ -1,4 +1,5 @@
 incidentReportSchema = require('/imports/schemas/incidentReport.coffee')
+import {formatUrl} from '/imports/utils.coffee'
 # A annotation's territory is the sentence containing it,
 # and all the following sentences until the next annotation.
 # Annotations in the same sentence are grouped.
@@ -53,10 +54,11 @@ Template.suggestedIncidentsModal.onCreated ->
   @incidentCollection = new Meteor.Collection(null)
   @loading = new ReactiveVar(true)
   @content = new ReactiveVar("")
-  Meteor.call("getArticleEnhancements", @data.article.url, (error, result) =>
+  Meteor.call("getArticleEnhancements", formatUrl(@data.article.url), (error, result) =>
     if error
       Modal.hide(@)
       toastr.error error.reason
+      console.error error
       return
     geonameIds = result.keypoints
       .filter((k)->k.location)
