@@ -23,14 +23,17 @@ docker-compose -f eidr-connect-test.yml up
 Install testing dependencies
 `npm install`
 
-Run the meteor application on port 13000
-`npm run start-test`
+Run the meteor test application
+`./start-test-server.sh`
 
 Execute the test runner to run all tests
 `npm run chimp-test`
 
 Or include the watch flag to continuously execute watched tests after file changes
 `npm run chimp-watch`
+
+Stop the meteor test application
+`./stop-test-server.sh`
 
 ## License
 
