@@ -1,3 +1,4 @@
+@watch
 Feature: Admin
 
   Background:

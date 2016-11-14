@@ -3,7 +3,7 @@
 # example:
 #
 # npm start-test
-# ./run-tests.sh --app_uri=http://127.0.0.1 --app_port=3001 --mongo_host=127.0.0.1 --mongo_port=27017 --prod_db=eidr-connect --test_db=eidr-connect-test
+# ./run-tests.sh --watch=false --app_uri=http://127.0.0.1 --app_port=3001 --mongo_host=127.0.0.1 --mongo_port=27017 --prod_db=eidr-connect --test_db=eidr-connect-test
 
 for i in "$@"
 do
@@ -32,6 +32,10 @@ case $i in
     app_port="${i#*=}"
     shift
     ;;
+    --watch=*)
+    watch="${i#*=}"
+    shift
+    ;;
     *)
     ;;
 esac
@@ -50,16 +54,11 @@ mongo_host=${mongo_host:=127.0.0.1}
 mongo_port=${mongo_port:=27017}
 app_uri=${app_uri:=http://localhost}
 app_port=${app_port:=3001}
+watch=${watch:=false}
 
 chimp=node_modules/chimp/bin/chimp.js
 mongo=node_modules/mongodb-prebuilt/binjs/
-watch=""
 quit=0
-
-if [ "$WATCH" == "true" ]; then
-  watch="--watch";
-  SECONDS=0
-fi
 
 # Clean-up
 function finish {
@@ -81,7 +80,7 @@ $mongo/mongodump.js -h $mongo_host --port $mongo_port -d $prod_db -o tests/dump/
 echo "Load the '${prod_db}' into the test '${test_db}' db..."
 $mongo/mongorestore.js -h $mongo_host --port $mongo_port -d $test_db tests/dump/$prod_db --quiet
 
-$chimp $watch --ddp=$app_uri:$app_port \
+$chimp --watch=$watch --ddp=$app_uri:$app_port \
         --path=tests/ \
         --coffee=true \
         --compiler=coffee:coffee-script/register \

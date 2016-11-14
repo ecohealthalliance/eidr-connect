@@ -3,9 +3,10 @@
   "private": true,
   "scripts": {
     "start": "meteor -p 13000 --settings settings-dev.json",
-    "start-test": "meteor -p 13000 --settings settings-dev.json",
+    "start-test-server": "bash start-test-server.sh",
+    "stop-test-server": "bash stop-test-server.sh",
     "chimp-test": "bash run-tests.sh",
-    "chimp-watch": "WATCH=true bash run-tests.sh"
+    "chimp-watch": "bash run-tests.sh --watch=true"
   },
   "devDependencies": {
     "chimp": "^0.41.2",

@@ -21,22 +21,39 @@ docker-compose -f eidr-connect-test.yml up
 ## Testing on OSX
 
 Install testing dependencies
-`npm install`
+```
+npm install
+```
 
 Run the meteor test application
-`./start-test-server.sh`
+```
+npm run-script start-test-server
+```
+
+- Or you may customize the script by running directly with the following optional args:
+```
+./start-test-server.sh --app_port=3001 --mongo_host=127.0.0.1 --mongo_port=27017 --test_db=eidr-connect-test
+```
 
 Execute the test runner to run all tests
-`npm run chimp-test`
+```
+npm run chimp-test
+```
 
-Or include the watch flag to continuously execute watched tests after file changes
-`npm run chimp-watch`
+- Or include the watch flag to continuously execute watched tests after file changes
+```
+npm run chimp-watch
+```
 
-Or you may customize the test runner script by running directly with the following optional args:
-`./run-tests.sh --app_uri=http://127.0.0.1 --app_port=3001 --mongo_host=127.0.0.1 --mongo_port=27017 --prod_db=eidr-connect --test_db=eidr-connect-test`
+- Or you may customize the script by running directly with the following optional args:
+```
+./run-tests.sh --watch=true --app_uri=http://127.0.0.1 --app_port=3001 --mongo_host=127.0.0.1 --mongo_port=27017 --prod_db=eidr-connect --test_db=eidr-connect-test
+```
 
 Stop the meteor test application
-`./stop-test-server.sh`
+```
+npm run-script stop-test-server
+```
 
 ## License
 
