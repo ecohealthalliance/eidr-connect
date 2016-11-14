@@ -4,7 +4,6 @@ Feature: Admin
     Given I am on the site
     And I am logged in as an admin
 
-
   Scenario: Submit a blank user form
     Given I can go to the account form
     Then I cannot submit a blank account form
