@@ -10,8 +10,8 @@
   },
   "devDependencies": {
     "chimp": "^0.41.2",
-    "mongodb-prebuilt": "^5.0.6",
-    "coffee-script": "^1.6.3"
+    "coffee-script": "^1.6.3",
+    "mongodb-prebuilt": "^5.0.7"
   },
   "dependencies": {
     "bcrypt": "^0.8.7",

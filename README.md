@@ -32,7 +32,7 @@ npm run-script start-test-server
 
 - Or you may customize the script by running directly with the following optional args:
 ```
-./start-test-server.sh --app_port=3001 --mongo_host=127.0.0.1 --mongo_port=27017 --test_db=eidr-connect-test
+./start-test-server.sh --app_port=3001 --mongo_host=127.0.0.1 --mongo_port=27017 --test_db=eidr-connect-test --prod_db=eidr-connect
 ```
 
 Execute the test runner to run all tests
@@ -47,7 +47,7 @@ npm run chimp-watch
 
 - Or you may customize the script by running directly with the following optional args:
 ```
-./run-tests.sh --watch=true --app_uri=http://127.0.0.1 --app_port=3001 --mongo_host=127.0.0.1 --mongo_port=27017 --prod_db=eidr-connect --test_db=eidr-connect-test
+./run-tests.sh --watch=true --app_uri=http://127.0.0.1 --app_port=3001
 ```
 
 Stop the meteor test application
