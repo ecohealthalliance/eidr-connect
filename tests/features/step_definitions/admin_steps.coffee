@@ -3,7 +3,6 @@ do ->
 
   module.exports = ->
     url = require('url')
-
     @Before(() ->
       @server.call("reset")
       @server.call("createTestingAdmin")

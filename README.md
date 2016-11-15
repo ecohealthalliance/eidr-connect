@@ -15,7 +15,6 @@ Run the newly built image using docker-compose
 
 ```
 docker build -t eidr-connect-test -f test.Dockerfile .
-docker-compose -f eidr-connect-test.yml up
 ```
 
 ## Testing on OSX
