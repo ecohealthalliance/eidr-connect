@@ -1,10 +1,10 @@
-FROM dannyanko/meteor-headless-testing:0.2
+FROM dannyanko/meteor-headless-testing:0.3
 
-# Compile and build eidr-connect
-RUN mkdir eidr-connect
-WORKDIR eidr-connect
+# Create the working directory
+RUN mkdir /opt/eidr-connect
+WORKDIR /opt/eidr-connect
 
-# Add files
+# Add project files
 COPY .meteor .meteor
 COPY packages packages
 COPY package.json package.json
@@ -18,6 +18,10 @@ COPY collections collections
 COPY imports imports
 COPY server server
 COPY public public
+COPY start-test-server.sh start-test-server.sh
+COPY run-tests.sh run-tests.sh
+
+# Note: settings-dev.json should exist on the docker host
 COPY settings-dev.json settings-dev.json
 
 RUN meteor add xolvio:cleaner xolvio:backdoor tmeasday:acceptance-test-driver
