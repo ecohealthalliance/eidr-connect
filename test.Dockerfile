@@ -1,4 +1,4 @@
-FROM dannyanko/meteor-headless-testing:0.1
+FROM dannyanko/meteor-headless-testing:0.2
 
 # Compile and build eidr-connect
 RUN mkdir eidr-connect
