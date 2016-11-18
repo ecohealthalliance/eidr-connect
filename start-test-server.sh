@@ -55,10 +55,10 @@ fi
 # Use the current prod_db database for testing.
 # TODO: we should load mock data for each test feature using fixtures
 echo "Creating a bson dump of our production '${prod_db}' db for testing..."
-$mongo/mongodump.js -h $mongo_host --port $mongo_port -d $prod_db -o tests/dump/ --quiet
+$mongo/mongodump.js --host $mongo_host --port $mongo_port -d $prod_db -o tests/dump/ --quiet
 
 echo "Dropping testing '${test_db}' if it exists..."
-$mongo/mongo.js $test_db --eval "db.dropDatabase()"
+$mongo/mongo.js --host $mongo_host --port $mongo_port $test_db --eval "db.dropDatabase()"
 
 MONGO_URL=mongodb://${mongo_host}:${mongo_port}/${test_db} meteor -p ${app_port} --settings settings-dev.json &
 APP_PID=$!

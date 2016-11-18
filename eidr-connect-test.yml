@@ -1,5 +1,17 @@
-eidr-connect-test:
-  image: eidr-connect-test:latest
-  container_name: eidr-connect-test
-  ports:
-   - "80:80"
+version: '2'
+services:
+  app:
+    image: eidr-connect-test:latest
+    entrypoint:
+      - /home/meteor/eidr-connect/run-tests.sh
+    depends_on:
+      - db
+    ports:
+      - '3001:3001'
+  db:
+    image: mongo:latest
+    volumes:
+      - /shared/data/db:/data/db
+    ports:
+      - '27017:27017'
+

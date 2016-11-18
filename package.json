@@ -17,6 +17,7 @@
     "bcrypt": "^0.8.7",
     "d3": "^4.3.0",
     "pluralize": "^3.0.0",
-    "rupture": "^0.6.1"
+    "rupture": "^0.6.1",
+    "underscore": "^1.8.3"
   }
 }
