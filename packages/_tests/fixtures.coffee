@@ -6,7 +6,6 @@ mongo_path = Meteor.settings.private.mongo_path || "#{pwd}/node_modules/mongodb-
 mongo_host = Meteor.settings.private.mongo_host || '127.0.0.1'
 mongo_port = Meteor.settings.private.mongo_port || '27017'
 test_db = Meteor.settings.private.test_db || 'eidr-connect-test'
-prod_db = Meteor.settings.private.prod_db || 'eidr-connect'
 
 syncExec = Meteor.wrapAsync(exec)
 
@@ -26,9 +25,9 @@ Meteor.methods
   ###
   load: ->
     if mongo_path.includes('binjs')
-      cmd = "#{mongo_path}/mongorestore.js --host #{mongo_host} --port #{mongo_port} -d #{test_db} #{pwd}/tests/dump/#{prod_db} --quiet"
+      cmd = "#{mongo_path}/mongorestore.js --host #{mongo_host} --port #{mongo_port} -d #{test_db} #{pwd}/tests/dump/#{test_db} --quiet"
     else
-      cmd = "#{mongo_path}/mongorestore --host #{mongo_host} --port #{mongo_port} -d #{test_db} #{pwd}/tests/dump/#{prod_db} --quiet"
+      cmd = "#{mongo_path}/mongorestore --host #{mongo_host} --port #{mongo_port} -d #{test_db} #{pwd}/tests/dump/#{test_db} --quiet"
     try
       syncExec(cmd)
       Meteor.call('createTestingAdmin')

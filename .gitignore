@@ -12,6 +12,7 @@ npm-debug.log
 .meteor/local
 .meteor/dev_bundle
 
-tests/dump
+tests/dump/eidr-connect
+tests/log/
 
 *.pid

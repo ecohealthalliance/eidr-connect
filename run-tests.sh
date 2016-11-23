@@ -20,10 +20,6 @@ case $i in
     app_port="${i#*=}"
     shift
     ;;
-    --prod_db=*)
-    prod_db="${i#*=}"
-    shift
-    ;;
     --test_db=*)
     test_db="${i#*=}"
     shift
@@ -38,6 +34,10 @@ case $i in
     ;;
     --watch=*)
     watch="${i#*=}"
+    shift
+    ;;
+    --is_docker=*)
+    is_docker="${i#*=}"
     shift
     ;;
     --browser=*)
@@ -56,31 +56,54 @@ app_host=${app_host:=localhost}
 app_port=${app_port:=3001}
 watch=${watch:=false}
 browser=${browser:=phantomjs}
-prod_db=${prod_db:=eidr-connect}
 test_db=${test_db:=eidr-connect-test}
 mongo_host=${mongo_host:=mongodb}
 mongo_port=${mongo_port:=27017}
+is_docker=${is_docker:=false}
+pwd=$(pwd)
+killed=false
 
-if [ ! -f ".test-server.pid" ]; then
+function pauseForApp {
+  while ! grep -qs '=> App running at:' ${pwd}/tests/log/eidr-test-server.log
+  do
+    if [ $killed = "true" ]; then
+      exit 0
+    fi
+    echo "Waiting for app to start... ${killed}"
+    sleep 2
+  done
+}
+
+if [ ! -f "/tmp/eidr-test-server.pid" ]; then
   echo "Starting the test server..."
-  ./start-test-server.sh --app_host=$app_host --app_port=$app_port --mongo_host=$mongo_host --mongo_port=$mongo_port --prod_db=$prod_db --test_db==$test_db
-  sleep 15
+  ${pwd}/start-test-server.sh --app_host=$app_host --app_port=$app_port --mongo_host=$mongo_host --mongo_port=$mongo_port --test_db=$test_db --is_docker=$is_docker &
+  started=true
+  # give some time for pid to be created
+  sleep 1
 fi
 
-if [ ! -f ".test-server.pid" ]; then
+if [ ! -f "/tmp/eidr-test-server.pid" ]; then
   echo "Error: is the test-server running?"
   exit 1
 fi
 
-function finish {
-  ./stop-test-server.sh
+function finishTest {
+  killed=true
+  if [ $started ]; then
+    # only stop the test server if this script started it
+    ./stop-test-server.sh --is_docker=$is_docker
+  fi
 }
-trap finish EXIT
-trap finish INT
-trap finish SIGINT  # 2
-trap finish SIGQUIT # 3
-trap finish SIGKILL # 9
-trap finish SIGTERM # 15
+
+trap finishTest EXIT
+trap finishTest INT
+trap finishTest SIGINT  # 2
+trap finishTest SIGQUIT # 3
+trap finishTest SIGKILL # 9
+trap finishTest SIGTERM # 15
+
+# determine if the app has started by grep on the log
+pauseForApp
 
 chimp=node_modules/chimp/bin/chimp.js
 
@@ -88,11 +111,4 @@ $chimp --watch=$watch --ddp=$app_protocol://$app_host:$app_port \
         --path=tests/ \
         --browser=$browser \
         --coffee=true \
-        --compiler=coffee:coffee-script/register \
-
-# Output time elapsed
-if [ "$WATCH" != "true" ]; then
-  echo ''
-  echo "$(($SECONDS / 60)) minutes and $(($SECONDS % 60)) seconds elapsed"
-  echo ''
-fi
+        --compiler=coffee:coffee-script/register

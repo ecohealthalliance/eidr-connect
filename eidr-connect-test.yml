@@ -2,16 +2,13 @@ version: '2'
 services:
   app:
     image: eidr-connect-test:latest
-    entrypoint:
-      - /home/meteor/eidr-connect/run-tests.sh
+    volumes:
+      - /shared:/shared
     depends_on:
-      - db
-    ports:
-      - '3001:3001'
-  db:
+      - mongodb
+    command: ['bash', '-c', '/home/meteor/eidr-connect/start-test-server.sh --mongo_host=mongodb --is_docker=true']
+  mongodb:
     image: mongo:latest
     volumes:
       - /shared/data/db:/data/db
-    ports:
-      - '27017:27017'
 
