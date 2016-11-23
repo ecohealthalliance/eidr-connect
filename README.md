@@ -26,7 +26,7 @@ The default CMD for `app` is to start the test server using `start-test-server.s
 
 ```
 docker-compose -f eidr-connect-test.yml up -d 
-docker exec -it --user meteor eidrconnect_app_1 ~/eidr-connect/run-tests.sh --mongo_host=mongodb --is_docker=true
+docker exec -it --user meteor eidrconnect_app_1 ./run-tests.sh --mongo_host=mongodb --is_docker=true
 docker-compose -f eidr-connect-test.yml down
 ```
 
