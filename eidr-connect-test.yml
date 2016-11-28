@@ -2,6 +2,8 @@ version: '2'
 services:
   app:
     image: eidr-connect-test:latest
+    environment:
+      - ghprbSourceBranch
     volumes:
       - /shared:/shared
     depends_on:

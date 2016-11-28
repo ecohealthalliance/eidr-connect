@@ -21,9 +21,11 @@ COPY . .
 
 # Admin chores
 RUN cp /usr/bin/meteor /usr/local/bin/meteor
-RUN touch /var/log/eidr-test-server.log && chown meteor:meteor /var/log/eidr-test-server.log
 RUN chown -R meteor:meteor /home/meteor/
 
 USER meteor
+
+# change the github url to https
+RUN git remote set-url origin https://github.com/ecohealthalliance/eidr-connect.git
 
 CMD /bin/bash

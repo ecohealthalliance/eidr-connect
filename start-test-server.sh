@@ -59,6 +59,8 @@ if [ $is_docker = "true" ]; then
   mongo --host $mongo_host --port $mongo_port $test_db --eval "db.dropDatabase()"
   # copy settings-dev.json from the shared volume
   cp $shared_dir/settings-dev.json ${pwd}/settings-dev.json
+  # update the repo and checkout the correct branch
+  git pull && git checkout $ghprbSourceBranch
 else
   $mongo/mongo.js --host $mongo_host --port $mongo_port $test_db --eval "db.dropDatabase()"
 fi
