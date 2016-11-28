@@ -13,9 +13,21 @@ Run the newly built image using docker-compose
 
 ## Testing with docker
 
+### Step 1: build the image
+
 ```
 docker build -t eidr-connect-test -f test.Dockerfile .
-docker-compose -f eidr-connect-test.yml up
+```
+
+### Step 2: run docker-compose (Step 1 only needs done once) 
+
+Note: docker-compose will bring up two containers `eidrconnect_app_1` and `eidrconnect_mongodb_1` that have an isoloated IP network.  They can communicate via hostname `app` and `mongodb`, which will be converted into IP addresses via /etc/hosts.
+The default CMD for `app` is to start the test server using `start-test-server.sh`.  See the eird-connect-test.yml for the specifics.
+
+```
+docker-compose -f eidr-connect-test.yml up -d 
+docker exec -it --user meteor eidrconnect_app_1 ./run-tests.sh --mongo_host=mongodb --is_docker=true
+docker-compose -f eidr-connect-test.yml down
 ```
 
 ## Testing on OSX
