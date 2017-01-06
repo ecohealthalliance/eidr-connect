@@ -39,7 +39,7 @@ USER root
 # Add the application files
 ADD supervisor-eidr-connect.conf /etc/supervisor/conf.d/eidr-connect.conf
 ADD run.sh /run.sh
-RUN cd /eidr-connect && git rev-parse HEAD > /revision.txt
+RUN cd /eidr-connect
 
 # Prepare for production
 LABEL app="eidr-connect"
