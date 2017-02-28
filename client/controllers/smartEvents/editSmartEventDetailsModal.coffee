@@ -47,10 +47,13 @@ Template.editSmartEventDetailsModal.events
       if error
         notify('error', error.message)
       else
-        notify('success', 'Smart event added')
+        adding = instance.data.action is 'add'
+        action = 'updated'
         dismissModal(instance.$('#smart-event-modal')).then ->
-          if instance.data.action == 'add'
-            Router.go('smart-event', _id: insertedId)
+        if adding
+          action = 'added'
+          Router.go('smart-event', _id: insertedId)
+        notify('success', "Smart event #{action}")
 
   'click .delete-event': (event, instance) ->
     instance.confirmingDeletion.set true

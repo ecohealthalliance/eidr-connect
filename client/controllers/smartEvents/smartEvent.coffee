@@ -5,8 +5,9 @@ Incidents = require '/imports/collections/incidentReports'
 Modal.allowMultiple = true
 
 Template.smartEvent.onCreated ->
-  @editState = new ReactiveVar false
+  @editState = new ReactiveVar(false)
   @eventId = new ReactiveVar()
+  @loading = new ReactiveVar(true)
 
 Template.smartEvent.onRendered ->
   eventId = Router.current().getParams()._id
@@ -20,7 +21,9 @@ Template.smartEvent.onRendered ->
       if eventDateRange
         query['dateRange.start'] = $lte: eventDateRange.end
         query['dateRange.end'] = $gte: eventDateRange.start
-      @subscribe 'smartEventIncidents', query
+      @subscribe 'smartEventIncidents', query,
+        onReady: =>
+          @loading.set(false)
 
 Template.smartEvent.onRendered ->
   new Clipboard '.copy-link'
@@ -35,12 +38,12 @@ Template.smartEvent.helpers
   deleted: ->
     SmartEvents.findOne(Template.instance().eventId.get())?.deleted
 
-  hasAssociatedIncidents: ->
-    Incidents.find().count()
-
   incidentReportsTemplateData: ->
     incidents: Incidents.find({}, sort: 'dateRange.end': 1)
     eventType: 'smart'
+
+  isLoading: ->
+    Template.instance().loading.get()
 
 Template.smartEvent.events
   'click .edit-link, click #cancel-edit': (event, instance) ->
