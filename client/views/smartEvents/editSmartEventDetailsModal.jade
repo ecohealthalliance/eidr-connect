@@ -11,7 +11,7 @@ template(name="editSmartEventDetailsModal")
                   | Add New Smart Event
                 else
                   | Edit Smart Event Details
-          .modal-body.clearfix
+          .modal-body.clearfixi.no-pad-btm
             if confirmingDeletion
               +deleteConfirmationModalBody(
                 objId=_id
@@ -20,16 +20,21 @@ template(name="editSmartEventDetailsModal")
                 allowEdit=true)
             else
               .form-group
-                label Event Name
+                label Name
                 input.form-control(type='text' name='eventName' value=eventName required)
                 .help-block.with-errors
               .form-group
-                label Event Disease
+                label Disease
                 input.form-control(type='text' name='eventDisease' value=disease required)
                 .help-block.with-errors
               .form-group
-                label Event Summary
+                label Summary
                 textarea.form-control(name="eventSummary" rows="15")= summary
+              .form-group.form-group--full
+                label Dates
+                .modal-block.full-width.centered-calendar.space-btm--2
+                  #date-picker.inlineRangePicker
+
           unless confirmingDeletion
             .modal-footer
               unless adding

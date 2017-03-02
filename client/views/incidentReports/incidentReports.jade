@@ -7,7 +7,7 @@ template(name="incidentReports")
       if incidents.count
         +reactiveTable collection=incidents settings=getSettings
       else
-        p No incident reports are associated with this event.
+        p.center-position No incident reports are associated with this event.
     .flex-col
       .chart
         #scatterPlot-toolbar.container-flex.no-break

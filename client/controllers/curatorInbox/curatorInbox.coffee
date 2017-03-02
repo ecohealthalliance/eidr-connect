@@ -1,16 +1,7 @@
 CuratorSources = require '/imports/collections/curatorSources.coffee'
 createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
 { keyboardSelect } = require '/imports/utils'
-
-updateCalendarSelection = (calendar, range) ->
-  {startDate, endDate} = range
-  currentMonth = moment(month: moment().month())
-  lastMonth = moment(month: moment().subtract(1, 'months').month())
-  calendar.rightCalendar.month = currentMonth
-  calendar.leftCalendar.month = lastMonth
-  calendar.setStartDate(startDate)
-  calendar.setEndDate(endDate)
-  calendar.updateCalendars()
+{ updateCalendarSelection } = require('/imports/ui/setRange')
 
 createNewCalendar = (latestSourceDate, range) ->
   {startDate, endDate} = range

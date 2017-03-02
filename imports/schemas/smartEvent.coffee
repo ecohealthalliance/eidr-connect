@@ -33,5 +33,12 @@ smartEventSchema = new SimpleSchema
   deletedDate:
     type: Date
     optional: true
+  dateRange:
+    type: Object
+    optional: true
+  "dateRange.start":
+    type: Date
+  "dateRange.end":
+    type: Date
 
 module.exports = smartEventSchema

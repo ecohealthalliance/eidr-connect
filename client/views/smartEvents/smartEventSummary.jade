@@ -21,6 +21,17 @@ template(name="smartEventSummary")
               data-target="#edit-event-modal"
               data-editing="disease"
               tabindex="0")
+      p.date-range
+        if dateRange
+          span {{formatDateRange dateRange}}
+        else
+          span.not-available No daterange selected.
+          if isInRole "admin"
+            i.fa.fa-plus-circle.edit-event-details(
+              data-toggle="modal"
+              data-target="#edit-event-modal"
+              data-editing=""
+              tabindex="0")
       if summary
         p.summary(class="{{#if collapsed}}collapsed{{/if}}")
           span= summary

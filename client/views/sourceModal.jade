@@ -51,7 +51,7 @@ template(name="sourceModal")
             .form-group.form-group--full(class="{{#if editing}} date-editing {{/if}}")
               label.control-label Publication Date
               .modal-block.full-width
-                #publishDate.datePicker.inlineRangePicker(class="{{suggested 'date'}}")
+                #publishDate.datePicker.inlineRangePicker.centered(class="{{suggested 'date'}}")
                 .clearfix.time
                   .col-sm-6
                     .form-group(class="{{suggested 'time'}}")

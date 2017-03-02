@@ -1,6 +1,8 @@
-{ dismissModal } = require '/imports/ui/modals'
-{ notify } = require '/imports/ui/notification'
-require 'bootstrap-validator'
+{ dismissModal } = require('/imports/ui/modals')
+{ notify } = require('/imports/ui/notification')
+createInlineDateRangePicker = require('/imports/ui/inlineDateRangePicker')
+{ updateCalendarSelection } = require('/imports/ui/setRange')
+require('bootstrap-validator')
 
 Template.editSmartEventDetailsModal.onCreated ->
   @confirmingDeletion = new ReactiveVar false
@@ -10,6 +12,15 @@ Template.editSmartEventDetailsModal.onRendered ->
     @$('#editEvent').validator
       # Do not disable inputs since we don't in other areas of the app
       disable: false
+    createInlineDateRangePicker $("#date-picker")
+    @calendar = $('#date-picker').data('daterangepicker')
+    instanceData = @data
+    dateRange = instanceData.dateRange
+    if dateRange
+      range =
+        startDate: dateRange.start
+        endDate: dateRange.end
+      updateCalendarSelection(@calendar, range)
 
 Template.editSmartEventDetailsModal.helpers
   confirmingDeletion: ->
@@ -20,25 +31,29 @@ Template.editSmartEventDetailsModal.helpers
 
 Template.editSmartEventDetailsModal.events
   'submit #editEvent': (event, instance) ->
+    form = event.target
     return if event.isDefaultPrevented() # Form is invalid
     event.preventDefault()
-    name = event.target.eventName.value.trim()
-    disease = event.target.eventDisease.value.trim()
-    summary = event.target.eventSummary.value.trim()
-    Meteor.call 'upsertSmartEvent',
+    calendar = instance.calendar
+    smartEvent =
       _id: @_id
-      eventName: name
-      summary: summary
-      disease: disease
-    , (error, {insertedId}) ->
+      eventName: form.eventName.value.trim()
+      summary: form.eventSummary.value.trim()
+      disease: form.eventDisease.value.trim()
+      dateRange:
+        start: calendar.startDate.toDate()
+        end: calendar.endDate.toDate()
+    Meteor.call 'upsertSmartEvent', smartEvent, (error, {insertedId}) ->
       if error
-        toastr.error error.message
-        return
+        notify('error', error.message)
       else
-        notify('success', 'Smart event added')
+        adding = instance.data.action is 'add'
+        action = 'updated'
         dismissModal(instance.$('#smart-event-modal')).then ->
-          if instance.data.action == 'add'
-            Router.go('smart-event', _id: insertedId)
+        if adding
+          action = 'added'
+          Router.go('smart-event', _id: insertedId)
+        notify('success', "Smart event #{action}")
 
   'click .delete-event': (event, instance) ->
     instance.confirmingDeletion.set true

@@ -8,8 +8,10 @@ template(name="smartEvent")
         with smartEvent
           +smartEventSummary
 
-    if hasAssociatedIncidents
-      section.event--detailed-info
-        .heading.container-fluid-padded
-          h2 Incident Reports
+    section.event--detailed-info
+      .heading.container-fluid-padded
+        h2 Incident Reports
+      if isLoading
+        +loading static=true
+      else
         +incidentReports incidentReportsTemplateData

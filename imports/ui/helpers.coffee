@@ -44,6 +44,7 @@ pluralize = (word, count, showCount=true) ->
 
 formatDateRange = (dateRange, readable)->
   dateFormat = "MMM D, YYYY"
+  dateRange ?= ''
   if dateRange.type is "day"
     if dateRange.cumulative
       return "before " + moment.utc(dateRange.end).format(dateFormat)
@@ -57,7 +58,8 @@ formatDateRange = (dateRange, readable)->
       return "between " + moment.utc(dateRange.start).format(dateFormat) + " and " + moment.utc(dateRange.end).format(dateFormat)
     else
       return moment.utc(dateRange.start).format(dateFormat) + " - " + moment.utc(dateRange.end).format(dateFormat)
-  return ""
+  else
+    return moment.utc(dateRange.start).format(dateFormat) + " - " + moment.utc(dateRange.end).format(dateFormat)
 
 module.exports =
   pluralize: pluralize
