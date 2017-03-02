@@ -26,9 +26,9 @@ if Meteor.isAppTest
     ###
     load: ->
       if mongo_path.includes('binjs')
-        cmd = "#{mongo_path}/mongorestore.js --host #{mongo_host} --port #{mongo_port} -d #{test_db} #{pwd}/tests/dump/#{test_db} --quiet"
+        cmd = "#{mongo_path}/mongorestore.js --host #{mongo_host} --port #{mongo_port} -d #{test_db} #{pwd}/tests/dump/#{test_db}"
       else
-        cmd = "#{mongo_path}/mongorestore --host #{mongo_host} --port #{mongo_port} -d #{test_db} #{pwd}/tests/dump/#{test_db} --quiet"
+        cmd = "#{mongo_path}/mongorestore --host #{mongo_host} --port #{mongo_port} -d #{test_db} #{pwd}/tests/dump/#{test_db}"
       try
         syncExec(cmd)
         Meteor.call('createTestingAdmin')
