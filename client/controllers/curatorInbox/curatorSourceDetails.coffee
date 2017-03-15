@@ -23,17 +23,6 @@ _markReviewed = (instance, showNext=true) ->
         resolve()
       , 1200
 
-_getSource = (instance, sourceId) ->
-  source = CuratorSources.findOne
-    _id: sourceId
-  instance.reviewed.set source?.reviewed or false
-  instance.source.set source
-
-_addIncidentsToLocalCollection = (instance, incidents) ->
-  for incident in incidents
-    instance.incidentCollection.insert(incident)
-  instance.incidentsLoaded.set(true)
-
 Template.curatorSourceDetails.onCreated ->
   @notifying = new ReactiveVar(false)
   @source = new ReactiveVar(null)
@@ -61,7 +50,9 @@ Template.curatorSourceDetails.onRendered ->
     # which is handed down, is updated and triggers this autorun
     # current source
     sourceId = @data.selectedSourceId.get()
-    _getSource(@, sourceId)
+    source = CuratorSources.findOne(sourceId)
+    instance.reviewed.set source?.reviewed or false
+    instance.source.set source
 
   @autorun =>
     source = @source.get()
@@ -82,10 +73,8 @@ Template.curatorSourceDetails.onRendered ->
       @subscribe 'curatorSourceIncidentReports', sourceId,
         onReady: =>
           source.url = "http://www.promedmail.org/post/#{sourceId}"
-          @incidentCollection = new Meteor.Collection(null)
-          incidents = Incidents.find(url: $regex: new RegExp("#{sourceId}$"))
-          if incidents.count()
-            _addIncidentsToLocalCollection(@, incidents.fetch())
+          if Incidents.findOne(url: $regex: new RegExp("#{sourceId}$"))
+            instance.incidentsLoaded.set(true)
           else
             Meteor.call 'getArticleEnhancements', source, (error, enhancements) =>
               if error
@@ -96,13 +85,10 @@ Template.curatorSourceDetails.onRendered ->
                   source: source
                   acceptByDefault: true
                   addToCollection: true
-                Meteor.call 'createIncidentReportsFromEnhancements', options, (error, result) =>
-                  _addIncidentsToLocalCollection(@, result.incidents)
+                Meteor.call 'createIncidentReportsFromEnhancements', options, (error, result) ->
+                  instance.incidentsLoaded.set(true)
 
 Template.curatorSourceDetails.helpers
-  incidents: ->
-    Template.instance().incidentCollection
-
   source: ->
     Template.instance().source.get()
 
@@ -125,7 +111,7 @@ Template.curatorSourceDetails.helpers
     Template.instance().incidentsLoaded.get()
 
   annotatedContent: ->
-    incidents = Template.instance().incidentCollection?.find().fetch()
+    incidents = Incidents.find().fetch()
     if incidents.length
       annotateContent(@content, incidents)
 
