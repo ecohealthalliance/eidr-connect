@@ -2,6 +2,14 @@ UserEvents = require '/imports/collections/userEvents.coffee'
 Articles = require '/imports/collections/articles.coffee'
 { notify } = require '/imports/ui/notification'
 
+select2NoResults = ->
+  """
+    <div class='no-results small'>
+      <p>No Results Found</p>
+    </div>
+    <button class='btn btn-default add-new-event'>Add New Event</a>
+  """
+
 Template.addToEvent.onCreated ->
   @subscribe('userEvents')
   @subscribe('article', @data.source._sourceId)
@@ -22,6 +30,9 @@ Template.addToEvent.onRendered ->
       data: select2Data
       placeholder: 'Search for an Event...'
       minimumInputLength: 0
+      language:
+        noResults: select2NoResults
+      escapeMarkup: (markup) -> markup
 
     $(document).on 'click', '.add-new-event', (event) =>
       $select2.select2('close')
