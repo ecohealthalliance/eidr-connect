@@ -16,11 +16,15 @@ template(name="createEventModal")
             .form-group
               label.control-label(for="eventSummary") Event Summary
               textarea#eventSummary.form-control(name='eventSummary', rows='15')
-            .form-group
-              .checkbox
-                label
-                  input(type="checkbox" value="1" name="promed")
-                  | Display this event on promedmail.org
+            .container-flex.check-buttons.type.no-break
+              .check-button
+                input(
+                  type="checkbox"
+                  name="promed"
+                  id="promed"
+                  value="1"
+                  tabindex="-1")
+                label(for="promed" tabindex="0") Display this event on promedmail.org?
           .modal-footer
             button.btn.btn-default(type="button" data-dismiss="modal") Cancel
             button#add-event-btn.btn.btn-primary(type='submit') Create Event
