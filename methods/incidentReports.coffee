@@ -1,6 +1,7 @@
 incidentReportSchema = require '/imports/schemas/incidentReport.coffee'
 Incidents = require '/imports/collections/incidentReports.coffee'
 UserEvents = require '/imports/collections/userEvents.coffee'
+Articles = require '/imports/collections/articles.coffee'
 Constants = require '/imports/constants.coffee'
 
 Meteor.methods
@@ -58,7 +59,21 @@ Meteor.methods
       Meteor.call("editUserEventLastModified", incident.userEventId)
       Meteor.call("editUserEventLastIncidentDate", incident.userEventId)
 
-  addIncidentsToEvent: (incidentIds, userEventId) ->
+  addIncidentsToEvent: (incidentIds, userEventId, source) ->
+    sourceId = source._sourceId
+    source = Articles.findOne(url: $regex: new RegExp("#{sourceId}$"))
+    # If source is in collection associate with event, otherwise add to Articles
+    # collection and associate
+    if source
+      Articles.update(source._id, $set: userEventId: userEventId)
+    else
+      Meteor.call 'addEventSource',
+        url: "promedmail.org/post/#{sourceId}"
+        userEventId: userEventId
+        title: source.title
+        publishDate: source.publishDate
+        publishDateTZ: 'EST'
+    # Associate Incidents with Event
     Incidents.update _id: $in: incidentIds,
       $set: userEventId: userEventId
       {multi: true}

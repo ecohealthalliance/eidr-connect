@@ -64,22 +64,28 @@ Template.addToEvent.events
   'click .add-to-event': (event, instance) ->
     userEventId = instance.selectedEventId.get()
     source = instance.data.source
-    unless Articles.findOne(url: $regex: new RegExp("#{source._sourceId}$"))
-      Meteor.call 'addEventSource',
-        url: "promedmail.org/post/#{source._sourceId}"
-        userEventId: userEventId
-        title: source.title
-        publishDate: source.publishDate
-        publishDateTZ: 'EST'
-
     selectedIncidents = instance.data.selectedIncidents
-    if selectedIncidents
+    if selectedIncidents.count()
       selectedIncidentIds = _.pluck(selectedIncidents.fetch(), 'id')
-      Meteor.call 'addIncidentsToEvent', selectedIncidentIds, userEventId, (error, result) ->
+      Meteor.call 'addIncidentsToEvent', selectedIncidentIds, userEventId, source, (error, result) ->
         if error
           notify('error', error.reason)
         else
           notify('success', 'Incident reports successfuly added to event')
+    else
+      sourceId = source._sourceId
+      Meteor.call 'addEventSource',
+        sourceId: sourceId
+        url: "promedmail.org/post/#{sourceId}"
+        userEventId: userEventId
+        title: source.title
+        publishDate: source.publishDate
+        publishDateTZ: 'EST'
+      , (error) ->
+        if error
+          notify('error', error.reason)
+        else
+          notify('success', 'Source successfuly added to event')
 
   'select2:select': (event, instance) ->
     instance.selectedEventId.set(event.params.data.id)
