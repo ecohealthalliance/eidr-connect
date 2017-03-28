@@ -35,12 +35,13 @@ Template.addToEvent.onRendered ->
         noResults: select2NoResults
       escapeMarkup: (markup) -> markup
 
-    $(document).on 'click', '.add-new-event', (event) =>
+    $(document).on 'click', '.add-new-event', (event) ->
+      eventName = $('.select2-search__field').val()
       $select2.select2('close')
       Modal.show 'createEventModal',
         associationMessage: " & Associate #{instanceData.objNameToAssociate}"
         sourceId: instanceData.sourceId
-        eventName: ''
+        eventName: eventName
         incidents: instanceData.selectedIncidents
         source: instanceData.source
 
