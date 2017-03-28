@@ -16,6 +16,7 @@ Template.addToEvent.onCreated ->
   @selectedEventId = new ReactiveVar(null)
 
 Template.addToEvent.onRendered ->
+  instanceData = @data
   # If showing accepted IRs instantiate select2 input and register event to
   # show 'Create Event' modal
   Meteor.defer =>
@@ -36,11 +37,12 @@ Template.addToEvent.onRendered ->
 
     $(document).on 'click', '.add-new-event', (event) =>
       $select2.select2('close')
-      Modal.show 'editEventDetailsModal',
-        action: 'add'
-        saveActionMessage: 'Add Event & Associate Incident Reports'
-        sourceId: @data.sourceId
+      Modal.show 'createEventModal',
+        associationMessage: " & Associate #{instanceData.objNameToAssociate}"
+        sourceId: instanceData.sourceId
         eventName: ''
+        incidents: instanceData.selectedIncidents
+        source: instanceData.source
 
 Template.addToEvent.helpers
   selectingEvent: ->

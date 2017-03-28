@@ -14,9 +14,8 @@ Template.createEventModal.events
     target = event.target
     summary = target.eventSummary?.value.trim()
     eventName = target.eventName
-    sourceId = instance.data?.sourceId
-    if sourceId
-      source = CuratorSources.findOne(sourceId)
+    source = instance.data?.source
+
     Meteor.call 'upsertUserEvent',
       eventName: eventName.value.trim()
       summary: summary
