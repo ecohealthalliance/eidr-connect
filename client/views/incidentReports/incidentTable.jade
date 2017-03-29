@@ -51,6 +51,7 @@ template(name="incidentTable")
                   | {{formatDateISO dateRange.start}}
               td {{formatDateISO dateRange.end}}
               td {{formatLocations locations}}
+              td.edit(title="Edit Incident Report")
       .container-flex.central.space-top-2
         button.btn.btn-default.add-incident Add New Incident
   else

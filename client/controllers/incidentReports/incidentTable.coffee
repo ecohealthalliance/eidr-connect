@@ -133,7 +133,7 @@ Template.incidentTable.events
       query.accepted = @accepted
       selectedIncidents.insert(query)
 
-  'click table.incident-table tr td .edit': (event, instance) ->
+  'click table.incident-table tr td.edit': (event, instance) ->
     event.stopPropagation()
     Modal.show 'incidentModal',
       articles: [instance.data.source]

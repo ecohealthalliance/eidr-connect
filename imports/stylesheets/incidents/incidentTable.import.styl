@@ -31,6 +31,20 @@ $tableTypes = {
     color blue
     text-decoration underline
     cursor pointer
+  .edit
+    padding-right 1em
+    transition transform .1s ease-in-out
+    &::before
+      icon()
+      content '\f040'
+      visibility hidden
+      color $primary
+    &:hover
+      transform scale(1.5)
+      color $primary-dark
+    &:active
+      transform scale(1.75)
+
   tr
     .select
       font-size 1.25em
@@ -44,6 +58,10 @@ $tableTypes = {
     &:active
       .select
         transform scale(1.5)
+    &:hover
+      .edit
+        &::before
+          visibility visible
   for $type, $options in $tableTypes
     $icon = $options.icon
     &.{$type}
@@ -61,6 +79,7 @@ $tableTypes = {
               cursor pointer
               &::before
                 content $icon
+
 
 .extract-incidents-table
   margin -25px
