@@ -54,6 +54,11 @@ Template.incidentModal.events
     if instance.data.accept or @incident?.accepted
       incident.accepted = true
 
+    manualAnnotation = instanceData.manualAnnotation
+    if manualAnnotation
+      incident.annotations ?= {}
+      incident.annotations.case = [manualAnnotation]
+
     if @add
       Meteor.call 'addIncidentReport', incident, (error, result) ->
         if not error
@@ -61,7 +66,7 @@ Template.incidentModal.events
           $('.reactive-table tr.tr-details').remove()
           if !duplicate
             form.reset()
-            notify('success', 'Incident report added to event')
+            notify('success', 'Incident report added.')
             if instance.data.offCanvas
               stageModals(instance, instance.modals)
             else

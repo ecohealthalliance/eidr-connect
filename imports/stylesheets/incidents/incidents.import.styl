@@ -2,11 +2,10 @@
 
 viewingBG()
   transition background-color .5s ease-in-out
-  background-color $highlight-yellow
+  background-color $highlight-primary
+  color black
 
 .annotation-text
-  padding-left .2em
-  padding-right .2em
   border-radius 2px
   text-decoration none
   for $type, $color in $incident-type-colors
@@ -51,6 +50,7 @@ viewingBG()
   .modal-body
     flex 1 1 auto
     padding 0
+    overflow scroll
   .modal-header
   .modal-footer
     flex 0 0 auto
@@ -69,38 +69,32 @@ viewingBG()
   .tabs
     margin-bottom -1px
 
-.suggested-incidents-wrapper
-  position absolute
-  top 0
-  bottom 0
-  left 0
-  right 0
-  padding 25px
-  overflow-y scroll
-
-.annotated-content
+.suggested-annotated-content
+  margin 25px
   white-space pre-wrap
 
-.snippet
-  gradientBottom(20px, $block-BG)
-  position relative
-  display flex
-  flex-direction column
-  margin-left -20px
-  margin-right -20px
-  margin-top -11px
-  margin-bottom 1em
-  &.modal-block
-    padding 0
+
+.annotated-content
+  &.snippet
+    gradientBottom(20px, $block-BG)
+    position relative
+    display flex
+    flex-direction column
+    margin-left -20px
+    margin-right -20px
+    margin-top -11px
+    margin-bottom 1em
+    &.modal-block
+      padding 0
+      label
+        display flex
+        border-top 0
     label
-      display flex
-      border-top 0
-  label
-    padding 10px 20px
-    border-bottom 1px solid darken($border-primary-light, 5%)
-    margin-top 0
-    h5
-      margin 0
+      padding 10px 20px
+      border-bottom 1px solid darken($border-primary-light, 5%)
+      margin-top 0
+      h5
+        margin 0
 
 .snippet--text
   flex 1

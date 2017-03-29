@@ -1,5 +1,8 @@
 template(name="suggestedIncidentModal")
-  .modal#suggestedIncidentModal.off-canvas--right(role="dialog" data-backdrop="false")
+  .modal#suggestedIncidentModal(
+    role="dialog"
+    data-backdrop="false"
+    class="off-canvas--#{offCanvasStartPosition}")
     .modal-dialog
       .modal-content
         .modal-header

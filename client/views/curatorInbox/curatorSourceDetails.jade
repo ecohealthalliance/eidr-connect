@@ -24,8 +24,13 @@ template(name="curatorSourceDetails")
                 span Mark Reviewed
             button.btn.btn-primary.btn-sm.add-source-to-event.on-left Add Source to Event
           if addingSourceToEvent
-            +addToEvent( source=source)
-          .curator-source-details--copy= annotatedContent
+            +addToEvent(source=source)
+          .curator-source-details--copy
+            +annotatedContent(
+              content=source.content
+              incidents=incidents
+              relatedElements=relatedElements
+              source=source)
         if wideUI
           .curator-source-details--incidents-container
             +sourceIncidentReports(

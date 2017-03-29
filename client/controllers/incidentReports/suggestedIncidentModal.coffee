@@ -35,6 +35,9 @@ Template.suggestedIncidentModal.helpers
   valid: ->
     Template.instance().valid
 
+  offCanvasStartPosition: ->
+    Template.instance().data.offCanvasStartPosition or 'right'
+
 Template.suggestedIncidentModal.events
   'hide.bs.modal #suggestedIncidentModal': (event, instance) ->
     if $(event.currentTarget).hasClass('in')
@@ -59,12 +62,20 @@ Template.suggestedIncidentModal.events
     incident.suggestedFields = instance.incident.suggestedFields.get()
     incident.userEventId = instance.data.userEventId
     incident.accepted = true
-    instance.incidentCollection.update instance.incident._id,
-      $unset:
-        cases: true
-        deaths: true
-        specify: true
-      $set: incident
-
-    notify('success', 'Incident Report Accepted', 1200)
-    stageModals(instance, instance.modals)
+    if instance.incidentCollection
+      instance.incidentCollection.update instance.incident._id,
+        $unset:
+          cases: true
+          deaths: true
+          specify: true
+        $set: incident
+      notify('success', 'Incident Report Accepted', 1200)
+      stageModals(instance, instance.modals)
+    else
+      incident.annotations = instance?.incident?.annotations
+      incident = _.pick(incident, incidentReportSchema.objectKeys())
+      Meteor.call 'addIncidentReport', incident, (error, result) ->
+        if error
+          return notify('error', error)
+        notify('success', 'Incident report added.')
+        stageModals(instance, instance.modals)

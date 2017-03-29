@@ -3,8 +3,9 @@ UserEvents = require '/imports/collections/userEvents.coffee'
 Constants = require '/imports/constants.coffee'
 { notify } = require('/imports/ui/notification')
 { stageModals } = require('/imports/ui/modals')
-{ annotateContent,
+{ annotateContentWithIncidents,
   buildAnnotatedIncidentSnippet } = require('/imports/ui/annotation')
+import { formatUrl, createIncidentReportsFromEnhancements } from '/imports/utils.coffee'
 
 # determines if the user should be prompted before leaving the current modal
 #
@@ -69,20 +70,16 @@ Template.suggestedIncidentsModal.onRendered ->
       Modal.hide(@)
       toastr.error error.reason
       return
-    options =
-      enhancements: enhancements
-      source: source
+    source.enhancements = enhancements
+    incidents = createIncidentReportsFromEnhancements(enhancements, {
       acceptByDefault: @data.acceptByDefault
-      addToCollection: false
-    Meteor.call 'createIncidentReportsFromEnhancements', options, (error, result) =>
-      if error
-        notify('error', error.reason)
-        return
-      else
-        for incident in result.incidents
-          @incidentCollection.insert(incident)
-        @loading.set(false)
-        @content.set(result.content)
+      url: source.url
+      publishDate: source.publishDate
+    })
+    for incident in result.incidents
+      @incidentCollection.insert(incident)
+    @loading.set(false)
+    @content.set(result.content)
 
 Template.suggestedIncidentsModal.onDestroyed ->
   $('#suggestedIncidentsModal').off('hide.bs.modal')
@@ -95,9 +92,7 @@ Template.suggestedIncidentsModal.helpers
     Template.instance().data.showTable and incidents.count()
 
   incidents: ->
-    Template.instance().incidentCollection.find
-      accepted: true
-      specify: $exists: false
+    Template.instance().incidentCollection.find()
 
   incidentsFound: ->
     Template.instance().incidentCollection.find().count() > 0
@@ -105,16 +100,15 @@ Template.suggestedIncidentsModal.helpers
   isLoading: ->
     Template.instance().loading.get()
 
+  annotatedContent: ->
+    instance = Template.instance()
+    annotateContentWithIncidents(instance.content.get(), instance.incidentCollection.find().fetch())
+
   annotatedCount: ->
     total = Template.instance().incidentCollection.find().count()
     if total
       count = Template.instance().incidentCollection.find(accepted: true).count()
       "#{count} of #{total} incidents accepted"
-
-  annotatedContent: ->
-    content = Template.instance().content.get()
-    incidents = Template.instance().incidentCollection.find().fetch()
-    annotateContent(content, incidents)
 
   annotatedContentVisible: ->
     Template.instance().annotatedContentVisible.get()
@@ -132,6 +126,16 @@ Template.suggestedIncidentsModal.helpers
       properties.push "Approximate"
     properties.join(";")
 
+  content: ->
+    Template.instance().content.get()
+
+  source: ->
+    Template.instance().data.article
+
+  relatedElements: ->
+    parent: '.suggested-incidents .modal-content'
+    sibling: '.suggested-incidents .modal-body'
+    sourceContainer: '.suggested-incidents-wrapper'
 
 Template.suggestedIncidentsModal.events
   'hide.bs.modal #suggestedIncidentsModal': (event, instance) ->

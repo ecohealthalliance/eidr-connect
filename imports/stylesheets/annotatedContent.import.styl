@@ -1,0 +1,75 @@
+.source-content--wrapper
+  position relative
+  margin 1em 2.5% 3em 2.5%
+  +above(4)
+    margin-right 5%
+    margin-left 5%
+
+.selectable-content
+.annotated-content
+  position absolute
+  top 0
+  left 0
+  bottom 0
+  right 0
+  z-index 1
+  padding-bottom 3em
+  white-space pre-wrap
+  word-wrap break-word
+  word-break break-word
+
+.annotated-content
+  &
+  span
+    &::selection
+      background transparent
+  &:after
+    content ''
+    display block
+    height 3em
+
+.selectable-content
+  z-index 2
+  color transparent
+  &::selection
+    color black
+    background alpha($selection, 90%)
+
+.new-incident-from-selection
+  position fixed
+  z-index $top-layer
+  opacity 0
+  transform translate(-50%, -15px) scale(0)
+  backface-visibility hidden
+  transition .1s transform ease-in-out, .1s opacity ease-in-out
+  &.active
+    opacity 1
+    transform translate(-50%, 0) scale(1)
+    transform-origin top
+    backface-visibility hidden
+  button
+    padding-left 3em
+    padding-right 3em
+    .text
+      display none
+  &.positioned
+    position static
+    transform translate(0,0) scale(1)
+    button
+      width 100%
+      border-radius 0
+      border-left 0
+      border-right 0
+      display flex
+      text-align left
+      span
+        display inline-block
+      .main-action
+        font-weight 600
+      .text
+        max-width 75%
+        overflow hidden
+        text-overflow ellipsis
+        display block
+        margin-left auto
+        font-style italic

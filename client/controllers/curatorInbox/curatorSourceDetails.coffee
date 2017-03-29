@@ -2,7 +2,6 @@ CuratorSources = require '/imports/collections/curatorSources.coffee'
 Incidents = require '/imports/collections/incidentReports.coffee'
 key = require 'keymaster'
 { notify } = require '/imports/ui/notification'
-{ annotateContent } = require('/imports/ui/annotation')
 WIDE_UI_WIDTH = 1500
 
 _markReviewed = (instance, showNext=true) ->
@@ -85,28 +84,29 @@ Template.curatorSourceDetails.onRendered ->
         else
           $title.attr('data-original-title', title)
 
-      @subscribe 'curatorSourceIncidentReports', sourceId,
-        onReady: =>
-          source.url = "http://www.promedmail.org/post/#{sourceId}"
-          if Incidents.findOne(url: $regex: new RegExp("#{sourceId}$"))
-            instance.incidentsLoaded.set(true)
+      @subscribe 'curatorSourceIncidentReports', sourceId
+      source.url = "http://www.promedmail.org/post/#{sourceId}"
+      if source.enhancements
+        instance.incidentsLoaded.set(true)
+      else
+        Meteor.call 'getArticleEnhancements', source, (error, enhancements)=>
+          if error
+            notify('error', error.reason)
           else
-            Meteor.call 'getArticleEnhancements', source, (error, enhancements) =>
-              if error
-                notify('error', error.reason)
-              else
-                options =
-                  enhancements: enhancements
-                  source: source
-                  acceptByDefault: true
-                  addToCollection: true
-                Meteor.call 'createIncidentReportsFromEnhancements', options, (error, result) ->
-                  instance.incidentsLoaded.set(true)
+            source.enhancements = enhancements
+            Meteor.call("updateSourceEnhancements", source._id, enhancements)
+            Meteor.call 'addSourceIncidentReportsToCollection', source, {
+              acceptByDefault: true
+            }, (error, result) ->
+              instance.incidentsLoaded.set(true)
 
 Template.curatorSourceDetails.onDestroyed ->
   $(window).off('resize')
 
 Template.curatorSourceDetails.helpers
+  incidents: ->
+    Incidents.find()
+
   source: ->
     Template.instance().source.get()
 
@@ -128,11 +128,6 @@ Template.curatorSourceDetails.helpers
   incidentsLoaded: ->
     Template.instance().incidentsLoaded.get()
 
-  annotatedContent: ->
-    incidents = Incidents.find().fetch()
-    if incidents.length
-      annotateContent(@content, incidents)
-
   wideUI: ->
     Template.instance().wideUI.get()
 
@@ -142,8 +137,11 @@ Template.curatorSourceDetails.helpers
   addingSourceToEvent: ->
     Template.instance().addingSourceToEvent.get()
 
-  source: ->
-    Template.instance().source.get()
+  relatedElements: ->
+    instance = Template.instance()
+    parent: '.curator-source-details--copy-wrapper'
+    sibling: '.curator-source-details--copy'
+    sourceContainer: '.curator-source-details--copy'
 
 Template.curatorSourceDetails.events
   'click .toggle-reviewed': (event, instance) ->
@@ -151,14 +149,6 @@ Template.curatorSourceDetails.events
 
   'click .back-to-list': (event, instance) ->
     instance.data.currentPaneInView.set('')
-
-  'click span.annotation': (event, instance) ->
-    incidentId = $(event.currentTarget).data('incident-id')
-    Modal.show 'incidentModal',
-      incident: Incidents.findOne(incidentId)
-      articles: [instance.source.get()]
-      edit: true
-      updateEvent: false
 
   'click .tabs a': (event, instance) ->
     instance.selectedIncidentTab.set(instance.$(event.currentTarget).data('tab'))

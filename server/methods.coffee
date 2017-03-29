@@ -5,7 +5,7 @@ Constants = require '/imports/constants.coffee'
 Incidents = require '/imports/collections/incidentReports'
 SmartEvents = require '/imports/collections/smartEvents'
 incidentReportSchema = require '/imports/schemas/incidentReport.coffee'
-import { formatUrl, parseSents, getTerritories } from '/imports/utils.coffee'
+import { formatUrl, cleanUrl, createIncidentReportsFromEnhancements, regexEscape } from '/imports/utils.coffee'
 
 DateRegEx = /<span class="blue">Published Date:<\/span> ([^<]+)/
 
@@ -16,7 +16,6 @@ Meteor.methods
     check article.content, Match.Maybe(String)
     check article.publishDate, Match.Maybe(Date)
     check article.addedDate, Match.Maybe(Date)
-    geonameIds = []
     console.log "Calling GRITS API @ " + Constants.GRITS_URL
     params =
       api_key: Constants.GRITS_API_KEY
@@ -35,7 +34,49 @@ Meteor.methods
     result = HTTP.post(Constants.GRITS_URL + "/api/v1/public_diagnose", params: params)
     if result.data.error
       throw new Meteor.Error("grits-error", result.data.error)
-    return result.data
+    enhancements = result.data
+    # Normalize geoname data in GRITS annotations to match incident report schema.
+    # The geoname lookup service is queried to get admin names.
+    # The GRITS api reponse only includes admin codes at the moment.
+    geonameIds = []
+    features = enhancements.features
+    locationAnnotations = features.filter (f) -> f.type == 'location'
+    geonameIds = locationAnnotations.map((r) -> r.geoname.geonameid)
+    geonamesResult = HTTP.get Constants.GRITS_URL + '/api/geoname_lookup/api/geonames', {
+      params:
+        ids: geonameIds
+    }
+    geonames = geonamesResult.data.docs
+    geonamesById = {}
+    geonames.forEach (geoname) ->
+      if not geoname
+        # null geonames are probably a bug in the geoname lookup service
+        return
+      geonamesById[geoname.id] =
+        id: geoname.id
+        name: geoname.name
+        admin1Name: geoname.admin1Name
+        admin2Name: geoname.admin2Name
+        latitude: parseFloat(geoname.latitude)
+        longitude: parseFloat(geoname.longitude)
+        countryName: geoname.countryName
+        population: geoname.population
+        featureClass: geoname.featureClass
+        featureCode: geoname.featureCode
+        alternateNames: geoname.alternateNames
+    locationAnnotations = locationAnnotations.filter (loc)->
+      geoname = geonamesById[loc.geoname.geonameid]
+      if geoname
+        loc.geoname = geoname
+        true
+      else
+        false
+    if article._id
+      Articles.update(article._id, {
+        $set:
+          enhancements: enhancements
+      })
+    return enhancements
 
   retrieveProMedArticle: (articleId) ->
     @unblock()
@@ -128,192 +169,22 @@ Meteor.methods
     Roles.addUsersToRoles([userId], ['admin'])
     Accounts.setPassword(userId, authInfo.authTicket, logout:false)
 
-  createIncidentReportsFromEnhancements: (options) ->
-    { enhancements, source, acceptByDefault, addToCollection } = options
-    incidents = []
-    features = enhancements.features
-    locationAnnotations = features.filter (f) -> f.type == 'location'
-    datetimeAnnotations = features.filter (f) -> f.type == 'datetime'
-    diseaseAnnotations = features.filter (f) ->
-      f.type == 'resolvedKeyword' and f.resolutions.some((r)->
-        # resolution is from the disease ontology
-        r.uri.startsWith("http://purl.obolibrary.org/obo/DOID")
-      )
-    countAnnotations = features.filter (f) -> f.type == 'count'
-    geonameIds = locationAnnotations.map((r) -> r.geoname.geonameid)
-    # Query geoname lookup service to get admin names.
-    # The GRITS api reponse only includes admin codes.
-    new Promise((resolve, reject) =>
-      if geonameIds.length == 0
-        resolve([])
-      else
-        HTTP.get Constants.GRITS_URL + '/api/geoname_lookup/api/geonames', {
-          params:
-            ids: geonameIds
-        }, (error, geonamesResult) =>
-          if error
-            toastr.error error.reason
-            Modal.hide(@)
-            reject()
-          else
-            resolve(geonamesResult.data.docs)
-    ).then (locations) =>
-      geonamesById = {}
-      locations.forEach (loc) ->
-        geonamesById[loc.id] =
-          id: loc.id
-          name: loc.name
-          admin1Name: loc.admin1Name
-          admin2Name: loc.admin2Name
-          latitude: parseFloat(loc.latitude)
-          longitude: parseFloat(loc.longitude)
-          countryName: loc.countryName
-          population: loc.population
-          featureClass: loc.featureClass
-          featureCode: loc.featureCode
-          alternateNames: loc.alternateNames
-      sents = parseSents(enhancements.source.cleanContent.content)
-      locTerritories = getTerritories(locationAnnotations, sents)
-      datetimeAnnotations = datetimeAnnotations
-        .map (timeAnnotation) =>
-          if not (timeAnnotation.timeRange and
-            timeAnnotation.timeRange.begin and
-            timeAnnotation.timeRange.end
-          )
-            return
-          # moment parses 0 based month indecies
-          if timeAnnotation.timeRange.begin.month
-            timeAnnotation.timeRange.begin.month--
-          if timeAnnotation.timeRange.end.month
-            timeAnnotation.timeRange.end.month--
-          timeAnnotation.precision = (
-            Object.keys(timeAnnotation.timeRange.end).length +
-            Object.keys(timeAnnotation.timeRange.end).length
-          )
-          timeAnnotation.beginMoment = moment.utc(
-            timeAnnotation.timeRange.begin
-          )
-          # Round up the to day end
-          timeAnnotation.endMoment = moment.utc(
-            timeAnnotation.timeRange.end
-          ).endOf('day')
-          publishMoment = moment.utc(source.publishDate)
-          if timeAnnotation.beginMoment.isAfter publishMoment, 'day'
-            # Omit future dates
-            return
-          if timeAnnotation.endMoment.isAfter publishMoment, 'day'
-            # Truncate ranges that extend into the future
-            timeAnnotation.endMoment = publishMoment
-          return timeAnnotation
-        .filter (x) -> x
-      dateTerritories = getTerritories(datetimeAnnotations, sents)
-      diseaseTerritories = getTerritories(diseaseAnnotations, sents)
-      countAnnotations.forEach (countAnnotation) =>
-        [start, end] = countAnnotation.textOffsets[0]
-        locationTerritory = _.find locTerritories, ({territoryStart, territoryEnd}) ->
-          return (start <= territoryEnd and start >= territoryStart)
-        dateTerritory = _.find dateTerritories, ({territoryStart, territoryEnd}) ->
-          return (start <= territoryEnd and start >= territoryStart)
-        diseaseTerritory = _.find diseaseTerritories, ({territoryStart, territoryEnd}) ->
-          return (start <= territoryEnd and start >= territoryStart)
-        incident =
-          locations: locationTerritory.annotations.map(({geoname}) ->
-            geonamesById[geoname.geonameid]
-          )
-        maxPrecision = 0
-        # Use the source's date as the default
-        incident.dateRange =
-          start: source.publishDate
-          end: moment(source.publishDate).add(1, 'day').toDate()
-          type: 'day'
-        dateTerritory.annotations.forEach (timeAnnotation)->
-          if (timeAnnotation.precision > maxPrecision and
-            timeAnnotation.beginMoment.isValid() and
-            timeAnnotation.endMoment.isValid()
-          )
-            maxPrecision = timeAnnotation.precision
-            incident.dateRange =
-              start: timeAnnotation.beginMoment.toDate()
-              end: timeAnnotation.endMoment.toDate()
-            rangeHours = moment(incident.dateRange.end)
-              .diff(incident.dateRange.start, 'hours')
-            if rangeHours <= 24
-              incident.dateRange.type = 'day'
-            else
-              incident.dateRange.type = 'precise'
-        incident.dateTerritory = dateTerritory
-        incident.locationTerritory = locationTerritory
-        incident.diseaseTerritory = diseaseTerritory
-        incident.countAnnotation = countAnnotation
-        { count, attributes } = countAnnotation
-        if 'death' in attributes
-          incident.deaths = count
-        else if "case" in attributes or "hospitalization" in attributes
-          incident.cases = count
-        else
-          incident.cases = count
-          incident.uncertainCountType = true
-        if acceptByDefault and not incident.uncertainCountType
-          incident.accepted = true
-        # Detect whether count is cumulative
-        if 'incremental' in attributes
-          incident.dateRange.cumulative = false
-        else if 'cumulative' in attributes
-          incident.dateRange.cumulative = true
-        else if incident.dateRange.type == 'day' and count > 300
-          incident.dateRange.cumulative = true
-        suspectedAttributes = _.intersection([
-          'approximate', 'average', 'suspected'
-        ], attributes)
-        if suspectedAttributes.length > 0
-          incident.status = 'suspected'
-        incident.url = source.url
-        # The disease field is set to the last disease mentioned.
-        diseaseTerritory.annotations.forEach (annotation)->
-          incident.resolvedDisease =
-            id: annotation.resolutions[0].uri
-            text: annotation.resolutions[0].label
-        incident.suggestedFields = _.intersection(
-          Object.keys(incident),
-          [
-            'resolvedDisease'
-            'cases'
-            'deaths'
-            'dateRange'
-            'status'
-            if incident.locations.length then 'locations'
-          ]
-        )
-        if incident.dateRange?.cumulative
-          incident.suggestedFields.push('cumulative')
-
-        annotations =
-          case: [
-            textOffsets: incident.countAnnotation.textOffsets[0]
-            text: incident.countAnnotation.text
-          ]
-        if locationTerritory.annotations.length
-          annotations.location =
-            locationTerritory.annotations.map (a) -> textOffsets: a.textOffsets[0]
-        if dateTerritory.annotations.length
-          annotations.date =
-            dateTerritory.annotations.map (a) -> textOffsets: a.textOffsets[0]
-        if diseaseTerritory.annotations.length
-          annotations.disease =
-            diseaseTerritory.annotations.map (a) -> textOffsets: a.textOffsets[0]
-        incident.annotations = annotations
-
-        incidents.push(incident)
-
-      incidentData =
-        content: enhancements.source.cleanContent.content
-        incidents: incidents
-
-      if addToCollection
-        _incidents = incidents.map (incident) ->
-          _incident = _.pick(incident, incidentReportSchema.objectKeys())
-        Meteor.call 'addIncidentReports', _incidents, false, (error, result) ->
-          return incidentData
-
-      else
-        return incidentData
+  addSourceIncidentReportsToCollection: (source, options) ->
+    { acceptByDefault } = options
+    enhancements = source.enhancements
+    check enhancements, Object
+    options.url = cleanUrl(source.url)
+    options.publishDate = source.publishDate
+    incidents = createIncidentReportsFromEnhancements(enhancements, options)
+    incidents = incidents.map (incident) ->
+      incident = _.pick(incident, incidentReportSchema.objectKeys())
+    # check for unexpected urls
+    if not options.url.startsWith("promedmail.org/post/")
+      throw Meteor.Error("Bad url")
+    # Remove prior unassociated incident reports for the article
+    Incidents.remove(
+      url: $regex: regexEscape(options.url) + "$"
+      userEventId: $exists: false
+      autogenerated: $ne: false
+    )
+    Meteor.call('addIncidentReports', incidents, false)

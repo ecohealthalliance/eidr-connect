@@ -26,8 +26,8 @@ template(name="suggestedIncidentsModal")
               else
                 unless incidentsFound
                   .no-incident-reports No incident reports could be automatically extracted from the article.
-                p.annotated-content(
-                  class="{{#unless incidentsFound}} space-top-4 {{/unless}}")=annotatedContent
+                .suggested-annotated-content(
+                  class="{{#unless incidentsFound}} space-top-4 {{/unless}}")= annotatedContent
             if showTable
               .extract-incidents-table
                 table.table.featured.incident-table(

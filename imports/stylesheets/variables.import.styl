@@ -7,6 +7,7 @@ $secondary-light = #FAF0EC
 $secondary-l-light = lighten($secondary, 90%)
 $secondary-dark = darken($secondary, 30%)
 $highlight = #F07382
+$highlight-primary = alpha(lighten($primary, 75%), 90%)
 $highlight-yellow = #FFEBAA
 
 $focus-primary = darken($primary-light, 20%)
@@ -36,6 +37,8 @@ $border-btn = #95989A
 
 $selected = $border-primary-light
 $block-BG = lighten($border-primary-light, 50%)
+
+$selection = $highlight-yellow
 
 $tableRadius = 5px
 $table-border = 1px solid #DDD
@@ -87,3 +90,4 @@ $incident-type-colors.rejected = $incident-type-colors.case
 
 // Break points
 $break-point--curator-inbox = 1000px
+$break-point--curator-inbox--x-wide = 1500px

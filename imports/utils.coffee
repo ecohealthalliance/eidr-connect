@@ -221,3 +221,151 @@ export getTerritories = (annotationsWithOffsets, sents) ->
     else
       territories[territories.length - 1].territoryEnd = sentEnd
   return territories
+
+export createIncidentReportsFromEnhancements = (enhancements, options)->
+  { countAnnotations, acceptByDefault, url, publishDate } = options
+  if not publishDate
+    publishDate = new Date()
+  incidents = []
+  features = enhancements.features
+  locationAnnotations = features.filter (f) -> f.type == 'location'
+  datetimeAnnotations = features.filter (f) -> f.type == 'datetime'
+  diseaseAnnotations = features.filter (f) ->
+    f.type == 'resolvedKeyword' and f.resolutions.some((r)->
+      # resolution is from the disease ontology
+      r.uri.startsWith("http://purl.obolibrary.org/obo/DOID")
+    )
+  if not countAnnotations
+    countAnnotations = features.filter (f) -> f.type == 'count'
+  sents = parseSents(enhancements.source.cleanContent.content)
+  locTerritories = getTerritories(locationAnnotations, sents)
+  datetimeAnnotations = datetimeAnnotations
+    .map (timeAnnotation) =>
+      if not (timeAnnotation.timeRange and
+        timeAnnotation.timeRange.begin and
+        timeAnnotation.timeRange.end
+      )
+        return
+      # moment parses 0 based month indecies
+      if timeAnnotation.timeRange.begin.month
+        timeAnnotation.timeRange.begin.month--
+      if timeAnnotation.timeRange.end.month
+        timeAnnotation.timeRange.end.month--
+      timeAnnotation.precision = (
+        Object.keys(timeAnnotation.timeRange.end).length +
+        Object.keys(timeAnnotation.timeRange.end).length
+      )
+      timeAnnotation.beginMoment = moment.utc(
+        timeAnnotation.timeRange.begin
+      )
+      # Round up the to day end
+      timeAnnotation.endMoment = moment.utc(
+        timeAnnotation.timeRange.end
+      ).endOf('day')
+      publishMoment = moment.utc(publishDate)
+      if timeAnnotation.beginMoment.isAfter publishMoment, 'day'
+        # Omit future dates
+        return
+      if timeAnnotation.endMoment.isAfter publishMoment, 'day'
+        # Truncate ranges that extend into the future
+        timeAnnotation.endMoment = publishMoment
+      return timeAnnotation
+    .filter (x) -> x
+  dateTerritories = getTerritories(datetimeAnnotations, sents)
+  diseaseTerritories = getTerritories(diseaseAnnotations, sents)
+  countAnnotations.forEach (countAnnotation) =>
+    [start, end] = countAnnotation.textOffsets[0]
+    locationTerritory = _.find locTerritories, ({territoryStart, territoryEnd}) ->
+      start <= territoryEnd and start >= territoryStart
+    dateTerritory = _.find dateTerritories, ({territoryStart, territoryEnd}) ->
+      start <= territoryEnd and start >= territoryStart
+    diseaseTerritory = _.find diseaseTerritories, ({territoryStart, territoryEnd}) ->
+      start <= territoryEnd and start >= territoryStart
+    incident =
+      locations: locationTerritory.annotations.map(({geoname}) -> geoname)
+    maxPrecision = 0
+    # Use the source's date as the default
+    incident.dateRange =
+      start: publishDate
+      end: moment(publishDate).add(1, 'day').toDate()
+      type: 'day'
+    dateTerritory.annotations.forEach (timeAnnotation) ->
+      if (timeAnnotation.precision > maxPrecision and
+        timeAnnotation.beginMoment.isValid() and
+        timeAnnotation.endMoment.isValid()
+      )
+        maxPrecision = timeAnnotation.precision
+        incident.dateRange =
+          start: timeAnnotation.beginMoment.toDate()
+          end: timeAnnotation.endMoment.toDate()
+        rangeHours = moment(incident.dateRange.end)
+          .diff(incident.dateRange.start, 'hours')
+        if rangeHours <= 24
+          incident.dateRange.type = 'day'
+        else
+          incident.dateRange.type = 'precise'
+    incident.dateTerritory = dateTerritory
+    incident.locationTerritory = locationTerritory
+    incident.diseaseTerritory = diseaseTerritory
+    incident.countAnnotation = countAnnotation
+    { count, attributes } = countAnnotation
+    if count
+      if 'death' in attributes
+        incident.deaths = count
+      else if "case" in attributes or "hospitalization" in attributes
+        incident.cases = count
+      else
+        incident.cases = count
+        incident.uncertainCountType = true
+      if acceptByDefault and not incident.uncertainCountType
+        incident.accepted = true
+      # Detect whether count is cumulative
+      if 'incremental' in attributes
+        incident.dateRange.cumulative = false
+      else if 'cumulative' in attributes
+        incident.dateRange.cumulative = true
+      else if incident.dateRange.type == 'day' and count > 300
+        incident.dateRange.cumulative = true
+      suspectedAttributes = _.intersection([
+        'approximate', 'average', 'suspected'
+      ], attributes)
+      if suspectedAttributes.length > 0
+        incident.status = 'suspected'
+    incident.url = url
+    # The disease field is set to the last disease mentioned.
+    diseaseTerritory.annotations.forEach (annotation)->
+      incident.resolvedDisease =
+        id: annotation.resolutions[0].uri
+        text: annotation.resolutions[0].label
+    incident.suggestedFields = _.intersection(
+      Object.keys(incident),
+      [
+        'resolvedDisease'
+        'cases'
+        'deaths'
+        'dateRange'
+        'status'
+        if incident.locations.length then 'locations'
+      ]
+    )
+    if incident.dateRange?.cumulative
+      incident.suggestedFields.push('cumulative')
+
+    annotations =
+      case: [
+        textOffsets: incident.countAnnotation.textOffsets[0]
+        text: incident.countAnnotation.text
+      ]
+    if locationTerritory.annotations.length
+      annotations.location =
+        locationTerritory.annotations.map (a) -> textOffsets: a.textOffsets[0]
+    if dateTerritory.annotations.length
+      annotations.date =
+        dateTerritory.annotations.map (a) -> textOffsets: a.textOffsets[0]
+    if diseaseTerritory.annotations.length
+      annotations.disease =
+        diseaseTerritory.annotations.map (a) -> textOffsets: a.textOffsets[0]
+    incident.annotations = annotations
+    incident.autogenerated = true
+    incidents.push(incident)
+  return incidents
