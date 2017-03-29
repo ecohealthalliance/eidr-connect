@@ -1,17 +1,22 @@
 template(name="sourceIncidentReports")
-  .curator-source-details--incidents(
-    class="{{#unless tableContentIsScrollable}} no-scroll {{/unless}}")
-      +incidentTable(
-        source=source
-        scrollToAnnotations=true
-        accepted=true
-        hideTableHeader=true
-        tableContentScrollable=tableContentScrollable)
-  .curator-source-details--incidents(
-    class="{{#unless tableContentIsScrollable}} no-scroll {{/unless}}")
-        +incidentTable(
-          source=source
-          scrollToAnnotations=true
-          accepted=false
-          hideTableHeader=true
-          tableContentScrollable=tableContentScrollable)
+  if hasIncidents
+    if hasAcceptedIncidents
+      .curator-source-details--incidents.accepted(
+        class="{{#unless tableContentIsScrollable}} no-scroll {{/unless}} {{#unless hasRejectedIncidents}} max-out-height {{/unless}}")
+          +incidentTable(
+            source=source
+            scrollToAnnotations=true
+            accepted=true
+            hideTableHeader=true
+            tableContentScrollable=tableContentScrollable)
+    if hasRejectedIncidents
+      .curator-source-details--incidents.rejected(
+        class="{{#unless tableContentIsScrollable}} no-scroll {{/unless}} {{#unless hasAcceptedIncidents}} max-out-height {{/unless}}")
+            +incidentTable(
+              source=source
+              scrollToAnnotations=true
+              accepted=false
+              hideTableHeader=true
+              tableContentScrollable=tableContentScrollable)
+  else
+    +noResults message='No Incident Reports Found'

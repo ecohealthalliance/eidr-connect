@@ -1,10 +1,6 @@
 template(name="incidentTable")
   .curator-source-details--sub-header
-    h3
-      if accepted
-        | Accepted
-      else
-        | Rejected
+    h3(class=tableType)=tableType
     .curator-source-details--actions.container-flex.no-break
       button.btn.btn-sm.action(
         disabled="{{#unless incidentsSelected}} true {{/unless}}"

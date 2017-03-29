@@ -467,6 +467,7 @@ $pane-switch-speed = .3s
   h3
     margin-right 2em
     font-weight 600
+    letter-spacing .02em
 
 .curator-source-details--header
   min-height $curator-pane-head-height
@@ -522,14 +523,32 @@ $pane-switch-speed = .3s
   max-height 50%
   display flex
   flex-direction column
+  &:not(:first-of-type)
+    .curator-source-details--sub-header
+      border-top-width 3px
+  &.max-out-height
+    max-height 100%
+    .curator-source-details--table-wrapper
+      padding-bottom 3em
+  &.accepted
+    .curator-source-details--sub-header
+      background alpha(desaturate($positive, 10%), 8%)
+      border-top-color darken(@background, 35%)
+      border-bottom-color darken(@background, 35%)
+      h3
+        color darken($positive, 30%)
+  &.rejected
+    .curator-source-details--sub-header
+      background alpha(desaturate($danger, 10%), 8%)
+      border-top-color darken(@background, 35%)
+      border-bottom-color darken(@background, 35%)
+      h3
+        color darken($danger, 20%)
   +above($break-point--curator-inbox--x-wide)
     border 0
   .curator-source-details--sub-header
     flex-shrink 0
     border-bottom-width 3px
-  &:not(:first-of-type)
-    .curator-source-details--sub-header
-      border-top-width 3px
   .curator-source-details--actions
     flex 1
 
@@ -602,123 +621,15 @@ $pane-switch-speed = .3s
   .title
     max-width 400px
 
-.curator-events
-  margin-bottom 2em
-  &:first-child
-    .curator-events-header
-      border-top 0
-
-.curator-events-table
-  margin-bottom 0
-  color $primary
-  thead
-    display none
-  tbody
-    tr
-      td
-        display flex
-        align-items center
-        padding-top 0
-        padding-bottom 0
-        padding-right 2em
-        border-color $border-primary-light
-        .event-info
-          transition .1s ease-in-out
-        &:first-of-type
-          padding-left 1.5em
-      &:first-of-type
-        td
-          border-top 0
-      &:hover
-        background none
-      .secondary-actions
-        margin-left auto
-        display flex
-        align-items center
-        opacity 0
-        transition opacity .2s ease-in-out
-        a
-          font-size 1.2em
-          color $primary
-          &:hover
-          &:focus
-            color darken(@color, 30%)
-            transform scale(1.3)
-            text-decoration none
-            noBootstrapFocus()
-      &:hover
-        .secondary-actions
-          opacity 1
-
-.curator-events--options
-  margin-left auto
-  display flex
-  align-items center
-  justify-content flex-end
-  min-width 50%
-  button
-    font-size .85em
-  .search-wrapper.stagged
-    .search-icon
-      font-size 1.5em
-
 .curator-events-collapse
   color $primary
   cursor pointer
-
-.associated-events
-  &::before
-  .no-events
-    padding 1em 2em
-
-.disassociate-event
-.associate-event
-  padding-top .5em
-  padding-bottom .5em
-  font-size 1em
-  color $primary
-  &:hover
-  &:focus
-    noBootstrapFocus()
-    color $primary-dark
-    i
-      transform scale(1.25)
-      transition .1s ease-in-out
-  i
-    margin-right .5em
-
-.associate-event
-  i
-    color darken($positive, 5%)
-    &:before
-      content '\f055' // fa-plus-circle
-  &:hover
-    i
-      color darken($positive, 20%)
-
-.disassociate-event
-  i
-    color darken($delete, 5%)
-    &::before
-      content '\f056' // fa-minus-circle
-  &:hover
-    i
-      color darken($delete, 20%)
 
 .suggest-incidents
   font-size .75em
   padding .25em .75em
   margin-right 1em
   background none
-
-#associated-events
-  .secondary-actions
-    opacity 1
-    visibility visible
-  tr
-    td
-      > span
-        padding-right 1em
 
 #curatorEventsFilter
   position relative
