@@ -1,7 +1,7 @@
 UserEvents = require '/imports/collections/userEvents.coffee'
 Incidents = require '/imports/collections/incidentReports.coffee'
 { notify } = require '/imports/ui/notification'
-SCROLL_WAIT_TIME = 500
+SCROLL_WAIT_TIME = 250
 
 _acceptedQuery = (accepted) ->
   query = {}
