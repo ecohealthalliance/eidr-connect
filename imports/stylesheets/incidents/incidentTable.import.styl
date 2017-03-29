@@ -1,0 +1,66 @@
+$acceptedAction = $danger
+
+$tableTypes = {
+  rejected: {
+    actionColor: desaturate(darken($positive, 20%), 20%)
+    icon: '\f058'
+  },
+  accepted: {
+    actionColor: $danger
+    icon: '\f057'
+  }
+}
+
+.incident-table
+  > tbody
+    > tr
+      border-bottom 1px solid $border-primary-light
+      &:hover
+      &:active
+        background lighten($border-primary-light, 20%)
+        > td
+          background none
+  td
+  th
+    padding 5px
+  .count-header
+    width 50px
+  .locations-header
+    width 300px
+  .count
+    color blue
+    text-decoration underline
+    cursor pointer
+  tr
+    .select
+      font-size 1.25em
+      padding .25em
+      color lighten($m-gray, 10%)
+      display block
+      transition .1s
+      &::before
+        icon()
+        content '\f1db' // fa-circle-thin
+    &:active
+      .select
+        transform scale(1.5)
+  for $type, $options in $tableTypes
+    $icon = $options.icon
+    &.{$type}
+      tr
+        &:hover
+          .select
+            color: lighten($options.actionColor, 10%)
+        &.selected
+          .select
+            color: $options.actionColor
+            &::before
+              content $icon
+          &:hover
+            .select
+              cursor pointer
+              &::before
+                content $icon
+
+.extract-incidents-table
+  margin -25px

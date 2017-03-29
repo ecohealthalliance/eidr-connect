@@ -16,8 +16,9 @@ _updateAllIncidentsStatus = (instance, select, event) ->
   query = _acceptedQuery(instance.accepted)
   if select
     Incidents.find(query).forEach (incident) ->
-      selectedIncidents.insert
-        id: incident._id
+      id = incident._id
+      selectedIncidents.upsert id: id,
+        id: id
         accepted: incident.accepted
   else
     selectedIncidents.remove(query)
@@ -115,8 +116,14 @@ Template.incidentTable.helpers
   tableContentScrollable: ->
     Template.instance().tableContentScrollable
 
+  tableType: ->
+    if Template.instance().accepted
+      'accepted'
+    else
+      'rejected'
+
 Template.incidentTable.events
-  'click table.incident-table tr td .select': (event, instance) ->
+  'click .incident-table tbody tr': (event, instance) ->
     event.stopPropagation()
     selectedIncidents = instance.selectedIncidents
     query = id: @_id
@@ -125,6 +132,15 @@ Template.incidentTable.events
     else
       query.accepted = @accepted
       selectedIncidents.insert(query)
+
+  'click table.incident-table tr td .edit': (event, instance) ->
+    event.stopPropagation()
+    Modal.show 'incidentModal',
+      articles: [instance.data.source]
+      userEventId: null
+      edit: true
+      incident: @
+      updateEvent: false
 
   'click .action': (event, instance) ->
     accepted = instance.accepted
@@ -157,15 +173,6 @@ Template.incidentTable.events
     if not instance.data.scrollToAnnotations or not @annotations?.case?[0].textOffsets
       return
     instance.stopScrollingInterval()
-
-  'click .incident-table tbody tr': (event, instance) ->
-    event.stopPropagation()
-    Modal.show 'incidentModal',
-      articles: [instance.data.source]
-      userEventId: null
-      edit: true
-      incident: @
-      updateEvent: false
 
   'click .show-addEvent': (event, instance) ->
     addingEvent = instance.addingEvent

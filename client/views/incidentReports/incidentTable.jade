@@ -20,6 +20,7 @@ template(name="incidentTable")
         source=source)
     .table-wrapper
       table.table.incident-table(
+        class=tableType
         hidden=annotatedContentVisible
         data-tableexport-display="always")
         unless hideTableHeader
@@ -33,9 +34,9 @@ template(name="incidentTable")
               th.locations-header Locations
         tbody
           each incidents
-            tr
+            tr(class="{{#if selected}} selected {{/if}}")
               td
-                span.select(class="{{#if selected}} selected {{/if}}")
+                span.select
               if cases
                 td Case Count
                 td(data-incident-id=_id)=cases
