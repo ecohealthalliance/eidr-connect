@@ -2,14 +2,6 @@ UserEvents = require '/imports/collections/userEvents.coffee'
 Articles = require '/imports/collections/articles.coffee'
 { notify } = require '/imports/ui/notification'
 
-select2NoResults = ->
-  """
-    <div class='no-results small'>
-      <p>No Results Found</p>
-    </div>
-    <button class='btn btn-default add-new-event'>Add New Event</a>
-  """
-
 Template.addToEvent.onCreated ->
   @subscribe('userEvents')
   @subscribe('article', @data.source._sourceId)
@@ -31,9 +23,6 @@ Template.addToEvent.onRendered ->
       data: select2Data
       placeholder: 'Search for an Event...'
       minimumInputLength: 0
-      language:
-        noResults: select2NoResults
-      escapeMarkup: (markup) -> markup
 
     $(document).on 'click', '.add-new-event', (event) ->
       eventName = $('.select2-search__field').val()
@@ -93,6 +82,17 @@ Template.addToEvent.events
 
   'select2:opening': (event, instance) ->
     instance.tableContentScrollable?.set(false)
+
+  'select2:open': (event, instance) ->
+    unless $('.select2-results__additional-options').length
+      $('.select2-dropdown').addClass('select2-dropdown--with-additional-options')
+      $('.select2-results').append(
+        """
+          <div class='select2-results__additional-options'>
+            <button class='btn btn-default add-new-event'>Add New Event</a>
+          </div>
+        """
+      )
 
   'select2:closing': (event, instance) ->
     instance.tableContentScrollable?.set(true)
