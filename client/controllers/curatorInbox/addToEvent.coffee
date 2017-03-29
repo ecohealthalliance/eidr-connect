@@ -40,7 +40,6 @@ Template.addToEvent.onRendered ->
       $select2.select2('close')
       Modal.show 'createEventModal',
         associationMessage: " & Associate #{instanceData.objNameToAssociate}"
-        sourceId: instanceData.sourceId
         eventName: eventName
         incidents: instanceData.selectedIncidents
         source: instanceData.source
@@ -64,8 +63,9 @@ Template.addToEvent.helpers
 Template.addToEvent.events
   'click .add-to-event': (event, instance) ->
     userEventId = instance.selectedEventId.get()
-    source = instance.data.source
-    selectedIncidents = instance.data.selectedIncidents
+    instanceData = instance.data
+    source = instanceData.source
+    selectedIncidents = instanceData.selectedIncidents
     if selectedIncidents.count()
       selectedIncidentIds = _.pluck(selectedIncidents.fetch(), 'id')
       Meteor.call 'addIncidentsToEvent', selectedIncidentIds, userEventId, source, (error, result) ->

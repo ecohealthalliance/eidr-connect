@@ -3,6 +3,7 @@ Incidents = require '/imports/collections/incidentReports.coffee'
 UserEvents = require '/imports/collections/userEvents.coffee'
 Articles = require '/imports/collections/articles.coffee'
 Constants = require '/imports/constants.coffee'
+{ regexEscape } = require '/imports/utils'
 
 Meteor.methods
   addIncidentReport: (incident) ->
@@ -61,10 +62,11 @@ Meteor.methods
 
   addIncidentsToEvent: (incidentIds, userEventId, source) ->
     sourceId = source._sourceId
-    source = Articles.findOne(url: $regex: new RegExp("#{sourceId}$"))
+    sourceUrl = "promedmail.org/post/#{sourceId}"
+    existingSource = Articles.findOne(url: $regex: regexEscape(sourceUrl) + "$")
     # If source is in collection associate with event, otherwise add to Articles
     # collection and associate
-    if source
+    if existingSource
       Articles.update(source._id, $set: userEventId: userEventId)
     else
       Meteor.call 'addEventSource',

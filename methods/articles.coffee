@@ -1,13 +1,15 @@
 Articles = require '/imports/collections/articles.coffee'
+{ regexEscape } = require '/imports/utils'
 
 Meteor.methods
   addEventSource: (source) -> #eventId, url, publishDate, publishDateTZ
     user = Meteor.user()
     if user and Roles.userIsInRole(user._id, ['admin'])
       # Check if Article is in collection
-      source = Articles.findOne(url: $regex: new RegExp("#{sourceId}$"))
-      if source
-        Articles.update url: $regex: new RegExp("#{sourceId}$")
+      sourceQuery = url: $regex: "#{regexEscape(source.url)}$"
+      existingSource = Articles.findOne(sourceQuery)
+      if existingSource
+        Articles.update sourceQuery,
           $set: userEventId, source.userEventId
       else
         if source.url
