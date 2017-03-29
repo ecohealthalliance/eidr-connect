@@ -1,30 +1,31 @@
 template(name="incidentTable")
-  .incident-heading
-    if accepted
-      | Accepted Incidents
-    else
-      | Rejected Incidents
-    if incidents.count
-        .incident-reports--actions.container-flex.no-break
-          button.btn.btn-sm.action(
-            disabled="{{#unless incidentsSelected}} true {{/unless}}"
-            class="btn-{{#if acceptance}}success{{else}}danger{{/if}}") #{action} Incidents
-          if accepted
-            button.btn.btn-sm.btn-primary.show-addEvent(
-              disabled="{{#unless incidentsSelected}} true {{/unless}}") Add Incidents to Event
-          button.btn.btn-sm.btn-default.select(
-            class="{{#if allSelected}} deselect-all {{else}} select-all {{/if}}")
-            if allSelected
-              | Deselect All
-            else
-              | Select All
-        if addEvent
-          +addToEvent(
-            selectedIncidents=selectedIncidents
-            tableContentScrollable=tableContentScrollable
-            source=source)
+  .curator-source-details--sub-header
+    h3
+      if accepted
+        | Accepted
+      else
+        | Rejected
+    .curator-source-details--actions.container-flex.no-break
+      button.btn.btn-sm.action(
+        disabled="{{#unless incidentsSelected}} true {{/unless}}"
+        class="btn-{{#if acceptance}}success{{else}}danger{{/if}}") #{action} Incidents
+      if accepted
+        button.btn.btn-sm.btn-primary.show-addEvent(
+          disabled="{{#unless incidentsSelected}} true {{/unless}}") Add Incidents to Event
+      button.btn.btn-sm.btn-default.select.on-right(
+        disabled="{{#unless incidents.count}} true {{/unless}}"
+        class="{{#if allSelected}} deselect-all {{else}} select-all {{/if}}")
+        if allSelected
+          | Deselect All
+        else
+          | Select All
+      if addEvent
+        +addToEvent(
+          selectedIncidents=selectedIncidents
+          tableContentScrollable=tableContentScrollable
+          source=source)
   if incidents.count
-    .table-wrapper
+    .curator-source-details--table-wrapper
       table.table.incident-table(
         class=tableType
         hidden=annotatedContentVisible
@@ -58,7 +59,5 @@ template(name="incidentTable")
               td {{formatDateISO dateRange.end}}
               td {{formatLocations locations}}
               td.edit(title="Edit Incident Report")
-      .container-flex.central.space-top-2
-        button.btn.btn-default.add-incident Add New Incident
   else
     +noResults message="No incidents found"

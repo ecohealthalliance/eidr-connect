@@ -1,6 +1,6 @@
 template(name="curatorSourceDetails")
   with source
-    .curator-inbox-header.curator-source-details--header(class="{{#if isReviewed}} reviewed {{/if}}")
+    .curator-inbox-header.curator-source-details--main-header(class="{{#if isReviewed}} reviewed {{/if}}")
       +curatorUserStatus selectedSourceId=selectedSourceId
       h2(id="sourceDetailsTitle" data-toggle="tooltip" data-placement="bottom")
         .back-to-list
@@ -15,14 +15,14 @@ template(name="curatorSourceDetails")
       .transition(class="{{#if notifying}} active {{/if}}")
     .curator-source-details--content
       if incidentsLoaded
-        .curator-source-details--copy-wrapper
-          .curator-source-details--actions.container-flex.no-break
+        .curator-source-details--copy-wrapper.curator-source-details--section
+          .curator-source-details--header.curator-source-details--actions.container-flex.no-break
             button.btn.btn-success.btn-sm.toggle-reviewed(class="{{#if isReviewed}} reviewed {{/if}}")
               if isReviewed
                 span Reviewed
               else
                 span Mark Reviewed
-            button.btn.btn-primary.btn-sm.add-source-to-event.on-left Add Source to Event
+            button.btn.btn-default.btn-sm.add-source-to-event.on-right Add Source to Event
           if addingSourceToEvent
             +addToEvent(source=source objNameToAssociate="Source")
           .curator-source-details--copy
@@ -31,13 +31,12 @@ template(name="curatorSourceDetails")
               incidents=incidents
               relatedElements=relatedElements
               source=source)
-        if wideUI
+        .curator-source-details--incidents-wrapper
+          .curator-source-details--header
+            h2 Incident Reports
+            button.btn.btn-default.btn-sm.add-incident.on-right Add New Incident
           .curator-source-details--incidents-container
             +sourceIncidentReports(
-              selectedIncidentTab=selectedIncidentTab
-              source=source)
-        else
-          +sourceIncidentReports(
               selectedIncidentTab=selectedIncidentTab
               source=source)
         if notifying

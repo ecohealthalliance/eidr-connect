@@ -22,5 +22,5 @@ template(name="smartEvents")
     if isInRole "admin"
       +editSmartEventDetailsModal action="add"
 
-    .featured-table.table-wrapper
+    .featured-table.curator-source-details--table-wrapper
       +reactiveTable collection="smartEvents" settings=settings

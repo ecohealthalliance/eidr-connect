@@ -11,7 +11,7 @@ template(name="userEvents")
       .page-options.container-flex.no-break.vertically-centered
         +searchInput searchSettings
 
-    .featured-table.table-wrapper
+    .featured-table.curator-source-details--table-wrapper
       +reactiveTable collection="userEvents" settings=settings
 
     if isInRole "admin"
