@@ -170,9 +170,3 @@ Template.incidentTable.events
     addingEvent = instance.addingEvent
     addingEvent.set(not addingEvent.get())
     event.currentTarget.blur()
-
-  'click .add-incident': (event, instance) ->
-    Modal.show 'incidentModal',
-      articles: [instance.data.source]
-      add: true
-      accept: true
