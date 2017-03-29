@@ -4,10 +4,10 @@ template(name="incidentTable")
     .curator-source-details--actions.container-flex.no-break
       button.btn.btn-sm.action(
         disabled="{{#unless incidentsSelected}} true {{/unless}}"
-        class="btn-{{#if acceptance}}success{{else}}danger{{/if}}") #{action} Incidents
+        class="btn-{{#if acceptance}}success{{else}}danger{{/if}}") #{action}
       if accepted
         button.btn.btn-sm.btn-primary.show-addEvent(
-          disabled="{{#unless incidentsSelected}} true {{/unless}}") Add Incidents to Event
+          disabled="{{#unless incidentsSelected}} true {{/unless}}") Add to Event
       button.btn.btn-sm.btn-default.select.on-right(
         disabled="{{#unless incidents.count}} true {{/unless}}"
         class="{{#if allSelected}} deselect-all {{else}} select-all {{/if}}")
@@ -15,11 +15,11 @@ template(name="incidentTable")
           | Deselect All
         else
           | Select All
-      if addEvent
-        +addToEvent(
-          selectedIncidents=selectedIncidents
-          tableContentScrollable=tableContentScrollable
-          source=source)
+  if addEvent
+    +addToEvent(
+      selectedIncidents=selectedIncidents
+      tableContentScrollable=tableContentScrollable
+      source=source)
   if incidents.count
     .curator-source-details--table-wrapper
       table.table.incident-table(

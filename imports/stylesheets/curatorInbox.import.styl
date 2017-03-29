@@ -450,6 +450,9 @@ $pane-switch-speed = .3s
 .curator-source-details--incidents-container
   flex 1 1 100%
   verticalScroll()
+  padding-bottom 3em
+  +above($break-point--curator-inbox--x-wide)
+    padding-bottom 0
 
 .curator-source-details--header
 .curator-source-details--sub-header
@@ -465,6 +468,7 @@ $pane-switch-speed = .3s
   h2
     font-size 1.4em
   h3
+    min-width 15%
     margin-right 2em
     font-weight 600
     letter-spacing .02em
@@ -499,6 +503,13 @@ $pane-switch-speed = .3s
       margin 0 0 1em 0
       padding-top .75em
       padding-bottom .75em
+    &[disabled]
+      &
+      &:hover
+      &:active
+        background alpha(white, 50%)
+        border-color alpha(darken($l-gray, 15%), 50%)
+        color lighten($m-gray, 20%)
   .on-left
   .on-right
   .select
@@ -536,10 +547,10 @@ $pane-switch-speed = .3s
       border-top-color darken(@background, 35%)
       border-bottom-color darken(@background, 35%)
       h3
-        color darken($positive, 30%)
+        color darken($positive, 40%)
   &.rejected
     .curator-source-details--sub-header
-      background alpha(desaturate($danger, 10%), 8%)
+      background alpha(desaturate($danger, 10%), 6%)
       border-top-color darken(@background, 35%)
       border-bottom-color darken(@background, 35%)
       h3
