@@ -30,14 +30,6 @@ _selectedIncidents = (instance) ->
 _incidentsSelected = (instance) ->
   _selectedIncidents(instance).count()
 
-select2NoResults = ->
-  """
-    <div class='no-results small'>
-      <p>No Results Found</p>
-    </div>
-    <button class='btn btn-default add-new-event'>Add New Event</a>
-  """
-
 Template.incidentTable.onCreated ->
   @selectedIncidents = new Meteor.Collection(null)
   @addingEvent = new ReactiveVar(false)

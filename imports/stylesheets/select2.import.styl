@@ -4,6 +4,13 @@
   border-color $border-primary
   overflow hidden
 
+.select2-dropdown
+  box-shadow 0 5px 15px alpha($border-primary, 90%)
+  &:not(.select2-dropdown--with-additional-options)
+    .select2-results__options
+      gradientBottom(50px)
+      padding-bottom 50px
+
 .select2-container--default .select2-search--inline .select2-search__field
   margin-top 6px
 
@@ -29,10 +36,10 @@
     background lighten($secondary, 70%)
 
 .select2-results__options
-  gradientBottom(50px)
-  padding-bottom 50px
   li
     border-bottom 1px solid lighten($border-primary-light, 10%)
+    &:last-of-type
+      border-bottom 0
 
 .select2-container--default
   .select2-selection--multiple
@@ -67,3 +74,11 @@
 .select2-results__message
   text-align center
   border-bottom 0 !important // Overide select2 styles
+
+.select2-results__additional-options
+  display flex
+  align-items center
+  justify-content center
+  padding-top 1em
+  padding-bottom 1em
+  border-top 3px solid $border-primary-light

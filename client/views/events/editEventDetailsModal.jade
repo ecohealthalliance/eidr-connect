@@ -20,11 +20,16 @@ template(name="editEventDetailsModal")
               .form-group
                 label Event Summary
                 textarea.form-control(name="eventSummary" rows="15")= summary
-              .form-group
-                .checkbox
-                  label
-                    input(type="checkbox" name="promed" checked=displayOnPromed)
-                    | Display this event on promedmail.org
+              .container-flex.check-buttons.type.no-break
+                .check-button
+                  input(
+                    type="checkbox"
+                    name="promed"
+                    id="promed"
+                    value="1"
+                    tabindex="-1"
+                    checked=displayOnPromed)
+                  label(for="promed" tabindex="0") Display this event on promedmail.org?
             else
               +deleteConfirmationModalBody(
                 objId=_id
