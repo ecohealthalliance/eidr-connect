@@ -241,20 +241,6 @@ Template.curatorInboxSection.onCreated ->
       sortDirection: -1
     },
     {
-      key: 'publishDate'
-      description: 'Date the article was published.'
-      label: 'Published'
-      sortOrder: 0
-      sortDirection: -1
-      sortFn: (value, ctx)->
-        value
-      fn: (value) ->
-        if moment(value).diff(new Date(), 'days') > -7
-          moment(value).fromNow()
-        else
-          moment(value).format('YYYY-MM-DD')
-    },
-    {
       key: 'addedDate'
       description: 'Date the article was added.'
       label: 'Added'

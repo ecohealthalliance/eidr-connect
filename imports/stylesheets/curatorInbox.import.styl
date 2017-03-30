@@ -36,21 +36,19 @@ $pane-switch-speed = .3s
   padding .5em $page-padding .5em 1.5em
   border-bottom 2px solid darken($border-primary, 10%)
   +above($break-point--curator-inbox)
-    border-right 1px solid darken($border-primary, 10%)
-  +above($break-point--curator-inbox--x-wide)
-    border-right-width 3px
+    border-right 3px solid darken($border-primary, 10%)
 
   &.pane-head-l
     padding-right 1em
-    +above($break-point--curator-inbox)
-      width 50%
     +below($break-point--curator-inbox)
       transition transform $pane-switch-speed ease-in-out
       transform translate(0, 0)
       &:not(.on-canvas)
         transform translate(-100%, 0)
-    +above($break-point--curator-inbox--x-wide)
-      width 30%
+    +above($break-point--curator-inbox)
+      width 35%
+    +above($break-point--BSVE)
+      width 25%
 
   h2
     color $primary
@@ -84,9 +82,11 @@ $pane-switch-speed = .3s
     transform translate(0, 0)
     &:not(.on-canvas)
       transform translate(-100%, 0)
-  +above($break-point--curator-inbox--x-wide)
-    width 30%
+  +above($break-point--curator-inbox)
+    width 35%
     border-right-width 3px
+  +above($break-point--BSVE)
+    width 25%
 
   .curator-inbox-header
   .curator-inbox-section-head
@@ -221,8 +221,10 @@ $pane-switch-speed = .3s
   display flex
   flex-direction column
   padding 0
-  +above($break-point--curator-inbox--x-wide)
-    width 70%
+  +above($break-point--curator-inbox)
+    width 65%
+  +above($break-point--BSVE)
+    width 75%
 
 .curator-source-details--main-header
   position relative
@@ -396,7 +398,7 @@ $pane-switch-speed = .3s
   flex 1 1 100%
   display flex
   flex-direction column
-  +above($break-point--curator-inbox--x-wide)
+  +above($break-point--BSVE)
     flex-direction row
   a
     cursor pointer
@@ -420,7 +422,7 @@ $pane-switch-speed = .3s
 
 .curator-source-details--copy-wrapper
   position relative
-  +above($break-point--curator-inbox--x-wide)
+  +above($break-point--BSVE)
     display flex
     flex-direction column
     border-right 1px solid $border-primary
@@ -434,7 +436,7 @@ $pane-switch-speed = .3s
   padding 1em 2.5%
   white-space pre-wrap
   border-top 1px solid $border-primary-light
-  +above($break-point--curator-inbox--x-wide)
+  +above($break-point--BSVE)
     height auto
     flex 1
     padding-bottom 3em
@@ -462,9 +464,12 @@ $pane-switch-speed = .3s
   color $primary-dark
   padding .5em $page-padding
   text-transform uppercase
+  +between(2, 3)
+    border-top 1px solid darken($border-primary-light, 5%)
   h2
-    font-size 1.4em
+    font-size 1.25em
   h3
+    font-size 1em
     min-width 15%
     margin-right 2em
     font-weight 600
@@ -546,7 +551,7 @@ $pane-switch-speed = .3s
       border-bottom-color darken(@background, 35%)
       h3
         color darken($danger, 20%)
-  +above($break-point--curator-inbox--x-wide)
+  +above($break-point--BSVE)
     border 0
   .curator-source-details--sub-header
     flex-shrink 0
@@ -569,7 +574,7 @@ $pane-switch-speed = .3s
 
 .curator-source-details--copy-wrapper
 .curator-source-details--table
-  +above($break-point--curator-inbox--x-wide)
+  +above($break-point--BSVE)
     flex 1 1 50%
     max-width 50%
 
