@@ -31,7 +31,6 @@ template(name="incidentTable")
             tr
               th
               th.count-header Type
-              th.count-header Value
               th Start Date
               th End Date
               th.locations-header Locations
@@ -40,15 +39,7 @@ template(name="incidentTable")
             tr(class="{{#if selected}} selected {{/if}}")
               td
                 span.select
-              if cases
-                td Case Count
-                td(data-incident-id=_id)=cases
-              else if deaths
-                td Death Count
-                td(data-incident-id=_id)=deaths
-              else
-                td Other
-                td(data-incident-id=_id)=specify
+              td=countWithDisease
               td
                 unless dateRange.cumulative
                   | {{formatDateISO dateRange.start}}

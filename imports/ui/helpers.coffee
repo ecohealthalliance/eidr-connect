@@ -11,8 +11,8 @@ UI.registerHelper 'formatDateRange', (dateRange)->
   return formatDateRange(dateRange)
 
 UI.registerHelper 'incidentToText', (incident) ->
-  if @cases
-    incidentDescription = pluralize("case", @cases)
+  if incident.cases
+    incidentDescription = pluralize("case", incident.cases)
   else if @deaths
     incidentDescription = pluralize("death", @deaths)
   else if @specify

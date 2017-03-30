@@ -2,6 +2,8 @@ UserEvents = require '/imports/collections/userEvents.coffee'
 Incidents = require '/imports/collections/incidentReports.coffee'
 { notify } = require '/imports/ui/notification'
 SCROLL_WAIT_TIME = 350
+import { incidentTypeWithCountAndDisease } from '/imports/utils'
+import { pluralize } from '/imports/ui/helpers'
 
 _acceptedQuery = (accepted) ->
   query = {}
@@ -113,6 +115,9 @@ Template.incidentTable.helpers
       'accepted'
     else
       'rejected'
+
+  countWithDisease: ->
+    incidentTypeWithCountAndDisease(@)
 
 Template.incidentTable.events
   'click .incident-table tbody tr': (event, instance) ->

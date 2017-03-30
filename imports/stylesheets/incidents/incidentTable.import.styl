@@ -11,6 +11,7 @@ $tableTypes = {
   }
 }
 
+.event-incidents
 .incident-table
   > tbody
     > tr
@@ -27,10 +28,6 @@ $tableTypes = {
     width 50px
   .locations-header
     width 300px
-  .count
-    color blue
-    text-decoration underline
-    cursor pointer
   .edit
     padding-right 1em
     transition transform .1s ease-in-out
@@ -43,6 +40,10 @@ $tableTypes = {
       color $primary-dark
     &:active
       transform scale(1.75)
+
+
+  .disease-name
+    text-transform capitalize
 
   tr
     .select
@@ -78,7 +79,6 @@ $tableTypes = {
               cursor pointer
               &::before
                 content $icon
-
 
 .extract-incidents-table
   margin -25px
