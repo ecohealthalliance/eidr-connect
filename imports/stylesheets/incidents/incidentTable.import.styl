@@ -37,8 +37,7 @@ $tableTypes = {
     &::before
       icon()
       content '\f040'
-      visibility hidden
-      color $primary
+      color $border-primary
     &:hover
       transform scale(1.5)
       color $primary-dark
@@ -58,10 +57,10 @@ $tableTypes = {
     &:active
       .select
         transform scale(1.5)
-    &:hover
-      .edit
+    .edit
+      &:hover
         &::before
-          visibility visible
+          color $primary-dark
   for $type, $options in $tableTypes
     $icon = $options.icon
     &.{$type}
