@@ -10,7 +10,7 @@ Meteor.methods
       existingSource = Articles.findOne(sourceQuery)
       if existingSource
         Articles.update sourceQuery,
-          $set: userEventId, source.userEventId
+          $set: userEventId: source.userEventId
       else
         if source.url
           insertArticle =

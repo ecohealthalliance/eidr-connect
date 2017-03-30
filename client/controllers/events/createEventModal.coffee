@@ -24,7 +24,7 @@ Template.createEventModal.events
     summary = target.eventSummary?.value.trim()
     eventName = target.eventName
     source = instanceData?.source
-    incidents = instanceData.incidents.fetch()
+    incidents = instanceData.incidents?.fetch()
 
     Meteor.call 'upsertUserEvent',
       eventName: eventName.value.trim()
@@ -33,7 +33,7 @@ Template.createEventModal.events
     , (error, result) ->
       unless error
         modal = instance.$('#create-event-modal')
-        if incidents.length
+        if incidents?.length
           incidentIds = _.pluck(incidents, 'id')
           Meteor.call 'addIncidentsToEvent', incidentIds, result.insertedId, source, (error, res) ->
             handleCompletion(error, 'Incident Reports', modal)

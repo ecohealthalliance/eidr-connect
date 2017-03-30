@@ -25,6 +25,7 @@ Template.addToEvent.onRendered ->
       minimumInputLength: 0
 
     $(document).on 'click', '.add-new-event', (event) ->
+      event.stopPropagation()
       eventName = $('.select2-search__field').val()
       $select2.select2('close')
       Modal.show 'createEventModal',
@@ -55,7 +56,7 @@ Template.addToEvent.events
     instanceData = instance.data
     source = instanceData.source
     selectedIncidents = instanceData.selectedIncidents
-    if selectedIncidents.count()
+    if selectedIncidents?.count()
       selectedIncidentIds = _.pluck(selectedIncidents.fetch(), 'id')
       Meteor.call 'addIncidentsToEvent', selectedIncidentIds, userEventId, source, (error, result) ->
         if error
