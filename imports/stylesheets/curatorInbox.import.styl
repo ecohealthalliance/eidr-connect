@@ -451,14 +451,11 @@ $pane-switch-speed = .3s
   flex 1 1 100%
   verticalScroll()
   padding-bottom 3em
-  +above($break-point--curator-inbox--x-wide)
-    padding-bottom 0
 
 .curator-source-details--header
 .curator-source-details--sub-header
   display flex
   align-items center
-  border-top 2px solid darken($border-primary-light, 5%)
   border-bottom 2px solid darken($border-primary-light, 5%)
   font-size 14px
   font-weight 600
@@ -478,6 +475,8 @@ $pane-switch-speed = .3s
   background $border-primary-light
 
 .curator-source-details--sub-header
+  border-top 1px solid darken($border-primary-light, 5%)
+  border-bottom-width 1px
   .input-group-addon
     display none
   &.toggleable
@@ -497,6 +496,7 @@ $pane-switch-speed = .3s
     flex-direction column
   button
     margin-right .5em
+    transition .1s ease-in-out
     &:last-of-type
       margin-right 0
     +at(1)
@@ -521,7 +521,6 @@ $pane-switch-speed = .3s
 
 .curator-inbox--add-event-container
   justify-content center
-  padding 1em
   border-top 1px solid $border-primary-light
   border-bottom 1px solid $border-primary-light
   button
@@ -530,17 +529,9 @@ $pane-switch-speed = .3s
     max-width 50%
 
 .curator-source-details--incidents
-  flex 1 1 auto
-  max-height 50%
-  display flex
-  flex-direction column
   &:not(:first-of-type)
     .curator-source-details--sub-header
-      border-top-width 3px
-  &.max-out-height
-    max-height 100%
-    .curator-source-details--table-wrapper
-      padding-bottom 3em
+      border-top-width 1px
   &.accepted
     .curator-source-details--sub-header
       background alpha(desaturate($positive, 10%), 8%)
@@ -559,17 +550,18 @@ $pane-switch-speed = .3s
     border 0
   .curator-source-details--sub-header
     flex-shrink 0
-    border-bottom-width 3px
+    border-bottom-width 1px
   .curator-source-details--actions
     flex 1
 
 .curator-source-details--table-wrapper
-  verticalScroll()
   .table
-    > tbody > tr:last-of-type
-      &
-      td
-        border-bottom 0
+    &
+    &.incident-table
+      > tbody > tr:last-of-type
+        &
+        td
+          border-bottom 0
     thead
       background lighten($border-primary-light, 50%)
       > tr > th

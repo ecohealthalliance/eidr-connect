@@ -3,7 +3,7 @@ Template.reactiveTable.onCreated ->
 
 Template.reactiveTable.onRendered ->
   if @data.settings.showLoader
-    $('.curator-source-details--table-wrapper').prepend(Blaze.toHTML(Template.loading))
+    $('.table-wrapper').prepend(Blaze.toHTML(Template.loading))
     @autorun =>
       if @context.ready.get()
         $('.loading').remove()
