@@ -1,7 +1,7 @@
 UserEvents = require '/imports/collections/userEvents.coffee'
 Incidents = require '/imports/collections/incidentReports.coffee'
 { notify } = require '/imports/ui/notification'
-SCROLL_WAIT_TIME = 250
+SCROLL_WAIT_TIME = 350
 
 _acceptedQuery = (accepted) ->
   query = {}
@@ -170,9 +170,3 @@ Template.incidentTable.events
     addingEvent = instance.addingEvent
     addingEvent.set(not addingEvent.get())
     event.currentTarget.blur()
-
-  'click .add-incident': (event, instance) ->
-    Modal.show 'incidentModal',
-      articles: [instance.data.source]
-      add: true
-      accept: true

@@ -1,30 +1,22 @@
 template(name="sourceIncidentReports")
-  .curator-source-details--incidents-options
-    ul.tabs
-      li(class="{{#if selectedIncidentTab 0}} active {{/if}}")
-        a(data-tab='0')
-          span
-            span Accepted
-            span Incidents
-      li(class="{{#if selectedIncidentTab 1}} active {{/if}}")
-        a(data-tab='1')
-          span
-            span Rejected
-            span Incidents
-  .curator-source-details--incidents(
-    class="{{#unless tableContentIsScrollable}} no-scroll {{/unless}}")
-    .tab-content
-      .tab-pane(class="{{#if selectedIncidentTab 0}} active {{/if}}")
-        +incidentTable(
-          source=source
-          scrollToAnnotations=true
-          accepted=true
-          hideTableHeader=true
-          tableContentScrollable=tableContentScrollable)
-      .tab-pane(class="{{#if selectedIncidentTab 1}} active {{/if}}")
-        +incidentTable(
-          source=source
-          scrollToAnnotations=true
-          accepted=false
-          hideTableHeader=true
-          tableContentScrollable=tableContentScrollable)
+  if hasIncidents
+    if hasAcceptedIncidents
+      .curator-source-details--incidents.accepted(
+        class="{{#unless tableContentIsScrollable}} no-scroll {{/unless}}")
+          +incidentTable(
+            source=source
+            scrollToAnnotations=true
+            accepted=true
+            hideTableHeader=true
+            tableContentScrollable=tableContentScrollable)
+    if hasRejectedIncidents
+      .curator-source-details--incidents.rejected(
+        class="{{#unless tableContentIsScrollable}} no-scroll {{/unless}}")
+            +incidentTable(
+              source=source
+              scrollToAnnotations=true
+              accepted=false
+              hideTableHeader=true
+              tableContentScrollable=tableContentScrollable)
+  else
+    +noResults message='No Incident Reports Found'

@@ -36,21 +36,19 @@ $pane-switch-speed = .3s
   padding .5em $page-padding .5em 1.5em
   border-bottom 2px solid darken($border-primary, 10%)
   +above($break-point--curator-inbox)
-    border-right 1px solid darken($border-primary, 10%)
-  +above($break-point--curator-inbox--x-wide)
-    border-right-width 3px
+    border-right 3px solid darken($border-primary, 10%)
 
   &.pane-head-l
     padding-right 1em
-    +above($break-point--curator-inbox)
-      width 50%
     +below($break-point--curator-inbox)
       transition transform $pane-switch-speed ease-in-out
       transform translate(0, 0)
       &:not(.on-canvas)
         transform translate(-100%, 0)
-    +above($break-point--curator-inbox--x-wide)
-      width 30%
+    +above($break-point--curator-inbox)
+      width 35%
+    +above($break-point--BSVE)
+      width 25%
 
   h2
     color $primary
@@ -84,9 +82,11 @@ $pane-switch-speed = .3s
     transform translate(0, 0)
     &:not(.on-canvas)
       transform translate(-100%, 0)
-  +above($break-point--curator-inbox--x-wide)
-    width 30%
+  +above($break-point--curator-inbox)
+    width 35%
     border-right-width 3px
+  +above($break-point--BSVE)
+    width 25%
 
   .curator-inbox-header
   .curator-inbox-section-head
@@ -221,10 +221,12 @@ $pane-switch-speed = .3s
   display flex
   flex-direction column
   padding 0
-  +above($break-point--curator-inbox--x-wide)
-    width 70%
+  +above($break-point--curator-inbox)
+    width 65%
+  +above($break-point--BSVE)
+    width 75%
 
-.curator-source-details--header
+.curator-source-details--main-header
   position relative
   background none
   padding-left 1.5em
@@ -242,8 +244,10 @@ $pane-switch-speed = .3s
     align-items center
     z-index 1
     margin-right 1em
-    text-transform capitalize
+    text-transform uppercase
     font-size 1.15em
+    +above(3)
+      font-size 1.5em
     +above($break-point--curator-inbox)
       max-width 75%
       min-width 0
@@ -394,7 +398,7 @@ $pane-switch-speed = .3s
   flex 1 1 100%
   display flex
   flex-direction column
-  +above($break-point--curator-inbox--x-wide)
+  +above($break-point--BSVE)
     flex-direction row
   a
     cursor pointer
@@ -418,7 +422,7 @@ $pane-switch-speed = .3s
 
 .curator-source-details--copy-wrapper
   position relative
-  +above($break-point--curator-inbox--x-wide)
+  +above($break-point--BSVE)
     display flex
     flex-direction column
     border-right 1px solid $border-primary
@@ -427,16 +431,17 @@ $pane-switch-speed = .3s
       display none
 
 .curator-source-details--copy
+  verticalScroll()
   height 30vh
-  overflow-y scroll
-  overflow-x hidden
+  padding 1em 2.5%
+  white-space pre-wrap
   border-top 1px solid $border-primary-light
-  +above($break-point--curator-inbox--x-wide)
+  +above($break-point--BSVE)
     height auto
     flex 1
     padding-bottom 3em
 
-.curator-source-details--incidents-container
+.curator-source-details--incidents-wrapper
   flex 1
   display flex
   flex-direction column
@@ -444,62 +449,132 @@ $pane-switch-speed = .3s
     .tabs
       border-top 0
 
-.curator-source-details--incidents-options
-  .tabs
-    width 100%
-    margin 0
-    border-top 2px solid darken($border-primary-light, 5%)
-    border-bottom 2px solid darken($border-primary-light, 5%)
-    li
-      margin 0
-      &:first-of-type
-        border-right 1px solid darken($border-primary-light, 5%)
-      &.active
-        a
-          background $border-primary-light
-          color $primary-dark
-      a
-        display flex
-        align-items center
-        justify-content center
-        border 0
-        border-radius 0
-        font-size 1em
-        min-height $curator-pane-head-height
-        span
-          span
-            &:first-of-type
-              font-weight 600
-              margin-right .1em
+.curator-source-details--incidents-container
+  flex 1 1 100%
+  verticalScroll()
+  padding-bottom 3em
+
+.curator-source-details--header
+.curator-source-details--sub-header
+  display flex
+  align-items center
+  border-bottom 2px solid darken($border-primary-light, 5%)
+  font-size 14px
+  font-weight 600
+  color $primary-dark
+  padding .5em $page-padding
+  text-transform uppercase
+  +between(2, 3)
+    border-top 1px solid darken($border-primary-light, 5%)
+  h2
+    font-size 1.25em
+  h3
+    font-size 1em
+    min-width 15%
+    margin-right 2em
+    font-weight 600
+    letter-spacing .02em
+
+.curator-source-details--header
+  min-height $curator-pane-head-height
+  background $border-primary-light
+
+.curator-source-details--sub-header
+  border-top 1px solid darken($border-primary-light, 5%)
+  border-bottom-width 1px
+  .input-group-addon
+    display none
+  &.toggleable
+    cursor pointer
+    &:hover
+      background $header-BG
+      .curator-events-collapse
+        transition transform .1s ease-in-out
+        transform scale(1.2)
+      h4
+        color $primary
+
+.curator-source-details--header
+.curator-source-details--sub-header
+.curator-source-details--actions
+  +at(1)
+    flex-direction column
+  button
+    margin-right .5em
+    transition .1s ease-in-out
+    &:last-of-type
+      margin-right 0
+    +at(1)
+      margin 0 0 1em 0
+      padding-top .75em
+      padding-bottom .75em
+    &[disabled]
+      &
+      &:hover
+      &:active
+        background alpha(white, 50%)
+        border-color alpha(darken($l-gray, 15%), 50%)
+        color lighten($m-gray, 20%)
+  .on-left
+  .on-right
+  .select
+    margin-left auto
+    +at(1)
+      margin 0 0 1em 0
+  .on-left
+    margin-right auto
+
+.curator-inbox--add-event-container
+  justify-content center
+  border-top 1px solid $border-primary-light
+  border-bottom 1px solid $border-primary-light
+  button
+    margin-left 1em
+  .select2-container
+    max-width 50%
 
 .curator-source-details--incidents
-  display flex
-  .tab-content
-    flex 1 1 auto
-    display flex
-  .tab-pane
-    flex 1 1 auto
-    &.active
-      display flex
-      flex-direction column
-  .table-wrapper
-    overflow-x hidden
-    overflow-y scroll
-    padding-bottom 3em
+  &:not(:first-of-type)
+    .curator-source-details--sub-header
+      border-top-width 1px
+  &.accepted
+    .curator-source-details--sub-header
+      background alpha(desaturate($positive, 10%), 8%)
+      border-top-color darken(@background, 35%)
+      border-bottom-color darken(@background, 35%)
+      h3
+        color darken($positive, 40%)
+  &.rejected
+    .curator-source-details--sub-header
+      background alpha(desaturate($danger, 10%), 6%)
+      border-top-color darken(@background, 35%)
+      border-bottom-color darken(@background, 35%)
+      h3
+        color darken($danger, 20%)
+  +above($break-point--BSVE)
+    border 0
+  .curator-source-details--sub-header
+    flex-shrink 0
+    border-bottom-width 1px
+  .curator-source-details--actions
+    flex 1
+
+.curator-source-details--table-wrapper
   .table
-    > tbody > tr:last-of-type td
-      border-bottom 0
+    &
+    &.incident-table
+      > tbody > tr:last-of-type
+        &
+        td
+          border-bottom 0
     thead
       background lighten($border-primary-light, 50%)
       > tr > th
         border-bottom 2px solid darken($border-primary-light, 5%)
-  +above($break-point--curator-inbox--x-wide)
-    padding-bottom 2em
-    border 0
-    incidents-options
+
 .curator-source-details--copy-wrapper
 .curator-source-details--table
-  +above($break-point--curator-inbox--x-wide)
+  +above($break-point--BSVE)
     flex 1 1 50%
     max-width 50%
 
@@ -554,143 +629,15 @@ $pane-switch-speed = .3s
   .title
     max-width 400px
 
-.curator-events
-  margin-bottom 2em
-  &:first-child
-    .curator-events-header
-      border-top 0
-
-.curator-events-table
-  margin-bottom 0
-  color $primary
-  thead
-    display none
-  tbody
-    tr
-      td
-        display flex
-        align-items center
-        padding-top 0
-        padding-bottom 0
-        padding-right 2em
-        border-color $border-primary-light
-        .event-info
-          transition .1s ease-in-out
-        &:first-of-type
-          padding-left 1.5em
-      &:first-of-type
-        td
-          border-top 0
-      &:hover
-        background none
-      .secondary-actions
-        margin-left auto
-        display flex
-        align-items center
-        opacity 0
-        transition opacity .2s ease-in-out
-        a
-          font-size 1.2em
-          color $primary
-          &:hover
-          &:focus
-            color darken(@color, 30%)
-            transform scale(1.3)
-            text-decoration none
-            noBootstrapFocus()
-      &:hover
-        .secondary-actions
-          opacity 1
-
-.curator-events--options
-  margin-left auto
-  display flex
-  align-items center
-  justify-content flex-end
-  min-width 50%
-  button
-    font-size .85em
-  .search-wrapper.stagged
-    .search-icon
-      font-size 1.5em
-
 .curator-events-collapse
   color $primary
   cursor pointer
-
-.associated-events
-  &::before
-  .no-events
-    padding 1em 2em
-
-.disassociate-event
-.associate-event
-  padding-top .5em
-  padding-bottom .5em
-  font-size 1em
-  color $primary
-  &:hover
-  &:focus
-    noBootstrapFocus()
-    color $primary-dark
-    i
-      transform scale(1.25)
-      transition .1s ease-in-out
-  i
-    margin-right .5em
-
-.associate-event
-  i
-    color darken($positive, 5%)
-    &:before
-      content '\f055' // fa-plus-circle
-  &:hover
-    i
-      color darken($positive, 20%)
-
-.disassociate-event
-  i
-    color darken($delete, 5%)
-    &::before
-      content '\f056' // fa-minus-circle
-  &:hover
-    i
-      color darken($delete, 20%)
 
 .suggest-incidents
   font-size .75em
   padding .25em .75em
   margin-right 1em
   background none
-
-#associated-events
-  .secondary-actions
-    opacity 1
-    visibility visible
-  tr
-    td
-      > span
-        padding-right 1em
-
-.curator-events-header
-  min-height $curator-pane-head-height
-  padding .5em $page-padding
-  display flex
-  align-items center
-  border-top 1px solid $border-primary
-  border-bottom 1px solid $border-primary
-  background lighten($border-primary-light, 50%)
-  .input-group-addon
-    display none
-  &.toggleable
-    cursor pointer
-    &:hover
-      background $header-BG
-      .curator-events-collapse
-        transition transform .1s ease-in-out
-        transform scale(1.2)
-      h4
-        color $primary
 
 #curatorEventsFilter
   position relative

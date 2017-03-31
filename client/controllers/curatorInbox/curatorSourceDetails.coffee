@@ -156,3 +156,9 @@ Template.curatorSourceDetails.events
   'click .add-source-to-event': (event, instance) ->
     addingSourceToEvent = instance.addingSourceToEvent
     addingSourceToEvent.set(not addingSourceToEvent.get())
+
+  'click .add-incident': (event, instance) ->
+    Modal.show 'incidentModal',
+      articles: [instance.source.get()]
+      add: true
+      accept: true
