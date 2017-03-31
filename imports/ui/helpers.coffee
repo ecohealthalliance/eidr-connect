@@ -1,5 +1,6 @@
 formatLocation = require '/imports/formatLocation.coffee'
 { formatUrl } = require '/imports/utils.coffee'
+import { incidentTypeWithCountAndDisease } from '/imports/utils'
 
 UI.registerHelper 'formatLocation', (location)->
   return formatLocation(location)
@@ -11,8 +12,8 @@ UI.registerHelper 'formatDateRange', (dateRange)->
   return formatDateRange(dateRange)
 
 UI.registerHelper 'incidentToText', (incident) ->
-  if incident.cases
-    incidentDescription = pluralize("case", incident.cases)
+  if @cases
+    incidentDescription = pluralize("case", @cases)
   else if @deaths
     incidentDescription = pluralize("death", @deaths)
   else if @specify
@@ -31,6 +32,10 @@ UI.registerHelper 'incidentToText', (incident) ->
   if @dateRange
     result += "<span> #{formatDateRange(@dateRange, true)}</span>"
   Spacebars.SafeString result
+
+
+UI.registerHelper 'incidentCountAndDisease', ->
+  incidentTypeWithCountAndDisease(@)
 
 UI.registerHelper 'formatDate', (date) ->
   moment(date).format("MMM DD, YYYY")

@@ -177,7 +177,6 @@ Meteor.methods
     options.publishDate = source.publishDate
     incidents = createIncidentReportsFromEnhancements(enhancements, options)
     incidents = incidents.map (incident) ->
-      console.log incident
       incident = _.pick(incident, incidentReportSchema.objectKeys())
     # check for unexpected urls
     if not options.url.startsWith("promedmail.org/post/")

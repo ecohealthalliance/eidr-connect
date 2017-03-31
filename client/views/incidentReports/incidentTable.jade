@@ -39,7 +39,7 @@ template(name="incidentTable")
             tr(class="{{#if selected}} selected {{/if}}")
               td
                 span.select
-              td=countWithDisease
+              td=incidentCountAndDisease
               td
                 unless dateRange.cumulative
                   | {{formatDateISO dateRange.start}}

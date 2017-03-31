@@ -374,19 +374,20 @@ export createIncidentReportsFromEnhancements = (enhancements, options)->
 
 export incidentTypeWithCountAndDisease = (incident) ->
   text = ''
+  cases = incident.cases
+  deaths = incident.deaths
   specify = incident.specify
-  if incident.cases
-    cases = incident.cases
+  disease = incident.resolvedDisease?.text
+  if cases
     text = "#{cases} #{pluralize('case', cases, false)}"
-  else if incident.deaths
-    deaths = incident.deaths
+  else if deaths
     text = "#{deaths} #{pluralize('death', deaths, false)}"
   else if specify
     text = specify
   else
     text = ''
-  if incident.resolvedDisease and not specify
+  if disease and not specify
     if text
       text += ' of '
-    text += "<span class='disease-name'>#{incident.resolvedDisease.text}</span>"
+    text += "<span class='disease-name'>#{disease}</span>"
   Spacebars.SafeString(text)
