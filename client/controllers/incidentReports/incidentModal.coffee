@@ -78,10 +78,7 @@ Template.incidentModal.events
           notify('error', errorString)
 
     if @edit
-      incident._id = @incident._id
-      incident.addedByUserId = @incident.addedByUserId
-      incident.addedByUserName = @incident.addedByUserName
-      incident.addedDate = @incident.addedDate
+      incident = _.extend({}, @incident, incident)
       Meteor.call 'editIncidentReport', incident, (error, result) ->
         if not error
           $('.reactive-table tr').removeClass('open')

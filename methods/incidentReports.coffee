@@ -27,6 +27,8 @@ Meteor.methods
     user = Meteor.user()
     if not Roles.userIsInRole(user._id, ['admin'])
       throw new Meteor.Error("auth", "User does not have permission to edit incident reports")
+    incident.modifiedByUserId = user._id
+    incident.modifiedByUserName = user.profile.name
     res = Incidents.update({_id: _id}, {$set: incident})
     if incident.userEventId
       Meteor.call("editUserEventLastModified", incident.userEventId)
@@ -38,6 +40,8 @@ Meteor.methods
     user = Meteor.user()
     if not Roles.userIsInRole(user._id, ['admin'])
       throw new Meteor.Error("auth", "User does not have permission to edit incident reports")
+    incident.modifiedByUserId = user._id
+    incident.modifiedByUserName = user.profile.name
     res = Incidents.update(incident._id, incident)
     if incident.userEventId
       Meteor.call("editUserEventLastModified", incident.userEventId)

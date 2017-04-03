@@ -76,10 +76,10 @@ Template.suggestedIncidentsModal.onRendered ->
       url: source.url
       publishDate: source.publishDate
     })
-    for incident in result.incidents
+    for incident in incidents
       @incidentCollection.insert(incident)
     @loading.set(false)
-    @content.set(result.content)
+    @content.set(enhancements.source.cleanContent.content)
 
 Template.suggestedIncidentsModal.onDestroyed ->
   $('#suggestedIncidentsModal').off('hide.bs.modal')
