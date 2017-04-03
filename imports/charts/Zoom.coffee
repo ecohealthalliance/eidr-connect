@@ -95,6 +95,8 @@ class Zoom
 
     y1 = @plot.axes.yScale.invert(pos[1]);
     y2 = @plot.axes.yScale.invert(@bandPos[1])
+    if y1 < 0 then y1 = 0
+    if y2 < 0 then y2 = 0
     if y1 < y2
       @zoomArea.y1 = y1
       @zoomArea.y2 = y2
