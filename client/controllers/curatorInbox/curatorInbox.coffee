@@ -225,7 +225,7 @@ Template.curatorInboxSection.onCreated ->
   @curatorInboxFields = [
     {
       key: 'reviewed'
-      description: 'Article has been curated'
+      description: 'Document has been curated'
       label: ''
       cellClass: (value) ->
         if value
@@ -242,7 +242,7 @@ Template.curatorInboxSection.onCreated ->
     },
     {
       key: 'addedDate'
-      description: 'Date the article was added.'
+      description: 'Date the document was added.'
       label: 'Added'
       sortDirection: -1
       hidden: true

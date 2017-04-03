@@ -24,10 +24,10 @@ template(name="suggestedIncidentsModal")
           .suggested-incidents-wrapper
             #suggested-locations-form.form-horizontal(hidden=tableVisible)
               if isLoading
-                +loading(message="Processing Article")
+                +loading(message="Processing Document")
               else
                 unless incidentsFound
-                  .no-incident-reports No incidents could be automatically extracted from the article.
+                  .no-incident-reports No incidents could be automatically extracted from the document.
                 .suggested-annotated-content(
                   class="{{#unless incidentsFound}} space-top-4 {{/unless}}")= annotatedContent
             if showTable

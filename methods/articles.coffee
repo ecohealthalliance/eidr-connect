@@ -5,7 +5,7 @@ Meteor.methods
   addEventSource: (source) -> #eventId, url, publishDate, publishDateTZ
     user = Meteor.user()
     if user and Roles.userIsInRole(user._id, ['admin'])
-      # Check if Article is in collection
+      # Check if Document is in collection
       sourceQuery = url: $regex: "#{regexEscape(source.url)}$"
       existingSource = Articles.findOne(sourceQuery)
       if existingSource

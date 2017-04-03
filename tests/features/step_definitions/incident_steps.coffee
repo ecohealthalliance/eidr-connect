@@ -60,7 +60,7 @@ do ->
       @client.waitForVisible('#suggested-locations-form p.annotated-content')
       if @client.isVisible('div.warn')
         text = @client.getText('div.warn')
-        assert.equal(text.trim(), 'No incidents could be automatically extracted from the article.')
+        assert.equal(text.trim(), 'No incidents could be automatically extracted from the document.')
         @client.pause(2000)
         return true
       if @client.isVisible('span.annotation.annotation-text')

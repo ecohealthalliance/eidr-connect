@@ -11,11 +11,11 @@ postMessageHandler = (event)->
     url = window.location.toString()
     if url.match(/extract\-incidents/)
       if $('#suggestedIncidentsModal:visible').length == 0
-        toastr.error "No article has been submitted"
+        toastr.error "No document has been submitted"
         return
       table = $('table.incident-table')
       if table.length == 0
-        toastr.error "No article has been submitted"
+        toastr.error "No document has been submitted"
         return
       dataUrl = 'data:text/csv;charset=utf-8;base64,' + table.tableExport(
         type: 'csv'
@@ -24,7 +24,7 @@ postMessageHandler = (event)->
       return window.parent.postMessage(JSON.stringify({
         type: "eha.dossierTag"
         html: """
-          <b>Article:</b>
+          <b>Document:</b>
           <p style="white-space:pre-wrap;max-height:400px;overflow-y:scroll;">#{
             $('p.annotated-content').html()
           }</p>

@@ -25,7 +25,7 @@ template(name="sourceModal")
                         each suggestedArticles
                           li(class="{{#if articleSelected}} active {{/if}}")= subject
                     else
-                      .no-results No articles found
+                      .no-results No documents found
 
             .form-group.form-group--full(class="{{suggested 'title'}}")
               label.control-label Title
@@ -37,7 +37,7 @@ template(name="sourceModal")
               .help-block.with-errors
 
             .form-group.form-group--full(class="{{suggested 'url'}}")
-              label.control-label Article URL
+              label.control-label Document URL
               if edit
                 p.form-control-static {{url}}
               else

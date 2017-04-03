@@ -179,7 +179,7 @@ Meteor.methods
     # check for unexpected urls
     if not options.url.startsWith("promedmail.org/post/")
       throw Meteor.Error("Bad url")
-    # Remove prior unassociated incidents for the article
+    # Remove prior unassociated incidents for the document
     Incidents.remove(
       url: $regex: regexEscape(options.url) + "$"
       userEventId: $exists: false
