@@ -41,6 +41,8 @@ Template.extractIncidents.events
       userEventId: null
       showTable: true
       acceptByDefault: true
+      offCanvasStartPosition: 'top'
+      classNames: 'extracted'
       article:
         publishDate: new Date()
         addedDate: new Date()

@@ -1,13 +1,15 @@
 template(name="suggestedIncidentsModal")
-  .modal#suggestedIncidentsModal.off-canvas--right.flex.fade(role="dialog")
-    .modal-dialog.suggested-incidents
+  .modal#suggestedIncidentsModal.flex.fade(
+    class="off-canvas--#{offCanvasStartPosition}"
+    role="dialog")
+    .modal-dialog.suggested-incidents(class=classNames)
       .modal-content
         .modal-header
           +modalCloseButton
           .modal-header--title
             h4 Suggested Incident Reports
             span.annotation-count=annotatedCount
-          .container-flex(class="{{#if showTable}} flex-reverse {{/if}}")
+          .container-flex.options-wrapper(class="{{#if showTable}} flex-reverse {{/if}}")
             ul.color-legend.list-unstyled.container-flex.no-break(
               class="{{#if showTable}} with-tabs {{else}} on-left {{/if}}")
               li.color-legend--accepted Accepted
@@ -15,11 +17,11 @@ template(name="suggestedIncidentsModal")
             if showTable
               ul.tabs.tabs-traditional.tabs-secondary.tabs-modal-header.list-unstyled
                 li(class="{{#if annotatedContentVisible}}active{{/if}}")
-                  a.annotated-content Source Text
+                  a.annotated-content-tab Source Text
                 li(class="{{#if tableVisible}}active{{/if}}")
-                  a.incident-table Incident Report Table
+                  a.incident-table-tab Incident Report Table
         .modal-body
-          .suggested-incidents-wrapper.tab-content
+          .suggested-incidents-wrapper
             #suggested-locations-form.form-horizontal(hidden=tableVisible)
               if isLoading
                 +loading(message="Processing Article")

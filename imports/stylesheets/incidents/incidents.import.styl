@@ -34,12 +34,16 @@ viewingBG()
       viewingBG()
     &:hover
       background-color darken(@background-color, 50%)
+
 .suggested-incidents
   margin 30px
   width calc(100% - 60px)
-  +above(3)
+  +above($break-point--medium-width)
     width 65%
     max-width 800px
+    &.extracted
+      max-width initial
+      width calc(100% - 150px)
   .modal-content
     display flex
     flex-direction column
@@ -66,11 +70,39 @@ viewingBG()
 
   .tabs
     margin-bottom -1px
+    +above($break-point--medium-width)
+      display none
+
+  &.extracted
+    +above($break-point--medium-width)
+      .modal-body
+        display flex
+      .options-wrapper
+        flex-direction row
+
+    .color-legend
+      +above($break-point--medium-width)
+        margin-left 25px
+        margin-bottom 1em
+
+.suggested-incidents-wrapper
+  +above($break-point--medium-width)
+    display flex
+    flex 1 1 auto
+    > div
+      overflow scroll
+      flex 1 1 50%
+      &:first-of-type
+        border-right 1px solid $border-primary
+
+.extract-incidents-table
+  table[hidden]
+    +above($break-point--medium-width)
+      display block
 
 .suggested-annotated-content
   margin 25px
   white-space pre-wrap
-
 
 .annotated-content
   &.snippet

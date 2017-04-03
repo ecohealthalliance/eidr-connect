@@ -2,7 +2,6 @@ CuratorSources = require '/imports/collections/curatorSources.coffee'
 Incidents = require '/imports/collections/incidentReports.coffee'
 key = require 'keymaster'
 { notify } = require '/imports/ui/notification'
-WIDE_UI_WIDTH = 1500
 
 _markReviewed = (instance, showNext=true) ->
   new Promise (resolve) ->
@@ -29,7 +28,7 @@ Template.curatorSourceDetails.onCreated ->
   @reviewed = new ReactiveVar(false)
   @incidentsLoaded = new ReactiveVar(false)
   @selectedIncidentTab = new ReactiveVar(0)
-  @wideUI = new ReactiveVar(window.innerWidth >= WIDE_UI_WIDTH)
+  @wideUI = new ReactiveVar(window.innerWidth >= Session.get('WIDE_UI_WIDTH'))
   @addingSourceToEvent = new ReactiveVar(false)
 
 Template.curatorSourceDetails.onRendered ->
@@ -48,7 +47,7 @@ Template.curatorSourceDetails.onRendered ->
   $(window).resize =>
     state = false
     wideUI = @wideUI.get()
-    if window.innerWidth >= WIDE_UI_WIDTH
+    if window.innerWidth >= Session.get('WIDE_UI_WIDTH')
       return if wideUI
       state = true
     else if not wideUI

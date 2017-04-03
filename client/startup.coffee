@@ -1,4 +1,6 @@
 Meteor.startup ->
+  Session.set('WIDE_UI_WIDTH', 1500)
+
   $(document)
     .on 'show.bs.modal', ->
       $(@).on 'keyup', (event) ->
