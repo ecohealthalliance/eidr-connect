@@ -84,6 +84,8 @@ Template.incidentReports.onRendered ->
     filters:
       notCumulative: @filters.notCumulative
     # group events
+    minimumZoom:
+      y: 0
     group:
       # methods to be applied when a new group is created
       onEnter: () ->
