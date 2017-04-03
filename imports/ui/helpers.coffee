@@ -1,6 +1,5 @@
 formatLocation = require '/imports/formatLocation.coffee'
-{ formatUrl } = require '/imports/utils.coffee'
-import { incidentTypeWithCountAndDisease } from '/imports/utils'
+import { incidentTypeWithCountAndDisease, formatUrl } from '/imports/utils'
 
 UI.registerHelper 'formatLocation', (location)->
   return formatLocation(location)
@@ -43,7 +42,8 @@ UI.registerHelper 'formatDate', (date) ->
 UI.registerHelper 'formatDateISO', (date) ->
   moment.utc(date).format("YYYY-MM-DDTHH:mm")
 
-UI.registerHelper 'formatUrl', formatUrl
+UI.registerHelper 'formatUrl', (url) ->
+  formatUrl(url)
 
 pluralize = (word, count, showCount=true) ->
   if Number(count) isnt 1
