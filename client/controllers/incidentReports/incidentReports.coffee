@@ -135,9 +135,8 @@ Template.incidentReports.helpers
         label: 'Locations'
         fn: (value, object, key) ->
           if object.locations
-            $.map(object.locations, (element, index) ->
-              element.name
-            ).toString()
+            locations = _.map object.locations, (location) -> location.name
+            locations.join('; ')
           else
             ''
       }
