@@ -62,7 +62,7 @@ Template.addToEvent.events
         if error
           notify('error', error.reason)
         else
-          notify('success', 'Incident reports successfuly added to event')
+          notify('success', 'Incidents successfuly added to event')
     else
       sourceId = source._sourceId
       Meteor.call 'addEventSource',

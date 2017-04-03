@@ -45,6 +45,6 @@ template(name="incidentTable")
                   | {{formatDateISO dateRange.start}}
               td {{formatDateISO dateRange.end}}
               td {{formatLocations locations}}
-              td.edit(title="Edit Incident Report")
+              td.edit(title="Edit Incident")
   else
     +noResults message="No incidents found"

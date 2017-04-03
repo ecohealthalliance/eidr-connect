@@ -7,7 +7,7 @@ template(name="suggestedIncidentsModal")
         .modal-header
           +modalCloseButton
           .modal-header--title
-            h4 Suggested Incident Reports
+            h4 Suggested Incident
             span.annotation-count=annotatedCount
           .container-flex.options-wrapper(class="{{#if showTable}} flex-reverse {{/if}}")
             ul.color-legend.list-unstyled.container-flex.no-break(
@@ -19,7 +19,7 @@ template(name="suggestedIncidentsModal")
                 li(class="{{#if annotatedContentVisible}}active{{/if}}")
                   a.annotated-content-tab Source Text
                 li(class="{{#if tableVisible}}active{{/if}}")
-                  a.incident-table-tab Incident Report Table
+                  a.incident-table-tab Incident Table
         .modal-body
           .suggested-incidents-wrapper
             #suggested-locations-form.form-horizontal(hidden=tableVisible)
@@ -27,7 +27,7 @@ template(name="suggestedIncidentsModal")
                 +loading(message="Processing Article")
               else
                 unless incidentsFound
-                  .no-incident-reports No incident reports could be automatically extracted from the article.
+                  .no-incident-reports No incidents could be automatically extracted from the article.
                 .suggested-annotated-content(
                   class="{{#unless incidentsFound}} space-top-4 {{/unless}}")= annotatedContent
             if showTable

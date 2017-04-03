@@ -69,7 +69,7 @@ Template.suggestedIncidentModal.events
           deaths: true
           specify: true
         $set: incident
-      notify('success', 'Incident Report Accepted', 1200)
+      notify('success', 'Incident Accepted', 1200)
       stageModals(instance, instance.modals)
     else
       incident.annotations = instance?.incident?.annotations
@@ -77,5 +77,5 @@ Template.suggestedIncidentModal.events
       Meteor.call 'addIncidentReport', incident, (error, result) ->
         if error
           return notify('error', error)
-        notify('success', 'Incident report added.')
+        notify('success', 'Incident added.')
         stageModals(instance, instance.modals)

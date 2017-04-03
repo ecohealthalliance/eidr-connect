@@ -66,7 +66,7 @@ Template.incidentModal.events
           $('.reactive-table tr.tr-details').remove()
           if !duplicate
             form.reset()
-            notify('success', 'Incident report added.')
+            notify('success', 'Incident added.')
             if instance.data.offCanvas
               stageModals(instance, instance.modals)
             else
@@ -83,7 +83,7 @@ Template.incidentModal.events
         if not error
           $('.reactive-table tr').removeClass('open')
           $('.reactive-table tr.details').remove()
-          notify('success', 'Incident report updated')
+          notify('success', 'Incident updated')
           Modal.hide('incidentModal')
         else
           notify('error', error.reason)

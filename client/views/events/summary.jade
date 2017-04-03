@@ -21,7 +21,7 @@ template(name="summary")
       .event--metadata--counts.container-flex.no-gutter.no-break
         .count.flex-col
           span= caseCount
-          h4 Incident Reports
+          h4 Incidents
           if isInRole "admin"
             +addIncidentReport class='-in-details'
         .count.flex-col

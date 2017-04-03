@@ -36,7 +36,7 @@ Template.createEventModal.events
         if incidents?.length
           incidentIds = _.pluck(incidents, 'id')
           Meteor.call 'addIncidentsToEvent', incidentIds, result.insertedId, source, (error, res) ->
-            handleCompletion(error, 'Incident Reports', modal)
+            handleCompletion(error, 'Incidents', modal)
         else if source
           Meteor.call 'addEventSource',
             url: "promedmail.org/post/#{source._sourceId}"

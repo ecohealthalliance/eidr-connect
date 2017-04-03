@@ -35,7 +35,7 @@ Meteor.methods
     if result.data.error
       throw new Meteor.Error("grits-error", result.data.error)
     enhancements = result.data
-    # Normalize geoname data in GRITS annotations to match incident report schema.
+    # Normalize geoname data in GRITS annotations to match incident schema.
     # The geoname lookup service is queried to get admin names.
     # The GRITS api reponse only includes admin codes at the moment.
     geonameIds = []
@@ -179,7 +179,7 @@ Meteor.methods
     # check for unexpected urls
     if not options.url.startsWith("promedmail.org/post/")
       throw Meteor.Error("Bad url")
-    # Remove prior unassociated incident reports for the article
+    # Remove prior unassociated incidents for the article
     Incidents.remove(
       url: $regex: regexEscape(options.url) + "$"
       userEventId: $exists: false

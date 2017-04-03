@@ -4,7 +4,7 @@ Constants = require '/imports/constants.coffee'
 
 incidentsToLocations = (incidents) ->
   locations = {}
-  # Loop 1: Incident Reports
+  # Loop 1: Incidents
   for incident in incidents
     if incident?.locations
       # Loop 2: Locations within each incident record
