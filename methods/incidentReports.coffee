@@ -68,7 +68,7 @@ Meteor.methods
     sourceId = source._sourceId
     sourceUrl = "promedmail.org/post/#{sourceId}"
     existingSource = Articles.findOne(url: $regex: regexEscape(sourceUrl) + "$")
-    # If source is in collection associate with event, otherwise add to Articles
+    # If document is in collection associate with event, otherwise add to Articles
     # collection and associate
     if existingSource
       Articles.update(source._id, $set: userEventId: userEventId)

@@ -12,7 +12,7 @@ IncidentReportSchema = new SimpleSchema
     optional: true
   url:
     type: String
-    label: "Source the incident is based on"
+    label: "Document the incident is based on"
   addedByUserName:
     type: String
     optional: true

@@ -42,14 +42,14 @@ Template.curatorSourceDetails.onRendered ->
       swippablePane.on 'swiperight', (event) ->
         instance.data.currentPaneInView.set('')
 
-  # Create key binding which marks sources as reviewed.
+  # Create key binding which marks documents as reviewed.
   key 'ctrl + enter, command + enter', (event) =>
     _markReviewed(@)
 
   @autorun =>
-    # When source is selected in the curatorInbox template, `selectedSourceId`,
+    # When document is selected in the curatorInbox template, `selectedSourceId`,
     # which is handed down, is updated and triggers this autorun
-    # current source
+    # current document
     sourceId = @data.selectedSourceId.get()
     source = CuratorSources.findOne(sourceId)
     instance.reviewed.set source?.reviewed or false
@@ -61,7 +61,7 @@ Template.curatorSourceDetails.onRendered ->
       @incidentsLoaded.set(false)
       title = source.title
       sourceId = source._sourceId
-      # Update the source title and its tooltip in the right pane
+      # Update the document title and its tooltip in the right pane
       Meteor.defer =>
         $title = $('#sourceDetailsTitle')
         titleEl = $title[0]

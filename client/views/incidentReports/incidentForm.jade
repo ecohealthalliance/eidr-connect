@@ -9,7 +9,7 @@ template(name="incidentForm")
             data-toggle="tooltip"
             data-placement="right"
             title="URL of the document where the incident was reported."
-          ) Source URL
+          ) Document URL
           if incidentData.url
             input.form-control(readonly value=incidentData.url name="articleSourceUrl")
           else
@@ -17,7 +17,7 @@ template(name="incidentForm")
               selectId="articleSource"
               articles=articles
               selected=incidentData.url
-              placeholder='Select a source')
+              placeholder='Select a Document')
             .help-block.with-errors
 
       .incident-type-wrapper.form-groups(

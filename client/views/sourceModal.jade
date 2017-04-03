@@ -6,16 +6,16 @@ template(name="sourceModal")
           .modal-header--title
             h4
               if edit
-                | Edit Event Source
+                | Edit Event Document
               else
-                | Add Event Source
+                | Add Event Document
           +modalCloseButton
 
         .modal-body
           form#add-source(novalidate)
             unless editing
               .form-group.full-width
-                label.control-label.featured Suggested Sources
+                label.control-label.featured Suggested Documents
                 #suggested-articles.modal-block
                   if loadingArticles
                     +loading small=true static=true

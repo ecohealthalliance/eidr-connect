@@ -1,6 +1,6 @@
 template(name="articles")
   .heading.container-fluid-padded
-    h2 Event Sources
+    h2 Event Documents
   .container-flex.no-gutter
     .flex-col.bordered
       if articles.count
@@ -26,13 +26,13 @@ template(name="articles")
               li.edit-source.link(
                   data-toggle="tooltip"
                   data-placement="bottom"
-                  title="Edit Source")
+                  title="Edit Document")
                 span
                   i.fa.fa-edit(aria-hidden="true")
               li.delete-source.link(
                   data-toggle="tooltip"
                   data-placement="bottom"
-                  title="Delete Source")
+                  title="Delete Document")
                 span
                   i.fa.fa-trash(aria-hidden="true")
             li.link
@@ -42,7 +42,7 @@ template(name="articles")
                 rel="noopener noreferrer"
                 data-toggle="tooltip"
                 data-placement="bottom"
-                title="View Original Source")
+                title="View Original Document")
                 i.fa.fa-link(aria-hidden="true")
           ul.event-source-info.container-flex.list-unstyled.no-break
             li Published on {{formatDate selectedSource.publishDate}}
@@ -63,7 +63,7 @@ template(name="articles")
               else
                 li No cases
       else
-        h4.make-selection Please select a source
+        h4.make-selection Please select a document
 
 
 template(name="article")
@@ -87,7 +87,7 @@ template(name="articleSelect2")
     name="{{selectId}}"
     multiple="{{multiple}}"
     required
-    data-error="Please select a source.")
+    data-error="Please select a document.")
     unless multiple
       option(value="")
     each articles
@@ -97,4 +97,4 @@ template(name="sourceModalButton")
   if isInRole "admin"
     button.btn.btn-primary(type="button" class="open-source-form#{class}")
       i.fa.fa-plus-circle(aria-hidden="true")
-      | Add Source
+      | Add Document

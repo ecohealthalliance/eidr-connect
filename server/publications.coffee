@@ -40,7 +40,7 @@ Meteor.publish 'smartEvent', (eidID) ->
 Meteor.publish 'smartEvents', () ->
   SmartEvents.find({deleted: {$in: [null, false]}})
 
-# Curator Sources
+# Curator Documents
 ReactiveTable.publish 'curatorSources', CuratorSources, {}
 Meteor.publish 'curatorSources', (query) ->
   CuratorSources.find(query, {

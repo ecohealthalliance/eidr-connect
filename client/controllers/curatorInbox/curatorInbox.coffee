@@ -236,7 +236,7 @@ Template.curatorInboxSection.onCreated ->
     },
     {
       key: 'title'
-      description: 'The source\'s title.'
+      description: 'The document\'s title.'
       label: 'Title'
       sortDirection: -1
     },

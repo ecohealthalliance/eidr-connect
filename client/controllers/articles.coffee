@@ -78,7 +78,7 @@ Template.articles.helpers
 
   searchSettings: ->
     id: 'sourceFilter'
-    placeholder: 'Search sources'
+    placeholder: 'Search documents'
     toggleable: true
     props: ['title']
 

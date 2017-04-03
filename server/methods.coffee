@@ -97,7 +97,7 @@ Meteor.methods
     # Add the disease name from the event to the keywords
     if event.disease
       keywords.push(event.disease)
-    # Collect related event source ID's
+    # Collect related event document ID's
     notOneOfThese = []
     Articles.find(userEventId: eventId).forEach (relatedEventSource) ->
       url = relatedEventSource.url

@@ -286,7 +286,7 @@ export createIncidentReportsFromEnhancements = (enhancements, options)->
     incident =
       locations: locationTerritory.annotations.map(({geoname}) -> geoname)
     maxPrecision = 0
-    # Use the source's date as the default
+    # Use the document's date as the default
     incident.dateRange =
       start: publishDate
       end: moment(publishDate).add(1, 'day').toDate()

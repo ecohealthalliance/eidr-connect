@@ -45,7 +45,7 @@ Template.createEventModal.events
             publishDate: source.publishDate
             publishDateTZ: "EST"
           , (error) ->
-            handleCompletion(error, 'Source', modal)
+            handleCompletion(error, 'Document', modal)
         else
           dismissModal(modal).then ->
             Router.go('user-event', _id: result.insertedId)

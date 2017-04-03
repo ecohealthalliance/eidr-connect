@@ -4,14 +4,14 @@ template(name="curatorSourceDetails")
       +curatorUserStatus selectedSourceId=selectedSourceId
       h2(id="sourceDetailsTitle" data-toggle="tooltip" data-placement="bottom")
         .back-to-list
-          i.fa.fa-chevron-circle-left(title="Return to source list")
+          i.fa.fa-chevron-circle-left(title="Return to document list")
         a(href="https://promedmail.org/post/#{_sourceId}" target="_blank")= title
       if notifying
         .notification
           .checks
             i.fa.fa-check-circle.confirmation(aria-hidden="true")
             .circle
-          p Preparing next source
+          p Preparing next document
       .transition(class="{{#if notifying}} active {{/if}}")
     .curator-source-details--content
       if incidentsLoaded
@@ -22,9 +22,9 @@ template(name="curatorSourceDetails")
                 span Reviewed
               else
                 span Mark Reviewed
-            button.btn.btn-default.btn-sm.add-source-to-event.on-right Add Source to Event
+            button.btn.btn-default.btn-sm.add-source-to-event.on-right Add Document to Event
           if addingSourceToEvent
-            +addToEvent(source=source objNameToAssociate="Source")
+            +addToEvent(source=source objNameToAssociate="Document")
           .curator-source-details--copy
             +annotatedContent(
               content=source.enhancements.source.cleanContent.content
@@ -42,4 +42,4 @@ template(name="curatorSourceDetails")
         if notifying
           .veil
       else
-        +loading message="Processing Source"
+        +loading message="Processing Document"

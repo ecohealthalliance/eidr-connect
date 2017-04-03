@@ -48,7 +48,7 @@ do ->
       if groups.value.length != 1
         throw new Error('ScatterPlot Group is empty')
 
-    @When /^I add the first suggested event source$/, ->
+    @When /^I add the first suggested event document$/, ->
       @client.clickWhenVisible('.open-source-form-in-details')
       @client.waitForVisible('#event-source')
       @client.clickWhenVisible('#suggested-articles li:first-child')
