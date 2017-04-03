@@ -28,7 +28,6 @@ Template.curatorSourceDetails.onCreated ->
   @reviewed = new ReactiveVar(false)
   @incidentsLoaded = new ReactiveVar(false)
   @selectedIncidentTab = new ReactiveVar(0)
-  @wideUI = new ReactiveVar(window.innerWidth >= Session.get('WIDE_UI_WIDTH'))
   @addingSourceToEvent = new ReactiveVar(false)
 
 Template.curatorSourceDetails.onRendered ->
@@ -42,17 +41,6 @@ Template.curatorSourceDetails.onRendered ->
       swippablePane = new Hammer($('#touch-stage')[0])
       swippablePane.on 'swiperight', (event) ->
         instance.data.currentPaneInView.set('')
-
-  # Adjust the UI if it is above WIDE_UI_WIDTH
-  $(window).resize =>
-    state = false
-    wideUI = @wideUI.get()
-    if window.innerWidth >= Session.get('WIDE_UI_WIDTH')
-      return if wideUI
-      state = true
-    else if not wideUI
-      state = false
-    @wideUI.set(state)
 
   # Create key binding which marks sources as reviewed.
   key 'ctrl + enter, command + enter', (event) =>
@@ -126,9 +114,6 @@ Template.curatorSourceDetails.helpers
 
   incidentsLoaded: ->
     Template.instance().incidentsLoaded.get()
-
-  wideUI: ->
-    Template.instance().wideUI.get()
 
   selectedIncidentTab: ->
     Template.instance().selectedIncidentTab
