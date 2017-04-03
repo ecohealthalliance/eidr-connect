@@ -5,6 +5,7 @@ import Axes from '/imports/charts/Axes.coffee'
 import Group from '/imports/charts/Group.coffee'
 import SegmentMarker from '/imports/charts/SegmentMarker.coffee'
 import { pluralize } from '/imports/ui/helpers'
+import { incidentTypeWithCountAndDisease } from '/imports/utils'
 
 Template.incidentReports.onDestroyed ->
   if @plot
@@ -125,13 +126,7 @@ Template.incidentReports.helpers
       {
         key: 'count'
         label: 'Incident'
-        fn: (value, object, key) ->
-          if object.cases
-            return pluralize('case', object.cases)
-          else if object.deaths
-            return pluralize('death', object.deaths)
-          else
-            return object.specify
+        fn: (value, object, key) -> incidentTypeWithCountAndDisease(object)
         sortFn: (value, object) ->
           0 + (object.deaths or 0) + (object.cases or 0)
       }
