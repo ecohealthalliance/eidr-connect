@@ -63,14 +63,14 @@ Meteor.startup ->
       Incidents.update incident._id,
         $set: disease: disease
 
-  # Soft delete incident reports of deleted user events
+  # Soft delete incidents of deleted user events
   UserEvents.find({deleted: true}, {fields: _id:1}).forEach (event) ->
     Incidents.update {userEventId: event._id, deleted: {$in: [null, false]}},
       $set:
         deleted: true
         deletedDate: new Date()
 
-  # Store urls on incident reports as strings rather than arrays
+  # Store urls on incidents as strings rather than arrays
   Incidents.find('url.0': {$exists: true}).forEach (incident) ->
     Incidents.update _id: incident._id,
       $set: url: incident.url[0]

@@ -10,7 +10,7 @@ Meteor.methods
     incidentReportSchema.validate(incident)
     user = Meteor.user()
     if not Roles.userIsInRole(user._id, ['admin'])
-      throw new Meteor.Error("auth", "User does not have permission to create incident reports")
+      throw new Meteor.Error("auth", "User does not have permission to create incidents")
     incident.addedByUserId = user._id
     incident.addedByUserName = user.profile.name
     incident.addedDate = new Date()
@@ -26,7 +26,7 @@ Meteor.methods
     delete incident._id
     user = Meteor.user()
     if not Roles.userIsInRole(user._id, ['admin'])
-      throw new Meteor.Error("auth", "User does not have permission to edit incident reports")
+      throw new Meteor.Error("auth", "User does not have permission to edit incidents")
     incident.modifiedByUserId = user._id
     incident.modifiedByUserName = user.profile.name
     res = Incidents.update({_id: _id}, {$set: incident})
@@ -39,7 +39,7 @@ Meteor.methods
     incidentReportSchema.validate(incident)
     user = Meteor.user()
     if not Roles.userIsInRole(user._id, ['admin'])
-      throw new Meteor.Error("auth", "User does not have permission to edit incident reports")
+      throw new Meteor.Error("auth", "User does not have permission to edit incidents")
     incident.modifiedByUserId = user._id
     incident.modifiedByUserName = user.profile.name
     res = Incidents.update(incident._id, incident)
@@ -54,7 +54,7 @@ Meteor.methods
 
   removeIncidentReport: (id) ->
     if not Roles.userIsInRole(@userId, ['admin'])
-      throw new Meteor.Error("auth", "User does not have permission to edit incident reports")
+      throw new Meteor.Error("auth", "User does not have permission to edit incidents")
     incident = Incidents.findOne(id)
     Incidents.update id,
       $set:
@@ -68,7 +68,7 @@ Meteor.methods
     sourceId = source._sourceId
     sourceUrl = "promedmail.org/post/#{sourceId}"
     existingSource = Articles.findOne(url: $regex: regexEscape(sourceUrl) + "$")
-    # If source is in collection associate with event, otherwise add to Articles
+    # If document is in collection associate with event, otherwise add to Articles
     # collection and associate
     if existingSource
       Articles.update(source._id, $set: userEventId: userEventId)

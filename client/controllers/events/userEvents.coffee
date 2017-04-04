@@ -22,12 +22,12 @@ Template.userEvents.onCreated ->
       }
       {
         arrayName: '',
-        description: 'The number of articles associated with the event.',
-        displayName: 'Article Count',
+        description: 'The number of documents associated with the event.',
+        displayName: 'Document Count',
         fieldName: 'articleCount',
         defaultSortDirection: 1
         displayFn: (value, object, key) ->
-          new Spacebars.SafeString("<span data-heading='Article Count'>#{value}</span>")
+          new Spacebars.SafeString("<span data-heading='Document Count'>#{value}</span>")
       }
       {
         arrayName: '',

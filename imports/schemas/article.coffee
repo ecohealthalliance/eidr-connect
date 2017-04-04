@@ -10,7 +10,7 @@ articleSchema = new SimpleSchema(
     type: Date
   publishDate:
     type: Date
-  # The timezone used to specify the publishDate in the article.
+  # The timezone used to specify the publishDate in the document.
   publishDateTZ:
     type: String
   title:

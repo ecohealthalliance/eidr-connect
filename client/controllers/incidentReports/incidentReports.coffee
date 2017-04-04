@@ -234,7 +234,7 @@ Template.incidentReports.events
       objId: @_id
       displayName: "#{location} on #{date}"
 
-  # Remove any open incident report details elements on pagination
+  # Remove any open incident details elements on pagination
   'click .next-page,
    click .prev-page,
    change .reactive-table-navigation .form-control': (event, instance) ->

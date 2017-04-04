@@ -21,7 +21,7 @@ do ->
       @client.clickWhenVisible(firstEvent)
       @client.pause(1000)
 
-    @When /^I add an incident report with count "([^']*)"$/, (count) ->
+    @When /^I add an incident with count "([^']*)"$/, (count) ->
       if not @client.waitForVisible(firstEvent)
         throw new Error('Event Incidents table is empty')
       @client.click('button.open-incident-form')
@@ -48,19 +48,19 @@ do ->
       if groups.value.length != 1
         throw new Error('ScatterPlot Group is empty')
 
-    @When /^I add the first suggested event source$/, ->
+    @When /^I add the first suggested event document$/, ->
       @client.clickWhenVisible('.open-source-form-in-details')
       @client.waitForVisible('#event-source')
       @client.clickWhenVisible('#suggested-articles li:first-child')
       @client.setValue('input[name="publishTime"]', '12:00 PM')
       @client.click('button.save-source[type="button"]')
 
-    @When /^I add the first suggested incident report$/, ->
+    @When /^I add the first suggested incident$/, ->
       # SuggestedIncidentsModal
       @client.waitForVisible('#suggested-locations-form p.annotated-content')
       if @client.isVisible('div.warn')
         text = @client.getText('div.warn')
-        assert.equal(text.trim(), 'No incident reports could be automatically extracted from the article.')
+        assert.equal(text.trim(), 'No incidents could be automatically extracted from the document.')
         @client.pause(2000)
         return true
       if @client.isVisible('span.annotation.annotation-text')
@@ -75,7 +75,7 @@ do ->
         @client.clickWhenVisible('button.save-modal[type="button"]')
         @client.pause(2000)
         return true
-      throw new Error 'There was a problem loading suggested incident reports.'
+      throw new Error 'There was a problem loading suggested incidents.'
 
     @Then /^I can "([^"]*)" suggestions$/, (action) ->
       setCalcHeight(@client, '.suggested-incidents-wrapper')
@@ -85,19 +85,19 @@ do ->
         @client.waitForVisible('#cancelConfirmationModal')
         @client.click('button.confirm[type="button"]')
         return true
-      # get the original number of incident reports before button has been clicked
+      # get the original number of incidents before button has been clicked
       elements = @client.elements('div.count :first-child')
       try
         expectedNumber = parseInt(@client.elementIdText(elements.value[0].ELEMENT).value, 10) + 1
       catch
-        throw new Error 'Cound not get actual number of incident reports.'
+        throw new Error 'Cound not get actual number of incidents.'
       # click add-suggestions button
       @client.clickWhenVisible('#add-suggestions')
       @client.pause(2000)
-      # get the actual number of incident reports after button has been clicked
+      # get the actual number of incidents after button has been clicked
       elements = @client.elements('div.count :first-child')
       try
         actualNumber = parseInt(@client.elementIdText(elements.value[0].ELEMENT).value, 10)
       catch
-        throw new Error 'Cound not get actual number of incident reports.'
+        throw new Error 'Cound not get actual number of incidents.'
       assert.equal(expectedNumber, actualNumber)

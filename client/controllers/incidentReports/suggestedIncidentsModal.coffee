@@ -173,7 +173,7 @@ Template.suggestedIncidentsModal.events
         # empty our collection temporary work.
         incidentCollection.remove({})
         # hide the modal
-        notify('success', 'Incident Reports Added')
+        notify('success', 'Incident Added')
         dismissModal(instance)
 
   'click #non-suggested-incident': (event, instance) ->

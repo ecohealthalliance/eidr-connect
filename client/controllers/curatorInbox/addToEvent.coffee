@@ -42,7 +42,7 @@ Template.addToEvent.helpers
     Template.instance().selectedEventId.get()
 
   whatToAddText: ->
-    text = 'Source'
+    text = 'Document'
     selectedIncidentCount = Template.instance().data.selectedIncidents?.fetch().length
     if selectedIncidentCount
       text = 'Incident'
@@ -62,7 +62,7 @@ Template.addToEvent.events
         if error
           notify('error', error.reason)
         else
-          notify('success', 'Incident reports successfuly added to event')
+          notify('success', 'Incidents successfuly added to event')
     else
       sourceId = source._sourceId
       Meteor.call 'addEventSource',
@@ -76,7 +76,7 @@ Template.addToEvent.events
         if error
           notify('error', error.reason)
         else
-          notify('success', 'Source successfuly added to event')
+          notify('success', 'Document successfuly added to event')
 
   'select2:select': (event, instance) ->
     instance.selectedEventId.set(event.params.data.id)

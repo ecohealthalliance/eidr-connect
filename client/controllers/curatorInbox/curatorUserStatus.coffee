@@ -24,7 +24,7 @@ Template.curatorUserStatus.onDestroyed ->
 Template.curatorUserStatus.helpers
   hasOnlineUsers: ->
     instance = Template.instance()
-    # Find other users viewing the source selected by the current user
+    # Find other users viewing the document selected by the current user
     otherUser = Meteor.users.findOne
       'status.online': true
       'status.curatorInboxSourceId': instance.data.selectedSourceId.get()

@@ -21,12 +21,12 @@ template(name="summary")
       .event--metadata--counts.container-flex.no-gutter.no-break
         .count.flex-col
           span= caseCount
-          h4 Incident Reports
+          h4 Incidents
           if isInRole "admin"
             +addIncidentReport class='-in-details'
         .count.flex-col
           span= articleCount
-          h4 Sources
+          h4 Documents
           if isInRole "admin"
             +sourceModalButton class='-in-details'
       .event--metadata--secondary-content.container-flex.no-break

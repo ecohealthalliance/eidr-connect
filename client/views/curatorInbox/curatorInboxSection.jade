@@ -2,7 +2,7 @@ template(name="curatorInboxSection")
   if count
     .curator-inbox-section-head(tabindex="0")
       .date= formattedDate
-      .count #{count} sources
+      .count #{count} documents
       .toggle
         i.fa.fa-lg
           if isOpen

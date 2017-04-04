@@ -8,14 +8,14 @@ template(name="suggestedIncidentModal")
         .modal-header
           +modalCloseButton
           .modal-header--title
-            h4 Edit and Confirm Incident Report
+            h4 Edit and Confirm Incident
             if hasSuggestedFields
               p.warning Fields marked with the #[i(class='fa fa-magic')] icon are suggestions
         .modal-body
           .annotated-content.snippet.modal-block
             .snippet--title-legend
               label.control-label.featured.container-flex.no-break
-                h5 Source Snippet
+                h5 Document Snippet
                 ul.color-legend.list-unstyled.container-flex.no-break
                   each type
                     li(class="color-legend--#{this}")=this

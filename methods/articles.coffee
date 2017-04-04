@@ -5,7 +5,7 @@ Meteor.methods
   addEventSource: (source) -> #eventId, url, publishDate, publishDateTZ
     user = Meteor.user()
     if user and Roles.userIsInRole(user._id, ['admin'])
-      # Check if Article is in collection
+      # Check if Document is in collection
       sourceQuery = url: $regex: "#{regexEscape(source.url)}$"
       existingSource = Articles.findOne(sourceQuery)
       if existingSource
@@ -26,7 +26,7 @@ Meteor.methods
           Meteor.call("editUserEventArticleCount", insertArticle.userEventId, 1)
           return newId
     else
-      throw new Meteor.Error("auth", "User does not have permission to add source articles")
+      throw new Meteor.Error("auth", "User does not have permission to add documents")
 
   updateEventSource: (source) ->
     user = Meteor.user()
@@ -38,7 +38,7 @@ Meteor.methods
           publishDateTZ: source.publishDateTZ
       Meteor.call("editUserEventLastModified", source.userEventId)
     else
-      throw new Meteor.Error("auth", "User does not have permission to edit source articles")
+      throw new Meteor.Error("auth", "User does not have permission to edit documents")
 
   removeEventSource: (id) ->
     if Roles.userIsInRole(Meteor.userId(), ['admin'])

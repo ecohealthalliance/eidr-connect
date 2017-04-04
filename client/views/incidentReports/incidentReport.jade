@@ -44,7 +44,7 @@ template(name="incidentReport")
             h6.metadata--title Dates:
             span {{formatDateRange(dateRange)}}
           li.container-flex.no-break
-            h6.metadata--title Source:
+            h6.metadata--title Document:
             a.ref-link(href="{{formatUrl(url)}}" target="_blank")
               span {{formatUrl(url)}}
           ul.integrity.metadata.list-unstyled
@@ -60,6 +60,6 @@ template(name="incidentReport")
       if isInRole "admin"
         .incident-report--details--actions.container-flex.no-break
           a.edit
-            i.fa.fa-edit(aria-hidden="true" title="Edit incident report")
+            i.fa.fa-edit(aria-hidden="true" title="Edit incident")
           a.delete
-            i.fa.fa-trash(aria-hidden="true" title="Delete incident report")
+            i.fa.fa-trash(aria-hidden="true" title="Delete incident")

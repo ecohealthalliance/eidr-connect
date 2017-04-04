@@ -14,7 +14,7 @@ Meteor.methods
 
     if not Roles.userIsInRole(user._id, ['admin'])
       if Meteor.isServer
-        throw new Meteor.Error('auth', 'User does not have permission to create incident reports')
+        throw new Meteor.Error('auth', 'User does not have permission to create incidents')
       return
 
     feed.addedByUserId = user._id
@@ -25,6 +25,6 @@ Meteor.methods
   removeFeed: (feedId) ->
     if not Roles.userIsInRole(Meteor.user()._id, ['admin'])
       if Meteor.isServer
-        throw new Meteor.Error('auth', 'User does not have permission to delete incident reports')
+        throw new Meteor.Error('auth', 'User does not have permission to delete incidents')
       return
     Feeds.remove feedId

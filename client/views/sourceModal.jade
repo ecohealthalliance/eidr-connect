@@ -6,16 +6,16 @@ template(name="sourceModal")
           .modal-header--title
             h4
               if edit
-                | Edit Event Source
+                | Edit Event Document
               else
-                | Add Event Source
+                | Add Event Document
           +modalCloseButton
 
         .modal-body
           form#add-source(novalidate)
             unless editing
               .form-group.full-width
-                label.control-label.featured Suggested Sources
+                label.control-label.featured Suggested Documents
                 #suggested-articles.modal-block
                   if loadingArticles
                     +loading small=true static=true
@@ -25,7 +25,7 @@ template(name="sourceModal")
                         each suggestedArticles
                           li(class="{{#if articleSelected}} active {{/if}}")= subject
                     else
-                      .no-results No articles found
+                      .no-results No documents found
 
             .form-group.form-group--full(class="{{suggested 'title'}}")
               label.control-label Title
@@ -37,7 +37,7 @@ template(name="sourceModal")
               .help-block.with-errors
 
             .form-group.form-group--full(class="{{suggested 'url'}}")
-              label.control-label Article URL
+              label.control-label Document URL
               if edit
                 p.form-control-static {{url}}
               else
@@ -85,7 +85,7 @@ template(name="sourceModal")
                       value="1"
                       tabindex="-1"
                       checked)
-                    label(for="enhance" tabindex="0") Suggest incident reports
+                    label(for="enhance" tabindex="0") Suggest incidents
 
         .modal-footer
           button.btn.btn-default(type="button" data-dismiss="modal") Close
