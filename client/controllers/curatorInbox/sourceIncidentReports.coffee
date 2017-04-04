@@ -12,6 +12,24 @@ findIncident = (accepted) ->
 Template.sourceIncidentReports.onCreated ->
   @tableContentScrollable = new ReactiveVar(true)
 
+  @autorun =>
+    selectedAnnotationId = @data.selectedAnnotationId.get()
+    return if not selectedAnnotationId
+    $tableContainer = @$('.curator-source-details--incidents-container')
+    return if $tableContainer[0].scrollHeight <= $tableContainer[0].clientHeight
+    $selectedIncidentRow = $("tr[data-incident-id=#{selectedAnnotationId}]")
+    # Sum of heights of elements affecting scroll distance
+    headerHeight = (
+      $('.curator-source-details--main-header').outerHeight() +
+      $('.curator-source-details--header').outerHeight()
+    )
+    rowTop = $selectedIncidentRow.position().top
+    # Acutal distance of scroll - Element's top position relative to parent
+    # container (.curator-source-details) minus the header heights and
+    # with the table container's top scroll distance.
+    scrollDistance = rowTop - headerHeight + $tableContainer.scrollTop()
+    $tableContainer.animate(scrollTop: scrollDistance, 500)
+
 Template.sourceIncidentReports.helpers
   tableContentScrollable: ->
     Template.instance().tableContentScrollable
