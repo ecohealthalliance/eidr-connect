@@ -3,7 +3,7 @@ Feature: Events
 
   Background:
     Given I am logged in as an admin
-    And I navigate to "/user-events"
+    And I navigate to "/events"
 
   Scenario: Submit a blank event form
     And I click on the create new event button
@@ -29,7 +29,7 @@ Feature: Events
   Scenario: Delete an existing event
     When I click on the create new event button
     And I create an event with name "A test" and summary "A summary"
-    Then I navigate to "/user-events"
+    Then I navigate to "/events"
     And I delete the first item in the event list
     And I "confirm" deletion
     Then I should see a "success" toast
@@ -38,7 +38,7 @@ Feature: Events
   Scenario: Cancel deleting an existing event
     When I click on the create new event button
     And I create an event with name "A test" and summary "A summary"
-    Then I navigate to "/user-events"
+    Then I navigate to "/events"
     And I delete the first item in the event list
     And I "cancel" deletion
     Then I should not see content "EDIT EVENT DETAILS"

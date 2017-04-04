@@ -78,17 +78,15 @@ Router.route "/contact-us",
   name: 'contact-us'
   title: 'Contact Us'
 
+Router.route "/events",
+  name: 'eventIndex'
+  title: 'Events'
+  onBeforeAction: ->
+    Router.go 'events', _view: 'curated'
+
 Router.route "/events/:_view",
   name: 'events'
   title: 'Events'
-
-# Router.route "/curated-events",
-#   name: 'curated-events'
-#   title: 'Curated Events'
-#
-# Router.route "/smart-events",
-#   name: 'smart-events'
-#   title: 'Smart Events'
 
 Router.route "/curator-inbox",
   name: 'curator-inbox'
