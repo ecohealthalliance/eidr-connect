@@ -27,7 +27,7 @@ template(name="curatorSourceDetails")
             +addToEvent(source=source objNameToAssociate="Source")
           .curator-source-details--copy
             +annotatedContent(
-              content=source.content
+              content=source.enhancements.source.cleanContent.content
               incidents=incidents
               relatedElements=relatedElements
               source=source)
