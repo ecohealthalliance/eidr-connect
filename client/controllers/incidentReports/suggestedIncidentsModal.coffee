@@ -47,7 +47,9 @@ dismissModal = (instance) ->
   stageModals(instance, modal)
 
 sendModalOffStage = (instance) ->
-  modal = modalClasses(instance.modal, 'staged-left', 'off-canvas--right fade')
+  startPosition = instance.data.offCanvasStartPosition
+  startPosition ?= 'right'
+  modal = modalClasses(instance.modal, 'staged-left', "off-canvas--#{startPosition} fade")
   stageModals(instance, modal, false)
 
 Template.suggestedIncidentsModal.onCreated ->
@@ -137,6 +139,9 @@ Template.suggestedIncidentsModal.helpers
     sibling: '.suggested-incidents .modal-body'
     sourceContainer: '.suggested-incidents-wrapper'
 
+  offCanvasStartPosition: ->
+    Template.instance().data.offCanvasStartPosition or 'right'
+
 Template.suggestedIncidentsModal.events
   'hide.bs.modal #suggestedIncidentsModal': (event, instance) ->
     proceed = confirmAbandonChanges(event, instance)
@@ -191,8 +196,8 @@ Template.suggestedIncidentsModal.events
     sendModalOffStage(instance)
     showSuggestedIncidentModal(event, instance)
 
-  'click .annotated-content': (event, instance) ->
+  'click .annotated-content-tab': (event, instance) ->
     instance.annotatedContentVisible.set true
 
-  'click .incident-table': (event, instance) ->
+  'click .incident-table-tab': (event, instance) ->
     instance.annotatedContentVisible.set false
