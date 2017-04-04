@@ -30,6 +30,7 @@ template(name="curatorSourceDetails")
               content=source.enhancements.source.cleanContent.content
               incidents=incidents
               relatedElements=relatedElements
+              selectedAnnotationId=selectedAnnotationId
               source=source)
         .curator-source-details--incidents-wrapper
           .curator-source-details--header
@@ -38,6 +39,7 @@ template(name="curatorSourceDetails")
           .curator-source-details--incidents-container
             +sourceIncidentReports(
               selectedIncidentTab=selectedIncidentTab
+              selectedAnnotationId=selectedAnnotationId
               source=source)
         if notifying
           .veil

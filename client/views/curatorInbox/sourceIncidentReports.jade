@@ -8,6 +8,7 @@ template(name="sourceIncidentReports")
             scrollToAnnotations=true
             accepted=true
             hideTableHeader=true
+            selectedAnnotationId=selectedAnnotationId
             tableContentScrollable=tableContentScrollable)
     if hasRejectedIncidents
       .curator-source-details--incidents.rejected(
@@ -17,6 +18,7 @@ template(name="sourceIncidentReports")
               scrollToAnnotations=true
               accepted=false
               hideTableHeader=true
+              selectedAnnotationId=selectedAnnotationId
               tableContentScrollable=tableContentScrollable)
   else
     +noResults message='No Incidents Found'

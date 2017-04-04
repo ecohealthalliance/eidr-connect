@@ -41,9 +41,12 @@ $tableTypes = {
     &:active
       transform scale(1.75)
 
-
   .disease-name
     text-transform capitalize
+
+  .selected-annotation
+    transition background .1s
+    background lighten($highlight-yellow, 50%)
 
   tr
     .select

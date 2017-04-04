@@ -29,6 +29,7 @@ Template.curatorSourceDetails.onCreated ->
   @incidentsLoaded = new ReactiveVar(false)
   @selectedIncidentTab = new ReactiveVar(0)
   @addingSourceToEvent = new ReactiveVar(false)
+  @selectedAnnotationId = new ReactiveVar(null)
 
 Template.curatorSourceDetails.onRendered ->
   instance = @
@@ -126,6 +127,9 @@ Template.curatorSourceDetails.helpers
     parent: '.curator-source-details--copy-wrapper'
     sibling: '.curator-source-details--copy'
     sourceContainer: '.curator-source-details--copy'
+
+  selectedAnnotationId: ->
+    Template.instance().selectedAnnotationId
 
 Template.curatorSourceDetails.events
   'click .toggle-reviewed': (event, instance) ->
