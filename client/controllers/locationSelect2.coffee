@@ -1,4 +1,4 @@
-formatLocation = require '/imports/formatLocation.coffee'
+import { formatLocation } from '/imports/ui/helpers'
 Incidents = require '/imports/collections/incidentReports.coffee'
 Constants = require '/imports/constants.coffee'
 

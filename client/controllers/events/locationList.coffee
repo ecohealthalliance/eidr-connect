@@ -1,4 +1,4 @@
-formatLocation = require '/imports/formatLocation.coffee'
+import { formatLocation } from '/imports/ui/helpers'
 { keyboardSelect } = require '/imports/utils'
 
 Template.locationList.helpers

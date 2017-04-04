@@ -1,4 +1,3 @@
-require '/imports/ui/helpers.coffee'
 Incidents = require '/imports/collections/incidentReports.coffee'
 UserEvents = require '/imports/collections/userEvents.coffee'
 Articles = require '/imports/collections/articles.coffee'

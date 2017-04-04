@@ -1,6 +1,4 @@
-formatLocation = require '/imports/formatLocation.coffee'
-{ formatUrl } = require '/imports/utils.coffee'
-import { incidentTypeWithCountAndDisease } from '/imports/utils'
+import { incidentTypeWithCountAndDisease, formatUrl } from '/imports/utils'
 
 UI.registerHelper 'formatLocation', (location)->
   return formatLocation(location)
@@ -43,14 +41,15 @@ UI.registerHelper 'formatDate', (date) ->
 UI.registerHelper 'formatDateISO', (date) ->
   moment.utc(date).format("YYYY-MM-DDTHH:mm")
 
-UI.registerHelper 'formatUrl', formatUrl
+UI.registerHelper 'formatUrl', (url) ->
+  formatUrl(url)
 
-pluralize = (word, count, showCount=true) ->
+export pluralize = (word, count, showCount=true) ->
   if Number(count) isnt 1
     word += "s"
   if showCount then "#{count} #{word}" else word
 
-formatDateRange = (dateRange, readable)->
+export formatDateRange = (dateRange, readable)->
   dateFormat = "MMM D, YYYY"
   dateRange ?= ''
   if dateRange.type is "day"
@@ -69,6 +68,9 @@ formatDateRange = (dateRange, readable)->
   else
     return moment.utc(dateRange.start).format(dateFormat) + " - " + moment.utc(dateRange.end).format(dateFormat)
 
-module.exports =
-  pluralize: pluralize
-  formatDateRange: formatDateRange
+export formatLocation = ({name, admin2Name, admin1Name, countryName}) ->
+  return _.chain([name, admin2Name, admin1Name, countryName])
+    .compact()
+    .uniq()
+    .value()
+    .join(", ")
