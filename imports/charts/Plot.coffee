@@ -63,7 +63,6 @@ class Plot
 
     # the axes of the plot
     @axes = new Axes(@, @options.axes)
-
     # the tooltip of the plot
     @tooltip = new Tooltip(@, @options)
 

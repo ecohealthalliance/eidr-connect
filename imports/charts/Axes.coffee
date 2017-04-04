@@ -110,13 +110,11 @@ class Axes
     # yAxis
     @yAxis = d3.axisLeft()
       .scale(@yScale)
-
     # yGroup
     @yGroup = @plot.container.append('g')
       .attr('class', 'y scatterPlot-axis')
       .attr('transform', "translate(#{@plot.margins.left}, 0)")
       .call(@yAxis)
-
     # xLabel
     if !@xLabel
       padding = 0
@@ -181,7 +179,6 @@ class Axes
     yMax = Axes.maxNumeric(_.pluck(data, 'y'))
     @xScale.domain([xMin, xMax])
     @yScale.domain([yMin, yMax])
-
     # add the filter the first time the domain is set
     if @initialized == false
       @initialMinMax = [[xMin, xMax], [yMin, yMax]]
@@ -248,12 +245,12 @@ class Axes
 
     if @options.x.type == 'datetime'
       @xAxis.tickFormat(d3.timeFormat(@formatDate()))
+    @yAxis.tickFormat(d3.format("d"))
 
     if zoomArea.y1 > zoomArea.y2
       @yScale.domain([zoomArea.y2, zoomArea.y1])
     else
       @yScale.domain([zoomArea.y1, zoomArea.y2])
-
     trans = @plot.container.transition().duration(750)
     @xGroup.transition(trans).call(@xAxis)
     @xGroup.selectAll('.tick').selectAll('text')
