@@ -4,7 +4,7 @@ template(name="summary")
       .event-name-wrap
         h1.event-name= eventName
         if isInRole "admin"
-          +editDetailsButton(target="#edit-event-modal" editing="name")
+          +editDetailsButton(target="#edit-event-modal" icon="pencil" editing="name")
 
       if summary
         p.summary(class="{{#if collapsed}}collapsed{{/if}}")
