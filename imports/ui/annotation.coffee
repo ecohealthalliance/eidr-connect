@@ -1,5 +1,5 @@
 annotateContent = (content, annotations, options={})->
-  { startingIndex, endingIndex } = options
+  { startingIndex, endingIndex, selectedAnnotationId } = options
   if not startingIndex
     startingIndex = 0
   if not endingIndex
@@ -50,7 +50,10 @@ annotateContent = (content, annotations, options={})->
       attributes = {}
       activeAnnotations.forEach (a)-> _.extend(attributes, a?.attributes or {})
       attributeText = _.map(attributes, (value, key)-> "#{key}='#{value}'").join(" ")
-      html += "<span class='annotation annotation-text #{types}' #{attributeText}>"
+      selectedClassName = ''
+      if attributes['data-incident-id'] is selectedAnnotationId
+        selectedClassName = 'viewing'
+      html += "<span class='annotation annotation-text #{types} #{selectedClassName}' #{attributeText}>"
     lastOffset = offset
   html += Handlebars._escape("#{content.slice(lastOffset, endingIndex)}")
   if endingIndex < content.length - 1
@@ -58,7 +61,7 @@ annotateContent = (content, annotations, options={})->
   html
 
 module.exports =
-  annotateContentWithIncidents: (content, incidents) ->
+  annotateContentWithIncidents: (content, incidents, selectedAnnotationId) ->
     incidentAnnotations = incidents.map (incident) ->
       if not incident.annotations?.case[0]
         return
@@ -69,7 +72,8 @@ module.exports =
       baseAnnotation.attributes =
         'data-incident-id': incident._id
       return baseAnnotation
-    html = annotateContent(content, _.compact(incidentAnnotations))
+    html = annotateContent content, _.compact(incidentAnnotations),
+     selectedAnnotationId: selectedAnnotationId
     new Spacebars.SafeString(html)
 
   buildAnnotatedIncidentSnippet: (content, incident) ->
@@ -84,7 +88,6 @@ module.exports =
     startingIndex = Math.max(startingIndex - PADDING_CHARACTERS, 0)
     endingIndex = _.max(incidentAnnotations.map (a)-> a.textOffsets[1])
     endingIndex = Math.min(endingIndex + PADDING_CHARACTERS, content.length - 1)
-    annotateContent(content, incidentAnnotations, {
+    annotateContent content, incidentAnnotations,
       startingIndex: startingIndex
       endingIndex: endingIndex
-    })

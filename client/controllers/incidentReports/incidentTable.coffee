@@ -114,6 +114,9 @@ Template.incidentTable.helpers
     else
       'rejected'
 
+  annotationSelected: ->
+    Template.instance().data.selectedAnnotationId.get() is @_id
+
 Template.incidentTable.events
   'click .incident-table tbody tr': (event, instance) ->
     event.stopPropagation()

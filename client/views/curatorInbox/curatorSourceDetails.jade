@@ -30,15 +30,16 @@ template(name="curatorSourceDetails")
               content=source.enhancements.source.cleanContent.content
               incidents=incidents
               relatedElements=relatedElements
+              selectedAnnotationId=selectedAnnotationId
               source=source)
         .curator-source-details--incidents-wrapper
           .curator-source-details--header
             h2 Incidents
             button.btn.btn-default.btn-sm.add-incident.on-right Add New Incident
-          .curator-source-details--incidents-container
-            +sourceIncidentReports(
-              selectedIncidentTab=selectedIncidentTab
-              source=source)
+          +sourceIncidentReports(
+            selectedIncidentTab=selectedIncidentTab
+            selectedAnnotationId=selectedAnnotationId
+            source=source)
         if notifying
           .veil
       else

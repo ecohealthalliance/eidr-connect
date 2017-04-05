@@ -36,7 +36,8 @@ template(name="incidentTable")
               th.locations-header Locations
         tbody
           each incidents
-            tr(class="{{#if selected}} selected {{/if}}")
+            tr(class="{{#if selected}} selected {{/if}} {{#if annotationSelected}} selected-annotation {{/if}}"
+              data-incident-id=_id)
               td
                 span.select
               td=incidentCountAndDisease
