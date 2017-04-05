@@ -43,8 +43,8 @@ template(name="incidentTable")
               td=incidentCountAndDisease
               td
                 unless dateRange.cumulative
-                  | {{formatDateISO dateRange.start}}
-              td {{formatDateISO dateRange.end}}
+                  | {{formatDate dateRange.start}}
+              td {{formatDate dateRange.end}}
               td {{formatLocations locations}}
               td.edit(title="Edit Incident")
   else
