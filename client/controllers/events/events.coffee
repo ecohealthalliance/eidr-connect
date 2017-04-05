@@ -46,7 +46,8 @@ Template.events.events
     $(event.currentTarget).blur()
 
   'click .tab a': (event, instance) ->
-    ReactiveTable.clearFilters(['smartEventFilter'])
+    instance.$('.search').val('')
+    ReactiveTable.clearFilters(['eventFilter', 'creatorFilter'])
     event.currentTarget.blur()
 
   'click .create-event': (event, instance) ->
