@@ -12,7 +12,7 @@ template(name="events")
         if isInRole "admin"
           button.create-event.btn.btn-primary.btn-sm
             i.fa.fa-plus-circle(aria-hidden="true")
-            span Add #{eventType} Event
+            span Add #{eventTypeText} Event
         if showUserOptions
           .check-button.small-text
             input(
@@ -24,4 +24,4 @@ template(name="events")
         +searchInput searchSettings
 
     .featured-table.table-wrapper
-      +reactiveTable collection=collection settings=settings
+      +eventsTable eventType=eventType

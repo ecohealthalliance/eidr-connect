@@ -60,7 +60,7 @@ template(name="curatorEventSearchRow")
         i.fa.fa-plus-circle(aria-hidden="true")
         span Incident
     a.fa.fa-info-circle.event-info(
-      href="/user-event/#{_id}"
+      href="{{pathFor 'curated-event' _id=_id}}"
       target="_blank"
       title="View event details"
       tabindex="-1")

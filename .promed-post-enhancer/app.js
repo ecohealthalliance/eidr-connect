@@ -89,7 +89,7 @@ const enhance = (target)=>{
       <p class="eidr-connect-events">EIDR-Connect Events
         [<a id="aboutEidrConnect">?</a>]:&nbsp;
         ${events.map((event)=>{
-          return safeHtml`<a href="https://eidr-connect.eha.io/user-event/${event._id}">
+          return safeHtml`<a href="https://eidr-connect.eha.io/curated-events/${event._id}">
             ${event.eventName}
           </a>`;
         }).join(", ")}

@@ -48,4 +48,4 @@ Template.createEventModal.events
             handleCompletion(error, 'Document', modal)
         else
           dismissModal(modal).then ->
-            Router.go('user-event', _id: result.insertedId)
+            Router.go('curated-event', _id: result.insertedId)
