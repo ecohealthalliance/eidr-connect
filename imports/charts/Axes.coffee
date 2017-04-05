@@ -245,7 +245,6 @@ class Axes
 
     if @options.x.type == 'datetime'
       @xAxis.tickFormat(d3.timeFormat(@formatDate()))
-    @yAxis.tickFormat(d3.format("d"))
 
     if zoomArea.y1 > zoomArea.y2
       @yScale.domain([zoomArea.y2, zoomArea.y1])
