@@ -1,4 +1,4 @@
-template(name="userEvent")
+template(name="curatedEvent")
   .event
     section.event--basic-info.container-fluid-padded
       if deleted
@@ -13,9 +13,9 @@ template(name="userEvent")
         .tabs-wrapper
           ul.tabs.primary-tabs.container-fluid-padded(role="tablist")
             li(class="{{#if incidentView}}active{{/if}}" role="presentation")
-              a(href="{{pathFor route='user-event' _id=userEvent._id _view='incidents'}}") Incidents
+              a(href="{{pathFor route='curated-event' _id=userEvent._id _view='incidents'}}") Incident Reports
             li(class="{{#if locationView}}active{{/if}}" role="presentation")
-              a(href="{{pathFor route='user-event' _id=userEvent._id _view='locations'}}") Locations
+              a(href="{{pathFor route='curated-event' _id=userEvent._id _view='locations'}}") Locations
 
         .tab-content
           .tab-pane.active(role="tabpanel")

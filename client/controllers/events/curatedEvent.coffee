@@ -3,13 +3,13 @@ UserEvents = require '/imports/collections/userEvents.coffee'
 #Allow multiple modals or the suggested locations list won't show after the loading modal is hidden
 Modal.allowMultiple = true
 
-Template.userEvent.onCreated ->
+Template.curatedEvent.onCreated ->
   @editState = new ReactiveVar false
 
-Template.userEvent.onRendered ->
+Template.curatedEvent.onRendered ->
   new Clipboard '.copy-link'
 
-Template.userEvent.helpers
+Template.curatedEvent.helpers
   isEditing: ->
     Template.instance().editState.get()
 
@@ -33,7 +33,7 @@ Template.userEvent.helpers
   templateData: ->
     Template.instance().data
 
-Template.userEvent.events
+Template.curatedEvent.events
   'click .edit-link, click #cancel-edit': (event, instance) ->
     instance.editState.set(not instance.editState.get())
 
@@ -48,4 +48,4 @@ Template.userEvent.events
     Modal.show('sourceModal', userEventId: instance.data.userEvent._id)
 
   'click .tabs li a': (event) ->
-    $(event.currentTarget).blur()
+    event.currentTarget.blur()

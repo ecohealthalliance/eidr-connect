@@ -9,7 +9,7 @@ template(name="markerPopup")
             svg.popup--event--marker-color-spot
               circle(fill="rgb(#{mapColorRGB})" r="8" cx="8" cy="8")
             .popup--event--content
-              a(href="{{pathFor 'user-event' _id=id}}")=eventName
+              a(href="{{pathFor 'curated-event' _id=id}}")=eventName
               .popup--incidents-text
                 with getMostSevere incidents
                   if count

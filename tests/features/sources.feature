@@ -3,7 +3,7 @@ Feature: Documentss
 
   Background:
     Given I am logged in as an admin
-    And I navigate to "/user-events"
+    And I navigate to "/events"
     And I navigate to the first event
 
   Scenario: I add a custom document to an event

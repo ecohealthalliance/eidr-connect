@@ -9,8 +9,7 @@ module.exports =
     tableOptions = instance.tableOptions
     fields = tableOptions.fields
     tableName = tableOptions.name
-    for field in fields
-      fieldName = field.fieldName
+    for fieldName, field of fields
       visibility = Session.get("#{tableName}-field-visible-#{fieldName}") or true
       tableOptions.fieldVisibility[fieldName] = new ReactiveVar(visibility)
 
@@ -23,8 +22,7 @@ module.exports =
     instance.autorun ->
       Session.set "#{tableName}-current-page", instance.currentPage.get()
       Session.set "#{tableName}-rows-per-page", instance.rowsPerPage.get()
-      for field in tableOptions.fields
-        fieldName = field.fieldName
+      for fieldName in _.keys(fields)
         Session.set "#{tableName}-field-visible-#{fieldName}", tableOptions.fieldVisibility[fieldName].get()
         Session.set "#{tableName}-field-sort-order-#{fieldName}", tableOptions.sortOrder[fieldName].get()
         Session.set "#{tableName}-field-sort-direction-#{fieldName}", tableOptions.sortDirection[fieldName].get()
@@ -37,23 +35,21 @@ module.exports =
   # @param {object} instance, instance of template containing table
   # @return {array} fields, array containing fields for ReactiveTable
   ###
-  tableFields: (instance) ->
-    tableOptions = instance.tableOptions
-    fields = []
-    for field in tableOptions.fields
-      fieldName = field.fieldName
+  tableFields: (fields, options) ->
+    _fields = []
+    for fieldName, field of fields
       tableField =
         key: fieldName
         label: field.displayName
-        isVisible: tableOptions.fieldVisibility[fieldName]
-        sortOrder: tableOptions.sortOrder[fieldName]
-        sortDirection: tableOptions.sortDirection[fieldName]
+        isVisible: options.fieldVisibility[fieldName]
+        sortOrder: options.sortOrder[fieldName]
+        sortDirection: options.sortDirection[fieldName]
         sortable: not field.arrayName
 
       if field.displayFn
         tableField.fn = field.displayFn
-      fields.push(tableField)
-    fields
+      _fields.push(tableField)
+    _fields
 
   ###
   # gotoEvent - navigates to a selected event
@@ -62,7 +58,7 @@ module.exports =
   # @param {object} instance, template instance
   ###
   gotoEvent: (event, instance) ->
-    route = instance.tableOptions.name.slice(0, -1)
+    route = "#{instance.eventType.get()}-event"
     if event.metaKey
       url = Router.url route, _id: @_id
       window.open(url, '_blank')

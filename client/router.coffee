@@ -78,13 +78,15 @@ Router.route "/contact-us",
   name: 'contact-us'
   title: 'Contact Us'
 
-Router.route "/user-events",
-  name: 'user-events'
-  title: 'User Events'
+Router.route "/events",
+  name: 'eventIndex'
+  title: 'Events'
+  onBeforeAction: ->
+    Router.go 'events', _view: 'curated'
 
-Router.route "/smart-events",
-  name: 'smart-events'
-  title: 'Smart Events'
+Router.route "/events/:_view",
+  name: 'events'
+  title: 'Events'
 
 Router.route "/curator-inbox",
   name: 'curator-inbox'
@@ -94,8 +96,8 @@ Router.route "/curator-inbox",
   onBeforeAction: ->
     redirectIfNotAuthorized(@, ['admin', 'curator'])
 
-Router.route "/user-event/:_id/:_view?",
-  name: 'user-event'
+Router.route "/events/curated-events/:_id/:_view?",
+  name: 'curated-event'
   title: ->
     @data().userEvent.eventName
   waitOn: ->
@@ -109,9 +111,8 @@ Router.route "/user-event/:_id/:_view?",
     articles: Articles.find({'userEventId': @params._id}, {sort: {publishDate: -1}})
     incidents: Incidents.find({'userEventId': @params._id}, {sort: {date: -1}})
 
-Router.route "/smart-event/:_id/:_view?",
+Router.route "/events/smart-events/:_id/:_view?",
   name: 'smart-event'
-
 
 Router.route "/feeds",
   onBeforeAction: ->
