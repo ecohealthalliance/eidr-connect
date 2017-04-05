@@ -11,6 +11,11 @@ $tableTypes = {
   }
 }
 
+.incident-table .edit::before
+  icon()
+  content '\f040'
+  color $border-primary
+
 .event-incidents
 .incident-table
   > tbody
@@ -31,10 +36,6 @@ $tableTypes = {
   .edit
     padding-right 1em
     transition transform .1s ease-in-out
-    &::before
-      icon()
-      content '\f040'
-      color $border-primary
     &:hover
       transform scale(1.5)
       color $primary-dark

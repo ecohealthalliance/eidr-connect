@@ -58,7 +58,7 @@ module.exports =
   # @param {object} instance, template instance
   ###
   gotoEvent: (event, instance) ->
-    route = "#{instance.eventType.get()}-event"
+    route = "#{instance.data.eventType.get()}-event"
     if event.metaKey
       url = Router.url route, _id: @_id
       window.open(url, '_blank')
