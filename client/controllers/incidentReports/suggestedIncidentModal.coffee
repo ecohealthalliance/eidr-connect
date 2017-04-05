@@ -13,6 +13,8 @@ Template.suggestedIncidentModal.onRendered ->
       $snippet.css('max-height', formHeight)
 
 Template.suggestedIncidentModal.onCreated ->
+  @showBackdrop = @data.showBackdrop
+  @showBackdrop ?= false
   @incidentCollection = @data.incidentCollection
   @incident = @data.incident or {}
   @incident.suggestedFields = new ReactiveVar(@incident.suggestedFields or [])
@@ -32,7 +34,6 @@ Template.suggestedIncidentModal.onCreated ->
 
     incident.annotations = instance?.incident?.annotations
     incident = _.pick(incident, incidentReportSchema.objectKeys())
-    console.log incident
     Meteor.call method, incident, (error, result) =>
       if error
         return notify('error', error)
@@ -54,11 +55,8 @@ Template.suggestedIncidentModal.helpers
   offCanvasStartPosition: ->
     Template.instance().data.offCanvasStartPosition or 'right'
 
-  showBackDrop: ->
-    if not _.isUndefined(Template.instance().data.showBackDrop)
-      false
-    else
-      Template.instance().data.showBackDrop
+  showBackdrop: ->
+    Template.instance().showBackdrop.toString()
 
 Template.suggestedIncidentModal.events
   'hide.bs.modal #suggestedIncidentModal': (event, instance) ->

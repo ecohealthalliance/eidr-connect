@@ -139,6 +139,7 @@ Template.incidentTable.events
       incident: @
       incidentText: Spacebars.SafeString(snippetHtml)
       offCanvasStartPosition: 'top'
+      showBackdrop: true
 
   'click .action': (event, instance) ->
     accepted = instance.accepted
