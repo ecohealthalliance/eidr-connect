@@ -1,14 +1,18 @@
 template(name="suggestedIncidentModal")
   .modal#suggestedIncidentModal(
     role="dialog"
-    data-backdrop="false"
+    data-backdrop=showBackdrop
     class="off-canvas--#{offCanvasStartPosition}")
     .modal-dialog
       .modal-content
         .modal-header
           +modalCloseButton
           .modal-header--title
-            h4 Edit and Confirm Incident
+            h4
+              if edit
+                 | Edit Incident
+              else
+                 | Edit and Confirm Incident
             if hasSuggestedFields
               p.warning Fields marked with the #[i(class='fa fa-magic')] icon are suggestions
         .modal-body
@@ -27,5 +31,12 @@ template(name="suggestedIncidentModal")
             confirmation=true
             valid=valid)
         .modal-footer
-          button.btn.btn-default.reject(type="button") Reject
-          button.btn.btn-primary.save-modal(type="button") Confirm
+          if edit
+            button.btn.btn-default.cancel(type="button") Cancel
+          else
+            button.btn.btn-default.reject(type="button") Reject
+          button.btn.btn-primary.save-modal(type="button")
+            if edit
+              | Save Incident
+            else
+              | Confirm

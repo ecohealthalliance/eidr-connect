@@ -30,7 +30,6 @@ showSuggestedIncidentModal = (event, instance)->
   snippetHtml = buildAnnotatedIncidentSnippet(content, incident)
 
   Modal.show 'suggestedIncidentModal',
-    edit: true
     articles: [instance.data.article]
     userEventId: instance.data.userEventId
     incidentCollection: instance.incidentCollection
