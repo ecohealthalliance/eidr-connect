@@ -13,6 +13,8 @@ Template.suggestedIncidentModal.onRendered ->
       $snippet.css('max-height', formHeight)
 
 Template.suggestedIncidentModal.onCreated ->
+  @showBackdrop = @data.showBackdrop
+  @showBackdrop ?= false
   @incidentCollection = @data.incidentCollection
   @incident = @data.incident or {}
   @incident.suggestedFields = new ReactiveVar(@incident.suggestedFields or [])
@@ -22,6 +24,21 @@ Template.suggestedIncidentModal.onCreated ->
     previousModal:
       element: '#suggestedIncidentsModal'
       add: 'fade'
+
+  @editIncident = (incident) =>
+    method = 'addIncidentReport'
+    action = 'added'
+    if @data.edit
+      method = 'editIncidentReport'
+      action = 'updated'
+
+    incident.annotations = instance?.incident?.annotations
+    incident = _.pick(incident, incidentReportSchema.objectKeys())
+    Meteor.call method, incident, (error, result) =>
+      if error
+        return notify('error', error)
+      notify('success', "Incident #{action}.")
+      stageModals(@, @modals)
 
 Template.suggestedIncidentModal.onDestroyed ->
   $('#suggestedIncidentModal').off('hide.bs.modal')
@@ -38,6 +55,9 @@ Template.suggestedIncidentModal.helpers
   offCanvasStartPosition: ->
     Template.instance().data.offCanvasStartPosition or 'right'
 
+  showBackdrop: ->
+    Template.instance().showBackdrop.toString()
+
 Template.suggestedIncidentModal.events
   'hide.bs.modal #suggestedIncidentModal': (event, instance) ->
     if $(event.currentTarget).hasClass('in')
@@ -49,6 +69,9 @@ Template.suggestedIncidentModal.events
     Template.instance().incidentCollection.update instance.incident._id,
       $set:
         accepted: false
+
+  'click .cancel': (event, instance) ->
+    stageModals(instance, instance.modals)
 
   'click .save-modal': (event, instance) ->
     # Submit the form to trigger validation and to update the 'valid'
@@ -72,10 +95,5 @@ Template.suggestedIncidentModal.events
       notify('success', 'Incident Accepted', 1200)
       stageModals(instance, instance.modals)
     else
-      incident.annotations = instance?.incident?.annotations
-      incident = _.pick(incident, incidentReportSchema.objectKeys())
-      Meteor.call 'addIncidentReport', incident, (error, result) ->
-        if error
-          return notify('error', error)
-        notify('success', 'Incident added.')
-        stageModals(instance, instance.modals)
+      incident = _.extend({}, instance.data.incident, incident)
+      instance.editIncident(incident)

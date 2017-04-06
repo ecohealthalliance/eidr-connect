@@ -1,5 +1,6 @@
 UserEvents = require '/imports/collections/userEvents.coffee'
 Incidents = require '/imports/collections/incidentReports.coffee'
+{ buildAnnotatedIncidentSnippet } = require('/imports/ui/annotation')
 { notify } = require '/imports/ui/notification'
 SCROLL_WAIT_TIME = 350
 
@@ -130,12 +131,15 @@ Template.incidentTable.events
 
   'click table.incident-table tr td.edit': (event, instance) ->
     event.stopPropagation()
-    Modal.show 'incidentModal',
+    snippetHtml = buildAnnotatedIncidentSnippet(instance.data.source.content, @)
+    Modal.show 'suggestedIncidentModal',
+      edit: true
       articles: [instance.data.source]
       userEventId: null
-      edit: true
       incident: @
-      updateEvent: false
+      incidentText: Spacebars.SafeString(snippetHtml)
+      offCanvasStartPosition: 'top'
+      showBackdrop: true
 
   'click .action': (event, instance) ->
     accepted = instance.accepted
