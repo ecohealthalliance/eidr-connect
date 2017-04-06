@@ -2,7 +2,7 @@ Incidents = require '/imports/collections/incidentReports.coffee'
 
 findIncident = (accepted) ->
   query = {}
-  query.url = $regex: new RegExp("#{Template.instance().data.source._sourceId}$")
+  query.url = Template.instance().data.source.url
   if accepted
     query.accepted = $eq: true
   else if not _.isUndefined(accepted)

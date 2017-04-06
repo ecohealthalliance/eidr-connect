@@ -76,7 +76,7 @@ Template.incidentTable.helpers
   incidents: ->
     instance = Template.instance()
     query = _acceptedQuery(instance.accepted)
-    query.url = {$regex: new RegExp("#{instance.data.source._sourceId}$")}
+    query.url = instance.data.source.url
     Incidents.find(query)
 
   allSelected: ->
@@ -131,7 +131,7 @@ Template.incidentTable.events
 
   'click table.incident-table tr td.edit': (event, instance) ->
     event.stopPropagation()
-    snippetHtml = buildAnnotatedIncidentSnippet(instance.data.source.content, @)
+    snippetHtml = buildAnnotatedIncidentSnippet(instance.data.source.enhancements.source.cleanContent.content, @)
     Modal.show 'suggestedIncidentModal',
       edit: true
       articles: [instance.data.source]

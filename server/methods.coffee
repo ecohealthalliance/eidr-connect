@@ -75,6 +75,35 @@ Meteor.methods
           console.log "Missing geoname for id: " + loc.geoname.geonameid
           false
     return enhancements
+  
+  # Get the articles enhancements then use them to update the article
+  # and create incidents in the database.
+  getArticleEnhancementsAndUpdate: (article) ->
+    dbArticle = Articles.findOne(_id: article._id)
+    if not dbArticle
+      throw Meteor.Error('invalid-article')
+    if dbArticle.enhancements
+      if dbArticle.enhancements.processingStartedAt
+        # If the processing started less than 100 seconds ago do not resubmit
+        # the aritcle.
+        console.log 't', new Date() - dbArticle.enhancements.processingStartedAt
+        if (new Date() - dbArticle.enhancements.processingStartedAt) < 100000
+          return dbArticle.enhancements
+      else
+        return dbArticle.enhancements
+    # Set the enhancements property to prevent repeated calls
+    Articles.update _id: article._id,
+      $set:
+        enhancements: { processingStartedAt: new Date() }
+    enhancements = Meteor.call('getArticleEnhancements', article)
+    Articles.update _id: article._id,
+      $set:
+        enhancements: enhancements
+    article.enhancements = enhancements
+    Meteor.call 'addSourceIncidentReportsToCollection', article, {
+      acceptByDefault: true
+    }
+    return enhancements
 
   retrieveProMedArticle: (articleId) ->
     @unblock()

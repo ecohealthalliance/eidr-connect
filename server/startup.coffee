@@ -17,12 +17,6 @@ Meteor.startup ->
       console.log error
       console.log JSON.stringify(incident, 0, 2)
 
-  CuratorSources.update
-    reviewed:
-      $exists: false
-    {$set: reviewed: false}
-    {multi: true}
-
   # Clean-up curatorInboxSourceId when user goes offline
   Meteor.users.find({'status.online': true}).observe
     removed: (user) ->
@@ -99,3 +93,18 @@ Meteor.startup ->
             resolvedDisease:
               id: "userSpecifiedDisease:#{incident.disease}"
               text: "Other Disease: #{incident.disease}"
+
+Meteor.startup ->
+  CuratorSources.find().forEach (source) ->
+    url = "promedmail.org/post/#{source._sourceId}"
+    article =
+      _id: source._id._str
+      url: url
+      addedDate: source.addedDate
+      publishDate: source.publishDate
+      publishDateTZ: "EDT"
+      title: source.title
+      reviewed: source.reviewed
+      feed: "promed-mail"
+    articleSchema.validate(article)
+    Articles.upsert(article._id, article)

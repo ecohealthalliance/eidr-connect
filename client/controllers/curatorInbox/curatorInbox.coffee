@@ -1,4 +1,4 @@
-CuratorSources = require '/imports/collections/curatorSources.coffee'
+Articles = require '/imports/collections/articles.coffee'
 createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
 { keyboardSelect } = require '/imports/utils'
 { updateCalendarSelection } = require('/imports/ui/setRange')
@@ -104,21 +104,22 @@ Template.curatorInbox.onRendered ->
     if calendar
       updateCalendarSelection(calendar, range)
 
-    @subscribe "curatorSources", query, () =>
+    @subscribe "articles", query, () =>
       unReviewedQuery = $and: [ {reviewed: false}, query ]
-      firstSource = CuratorSources.findOne unReviewedQuery,
+      firstSource = Articles.findOne unReviewedQuery,
         sort:
           publishDate: -1
-      @selectedSourceId.set(firstSource._id)
+      if firstSource
+        @selectedSourceId.set(firstSource._id)
       @filtering.set(false)
       if not @latestSourceDate.get()
-        @latestSourceDate.set CuratorSources.findOne({},
+        @latestSourceDate.set Articles.findOne({},
             sort:
               publishDate: -1
             fields:
               publishDate: 1
-          ).publishDate
-        @ready.set(true)
+          )?.publishDate
+      @ready.set(true)
 
 Template.curatorInbox.onDestroyed ->
   $('.inlineRangePicker').off('mouseleave')
@@ -276,14 +277,14 @@ Template.curatorInboxSection.onRendered ->
     filters = uniteReactiveTableFilters [ data.textFilter, data.reviewFilter ]
     filters.push dateFilters
     query = $and: filters
-    @sourceCount.set CuratorSources.find(query).count()
+    @sourceCount.set Articles.find(query).count()
 
 Template.curatorInboxSection.helpers
   post: ->
-    CuratorSources.findOne publishDate: Template.instance().filter.get()
+    Articles.findOne publishDate: Template.instance().filter.get()
 
   posts: ->
-    CuratorSources
+    Articles
 
   count: ->
     Template.instance().sourceCount.get()
@@ -306,7 +307,7 @@ Template.curatorInboxSection.helpers
     showNavigation: 'never'
     filters: [Template.instance().filterId, 'curator-inbox-article-filter', 'curator-inbox-review-filter']
     rowClass: (source) ->
-      if source._id._str is instance.data.selectedSourceId.get()?._str
+      if source._id is instance.data.selectedSourceId.get()
         'selected'
 
 Template.curatorInboxSection.events
@@ -315,7 +316,7 @@ Template.curatorInboxSection.events
     return if not keyboardSelect(event) and event.type is 'keyup'
     instanceData = instance.data
     selectedSourceId = instanceData.selectedSourceId
-    if selectedSourceId.get()._str != @_id._str
+    if selectedSourceId.get() != @_id
       selectedSourceId.set(@_id)
       instanceData.currentPaneInView.set('details')
     $(event.currentTarget).blur()
