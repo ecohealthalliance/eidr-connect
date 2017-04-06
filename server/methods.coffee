@@ -86,7 +86,6 @@ Meteor.methods
       if dbArticle.enhancements.processingStartedAt
         # If the processing started less than 100 seconds ago do not resubmit
         # the aritcle.
-        console.log 't', new Date() - dbArticle.enhancements.processingStartedAt
         if (new Date() - dbArticle.enhancements.processingStartedAt) < 100000
           return dbArticle.enhancements
       else
