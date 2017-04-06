@@ -1,5 +1,6 @@
 $header-BG = $border-primary-light
 $pane-switch-speed = .3s
+$mobile-header-height = 65px
 
 .curator-heading
   color $primary
@@ -33,8 +34,10 @@ $pane-switch-speed = .3s
   width 100%
   min-height $curator-pane-head-height
   max-height $curator-pane-head-height
-  padding .5em $page-padding .5em 1.5em
+  padding 0 $page-padding 0 1.5em
   border-bottom 2px solid darken($border-primary, 10%)
+  +below($break-point--curator-inbox)
+    min-height $mobile-header-height
   +above($break-point--curator-inbox)
     border-right 3px solid darken($border-primary, 10%)
 
@@ -78,6 +81,7 @@ $pane-switch-speed = .3s
 
 .curator-inbox-sources
   +below($break-point--curator-inbox)
+    top $mobile-header-height
     transition transform $pane-switch-speed ease-in-out
     transform translate(0, 0)
     &:not(.on-canvas)
@@ -235,8 +239,17 @@ $pane-switch-speed = .3s
   overflow hidden
   +below($break-point--curator-inbox)
     flex-direction column
-    min-height none
+    min-height $mobile-header-height
     max-height none
+    padding-top 0
+    padding-bottom 0
+  &.notifying
+    padding 0
+    flex-direction row
+  &.reviewed
+    h2
+    a
+      color darken($positive, 40%)
   h2
     flex 1
     width 100%
@@ -245,11 +258,11 @@ $pane-switch-speed = .3s
     z-index 1
     margin-right 1em
     text-transform uppercase
-    font-size 1.15em
+    font-size 1.4em
     +above(3)
       font-size 1.5em
     +above($break-point--curator-inbox)
-      max-width 75%
+      max-width 100%
       min-width 0
       margin-bottom 0
       margin-left -21px
@@ -288,19 +301,17 @@ $pane-switch-speed = .3s
   &.reviewed
     h2
       color darken($positive, 35%)
-  .notification
-    position absolute
-    top 0
-    bottom 0
-    left 0
-    right 0
+  .inbox-notification
     z-index 110
+    flex 1 1 100%
     background desaturate(lighten($positive, 20%), 10%)
     display flex
     align-items center
     justify-content center
     height 49px
     overflow hidden
+    margin-left -5.5em
+    margin-right -2em
     p
       margin 0
       color $primary-dark
@@ -325,6 +336,7 @@ $pane-switch-speed = .3s
     top 50%
     left 50%
     transform translate(-50%, -50%)
+    transform-origin center
     height 10px
     width 10px
     background white
@@ -336,7 +348,11 @@ $pane-switch-speed = .3s
     &.active
       transition-delay .9s
       opacity 1
-      transform scale(100)
+      transform scale(150)
+      +above(2000px)
+        transform scale(250)
+      +above(4000px)
+        transform scale(500)
 
 .curator-source-details--options
   display flex
@@ -354,45 +370,7 @@ $pane-switch-speed = .3s
     flex 1
     +above($break-point--curator-inbox)
       flex auto
-    &.toggle-reviewed
-      padding .45em 3em
-      background lighten($positive, 90%)
-      color $primary-dark
-      margin-right auto
-      max-width 225px
-      +above($break-point--curator-inbox)
-        margin-bottom 0
-      &:hover
-        background darken(@background, 10%)
-        color darken(@color, 10%)
-      &:focus
-        @extend .btn-success
-    &.reviewed
-      min-width 125px
-      transition .3s
-      background lighten($positive, 30%)
-      border-color darken($positive, 50%)
-      color $primary-dark
-      &::before
-      &::after
-        display none
-        vertical-align middle
-      &:before
-        content '\f0e2' // fa-undo
-        margin-right .25em
-        font-family FontAwesome
-        font-size .9em
-      &::after
-        content 'Undo'
-      &:hover
-        background lighten($delete, 99%)
-        border-color $delete
-        color darken($delete, 10%)
-        &::before
-        &::after
-          display inline-block
-        span
-          display none
+
 
 .curator-source-details--content
   flex 1 1 100%
@@ -419,6 +397,44 @@ $pane-switch-speed = .3s
     padding 0
     +below(2)
       margin-top 1em
+  .toggle-reviewed
+    background lighten($positive, 90%)
+    color $primary-dark
+    margin-right auto
+    max-width 225px
+    +above($break-point--curator-inbox)
+      margin-bottom 0
+    &:hover
+      background darken(@background, 10%)
+      color darken(@color, 10%)
+    &:focus
+      @extend .btn-success
+  .reviewed
+    min-width 125px
+    transition .3s
+    background lighten($positive, 30%)
+    border-color darken($positive, 50%)
+    color $primary-dark
+    &::before
+    &::after
+      display none
+      vertical-align middle
+    &:before
+      content '\f0e2' // fa-undo
+      margin-right .25em
+      font-family FontAwesome
+      font-size .9em
+    &::after
+      content 'Undo'
+    &:hover
+      background lighten($delete, 99%)
+      border-color $delete
+      color darken($delete, 10%)
+      &::before
+      &::after
+        display inline-block
+      span
+        display none
 
 .curator-source-details--copy-wrapper
   position relative
@@ -698,10 +714,15 @@ $pane-switch-speed = .3s
       transition opacity .5s ease-in-out
 
 .back-to-list
-  font-size 2.5em
+  font-size 2.25em
   margin-right .35em
   color $primary
   cursor pointer
+  transition .1s
+  &:hover
+    darken(@color, 10%)
+  &:active
+    transform scale(1.2)
   +above($break-point--curator-inbox)
     display none
 
