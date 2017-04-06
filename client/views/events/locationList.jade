@@ -1,15 +1,15 @@
 template(name="locationList")
-  .container-flex.no-gutter
-    .flex-col.bordered
-      if incidentLocations.length
+  if incidentLocations.length
+    .container-flex.no-gutter
+      .flex-col.bordered
         .tab-form
           +searchInput searchSettings
         +reactiveTable collection=incidentLocations settings=getSettings
-      else
-        p No locations are associated with this event.
-    .flex-col
-      if incidentLocations.length
+      .flex-col
         +map event=userEvent incidentLocations=incidentLocations
+  else
+    +noResults message="No locations are associated with this event."
+
   #proMedModal.modal.fade(role='dialog')
     .modal-dialog.modal-lg(role='document')
       .modal-content
