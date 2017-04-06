@@ -1,6 +1,6 @@
 Articles = require '/imports/collections/articles.coffee'
 createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
-{ keyboardSelect } = require '/imports/utils'
+import { keyboardSelect, debounceCheckTop } from '/imports/utils'
 { updateCalendarSelection } = require('/imports/ui/setRange')
 
 createNewCalendar = (latestSourceDate, range) ->
@@ -30,23 +30,9 @@ uniteReactiveTableFilters = (filters) ->
         [field, _filter]
   reactiveFilters
 
-###
-# prevents checking the scrollTop more than every 50 ms to avoid flicker
-# if the scrollTop is greater than zero, show the 'back-to-top' button
-#
-# @param [object] scrollableElement, the dom element from the scroll event
-###
-debounceCheckTop = _.debounce (scrollableElement) ->
-    top = $(scrollableElement).scrollTop()
-    if top > 0
-      $('.back-to-top').fadeIn()
-    else
-      $('.back-to-top').fadeOut()
-, 50
-
 Template.curatorInbox.onDestroyed ->
   # cleanup the event handler
-  $('.curator-inbox-sources').off 'scroll'
+  @$('.curator-inbox-sources').off 'scroll'
 
 Template.curatorInbox.onCreated ->
   @calendarState = new ReactiveVar(false)
@@ -70,11 +56,12 @@ Template.curatorInbox.onCreated ->
 
 Template.curatorInbox.onRendered ->
   # determine if our `back-to-top` button should be initially displayed
-  $scrollableElement = $('.curator-inbox-sources')
-  debounceCheckTop($scrollableElement)
+  $scrollableElement = @$('.curator-inbox-sources')
+  $toTopButton = @$('.curator-inbox-sources--back-to-top')
+  debounceCheckTop($scrollableElement, $toTopButton)
   # fadeIn/Out the `back-to-top` button based on if the div has scrollable content
   $scrollableElement.on 'scroll', ->
-    debounceCheckTop(@)
+    debounceCheckTop($scrollableElement, $toTopButton)
 
   @autorun =>
     if @ready.get()
@@ -82,7 +69,7 @@ Template.curatorInbox.onRendered ->
         createNewCalendar(@latestSourceDate.get(), @dateRange.get())
         @$('[data-toggle="tooltip"]').tooltip
           container: 'body'
-          placement: 'left'
+          placement: 'top'
 
   @autorun =>
     @filtering.set(true)
