@@ -31,8 +31,7 @@ template(name="incidentTable")
             tr
               th
               th.count-header Type
-              th Start Date
-              th End Date
+              th Dates
               th.locations-header Locations
         tbody
           each incidents
@@ -41,10 +40,7 @@ template(name="incidentTable")
               td
                 span.select
               td=incidentCountAndDisease
-              td
-                unless dateRange.cumulative
-                  | {{formatDate dateRange.start}}
-              td {{formatDate dateRange.end}}
+              td {{formatDateRange dateRange}}
               td {{formatLocations locations}}
               td.edit(title="Edit Incident")
   else
