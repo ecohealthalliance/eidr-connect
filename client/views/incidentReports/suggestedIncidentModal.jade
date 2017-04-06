@@ -35,8 +35,4 @@ template(name="suggestedIncidentModal")
             button.btn.btn-default.cancel(type="button") Cancel
           else
             button.btn.btn-default.reject(type="button") Reject
-          button.btn.btn-primary.save-modal(type="button")
-            if edit
-              | Save Incident
-            else
-              | Confirm
+          button.btn.btn-primary.save-modal(type="button")=saveButtonText

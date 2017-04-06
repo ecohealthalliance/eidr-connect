@@ -58,6 +58,16 @@ Template.suggestedIncidentModal.helpers
   showBackdrop: ->
     Template.instance().showBackdrop.toString()
 
+  saveButtonText: ->
+    buttonText = 'Confirm'
+    instanceData = Template.instance().data
+    if instanceData.edit
+      buttonText = 'Save'
+      unless instanceData.incident.accepted
+        buttonText += ' & Accept'
+    buttonText += ' Incident'
+    buttonText
+
 Template.suggestedIncidentModal.events
   'hide.bs.modal #suggestedIncidentModal': (event, instance) ->
     if $(event.currentTarget).hasClass('in')
