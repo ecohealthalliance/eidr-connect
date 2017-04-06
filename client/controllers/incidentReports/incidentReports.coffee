@@ -4,7 +4,7 @@ import ScatterPlot from '/imports/charts/ScatterPlot.coffee'
 import Axes from '/imports/charts/Axes.coffee'
 import Group from '/imports/charts/Group.coffee'
 import SegmentMarker from '/imports/charts/SegmentMarker.coffee'
-import { pluralize } from '/imports/ui/helpers'
+import { pluralize, formatDateRange } from '/imports/ui/helpers'
 import { incidentTypeWithCountAndDisease } from '/imports/utils'
 
 Template.incidentReports.onDestroyed ->
@@ -145,18 +145,7 @@ Template.incidentReports.helpers
       {
         key: 'dateRange'
         label: 'Date'
-        fn: (value, object, key) ->
-          dateFormat = 'MMM D, YYYY'
-          if object.dateRange?.type is 'day'
-            if object.dateRange.cumulative
-              "Before " + moment(object.dateRange.end).format(dateFormat)
-            else
-              moment(object.dateRange.start).format(dateFormat)
-          else if object.dateRange?.type is 'precise'
-            "#{moment(object.dateRange.start).format(dateFormat)} -
-              #{moment(object.dateRange.end).format(dateFormat)}"
-          else
-            ''
+        fn: (value, object, key) -> formatDateRange(object.dateRange)
         sortFn: (value, object) ->
           +new Date(object.dateRange.end)
       }
