@@ -88,7 +88,3 @@ cleanPromedUrls = ->
     domain = 'org'
     updateUrls(Articles, host, domain)
     updateUrls(IncidentReports, host, domain)
-
-# if Meteor.isServer
-#   Meteor.startup ->
-#     cleanPromedUrls()

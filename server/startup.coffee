@@ -94,7 +94,6 @@ Meteor.startup ->
               id: "userSpecifiedDisease:#{incident.disease}"
               text: "Other Disease: #{incident.disease}"
 
-Meteor.startup ->
   CuratorSources.find().forEach (source) ->
     url = "promedmail.org/post/#{source._sourceId}"
     article =
