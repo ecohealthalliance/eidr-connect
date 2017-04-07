@@ -7,18 +7,18 @@ _markReviewed = (instance, showNext=true) ->
   new Promise (resolve) ->
     reviewed = instance.reviewed
     notifying = instance.notifying
-    reviewed.set not reviewed.get()
+    reviewed.set(not reviewed.get())
     Meteor.call('markSourceReviewed', instance.source.get()._id, reviewed.get())
     if reviewed.get()
-      notifying.set true
-      Meteor.setTimeout ->
+      notifying.set(true)
+      setTimeout ->
         if showNext
           unReviewedQuery = $and: [ {reviewed: false}, instance.data.query.get()]
           nextSource = CuratorSources.findOne unReviewedQuery,
             sort:
               publishDate: -1
-          instance.data.selectedSourceId.set nextSource._id
-        notifying.set false
+          instance.data.selectedSourceId.set(nextSource._id)
+        notifying.set(false)
         resolve()
       , 1200
 
@@ -50,7 +50,6 @@ Template.curatorSourceDetails.onRendered ->
   @autorun =>
     # When document is selected in the curatorInbox template, `selectedSourceId`,
     # which is handed down, is updated and triggers this autorun
-    # current document
     sourceId = @data.selectedSourceId.get()
     source = CuratorSources.findOne(sourceId)
     instance.reviewed.set source?.reviewed or false
@@ -67,7 +66,7 @@ Template.curatorSourceDetails.onRendered ->
         $title = $('#sourceDetailsTitle')
         titleEl = $title[0]
         # Remove title and tooltip if the title is complete & without ellipsis
-        if titleEl.offsetWidth >= titleEl.scrollWidth
+        if titleEl?.offsetWidth >= titleEl?.scrollWidth
           $title.tooltip('hide').attr('data-original-title', '')
         else
           $title.attr('data-original-title', title)
@@ -134,6 +133,7 @@ Template.curatorSourceDetails.helpers
 Template.curatorSourceDetails.events
   'click .toggle-reviewed': (event, instance) ->
     _markReviewed(instance)
+    event.currentTarget.blur()
 
   'click .back-to-list': (event, instance) ->
     instance.data.currentPaneInView.set('')
