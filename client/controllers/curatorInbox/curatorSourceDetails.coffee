@@ -136,7 +136,9 @@ Template.curatorSourceDetails.events
     event.currentTarget.blur()
 
   'click .back-to-list': (event, instance) ->
-    instance.data.currentPaneInView.set('')
+    instanceData = instance.data
+    instanceData.selectedSourceId.set('')
+    instanceData.currentPaneInView.set('')
 
   'click .tabs a': (event, instance) ->
     instance.selectedIncidentTab.set(instance.$(event.currentTarget).data('tab'))
