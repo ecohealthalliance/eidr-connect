@@ -1,13 +1,15 @@
 template(name="curatorSourceDetails")
   with source
-    .curator-inbox-header.curator-source-details--main-header(class="{{#if isReviewed}} reviewed {{/if}}")
-      +curatorUserStatus selectedSourceId=selectedSourceId
-      h2(id="sourceDetailsTitle" data-toggle="tooltip" data-placement="bottom")
-        .back-to-list
-          i.fa.fa-chevron-circle-left(title="Return to document list")
-        a(href="#{url}" target="_blank")= title
+    .curator-inbox-header.curator-source-details--main-header(
+      class="{{#if isReviewed}} reviewed {{/if}} {{#if notifying}} notifying {{/if}}")
+      unless notifying
+        +curatorUserStatus selectedSourceId=selectedSourceId
+        h2(id="sourceDetailsTitle" data-toggle="tooltip" data-placement="bottom")
+          .back-to-list
+            i.fa.fa-chevron-circle-left(title="Return to document list")
+          a(href="#{url}" target="_blank")= title
       if notifying
-        .notification
+        .inbox-notification
           .checks
             i.fa.fa-check-circle.confirmation(aria-hidden="true")
             .circle

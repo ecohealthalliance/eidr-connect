@@ -50,26 +50,43 @@ export pluralize = (word, count, showCount=true) ->
   if showCount then "#{count} #{word}" else word
 
 export formatDateRange = (dateRange, readable)->
-  dateFormat = "MMM D, YYYY"
   dateRange ?= ''
+  start = moment.utc(dateRange.start)
+  end = moment.utc(dateRange.end)
+  dateFormatEnd = "MMM D, YYYY"
+  dateFormatStart = dateFormatEnd
+  inSameYear = start?.year() == end?.year()
+  inSameMonthAndYear = inSameYear and start?.month() == end?.month()
+  sameMonthAndYearDateRange =
+    start.format('MMM D') + ' - ' + end.format('D') + ', ' + end.format('YYYY')
+  if inSameYear
+    dateFormatStart = "MMM D"
+  startFormated = start.format(dateFormatStart)
+  startFormatedWithYear = start.format(dateFormatEnd)
+  endFormated = end.format(dateFormatEnd)
+
   if dateRange.type is "day"
     if dateRange.cumulative
-      return "before " + moment.utc(dateRange.end).format(dateFormat)
+      "before " + endFormated
     else
       if readable
-        return "on " + moment.utc(dateRange.start).format(dateFormat)
+        "on " + startFormatedWithYear
       else
-        return moment.utc(dateRange.start).format(dateFormat)
+        startFormatedWithYear
   else if dateRange.type is "precise"
     if readable
-      return "between " + moment.utc(dateRange.start).format(dateFormat) + " and " + moment.utc(dateRange.end).format(dateFormat)
+      "between " + startFormated + " and " + endFormated
+    else if inSameMonthAndYear
+      sameMonthAndYearDateRange
     else
-      return moment.utc(dateRange.start).format(dateFormat) + " - " + moment.utc(dateRange.end).format(dateFormat)
+      startFormated + " - " + endFormated
+  else if inSameMonthAndYear
+    sameMonthAndYearDateRange
   else
-    return moment.utc(dateRange.start).format(dateFormat) + " - " + moment.utc(dateRange.end).format(dateFormat)
+    startFormated + " - " + endFormated
 
 export formatLocation = ({name, admin2Name, admin1Name, countryName}) ->
-  return _.chain([name, admin2Name, admin1Name, countryName])
+  _.chain([name, admin2Name, admin1Name, countryName])
     .compact()
     .uniq()
     .value()
