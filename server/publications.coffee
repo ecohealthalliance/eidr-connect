@@ -1,9 +1,9 @@
 Incidents = require '/imports/collections/incidentReports.coffee'
 UserEvents = require '/imports/collections/userEvents.coffee'
 SmartEvents = require '/imports/collections/smartEvents.coffee'
-CuratorSources = require '/imports/collections/curatorSources.coffee'
 Articles = require '/imports/collections/articles.coffee'
 Feeds = require '/imports/collections/feeds.coffee'
+{ regexEscape, cleanUrl } = require '/imports/utils'
 
 # Incidents
 ReactiveTable.publish 'curatorEventIncidents', Incidents, {deleted: {$in: [null, false]}}
@@ -40,15 +40,8 @@ Meteor.publish 'smartEvent', (eidID) ->
 Meteor.publish 'smartEvents', () ->
   SmartEvents.find({deleted: {$in: [null, false]}})
 
-# Curator Documents
-ReactiveTable.publish 'curatorSources', CuratorSources, {}
-Meteor.publish 'curatorSources', (query) ->
-  CuratorSources.find(query, {
-    sort:
-      publishDate: -1
-  })
-Meteor.publish 'curatorSourceIncidentReports', (sourceId) ->
-  Incidents.find {url: $regex: new RegExp("#{sourceId}$")},
+Meteor.publish 'ArticleIncidentReports', (articleUrl) ->
+  Incidents.find {url: $regex: new RegExp("#{regexEscape(cleanUrl(articleUrl))}$")},
     sort: 'annotations.case.0.textOffsets.0': 1
 
 Meteor.publish 'eventArticles', (ueId) ->

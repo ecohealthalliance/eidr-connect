@@ -1,4 +1,4 @@
-CuratorSources = require '/imports/collections/curatorSources.coffee'
+Articles = require '/imports/collections/articles.coffee'
 Incidents = require '/imports/collections/incidentReports.coffee'
 key = require 'keymaster'
 { notify } = require '/imports/ui/notification'
@@ -14,7 +14,7 @@ _markReviewed = (instance, showNext=true) ->
       setTimeout ->
         if showNext
           unReviewedQuery = $and: [ {reviewed: false}, instance.data.query.get()]
-          nextSource = CuratorSources.findOne unReviewedQuery,
+          nextSource = Articles.findOne unReviewedQuery,
             sort:
               publishDate: -1
           instance.data.selectedSourceId.set(nextSource._id)
@@ -51,7 +51,7 @@ Template.curatorSourceDetails.onRendered ->
     # When document is selected in the curatorInbox template, `selectedSourceId`,
     # which is handed down, is updated and triggers this autorun
     sourceId = @data.selectedSourceId.get()
-    source = CuratorSources.findOne(sourceId)
+    source = Articles.findOne(sourceId)
     instance.reviewed.set source?.reviewed or false
     instance.source.set source
 
@@ -60,7 +60,6 @@ Template.curatorSourceDetails.onRendered ->
     if source
       @incidentsLoaded.set(false)
       title = source.title
-      sourceId = source._sourceId
       # Update the document title and its tooltip in the right pane
       Meteor.defer =>
         $title = $('#sourceDetailsTitle')
@@ -70,22 +69,16 @@ Template.curatorSourceDetails.onRendered ->
           $title.tooltip('hide').attr('data-original-title', '')
         else
           $title.attr('data-original-title', title)
-
-      @subscribe 'curatorSourceIncidentReports', sourceId
-      source.url = "http://www.promedmail.org/post/#{sourceId}"
-      if source.enhancements
+      @subscribe 'ArticleIncidentReports', source.url
+      if source.enhancements?.dateOfDiagnosis
         instance.incidentsLoaded.set(true)
       else
-        Meteor.call 'getArticleEnhancements', source, (error, enhancements)=>
+        Meteor.call 'getArticleEnhancementsAndUpdate', source, (error, enhancements)=>
           if error
             notify('error', error.reason)
           else
             source.enhancements = enhancements
-            Meteor.call("updateSourceEnhancements", source._id, enhancements)
-            Meteor.call 'addSourceIncidentReportsToCollection', source, {
-              acceptByDefault: true
-            }, (error, result) ->
-              instance.incidentsLoaded.set(true)
+            instance.incidentsLoaded.set(true)
 
 Template.curatorSourceDetails.onDestroyed ->
   $(window).off('resize')

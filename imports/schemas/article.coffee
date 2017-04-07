@@ -4,8 +4,10 @@ articleSchema = new SimpleSchema(
     optional: true
   addedByUserId:
     type: String
+    optional: true
   addedByUserName:
     type: String
+    optional: true
   addedDate:
     type: Date
   publishDate:
@@ -19,14 +21,21 @@ articleSchema = new SimpleSchema(
     type: String
   userEventId:
     type: String
+    optional: true
   reviewed:
     type: Boolean
+    optional: true
+  enhancements:
+    type: Object
     optional: true
   deleted:
     type: Boolean
     optional: true
   deletedDate:
     type: Date
+    optional: true
+  feed:
+    type: String
     optional: true
 )
 module.exports = articleSchema

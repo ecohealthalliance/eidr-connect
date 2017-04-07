@@ -1,6 +1,4 @@
 if Meteor.isServer
-  CuratorSources = require './curatorSources.coffee'
-
   PromedPosts = null
   try
     spaDb = new MongoInternals.RemoteCollectionDriver(process.env.SPA_MONGO_URL)

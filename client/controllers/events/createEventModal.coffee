@@ -1,4 +1,3 @@
-CuratorSources = require '/imports/collections/curatorSources.coffee'
 { dismissModal } = require '/imports/ui/modals'
 { notify } = require '/imports/ui/notification'
 
@@ -39,7 +38,7 @@ Template.createEventModal.events
             handleCompletion(error, 'Incidents', modal)
         else if source
           Meteor.call 'addEventSource',
-            url: "promedmail.org/post/#{source._sourceId}"
+            url: source.url
             userEventId: result.insertedId
             title: source.title
             publishDate: source.publishDate

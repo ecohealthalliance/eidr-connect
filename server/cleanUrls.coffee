@@ -1,6 +1,5 @@
 import Articles from '/imports/collections/articles.coffee'
 import IncidentReports from '/imports/collections/incidentReports.coffee'
-import CuratorSources from '/imports/collections/curatorSources.coffee'
 import { attemptBulkUpdate } from './dbUtils.coffee'
 import { cleanUrl } from '/imports/utils.coffee'
 
@@ -81,16 +80,11 @@ updateMetadataLinks = (collection, host, domain) ->
     attemptBulkUpdate(collection, bulkUpdates)
 
 ###
-# cleanPromedUrls - finds and cleans promedmail urls from `Articles`, `IncidentReports` and
-#   `CuratorSources` urls/links properties.
+# cleanPromedUrls - finds and cleans promedmail urls from `Articles`, and
+#   `IncidentReports` urls/links properties.
 ###
 cleanPromedUrls = ->
     host = 'promedmail'
     domain = 'org'
     updateUrls(Articles, host, domain)
     updateUrls(IncidentReports, host, domain)
-    updateMetadataLinks(CuratorSources, host, domain)
-
-if Meteor.isServer
-  Meteor.startup ->
-    cleanPromedUrls()

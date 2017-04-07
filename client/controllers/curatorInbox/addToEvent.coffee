@@ -64,10 +64,8 @@ Template.addToEvent.events
         else
           notify('success', 'Incidents successfuly added to event')
     else
-      sourceId = source._sourceId
       Meteor.call 'addEventSource',
-        sourceId: sourceId
-        url: "promedmail.org/post/#{sourceId}"
+        url: source.url
         userEventId: userEventId
         title: source.title
         publishDate: source.publishDate

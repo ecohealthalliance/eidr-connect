@@ -1,6 +1,6 @@
 if Meteor.isServer
   PromedPosts = require '/imports/collections/promedPosts.coffee'
-  CuratorSources = require '/imports/collections/curatorSources.coffee'
+  Articles = require '/imports/collections/articles.coffee'
 
   Meteor.methods
     fetchPromedPosts: (limit, range) ->
@@ -32,14 +32,11 @@ if Meteor.isServer
     for post in posts
       # Normalize post for display/subscription
       normalizedPost =
-        _source: "promed-mail"
-        _sourceId: post.promedId
-        title: post.subject.raw
+        url: "promedmail.org/post/#{post.promedId}"
         addedDate: new Date()
         publishDate: post.promedDate
-        content: post.content
+        publishDateTZ: "EDT"
+        title: post.subject.raw
         reviewed: false
-        feedId: post.feedId
-        metadata:
-          links: post.links
-      CuratorSources.upsert({_id: post._id}, {$setOnInsert: normalizedPost})
+        feed: "promed-mail"
+      Articles.upsert({_id: post._id._str}, {$setOnInsert: normalizedPost})

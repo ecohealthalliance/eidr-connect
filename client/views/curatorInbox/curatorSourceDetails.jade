@@ -7,7 +7,7 @@ template(name="curatorSourceDetails")
         h2(id="sourceDetailsTitle" data-toggle="tooltip" data-placement="bottom")
           .back-to-list
             i.fa.fa-chevron-circle-left(title="Return to document list")
-          a(href="https://promedmail.org/post/#{_sourceId}" target="_blank")= title
+          a(href="#{url}" target="_blank")= title
       if notifying
         .inbox-notification
           .checks

@@ -49,3 +49,9 @@ Meteor.methods
           deletedDate: new Date()
       Meteor.call("editUserEventLastModified", removed.userEventId)
       Meteor.call("editUserEventArticleCount", removed.userEventId, -1)
+
+  markSourceReviewed: (id, reviewed) ->
+    if Roles.userIsInRole(Meteor.userId(), ['curator', 'admin'])
+      Articles.update _id: id,
+        $set:
+          reviewed: reviewed
