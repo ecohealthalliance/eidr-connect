@@ -401,11 +401,13 @@ export incidentTypeWithCountAndDisease = (incident) ->
 export debounceCheckTop = _.debounce ($scrollableElement, $toTopButton) ->
   top = $scrollableElement.scrollTop()
   offCanvas = $toTopButton.hasClass('off-canvas')
-  if top > 200 # Show element when scroll distance from top is above 200
+  containerHeight = window.innerHeight - $('header nav').height()
+  # Show element when scroll distance from top is above containerHeight
+  if top > containerHeight
     return if not offCanvas
     $toTopButton.removeClass('off-canvas')
     $toTopButton.addClass('on-canvas')
-  else if top < 50 # Hide element when scroll distance from top is under 50
+  else if top < 50 # Hide element when scroll distance from top is near top
     return if offCanvas
     $toTopButton.removeClass('on-canvas')
     $toTopButton.addClass('off-canvas')
