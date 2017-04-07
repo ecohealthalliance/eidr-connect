@@ -10,6 +10,8 @@ services:
     depends_on:
       - mongodb
     command: ['bash', '-c', '/home/meteor/eidr-connect/start-test-server.sh --mongo_host=mongodb --is_docker=true']
+    links:
+      - mongodb
   mongodb:
     image: mongo:latest
     container_name: eidrconnect_mongodb_1
