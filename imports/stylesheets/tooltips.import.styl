@@ -1,5 +1,8 @@
 .tooltip-inner
   max-width 350px
+  color $tooltip-text-color
+  font-weight 600
+  font-size 1em
 
 .popover
   z-index 20000
@@ -35,9 +38,6 @@
     max-width 325px
 
 .tooltip
-  &.in
-    opacity .95
-  $tooltip-BG-color = darken($primary, 20%)
   for direction in top bottom right left
     &.{direction}
       & > .tooltip-inner

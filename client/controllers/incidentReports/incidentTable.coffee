@@ -2,6 +2,7 @@ UserEvents = require '/imports/collections/userEvents.coffee'
 Incidents = require '/imports/collections/incidentReports.coffee'
 { buildAnnotatedIncidentSnippet } = require('/imports/ui/annotation')
 { notify } = require '/imports/ui/notification'
+{ formatLocation, formatLocations } = require '/imports/ui/helpers'
 SCROLL_WAIT_TIME = 350
 
 _updateAllIncidentsStatus = (instance, select, event) ->
@@ -37,6 +38,7 @@ Template.incidentTable.onCreated ->
         @stopScrollingInterval()
         $annotation = $("span[data-incident-id=#{id}]")
         $sourceTextContainer = $('.curator-source-details--copy')
+        $sourceTextContainer.stop()
         $("span[data-incident-id]").removeClass('viewing')
         appHeaderHeight = $('header nav.navbar').outerHeight()
         detailsHeaderHeight = $('.curator-source-details--header').outerHeight()
@@ -49,7 +51,7 @@ Template.incidentTable.onCreated ->
         # within the text container and the container's midpoint (to position the
         # annotation in the center of the container)
         scrollDistance =  totalOffset + containerScrollTop - countainerVerticalMidpoint
-        $sourceTextContainer.stop().animate
+        $sourceTextContainer.animate
           scrollTop: scrollDistance
         , 500, -> $annotation.addClass('viewing')
       intervalTime += 100
@@ -67,6 +69,9 @@ Template.incidentTable.onCreated ->
     query
 
 Template.incidentTable.onRendered ->
+  Meteor.defer =>
+    @$('[data-toggle="tooltip"]').tooltip()
+
   @autorun =>
     if not _incidentsSelected(@)
       @addingEvent.set(false)
@@ -125,6 +130,17 @@ Template.incidentTable.helpers
   annotationSelected: ->
     Template.instance().data.selectedAnnotationId.get() is @_id
 
+  firstLocation: ->
+    if @locations.length
+      formatLocation(@locations[0])
+
+  otherLocations: ->
+    return if @locations.length <= 1
+    otherLocations = @locations.slice()
+    otherLocations?.shift()
+    if otherLocations?.length
+      formatLocations(otherLocations)
+
 Template.incidentTable.events
   'click .incident-table tbody tr': (event, instance) ->
     event.stopPropagation()
@@ -171,6 +187,7 @@ Template.incidentTable.events
     _updateAllIncidentsStatus(instance, false, event)
 
   'mouseover .incident-table tbody tr': (event, instance) ->
+    event.stopPropagation()
     if not instance.data.scrollToAnnotations or not @annotations?.case?[0].textOffsets
       return
     instance.scrollToAnnotation(@_id)

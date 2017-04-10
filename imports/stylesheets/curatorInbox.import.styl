@@ -578,10 +578,19 @@ $mobile-header-height = 65px
   .table
     &
     &.incident-table
-      > tbody > tr:last-of-type
-        &
-        td
-          border-bottom 0
+      > tbody
+        > tr
+          > td
+            &:nth-of-type(2)
+              width 25%
+            &:nth-of-type(3)
+              width 25%
+            &:nth-of-type(4)
+              width 35%
+          &:last-of-type
+            &
+            td
+              border-bottom 0
     thead
       background lighten($border-primary-light, 50%)
       > tr > th
