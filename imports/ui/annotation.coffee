@@ -51,7 +51,7 @@ annotateContent = (content, annotations, options={})->
       activeAnnotations.forEach (a)-> _.extend(attributes, a?.attributes or {})
       attributeText = _.map(attributes, (value, key)-> "#{key}='#{value}'").join(" ")
       selectedClassName = ''
-      if attributes['data-incident-id'] is selectedAnnotationId
+      if selectedAnnotationId and attributes['data-incident-id'] is selectedAnnotationId
         selectedClassName = 'viewing'
       html += "<span class='annotation annotation-text #{types} #{selectedClassName}' #{attributeText}>"
     lastOffset = offset
