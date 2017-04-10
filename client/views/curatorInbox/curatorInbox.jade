@@ -45,10 +45,9 @@ template(name="curatorInbox")
           selectedSourceId=selectedSourceId
           query=query
           currentPaneInView=currentPaneInView)
-    button.btn.btn-primary.btn-wide.back-to-top(
-      class="{{#if detailsInView}} off{{else}}on{{/if}}-canvas"
-      type="button"
-      title="Click to return on the top page."
-      data-toggle="tooltip")
-      i.fa.fa-chevron-circle-up
-      span Back to Top
+    .curator-inbox-sources--back-to-top.off-canvas
+      button.btn.btn-primary.btn-wide.back-to-top(
+        class="{{#if detailsInView}} off{{else}}on{{/if}}-canvas"
+        type="button")
+        i.fa.fa-chevron-circle-up
+        span Back to Top

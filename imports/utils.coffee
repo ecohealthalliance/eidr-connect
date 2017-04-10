@@ -391,3 +391,24 @@ export incidentTypeWithCountAndDisease = (incident) ->
       text += ' of '
     text += "<span class='disease-name'>#{disease}</span>"
   Spacebars.SafeString(text)
+
+###
+# prevents checking the scrollTop more than every 50 ms to avoid flicker
+# if the scrollTop is greater than zero, show the 'back-to-top' button
+#
+# @param [object] scrollableElement, the dom element from the scroll event
+###
+export debounceCheckTop = _.debounce ($scrollableElement, $toTopButton) ->
+  top = $scrollableElement.scrollTop()
+  offCanvas = $toTopButton.hasClass('off-canvas')
+  containerHeight = window.innerHeight - $('header nav').height()
+  # Show element when scroll distance from top is above containerHeight
+  if top > containerHeight
+    return if not offCanvas
+    $toTopButton.removeClass('off-canvas')
+    $toTopButton.addClass('on-canvas')
+  else if top < 50 # Hide element when scroll distance from top is near top
+    return if offCanvas
+    $toTopButton.removeClass('on-canvas')
+    $toTopButton.addClass('off-canvas')
+, 50
