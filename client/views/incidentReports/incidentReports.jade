@@ -15,8 +15,9 @@ template(name="incidentReports")
             button#scatterPlot-toggleCumulative.btn.btn-xs.btn-default.scatterPlot-toolbar-button
               i.fa.fa-circle-o(aria-hidden="true")
               span Cumulative
-          .flex-col.on-right.items-right
-            button#scatterPlot-resetZoom.btn.btn-xs.btn-default.scatterPlot-toolbar-button
-              i.fa.fa-search-plus(aria-hidden="true")
-              span Reset
+          if plotZoomed
+            .flex-col.on-right.items-right
+              button#scatterPlot-resetZoom.btn.btn-xs.btn-default.scatterPlot-toolbar-button
+                i.fa.fa-search-plus(aria-hidden="true")
+                span Reset
         #scatterPlot
