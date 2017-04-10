@@ -9,6 +9,7 @@ POPUP_WINDOW_PADDING = 50
 Template.newIncidentFromSelection.onCreated ->
   @selection = window.getSelection()
   @data.selecting.set(true)
+  @popupPosition = new ReactiveVar(null)
   range = @selection.getRangeAt(0)
   {top, bottom, left, width} = range.getBoundingClientRect()
   selectionHeight = bottom - top
@@ -18,10 +19,11 @@ Template.newIncidentFromSelection.onCreated ->
   if (bottom + POPUP_WINDOW_PADDING) > window.innerHeight
     topPosition = 'auto'
     bottomPosition = "#{window.innerHeight - top + POPUP_PADDING_TOP}px"
-  @popupPosition =
+  @popupPosition.set
     top: topPosition
     bottom: bottomPosition
     left:  "#{Math.floor(left + width / 2)}px"
+
 
 Template.newIncidentFromSelection.onRendered ->
   Meteor.setTimeout =>
@@ -33,15 +35,18 @@ Template.newIncidentFromSelection.onRendered ->
       @$('.new-incident-from-selection').remove()
       @data.scrolled.set(false)
 
+  @autorun =>
+    if @data.scrolled.get()
+      @popupPosition.set
+        width: '100%'
+        top: "#{$('.curator-source-details--actions').outerHeight()}px"
+        left: "auto"
+        bottom: 'auto'
+
 Template.newIncidentFromSelection.helpers
-  topPosition: ->
-    Template.instance().popupPosition.top
-
-  leftPosition: ->
-    Template.instance().popupPosition.left
-
-  bottomPosition: ->
-    Template.instance().popupPosition.bottom
+  position: ->
+    console.log Template.instance().popupPosition.get()
+    Template.instance().popupPosition.get()
 
   scrolled: ->
     Template.instance().data.scrolled.get()
