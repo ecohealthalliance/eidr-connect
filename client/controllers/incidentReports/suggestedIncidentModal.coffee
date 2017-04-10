@@ -32,7 +32,7 @@ Template.suggestedIncidentModal.onCreated ->
       method = 'editIncidentReport'
       action = 'updated'
 
-    incident.annotations = instance?.incident?.annotations
+    incident.annotations = @data.incident?.annotations
     incident = _.pick(incident, incidentReportSchema.objectKeys())
     Meteor.call method, incident, (error, result) =>
       if error
@@ -87,13 +87,14 @@ Template.suggestedIncidentModal.events
     # Submit the form to trigger validation and to update the 'valid'
     # reactiveVar — its value is based on whether the form's hidden submit
     # button's default is prevented
+    instanceData = instance.data
     $('#add-incident').submit()
     return unless instance.valid.get()
     incident = utils.incidentReportFormToIncident(instance.$("form")[0])
 
     return if not incident
     incident.suggestedFields = instance.incident.suggestedFields.get()
-    incident.userEventId = instance.data.userEventId
+    incident.userEventId = instanceData.userEventId
     incident.accepted = true
     if instance.incidentCollection
       instance.incidentCollection.update instance.incident._id,
@@ -105,5 +106,5 @@ Template.suggestedIncidentModal.events
       notify('success', 'Incident Accepted', 1200)
       stageModals(instance, instance.modals)
     else
-      incident = _.extend({}, instance.data.incident, incident)
+      incident = _.extend({}, instanceData.incident, incident)
       instance.editIncident(incident)

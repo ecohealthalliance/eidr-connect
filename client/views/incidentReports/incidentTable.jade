@@ -9,7 +9,7 @@ template(name="incidentTable")
         button.btn.btn-sm.btn-primary.show-addEvent(
           disabled="{{#unless incidentsSelected}} true {{/unless}}") Add to Event
       button.btn.btn-sm.btn-default.select.on-right(
-        disabled="{{#unless incidents.count}} true {{/unless}}"
+        disabled="{{#unless incidents.length}} true {{/unless}}"
         class="{{#if allSelected}} deselect-all {{else}} select-all {{/if}}")
         if allSelected
           | Deselect All
@@ -20,7 +20,7 @@ template(name="incidentTable")
       selectedIncidents=selectedIncidents
       tableContentScrollable=tableContentScrollable
       source=source)
-  if incidents.count
+  if incidents.length
     .curator-source-details--table-wrapper
       table.table.incident-table(
         class=tableType
