@@ -18,7 +18,6 @@ Meteor.methods
       return
 
     feed.addedByUserId = user._id
-    feed.addedByUserName = user.profile.name
     feed.addedDate = new Date()
     Feeds.insert feed
 

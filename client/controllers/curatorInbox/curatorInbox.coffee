@@ -44,6 +44,7 @@ Template.curatorInbox.onCreated ->
   @currentPaneInView = new ReactiveVar('')
   @latestSourceDate = new ReactiveVar(null)
   @filtering = new ReactiveVar(false)
+  @selectedFeed = new ReactiveVar('promed')
 
 Template.curatorInbox.onRendered ->
   # determine if our `back-to-top` button should be initially displayed
@@ -197,3 +198,6 @@ Template.curatorInbox.events
     $('.curator-inbox-sources').stop().animate
       scrollTop: 0
     , 500
+
+  'change .curator-inbox--feed-selector': (event, instance) ->
+    instance.selectedFeed.set(event.currentTarget.value)

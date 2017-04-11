@@ -5,6 +5,8 @@ articleSchema = require '/imports/schemas/article.coffee'
 Articles = require '/imports/collections/articles.coffee'
 PromedPosts = require '/imports/collections/promedPosts.coffee'
 CuratorSources = require '/imports/collections/curatorSources'
+Feeds = require '/imports/collections/feeds'
+feedSchema = require '/imports/schemas/feed'
 Constants = require '/imports/constants.coffee'
 
 Meteor.startup ->
@@ -107,3 +109,11 @@ Meteor.startup ->
       feed: "promed-mail"
     articleSchema.validate(article)
     Articles.upsert(article._id, article)
+
+  if not Feeds.findOne(title: 'ProMED-mail')
+    promedFeed =
+      title: 'ProMED-mail'
+      url: 'https://www.promedmail.org/'
+      addedDate: new Date()
+    feedSchema.validate(promedFeed)
+    Feeds.insert(promedFeed)
