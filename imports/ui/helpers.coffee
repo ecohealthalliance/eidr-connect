@@ -1,13 +1,13 @@
 import { incidentTypeWithCountAndDisease, formatUrl } from '/imports/utils'
 
 UI.registerHelper 'formatLocation', (location)->
-  return formatLocation(location)
+  formatLocation(location)
 
 UI.registerHelper 'formatLocations', (locations)->
-  return locations.map(formatLocation).join('; ')
+  formatLocations(locations)
 
 UI.registerHelper 'formatDateRange', (dateRange)->
-  return formatDateRange(dateRange)
+  formatDateRange(dateRange)
 
 UI.registerHelper 'incidentToText', (incident) ->
   if @cases
@@ -91,3 +91,6 @@ export formatLocation = ({name, admin2Name, admin1Name, countryName}) ->
     .uniq()
     .value()
     .join(", ")
+
+export formatLocations = (locations) ->
+  locations.map(formatLocation).join('; ')

@@ -40,8 +40,10 @@ template(name="incidentTable")
               td
                 span.select
               td=incidentCountAndDisease
-              td {{formatDateRange dateRange}}
-              td {{formatLocations locations}}
+              td.dates {{formatDateRange dateRange}}
+              td #{firstLocation}
+                if otherLocations
+                  span.tooltipped(data-toggle="tooltip" title=otherLocations) other locations
               td.edit(title="Edit Incident")
   else
     +noResults message="No incidents found"
