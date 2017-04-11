@@ -1,5 +1,7 @@
-Articles = require '/imports/collections/articles.coffee'
+Articles = require '/imports/collections/articles'
+Feeds = require '/imports/collections/feeds'
 createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
+import { formatDateRange } from '/imports/ui/helpers'
 import { keyboardSelect, debounceCheckTop } from '/imports/utils'
 { updateCalendarSelection } = require('/imports/ui/setRange')
 
@@ -44,7 +46,10 @@ Template.curatorInbox.onCreated ->
   @currentPaneInView = new ReactiveVar('')
   @latestSourceDate = new ReactiveVar(null)
   @filtering = new ReactiveVar(false)
-  @selectedFeed = new ReactiveVar('promed')
+  @selectedFeedId = new ReactiveVar()
+  @subscribe 'feeds',
+    onReady: =>
+      @selectedFeedId.set(Feeds.findOne(title: 'ProMED-mail')._id)
 
 Template.curatorInbox.onRendered ->
   # determine if our `back-to-top` button should be initially displayed
@@ -72,7 +77,14 @@ Template.curatorInbox.onRendered ->
       publishDate:
         $gte: new Date(startDate)
         $lte: new Date(endDate)
-    @query.set query
+
+    feedId = @selectedFeedId.get()
+    if feedId is 'userAdded'
+      query.addedByUserId = $exists: true
+    else
+      query.feedId = feedId
+
+    @query.set(query)
 
     Meteor.call 'fetchPromedPosts', 100, range, (err) ->
       if err
@@ -104,6 +116,9 @@ Template.curatorInbox.onDestroyed ->
   $('.inlineRangePicker').off('mouseleave')
 
 Template.curatorInbox.helpers
+  articles: ->
+    Articles.find()
+
   days: ->
     {startDate, endDate} = Template.instance().dateRange.get()
     days = _.range(moment(endDate).diff(startDate, 'days') + 1).map (dayOffset)->
@@ -153,6 +168,32 @@ Template.curatorInbox.helpers
     instance = Template.instance()
     not _.isEqual(instance.defaultDateRange, instance.dateRange.get())
 
+  feeds: ->
+    feeds = Feeds.find().fetch()
+    feeds.push
+      _id: 'userAdded'
+      title: 'User Added Documents'
+    feeds
+
+  selectedFeed: ->
+    @_id is Template.instance().selectedFeedId.get()
+
+  noDocumentsMessage: ->
+    message = ''
+    instance = Template.instance()
+    query = instance.query.get()
+    dateRange = formatDateRange
+      start: query.publishDate.$gte
+      end: query.publishDate.$lte
+
+    selectedFeed = Feeds.findOne(instance.selectedFeedId.get())
+    feedTitle = selectedFeed?.title or 'User Added Documents'
+    if selectedFeed
+      message += "No documents from #{feedTitle}"
+    else
+      message += "No #{feedTitle} found"
+      message += "<span class='secondary'>from #{dateRange}</span>"
+    Spacebars.SafeString(message)
 
 Template.curatorInbox.events
   'click .curator-filter-reviewed-icon': (event, instance) ->
@@ -200,4 +241,4 @@ Template.curatorInbox.events
     , 500
 
   'change .curator-inbox--feed-selector': (event, instance) ->
-    instance.selectedFeed.set(event.currentTarget.value)
+    instance.selectedFeedId.set(event.currentTarget.value)

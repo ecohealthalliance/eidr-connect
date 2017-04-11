@@ -4,8 +4,8 @@ template(name="curatorInbox")
       class="{{#unless detailsInView }} on-canvas {{/unless}}")
       h2 Inbox
       select.form-control.curator-inbox--feed-selector
-        option(value='promed') ProMed Mail
-        option(value='userSubmitted') User Submitted
+        each feeds
+          option(value=_id selected="{{#if selectedFeed}} true {{/if}}")=title
       .curator-inbox-options
         a.option.curator-filter-reviewed-icon.plain-focus(
           class="{{#unless reviewFilterActive}} active {{/unless}}"
@@ -31,14 +31,17 @@ template(name="curatorInbox")
             button#calendar-btn-reset.btn.btn-default(type="button") Reset
       if isReady
         .curator-inbox-source-list
-          each day in days
-            +curatorInboxSection(
-              date=day
-              index=@index
-              reviewFilter=reviewFilter
-              textFilter=textFilter
-              selectedSourceId=selectedSourceId
-              currentPaneInView=currentPaneInView)
+          if articles.count
+            each day in days
+              +curatorInboxSection(
+                date=day
+                index=@index
+                reviewFilter=reviewFilter
+                textFilter=textFilter
+                selectedSourceId=selectedSourceId
+                currentPaneInView=currentPaneInView)
+          else
+            +noResults message=noDocumentsMessage
       else
         +loading static=true
     #touch-stage.curator-source-details.pane.pane-r.curator-inbox--pane(
