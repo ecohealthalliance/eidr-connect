@@ -96,6 +96,23 @@ Meteor.startup ->
               id: "userSpecifiedDisease:#{incident.disease}"
               text: "Other Disease: #{incident.disease}"
 
+  promedFeedId = Feeds.findOne(title: 'ProMED-mail')?._id
+
+  if not promedFeedId
+    promedFeed =
+      title: 'ProMED-mail'
+      url: 'promedmail.org/post/'
+      addedDate: new Date()
+    feedSchema.validate(promedFeed)
+    promedFeedId = Feeds.insert(promedFeed)
+
+  Articles.find(
+    url: $regex: /promedmail.org/
+    feed: $exists: false
+  ).forEach (article) ->
+    Articles.update article._id,
+      $set: feedId: promedFeedId
+
   CuratorSources.find().forEach (source) ->
     url = "promedmail.org/post/#{source._sourceId}"
     article =
@@ -106,14 +123,6 @@ Meteor.startup ->
       publishDateTZ: "EDT"
       title: source.title
       reviewed: source.reviewed
-      feed: "promed-mail"
+      feedId: promedFeedId
     articleSchema.validate(article)
     Articles.upsert(article._id, article)
-
-  if not Feeds.findOne(title: 'ProMED-mail')
-    promedFeed =
-      title: 'ProMED-mail'
-      url: 'https://www.promedmail.org/'
-      addedDate: new Date()
-    feedSchema.validate(promedFeed)
-    Feeds.insert(promedFeed)
