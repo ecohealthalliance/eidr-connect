@@ -123,12 +123,15 @@ class ScatterPlot extends Plot
     #if !@data || @data.length <= 0
     #  return
     if @zoom
+      @zoomed?.set(false)
       @zoom.reset()
 
   ###
   # resetZoom - Checks zoomArea and returns 0 if no current area selected
   ###
   isZoomed: ->
-    _.compact(_.values(@zoom.zoomArea)).length
+    zoomed = _.compact(_.values(@zoom.zoomArea)).length
+    @zoomed?.set(zoomed)
+    zoomed
 
 module.exports = ScatterPlot

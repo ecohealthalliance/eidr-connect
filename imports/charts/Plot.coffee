@@ -71,6 +71,8 @@ class Plot
     if zoomEnabled
       @zoom = new Zoom(@, @options)
 
+    @zoomed = @options.zoomed or new ReactiveVar(false)
+
     # an svg container for the plot's groups
     @groups = @container.append('g')
       .attr('class', 'scatterPlot-groups')

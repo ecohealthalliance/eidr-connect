@@ -13,6 +13,7 @@ Template.incidentReports.onDestroyed ->
     @plot = null
 
 Template.incidentReports.onCreated ->
+  @plotZoomed = new ReactiveVar(false)
   # iron router returns an array and not a cursor for data.incidents,
   # therefore we will setup a reactive cursor to use with the plot as an
   # instance variable.
@@ -80,6 +81,7 @@ Template.incidentReports.onRendered ->
         # render the template from
         tmpl(group)
     zoom: true
+    zoomed: @plotZoomed
     # initially active filters
     filters:
       notCumulative: @filters.notCumulative
@@ -169,6 +171,9 @@ Template.incidentReports.helpers
 
   smartEvent: ->
     Template.instance().data.eventType is 'smart'
+
+  plotZoomed: ->
+    Template.instance().plotZoomed.get()
 
 Template.incidentReports.events
   'click #scatterPlot-toggleCumulative': (event, instance) ->
