@@ -36,7 +36,7 @@
     padding-right 7px
     position relative
     &:hover
-      background-color $border-primary-light
+      background-color lighten($border-primary-light, 20%)
     &:last-of-type
       td
         border 0
@@ -57,7 +57,7 @@
         padding-top .5em
         padding-bottom .5em
     &.selected
-      background $selected
+      font-weight 600
       cursor default
       &:hover
         background @background

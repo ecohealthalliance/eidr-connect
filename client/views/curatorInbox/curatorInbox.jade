@@ -3,9 +3,6 @@ template(name="curatorInbox")
     .curator-inbox-header.pane-head.pane-head-l(
       class="{{#unless detailsInView }} on-canvas {{/unless}}")
       h2 Inbox
-      select.form-control.curator-inbox--feed-selector
-        each feeds
-          option(value=_id selected="{{#if selectedFeed}} true {{/if}}")=title
       .curator-inbox-options
         a.option.curator-filter-reviewed-icon.plain-focus(
           class="{{#unless reviewFilterActive}} active {{/unless}}"
@@ -23,6 +20,13 @@ template(name="curatorInbox")
 
     .curator-inbox-sources.pane.pane-l.curator-inbox--pane(
       class="{{#if detailsInView}} off{{else}}on{{/if}}-canvas")
+      .curator-inbox--feed-selector-wrapper.curator-source-details--header
+        select.form-control.curator-inbox--feed-selector(
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Select a feed")
+          each feeds
+            option(value=_id selected="{{#if selectedFeed}} true {{/if}}")=title
       .curator-inbox-datepicker(class="{{#if calendarState}} active {{/if}}")
         #date-picker.inlineRangePicker
         .curator-inbox-datepicker--controls.container-flex.central.no-break

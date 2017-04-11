@@ -66,7 +66,6 @@ Template.curatorInbox.onRendered ->
         createNewCalendar(@latestSourceDate.get(), @dateRange.get())
         @$('[data-toggle="tooltip"]').tooltip
           container: 'body'
-          placement: 'top'
 
   @autorun =>
     @filtering.set(true)
@@ -252,4 +251,6 @@ Template.curatorInbox.events
     , 500
 
   'change .curator-inbox--feed-selector': (event, instance) ->
+    currentTarget = event.currentTarget
     instance.selectedFeedId.set(event.currentTarget.value)
+    currentTarget.blur()

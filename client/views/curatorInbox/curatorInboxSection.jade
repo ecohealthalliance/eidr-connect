@@ -4,11 +4,7 @@ template(name="curatorInboxSection")
       .date= formattedDate
       .count #{count} documents
       .toggle
-        i.fa.fa-lg
-          if isOpen
-            i.fa.fa-chevron-circle-down
-          else
-            i.fa.fa-chevron-circle-left
+        i.fa(class="fa-chevron-circle-{{#if isOpen}}down{{else}}left{{/if}}")
     if isOpen
       +reactiveTable(
         collection=posts
