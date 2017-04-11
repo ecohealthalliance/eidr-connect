@@ -79,10 +79,11 @@ Template.curatorInbox.onRendered ->
         $lte: new Date(endDate)
 
     feedId = @selectedFeedId.get()
-    if feedId is 'userAdded'
-      query.addedByUserId = $exists: true
-    else
-      query.feedId = feedId
+    switch feedId
+      when 'userAdded' then query.addedByUserId = $exists: true
+      when 'currentUser' then query.addedByUserId = Meteor.userId()
+      else
+        query.feedId = feedId
 
     @query.set(query)
 
@@ -170,30 +171,40 @@ Template.curatorInbox.helpers
 
   feeds: ->
     feeds = Feeds.find().fetch()
-    feeds.push
-      _id: 'userAdded'
-      title: 'User Added Documents'
-    feeds
+    customFeeds = [
+      {
+        _id: 'userAdded'
+        title: 'User Added'
+      },
+      {
+        _id: 'currentUser'
+        title: "Current User's"
+      }
+    ]
+    feeds.concat(customFeeds)
 
   selectedFeed: ->
     @_id is Template.instance().selectedFeedId.get()
 
   noDocumentsMessage: ->
-    message = ''
     instance = Template.instance()
     query = instance.query.get()
+    selectedFeedId = instance.selectedFeedId.get()
+    publishDate = query.publishDate
     dateRange = formatDateRange
-      start: query.publishDate.$gte
-      end: query.publishDate.$lte
+      start: publishDate.$gte
+      end: publishDate.$lte
+    feedTitle = Feeds.findOne(selectedFeedId)?.title
+    unless feedTitle
+      if selectedFeedId is 'userAdded'
+        feedTitle = 'User Added'
+      else
+        feedTitle = "Current user's"
 
-    selectedFeed = Feeds.findOne(instance.selectedFeedId.get())
-    feedTitle = selectedFeed?.title or 'User Added Documents'
-    if selectedFeed
-      message += "No documents from #{feedTitle}"
-    else
-      message += "No #{feedTitle} found"
-      message += "<span class='secondary'>from #{dateRange}</span>"
-    Spacebars.SafeString(message)
+    Spacebars.SafeString """
+      No #{feedTitle} documents found
+      <span class='secondary'>from #{dateRange}</span>
+    """
 
 Template.curatorInbox.events
   'click .curator-filter-reviewed-icon': (event, instance) ->
