@@ -16,9 +16,10 @@ Template.annotatedContent.onRendered ->
     setTimeout =>
       _setSelectingState(@, false)
     , POPUP_DELAY
-  $(@data.relatedElements.sourceContainer).on 'scroll', (event) =>
+  $(@data.relatedElements.sourceContainer).on 'scroll', _.throttle (event) =>
     unless @scrolled.get()
       @scrolled.set(true)
+  , 100
 
 Template.annotatedContent.onDestroyed ->
   $('body').off('mousedown')
@@ -31,6 +32,7 @@ Template.annotatedContent.helpers
 Template.annotatedContent.events
   'mouseup .selectable-content': _.debounce (event, instance) ->
     selection = window.getSelection()
+    instance.scrolled.set(false)
     if not selection.isCollapsed
       data =
         source: instance.data.source
