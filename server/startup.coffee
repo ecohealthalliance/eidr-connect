@@ -101,7 +101,7 @@ Meteor.startup ->
     newFeedProps =
       title: 'ProMED-mail'
       url: 'promedmail.org/post/'
-    feedSchema.validate(newfeedProps)
+    feedSchema.validate(newFeedProps)
     Feeds.upsert promedFeed?._id,
       $set: newFeedProps
       $setOnInsert:
