@@ -12,6 +12,7 @@ findIncident = (accepted) ->
 Template.sourceIncidentReports.onCreated ->
   @tableContentScrollable = new ReactiveVar(true)
 
+Template.sourceIncidentReports.onRendered ->
   @autorun =>
     selectedAnnotationId = @data.selectedAnnotationId.get()
     return if not selectedAnnotationId
