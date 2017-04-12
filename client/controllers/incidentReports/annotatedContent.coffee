@@ -33,7 +33,7 @@ Template.annotatedContent.events
   'mouseup .selectable-content': _.debounce (event, instance) ->
     selection = window.getSelection()
     instance.scrolled.set(false)
-    if not selection.isCollapsed
+    if not selection.isCollapsed and selection.toString().trim()
       data =
         source: instance.data.source
         scrolled: instance.scrolled
