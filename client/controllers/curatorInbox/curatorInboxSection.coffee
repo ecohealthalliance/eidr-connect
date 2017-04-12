@@ -31,15 +31,6 @@ Template.curatorInboxSection.onCreated ->
       sortDirection: -1
     },
     {
-      key: 'addedDate'
-      description: 'Date the document was added.'
-      label: 'Added'
-      sortDirection: -1
-      hidden: true
-      fn: (value) ->
-        moment(value).format('YYYY-MM-DD')
-    },
-    {
       key: 'expand'
       label: ''
       cellClass: 'action open-right'
@@ -48,7 +39,7 @@ Template.curatorInboxSection.onCreated ->
 
   sectionDate = Template.instance().data.date
   @filterId = 'inbox-date-filter-'+sectionDate.getTime()
-  @filter = new ReactiveTable.Filter(@filterId, ['publishDate'])
+  @filter = new ReactiveTable.Filter(@filterId, [@data.dateType])
   @filter.set
     $gte: sectionDate
     $lt: moment(sectionDate).add(1, 'day').toDate()
@@ -59,10 +50,10 @@ Template.curatorInboxSection.onRendered ->
   @autorun =>
     data = @data
     sectionDate = data.date
-    dateFilters =
-      'publishDate':
-        $gte: sectionDate
-        $lt: moment(sectionDate).add(1, 'day').toDate()
+    dateFilters = {}
+    dateFilters[@data.dateType] =
+      $gte: sectionDate
+      $lt: moment(sectionDate).add(1, 'day').toDate()
     filters = uniteReactiveTableFilters [ data.textFilter, data.reviewFilter ]
     filters.push dateFilters
     query = $and: filters
@@ -70,7 +61,10 @@ Template.curatorInboxSection.onRendered ->
 
 Template.curatorInboxSection.helpers
   post: ->
-    Articles.findOne publishDate: Template.instance().filter.get()
+    instance = Template.instance()
+    query = {}
+    query[instance.data.dateType] = instance.filter.get()
+    Articles.findOne(query)
 
   posts: ->
     Articles
