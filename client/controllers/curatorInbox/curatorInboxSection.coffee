@@ -1,5 +1,6 @@
 Articles = require '/imports/collections/articles.coffee'
 import { keyboardSelect } from '/imports/utils'
+import { pluralize } from '/imports/ui/helpers'
 
 uniteReactiveTableFilters = (filters) ->
   reactiveFilters = []
@@ -71,6 +72,9 @@ Template.curatorInboxSection.helpers
 
   count: ->
     Template.instance().sourceCount.get()
+
+  countText: ->
+    pluralize('document', Template.instance().sourceCount.get())
 
   isOpen: ->
     Template.instance().isOpen.get()
