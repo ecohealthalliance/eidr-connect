@@ -55,7 +55,8 @@ template(name="curatorInbox")
         +curatorSourceDetails(
           selectedSourceId=selectedSourceId
           query=query
-          currentPaneInView=currentPaneInView)
+          currentPaneInView=currentPaneInView
+          dateType=dateType)
     .curator-inbox-sources--back-to-top.off-canvas
       button.btn.btn-primary.btn-wide.back-to-top(
         class="{{#if detailsInView}} off{{else}}on{{/if}}-canvas"
