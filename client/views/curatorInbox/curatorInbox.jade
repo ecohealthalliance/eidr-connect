@@ -2,14 +2,22 @@ template(name="curatorInbox")
   .pane-container.curator-inbox
     .curator-inbox-header.pane-head.pane-head-l(
       class="{{#unless detailsInView }} on-canvas {{/unless}}")
-      h2 Inbox
+      unless searching
+        h2 Inbox
       .curator-inbox-options
-        a.option.curator-filter-reviewed-icon.plain-focus(
-          class="{{#unless reviewFilterActive}} active {{/unless}}"
+        a.option.add-document.plain-focus(
           data-toggle="tooltip"
-          title="Show/Hide Reviewed"
+          title="Add New Document"
           tabindex="0")
-          i.fa.fa-check-circle(aria-hidden="true")
+          i.fa.fa-plus(aria-hidden="true")
+        .spacer
+        if reviewedArticles
+          a.option.curator-filter-reviewed-icon.plain-focus(
+            class="{{#unless reviewFilterActive}} active {{/unless}}"
+            data-toggle="tooltip"
+            title="Show/Hide Reviewed"
+            tabindex="0")
+            i.fa.fa-check-circle(aria-hidden="true")
         a.option.curator-filter-calendar-icon.plain-focus(
           class="{{#if calendarState}} active {{/if}}"
           data-toggle="tooltip"

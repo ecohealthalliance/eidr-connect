@@ -47,6 +47,7 @@ Template.curatorInbox.onCreated ->
   @currentPaneInView = new ReactiveVar('')
   @latestSourceDate = new ReactiveVar(null)
   @filtering = new ReactiveVar(false)
+  @searching = new ReactiveVar(false)
   @selectedFeedId = new ReactiveVar()
   @subscribe 'feeds',
     onReady: =>
@@ -154,11 +155,13 @@ Template.curatorInbox.helpers
     Template.instance().query
 
   searchSettings: ->
+    instance = Template.instance()
     id:"inboxFilter"
-    textFilter: Template.instance().textFilter
+    textFilter: instance.textFilter
     classes: 'option'
     placeholder: 'Search inbox'
     toggleable: true
+    searching: instance.searching
 
   detailsInView: ->
     Template.instance().currentPaneInView.get() is 'details'
@@ -169,6 +172,12 @@ Template.curatorInbox.helpers
   userHasFilteredByDate: ->
     instance = Template.instance()
     not _.isEqual(instance.defaultDateRange, instance.dateRange.get())
+
+  reviewedArticles: ->
+    Articles.findOne(reviewed: true)
+
+  searching: ->
+    Template.instance().searching.get()
 
   feeds: ->
     feeds = Feeds.find().fetch()

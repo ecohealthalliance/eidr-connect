@@ -131,8 +131,11 @@ Template.curatorSourceDetails.events
 
   'click .back-to-list': (event, instance) ->
     instanceData = instance.data
-    instanceData.selectedSourceId.set('')
     instanceData.currentPaneInView.set('')
+    # Clear selected after animation so details UI does not dissapear
+    setTimeout ->
+      instanceData.selectedSourceId.set('')
+    , 300
 
   'click .tabs a': (event, instance) ->
     instance.selectedIncidentTab.set(instance.$(event.currentTarget).data('tab'))
