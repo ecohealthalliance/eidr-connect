@@ -126,6 +126,10 @@ Template.sourceModal.helpers
   originIsText: ->
     Template.instance().articleOrigin.get() is 'text'
 
+  showEnhanceOption: ->
+    instance = Template.instance()
+    not instance.data.edit and instance.suggest
+
 Template.sourceModal.events
   'click .save-source': (event, instance) ->
     return unless _checkFormValidity(instance)
@@ -154,18 +158,20 @@ Template.sourceModal.events
                                     UTCOffsets[source.publishDateTZ], 'local')
       source.publishDate = selectedDate.toDate()
 
-    enhance = form.enhance.checked
+    enhance = form.enhance?.checked
     Meteor.call 'addEventSource', source, (error, articleId) ->
       if error
         toastr.error error.reason
       else
-        if enhance
+        if enhance and instance.suggest
           notify('success', 'Source successfully added')
+          instance.subscribe 'ArticleIncidentReports', articleId
           Modal.show 'suggestedIncidentsModal',
             userEventId: instance.data.userEventId
             article: source
           stageModals(instance, instance.modals)
         else
+          instance.data.selectedSourceId?.set(articleId)
           Modal.hide(instance)
 
   'click .save-source-edit': (event, instance) ->

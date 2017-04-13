@@ -87,7 +87,7 @@ template(name="sourceModal")
                           each timezones
                             option(value=name selected=selected) #{name} (GMT#{offset})
 
-            unless edit
+            if showEnhanceOption
               .form-group.no-margin
                 .container-flex.check-buttons.options.no-break
                   .check-button

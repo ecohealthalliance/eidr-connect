@@ -280,3 +280,4 @@ Template.curatorInbox.events
   'click .add-document': (event, instance) ->
     Modal.show 'sourceModal',
       suggest: false
+      selectedSourceId: instance.selectedSourceId
