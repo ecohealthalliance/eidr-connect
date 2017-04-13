@@ -10,9 +10,9 @@ IncidentReportSchema = new SimpleSchema
   _id:
     type: String
     optional: true
-  url:
+  articleId:
     type: String
-    label: "Document the incident is based on"
+    optional: true
   addedByUserName:
     type: String
     optional: true

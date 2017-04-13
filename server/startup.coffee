@@ -131,3 +131,10 @@ Meteor.startup ->
       feedId: promedFeedId
     articleSchema.validate(article)
     Articles.upsert(article._id, article)
+
+  Incidents.find(articleId: $exists: false).forEach (incident) ->
+    parentArticle = Articles.findOne(url: $regex: incident.url)
+    if parentArticle
+      Incidents.update incident._id,
+        $unset: url: ''
+        $set: articleId: parentArticle._id

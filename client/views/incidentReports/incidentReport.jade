@@ -45,8 +45,8 @@ template(name="incidentReport")
             span {{formatDateRange(dateRange)}}
           li.container-flex.no-break
             h6.metadata--title Document:
-            a.ref-link(href="{{formatUrl(url)}}" target="_blank")
-              span {{formatUrl(url)}}
+            a.ref-link(href="{{formatUrl(incidentUrl)}}" target="_blank")
+              span {{formatUrl(incidentUrl)}}
           ul.integrity.metadata.list-unstyled
             if dateRange.cumulative
               li

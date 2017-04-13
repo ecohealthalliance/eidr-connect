@@ -10,8 +10,8 @@ template(name="incidentForm")
             data-placement="right"
             title="URL of the document where the incident was reported."
           ) Document URL
-          if incidentData.url
-            input.form-control(readonly value=incidentData.url name="articleSourceUrl")
+          if documentUrl
+            input.form-control(readonly value=documentUrl name="articleSourceUrl")
           else
             +articleSelect2(
               selectId="articleSource"

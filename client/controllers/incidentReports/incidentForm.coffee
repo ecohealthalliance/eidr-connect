@@ -1,3 +1,4 @@
+Articles = require '/imports/collections/articles.coffee'
 createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
 validator = require 'bootstrap-validator'
 { keyboardSelect, removeSuggestedProperties, diseaseOptionsFn } = require '/imports/utils'
@@ -17,9 +18,12 @@ _selectInput = (event, instance, prop, isCheckbox) ->
 
 Template.incidentForm.onCreated ->
   instanceData = @data
+  incident = instanceData.incident
+  articleId = incident?.articleId
+  if articleId
+    @subscribe 'incidentArticle', articleId
   @incidentStatus = new ReactiveVar('')
   @incidentType = new ReactiveVar('')
-  incident = instanceData.incident
   @suggestedFields = incident?.suggestedFields or new ReactiveVar([])
 
   @incidentData =
@@ -29,7 +33,7 @@ Template.incidentForm.onCreated ->
 
   article = instanceData.articles[0]
   if article
-    @incidentData.url = article.url
+    @incidentData.articleId = article._id
 
   if incident
     @incidentData = _.extend(@incidentData, incident)
@@ -117,6 +121,9 @@ Template.incidentForm.helpers
     Template.instance().data.articles[0]?.url
 
   diseaseOptionsFn: -> diseaseOptionsFn
+
+  documentUrl: ->
+    Articles.findOne(Template.instance().data.incident?.articleId)?.url
 
 Template.incidentForm.events
   'change input[name=daterangepicker_start]': (event, instance) ->

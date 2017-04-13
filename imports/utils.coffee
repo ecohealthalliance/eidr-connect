@@ -225,7 +225,7 @@ export getTerritories = (annotationsWithOffsets, sents) ->
   return territories
 
 export createIncidentReportsFromEnhancements = (enhancements, options)->
-  { countAnnotations, acceptByDefault, url, publishDate } = options
+  { countAnnotations, acceptByDefault, articleId, publishDate } = options
   if not publishDate
     publishDate = new Date()
   incidents = []
@@ -333,7 +333,7 @@ export createIncidentReportsFromEnhancements = (enhancements, options)->
       ], attributes)
       if suspectedAttributes.length > 0
         incident.status = 'suspected'
-    incident.url = url
+    incident.articleId = articleId
     # The disease field is set to the last disease mentioned.
     diseaseTerritory.annotations.forEach (annotation)->
       incident.resolvedDisease =

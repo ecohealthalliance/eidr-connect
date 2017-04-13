@@ -184,7 +184,7 @@ Template.suggestedIncidentsModal.events
       userEventId: instance.data.userEventId
       add: true
       incident:
-        url: instance.data.article.url
+        articleId: instance.data.article._id
       offCanvas: 'right'
 
   'click #save-csv': (event, instance) ->
