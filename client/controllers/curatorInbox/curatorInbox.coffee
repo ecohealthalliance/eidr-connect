@@ -43,6 +43,7 @@ Template.curatorInbox.onCreated ->
   @reviewFilter.set(null)
   @selectedSourceId = new ReactiveVar(null)
   @query = new ReactiveVar(null)
+  @sorting = new ReactiveVar(null)
   @currentPaneInView = new ReactiveVar('')
   @latestSourceDate = new ReactiveVar(null)
   @filtering = new ReactiveVar(false)
@@ -84,12 +85,14 @@ Template.curatorInbox.onRendered ->
     dateQuery =
       $gte: new Date(startDate)
       $lte: new Date(endDate)
-    sort = sort: publishDate: -1
+    sorting = sort: publishDate: -1
     if query.addedByUserId
-      sort = sort: addedDate: -1
+      sorting = sort: addedDate: -1
       query.addedDate = dateQuery
     else
       query.publishDate = dateQuery
+
+    @sorting.set(sorting)
 
     @query.set(query)
 
@@ -101,15 +104,14 @@ Template.curatorInbox.onRendered ->
     if calendar
       updateCalendarSelection(calendar, range)
 
-    @subscribe "articles", query, () =>
+    @subscribe "articles", query, =>
       unReviewedQuery = $and: [ {reviewed: false}, query ]
-      firstSource = Articles.findOne(unReviewedQuery, sort)
+      firstSource = Articles.findOne(unReviewedQuery, sorting)
       if firstSource
         @selectedSourceId.set(firstSource._id)
       @filtering.set(false)
       if not @latestSourceDate.get()
-        sort.fields = publishDate: 1
-        @latestSourceDate.set Articles.findOne({}, sort)?.publishDate
+        @latestSourceDate.set Articles.findOne({}, sorting)?.publishDate
       @ready.set(true)
 
 Template.curatorInbox.onDestroyed ->
@@ -117,7 +119,7 @@ Template.curatorInbox.onDestroyed ->
 
 Template.curatorInbox.helpers
   articles: ->
-    Articles.find()
+    Articles.find({}, Template.instance().sorting.get())
 
   days: ->
     {startDate, endDate} = Template.instance().dateRange.get()
