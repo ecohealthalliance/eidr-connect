@@ -26,7 +26,7 @@ template(name="curatorInbox")
           data-placement="bottom"
           title="Select a feed")
           each feeds
-            option(value=_id selected="{{#if selectedFeed}} true {{/if}}")=title
+            option(value=_id selected="{{#if selectedFeed}} true {{/if}}")=feedTitle
       .curator-inbox-datepicker(class="{{#if calendarState}} active {{/if}}")
         #date-picker.inlineRangePicker
         .curator-inbox-datepicker--controls.container-flex.central.no-break

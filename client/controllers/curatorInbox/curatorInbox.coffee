@@ -213,6 +213,9 @@ Template.curatorInbox.helpers
     else
       'publishDate'
 
+  feedTitle: ->
+    @title or @url
+
 Template.curatorInbox.events
   'click .curator-filter-reviewed-icon': (event, instance) ->
     reviewFilter = instance.reviewFilter
