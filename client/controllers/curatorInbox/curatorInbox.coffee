@@ -276,3 +276,7 @@ Template.curatorInbox.events
     currentTarget = event.currentTarget
     instance.selectedFeedId.set(event.currentTarget.value)
     currentTarget.blur()
+
+  'click .add-document': (event, instance) ->
+    Modal.show 'sourceModal',
+      suggest: false

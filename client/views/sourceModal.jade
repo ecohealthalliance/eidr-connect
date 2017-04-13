@@ -6,14 +6,14 @@ template(name="sourceModal")
           .modal-header--title
             h4
               if edit
-                | Edit Event Document
+                | Edit Document
               else
-                | Add Event Document
+                | Add Document
           +modalCloseButton
 
         .modal-body
           form#add-source(novalidate)
-            unless editing
+            if showSuggestedDocuments
               .form-group.full-width
                 label.control-label.featured Suggested Documents
                 #suggested-articles.modal-block
@@ -27,6 +27,31 @@ template(name="sourceModal")
                     else
                       .no-results No documents found
 
+            if edit
+              label.control-label Document URL
+              p.form-control-static {{url}}
+            else
+              .form-group.full-width.with-tabs
+                ul.tabs.tabs-secondary.tabs-traditional(role="tablist")
+                  li.active
+                    a(href="#url" data-toggle="tab" role="tab") Via URL
+                  li
+                    a(href="#text" data-toggle="tab" role="tab") Via Pasted Text
+                .tab-content.modal-block
+                  #url.tab-pane.active(role="tabpanel")
+                    input#article.form-control.new-article(
+                      type="url"
+                      value=url
+                      name="url"
+                      required=originIsUrl)
+                    .help-block.with-errors
+                  #text.tab-pane(role="tabpanel")
+                    textarea.form-control.article-text#content(
+                      placeholder="Paste text here"
+                      name='content'
+                      require=originIsText)
+                    .help-block.with-errors
+
             .form-group.form-group--full(class="{{suggested 'title'}}")
               label.control-label Title
               input#title.form-control.new-title(
@@ -34,18 +59,6 @@ template(name="sourceModal")
                 name="title"
                 value=title
                 required)
-              .help-block.with-errors
-
-            .form-group.form-group--full(class="{{suggested 'url'}}")
-              label.control-label Document URL
-              if edit
-                p.form-control-static {{url}}
-              else
-                input#article.form-control.new-article(
-                  type="url"
-                  value=url
-                  name="article"
-                  required)
               .help-block.with-errors
 
             .form-group.form-group--full(class="{{#if editing}} date-editing {{/if}}")

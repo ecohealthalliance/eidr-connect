@@ -6,25 +6,26 @@ Meteor.methods
     user = Meteor.user()
     if user and Roles.userIsInRole(user._id, ['admin'])
       # Check if Document is in collection
-      sourceQuery = url: $regex: "#{regexEscape(source.url)}$"
-      existingSource = Articles.findOne(sourceQuery)
+      if source.url
+        sourceQuery = url: $regex: "#{regexEscape(source.url)}$"
+        existingSource = Articles.findOne(sourceQuery)
       if existingSource
         Articles.update sourceQuery,
           $set: userEventId: source.userEventId
       else
-        if source.url
-          insertArticle =
-            url: source.url
-            title: source.title
-            userEventId: source.userEventId
-          insertArticle = source
-          insertArticle.addedByUserId = user._id
-          insertArticle.addedByUserName = user.profile.name
-          insertArticle.addedDate = new Date()
-          newId = Articles.insert(insertArticle)
+        insertArticle =
+          url: source.url
+          title: source.title
+          userEventId: source.userEventId
+        insertArticle = source
+        insertArticle.addedByUserId = user._id
+        insertArticle.addedByUserName = user.profile.name
+        insertArticle.addedDate = new Date()
+        newId = Articles.insert(insertArticle)
+        if insertArticle.userEventId
           Meteor.call("editUserEventLastModified", insertArticle.userEventId)
           Meteor.call("editUserEventArticleCount", insertArticle.userEventId, 1)
-          return newId
+        return newId
     else
       throw new Meteor.Error("auth", "User does not have permission to add documents")
 

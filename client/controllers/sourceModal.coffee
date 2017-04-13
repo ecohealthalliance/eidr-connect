@@ -21,9 +21,12 @@ _setDatePicker = (picker, date) ->
   picker.clickApply()
 
 Template.sourceModal.onCreated ->
+  @suggest = @data.suggest
+  @suggest ?= true
   @tzIsSpecified = false
   @proMEDRegEx = /promedmail\.org\/post\/(\d+)/ig
   @selectedArticle = new ReactiveVar(@data)
+  @articleOrigin = new ReactiveVar('url')
   @modals =
     currentModal:
       element: '#event-source'
@@ -109,9 +112,19 @@ Template.sourceModal.helpers
   editing: ->
     Template.instance().data.edit
 
+  showSuggestedDocuments: ->
+    instance = Template.instance()
+    not instance.data.edit and instance.suggest
+
   suggested: (field) ->
     if field in Template.instance().suggestedFields.get()
       'suggested-minimal'
+
+  originIsUrl: ->
+    Template.instance().articleOrigin.get() is 'url'
+
+  originIsText: ->
+    Template.instance().articleOrigin.get() is 'text'
 
 Template.sourceModal.events
   'click .save-source': (event, instance) ->
@@ -126,6 +139,7 @@ Template.sourceModal.events
     source =
       userEventId: instance.data.userEventId
       url: cleanUrl(article)
+      content: form.content.value
       publishDateTZ: form.publishDateTZ.value
       title: form.title.value
 
@@ -233,3 +247,6 @@ Template.sourceModal.events
 
   'input input[name=title], input input[name=url]': (event, instance) ->
     removeSuggestedProperties(instance, [event.currentTarget.name])
+
+  'click .tabs li a': (event, instance) ->
+    instance.articleOrigin.set($(event.currentTarget).attr('href').slice(1))
