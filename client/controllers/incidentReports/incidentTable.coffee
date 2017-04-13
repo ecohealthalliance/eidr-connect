@@ -85,7 +85,7 @@ Template.incidentTable.helpers
     query = instance.acceptedQuery()
     query.url = instance.data.source.url
     _.sortBy Incidents.find(query).fetch(), (incident) ->
-      incident.annotations.case[0].textOffsets[0]
+      incident.annotations?.case?[0].textOffsets?[0]
 
   allSelected: ->
     instance = Template.instance()
