@@ -69,17 +69,16 @@ Template.curatorSourceDetails.onRendered ->
           $title.tooltip('hide').attr('data-original-title', '')
         else
           $title.attr('data-original-title', title)
-      @subscribe 'ArticleIncidentReports', source.url,
-        onReady: ->
-          if source.enhancements?.dateOfDiagnosis
-            instance.incidentsLoaded.set(true)
+      @subscribe 'ArticleIncidentReports', source.url
+      if source.enhancements?.dateOfDiagnosis
+        instance.incidentsLoaded.set(true)
+      else
+        Meteor.call 'getArticleEnhancementsAndUpdate', source, (error, enhancements) =>
+          if error
+            notify('error', error.reason)
           else
-            Meteor.call 'getArticleEnhancementsAndUpdate', source, (error, enhancements) =>
-              if error
-                notify('error', error.reason)
-              else
-                source.enhancements = enhancements
-                instance.incidentsLoaded.set(true)
+            source.enhancements = enhancements
+            instance.incidentsLoaded.set(true)
 
 Template.curatorSourceDetails.onDestroyed ->
   $(window).off('resize')
