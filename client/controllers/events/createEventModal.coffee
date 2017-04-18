@@ -13,6 +13,7 @@ Template.createEventModal.onRendered ->
     @$('#createEvent').validator
       # Do not disable inputs since we don't in other areas of the app
       disable: false
+    .off('input.bs.validator change.bs.validator focusout.bs.validator')
 
 Template.createEventModal.events
   'submit #createEvent': (event, instance) ->
@@ -24,7 +25,6 @@ Template.createEventModal.events
     eventName = target.eventName
     source = instanceData?.source
     incidents = instanceData.incidents?.fetch()
-
     Meteor.call 'upsertUserEvent',
       eventName: eventName.value.trim()
       summary: summary
