@@ -96,7 +96,7 @@ Meteor.startup ->
               id: "userSpecifiedDisease:#{incident.disease}"
               text: "Other Disease: #{incident.disease}"
 
-  promedFeed = Feeds.findOne(url: $regex: /promedmail.org/)
+  promedFeed = Feeds.findOne(url: 'promedmail.org/post/')
   if not promedFeed?.title
     newFeedProps =
       title: 'ProMED-mail'
@@ -108,9 +108,11 @@ Meteor.startup ->
         addedDate: new Date()
 
   promedFeedId = Feeds.findOne(url: $regex: /promedmail.org/)?._id
+  console.log promedFeedId
 
   Articles.find(
     url: $regex: /promedmail.org/
+    feedId: $exists: false
   ).forEach (article) ->
     Articles.update article._id,
       $set: feedId: promedFeedId
