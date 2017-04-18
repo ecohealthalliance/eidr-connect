@@ -1,5 +1,7 @@
-Articles = require '/imports/collections/articles.coffee'
+Articles = require '/imports/collections/articles'
+Feeds = require '/imports/collections/feeds'
 createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
+import { formatDateRange } from '/imports/ui/helpers'
 import { keyboardSelect, debounceCheckTop } from '/imports/utils'
 { updateCalendarSelection } = require('/imports/ui/setRange')
 
@@ -41,9 +43,14 @@ Template.curatorInbox.onCreated ->
   @reviewFilter.set(null)
   @selectedSourceId = new ReactiveVar(null)
   @query = new ReactiveVar(null)
+  @sorting = new ReactiveVar(null)
   @currentPaneInView = new ReactiveVar('')
   @latestSourceDate = new ReactiveVar(null)
   @filtering = new ReactiveVar(false)
+  @selectedFeedId = new ReactiveVar()
+  @subscribe 'feeds',
+    onReady: =>
+      @selectedFeedId.set(Feeds.findOne(title: 'ProMED-mail')._id)
 
 Template.curatorInbox.onRendered ->
   # determine if our `back-to-top` button should be initially displayed
@@ -60,49 +67,60 @@ Template.curatorInbox.onRendered ->
         createNewCalendar(@latestSourceDate.get(), @dateRange.get())
         @$('[data-toggle="tooltip"]').tooltip
           container: 'body'
-          placement: 'top'
 
   @autorun =>
     @filtering.set(true)
     range = @dateRange.get()
     endDate = range?.endDate
     startDate = range?.startDate
-    query =
-      publishDate:
-        $gte: new Date(startDate)
-        $lte: new Date(endDate)
-    @query.set query
+    query = {}
+
+    feedId = @selectedFeedId.get()
+    switch feedId
+      when 'userAdded' then query.addedByUserId = $exists: true
+      when 'currentUser' then query.addedByUserId = Meteor.userId()
+      else
+        query.feedId = feedId
+
+    dateQuery =
+      $gte: new Date(startDate)
+      $lte: new Date(endDate)
+    sorting = sort: publishDate: -1
+    if query.addedByUserId
+      sorting = sort: addedDate: -1
+      query.addedDate = dateQuery
+    else
+      query.publishDate = dateQuery
+
+    @sorting.set(sorting)
+
+    @query.set(query)
 
     Meteor.call 'fetchPromedPosts', 100, range, (err) ->
       if err
-        console.log(err)
         return toastr.error(err.reason)
 
     calendar = $('#date-picker').data('daterangepicker')
     if calendar
       updateCalendarSelection(calendar, range)
 
-    @subscribe "articles", query, () =>
+    @subscribe "articles", query, =>
       unReviewedQuery = $and: [ {reviewed: false}, query ]
-      firstSource = Articles.findOne unReviewedQuery,
-        sort:
-          publishDate: -1
+      firstSource = Articles.findOne(unReviewedQuery, sorting)
       if firstSource
         @selectedSourceId.set(firstSource._id)
       @filtering.set(false)
       if not @latestSourceDate.get()
-        @latestSourceDate.set Articles.findOne({},
-            sort:
-              publishDate: -1
-            fields:
-              publishDate: 1
-          )?.publishDate
+        @latestSourceDate.set Articles.findOne({}, sorting)?.publishDate
       @ready.set(true)
 
 Template.curatorInbox.onDestroyed ->
   $('.inlineRangePicker').off('mouseleave')
 
 Template.curatorInbox.helpers
+  articles: ->
+    Articles.find({}, Template.instance().sorting.get())
+
   days: ->
     {startDate, endDate} = Template.instance().dateRange.get()
     days = _.range(moment(endDate).diff(startDate, 'days') + 1).map (dayOffset)->
@@ -152,6 +170,53 @@ Template.curatorInbox.helpers
     instance = Template.instance()
     not _.isEqual(instance.defaultDateRange, instance.dateRange.get())
 
+  feeds: ->
+    feeds = Feeds.find().fetch()
+    customFeeds = [
+      {
+        _id: 'userAdded'
+        title: 'User Added'
+      },
+      {
+        _id: 'currentUser'
+        title: "Current User's"
+      }
+    ]
+    feeds.concat(customFeeds)
+
+  selectedFeed: ->
+    @_id is Template.instance().selectedFeedId.get()
+
+  noDocumentsMessage: ->
+    instance = Template.instance()
+    query = instance.query.get()
+    selectedFeedId = instance.selectedFeedId.get()
+    dateType = 'publishDate'
+    if query.addedByUserId
+      dateType = 'addedDate'
+    dateRange = formatDateRange
+      start: query[dateType].$gte
+      end: query[dateType].$lte
+    feedTitle = Feeds.findOne(selectedFeedId)?.title
+    unless feedTitle
+      if selectedFeedId is 'userAdded'
+        feedTitle = 'User Added'
+      else
+        feedTitle = "Current user's"
+
+    Spacebars.SafeString """
+      No #{feedTitle} documents found
+      <span class='secondary'>from #{dateRange}</span>
+    """
+
+  dateType: ->
+    if Template.instance().query.get().addedByUserId
+      'addedDate'
+    else
+      'publishDate'
+
+  feedTitle: ->
+    @title or @url
 
 Template.curatorInbox.events
   'click .curator-filter-reviewed-icon': (event, instance) ->
@@ -197,3 +262,8 @@ Template.curatorInbox.events
     $('.curator-inbox-sources').stop().animate
       scrollTop: 0
     , 500
+
+  'change .curator-inbox--feed-selector': (event, instance) ->
+    currentTarget = event.currentTarget
+    instance.selectedFeedId.set(event.currentTarget.value)
+    currentTarget.blur()

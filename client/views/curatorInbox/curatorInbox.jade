@@ -20,6 +20,13 @@ template(name="curatorInbox")
 
     .curator-inbox-sources.pane.pane-l.curator-inbox--pane(
       class="{{#if detailsInView}} off{{else}}on{{/if}}-canvas")
+      .curator-inbox--feed-selector-wrapper.curator-source-details--header
+        select.form-control.curator-inbox--feed-selector(
+          data-toggle="tooltip"
+          data-placement="bottom"
+          title="Select a feed")
+          each feeds
+            option(value=_id selected="{{#if selectedFeed}} true {{/if}}")=feedTitle
       .curator-inbox-datepicker(class="{{#if calendarState}} active {{/if}}")
         #date-picker.inlineRangePicker
         .curator-inbox-datepicker--controls.container-flex.central.no-break
@@ -28,14 +35,18 @@ template(name="curatorInbox")
             button#calendar-btn-reset.btn.btn-default(type="button") Reset
       if isReady
         .curator-inbox-source-list
-          each day in days
-            +curatorInboxSection(
-              date=day
-              index=@index
-              reviewFilter=reviewFilter
-              textFilter=textFilter
-              selectedSourceId=selectedSourceId
-              currentPaneInView=currentPaneInView)
+          if articles.count
+            each day in days
+              +curatorInboxSection(
+                date=day
+                index=@index
+                reviewFilter=reviewFilter
+                textFilter=textFilter
+                selectedSourceId=selectedSourceId
+                currentPaneInView=currentPaneInView
+                dateType=dateType)
+          else
+            +noResults message=noDocumentsMessage
       else
         +loading static=true
     #touch-stage.curator-source-details.pane.pane-r.curator-inbox--pane(
@@ -44,7 +55,8 @@ template(name="curatorInbox")
         +curatorSourceDetails(
           selectedSourceId=selectedSourceId
           query=query
-          currentPaneInView=currentPaneInView)
+          currentPaneInView=currentPaneInView
+          dateType=dateType)
     .curator-inbox-sources--back-to-top.off-canvas
       button.btn.btn-primary.btn-wide.back-to-top(
         class="{{#if detailsInView}} off{{else}}on{{/if}}-canvas"

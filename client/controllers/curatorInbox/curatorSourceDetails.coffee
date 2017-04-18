@@ -14,10 +14,11 @@ _markReviewed = (instance, showNext=true) ->
       setTimeout ->
         if showNext
           unReviewedQuery = $and: [ {reviewed: false}, instance.data.query.get()]
-          nextSource = Articles.findOne unReviewedQuery,
-            sort:
-              publishDate: -1
-          instance.data.selectedSourceId.set(nextSource._id)
+          sort = sort: {}
+          sort.sort[instance.data.dateType] = -1
+          nextSource = Articles.findOne unReviewedQuery, sort
+          if nextSource
+            instance.data.selectedSourceId.set(nextSource._id)
         notifying.set(false)
         resolve()
       , 1200

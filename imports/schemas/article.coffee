@@ -1,4 +1,4 @@
-articleSchema = new SimpleSchema(
+articleSchema = new SimpleSchema
   _id:
     type: String
     optional: true
@@ -34,8 +34,8 @@ articleSchema = new SimpleSchema(
   deletedDate:
     type: Date
     optional: true
-  feed:
+  feedId:
     type: String
     optional: true
-)
+
 module.exports = articleSchema

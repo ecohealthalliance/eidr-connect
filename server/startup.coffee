@@ -5,6 +5,8 @@ articleSchema = require '/imports/schemas/article.coffee'
 Articles = require '/imports/collections/articles.coffee'
 PromedPosts = require '/imports/collections/promedPosts.coffee'
 CuratorSources = require '/imports/collections/curatorSources'
+Feeds = require '/imports/collections/feeds'
+feedSchema = require '/imports/schemas/feed'
 Constants = require '/imports/constants.coffee'
 
 Meteor.startup ->
@@ -94,6 +96,28 @@ Meteor.startup ->
               id: "userSpecifiedDisease:#{incident.disease}"
               text: "Other Disease: #{incident.disease}"
 
+  promedFeed = Feeds.findOne(url: 'promedmail.org/post/')
+  if not promedFeed?.title
+    newFeedProps =
+      title: 'ProMED-mail'
+      url: 'promedmail.org/post/'
+    feedSchema.validate(newFeedProps)
+    Feeds.upsert promedFeed?._id,
+      $set: newFeedProps
+      $setOnInsert:
+        addedDate: new Date()
+
+  promedFeedId = Feeds.findOne(url: $regex: /promedmail.org/)?._id
+  console.log promedFeedId
+
+  Articles.find(
+    url: $regex: /promedmail.org/
+    feedId: $exists: false
+  ).forEach (article) ->
+    Articles.update article._id,
+      $set: feedId: promedFeedId
+      $unset: feed: ''
+
   CuratorSources.find().forEach (source) ->
     url = "promedmail.org/post/#{source._sourceId}"
     article =
@@ -104,6 +128,6 @@ Meteor.startup ->
       publishDateTZ: "EDT"
       title: source.title
       reviewed: source.reviewed
-      feed: "promed-mail"
+      feedId: promedFeedId
     articleSchema.validate(article)
     Articles.upsert(article._id, article)

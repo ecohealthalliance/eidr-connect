@@ -45,7 +45,6 @@ Template.newIncidentFromSelection.onRendered ->
 
 Template.newIncidentFromSelection.helpers
   position: ->
-    console.log Template.instance().popupPosition.get()
     Template.instance().popupPosition.get()
 
   scrolled: ->
