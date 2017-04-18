@@ -12,7 +12,7 @@ do ->
           @waitForVisible(selector)
           @click(selector)
         commandsAdded = true
-      @server.call('load')
+      console.log 'Results of load method:' + JSON.stringify(@server.call('load'), null, 4)
       @client.url(url.resolve(process.env.ROOT_URL, '/'))
 
     @After ->

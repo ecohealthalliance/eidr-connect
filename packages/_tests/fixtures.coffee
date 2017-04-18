@@ -3,10 +3,10 @@ if Meteor.isAppTest
   exec = Npm.require('child_process').exec
 
   pwd = process.env.PWD
-  mongo_path = Meteor.settings.private?.mongo_path || "#{pwd}/node_modules/mongodb-prebuilt/binjs"
-  mongo_host = Meteor.settings.private?.mongo_host || '127.0.0.1'
-  mongo_port = Meteor.settings.private?.mongo_port || '27017'
-  test_db = Meteor.settings.private?.test_db || 'eidr-connect-test'
+  mongo_path = "#{pwd}/node_modules/mongodb-prebuilt/binjs"
+  mongo_host = '127.0.0.1'
+  mongo_port = '27017'
+  test_db = 'eidr-connect-test'
 
   syncExec = Meteor.wrapAsync(exec)
 
@@ -31,24 +31,29 @@ if Meteor.isAppTest
         cmd = "#{mongo_path}/mongorestore --host #{mongo_host} --port #{mongo_port} -d #{test_db} #{pwd}/tests/dump/#{test_db}"
       try
         syncExec(cmd)
-        Meteor.call('createTestingAdmin')
+        Meteor.call('createTestingAdmin', cmd)
       catch error
         console.error(error.message)
-        Meteor.call('reset')
+        Meteor.call('reset', error, cmd)
 
     ###
     # reset - removes all data from the database
     ###
-    reset: ->
+    reset: (error, cmd) ->
       allUsers = Meteor.users.find({}).fetch()
       for user in allUsers
         Roles.removeUsersFromRoles(user._id, 'admin')
       Package['xolvio:cleaner'].resetDatabase()
+      users: allUsers
+      context: @
+      message: error
+      cmd: cmd
+      meteorSettings: Meteor.settings
 
     ###
     # createTestingAdmin - will create an admin account for testing
     ###
-    createTestingAdmin: ->
+    createTestingAdmin: (cmd) ->
       email = 'chimp@testing1234.com'
       try
         newId = Accounts.createUser({
@@ -58,6 +63,10 @@ if Meteor.isAppTest
             name: 'Chimp'
         })
         Roles.addUsersToRoles(newId, ['admin'])
+        id: newId
+        cmd: cmd
+        context: @
       catch error
         # this user shouldn't belong in the production database
         console.warn("TestingAdmin user '#{email}' exists")
+        'Error! Context: ' + @

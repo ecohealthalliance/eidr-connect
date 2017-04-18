@@ -60,6 +60,7 @@ fi
 
 echo "Dropping testing '${test_db}' if it exists..."
 if [ $is_docker = "true" ]; then
+  echo 'Running mongo'
   mongo --host $mongo_host --port $mongo_port $test_db --eval "db.dropDatabase()"
   # copy settings-dev.json from the shared volume
   cp $shared_dir/settings-dev.json ${pwd}/settings-dev.json
@@ -83,6 +84,7 @@ trap signalCaught SIGKILL # 9
 trap signalCaught SIGTERM # 15
 
 MONGO_URL=mongodb://${mongo_host}:${mongo_port}/${test_db} meteor test --full-app --driver-package tmeasday:acceptance-test-driver -p ${app_port} --settings settings-dev.json > ${log_file} &
+echo $MONGO_URL
 APP_PID=$!
 echo $APP_PID > $pid_file
 echo "Starting server with PID: ${APP_PID}"
