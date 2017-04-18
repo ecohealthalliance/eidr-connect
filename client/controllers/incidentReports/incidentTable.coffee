@@ -89,7 +89,8 @@ Template.incidentTable.helpers
     instance = Template.instance()
     query = instance.acceptedQuery()
     query.url = instance.data.source.url
-    Incidents.find(query)
+    _.sortBy Incidents.find(query).fetch(), (incident) ->
+      incident.annotations?.case?[0].textOffsets?[0]
 
   allSelected: ->
     instance = Template.instance()
@@ -154,10 +155,11 @@ Template.incidentTable.events
 
   'click table.incident-table tr td.edit': (event, instance) ->
     event.stopPropagation()
-    snippetHtml = buildAnnotatedIncidentSnippet(instance.data.source.enhancements.source.cleanContent.content, @)
+    source = instance.data.source
+    snippetHtml = buildAnnotatedIncidentSnippet(source.enhancements.source.cleanContent.content, @)
     Modal.show 'suggestedIncidentModal',
       edit: true
-      articles: [instance.data.source]
+      articles: [source]
       userEventId: null
       incident: @
       incidentText: Spacebars.SafeString(snippetHtml)

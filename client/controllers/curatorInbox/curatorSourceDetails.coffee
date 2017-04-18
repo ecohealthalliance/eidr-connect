@@ -73,7 +73,7 @@ Template.curatorSourceDetails.onRendered ->
       if source.enhancements?.dateOfDiagnosis
         instance.incidentsLoaded.set(true)
       else
-        Meteor.call 'getArticleEnhancementsAndUpdate', source, (error, enhancements)=>
+        Meteor.call 'getArticleEnhancementsAndUpdate', source, (error, enhancements) =>
           if error
             notify('error', error.reason)
           else
