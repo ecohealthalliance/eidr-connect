@@ -108,7 +108,6 @@ Meteor.startup ->
         addedDate: new Date()
 
   promedFeedId = Feeds.findOne(url: $regex: /promedmail.org/)?._id
-  console.log promedFeedId
 
   Articles.find(
     url: $regex: /promedmail.org/
