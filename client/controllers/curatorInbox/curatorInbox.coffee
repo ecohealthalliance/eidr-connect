@@ -5,6 +5,20 @@ import { formatDateRange } from '/imports/ui/helpers'
 import { keyboardSelect, debounceCheckTop } from '/imports/utils'
 { updateCalendarSelection } = require('/imports/ui/setRange')
 
+CUSTOM_FEEDS = [
+  {
+    _id: 'userAdded'
+    title: 'User Added'
+  },
+  {
+    _id: 'currentUser'
+    title: "Current User's"
+  }
+]
+
+getCustomFeedArray = ->
+  _.pluck(CUSTOM_FEEDS, '_id')
+
 createNewCalendar = (latestSourceDate, range) ->
   {startDate, endDate} = range
   createInlineDateRangePicker $("#date-picker"),
@@ -49,9 +63,8 @@ Template.curatorInbox.onCreated ->
   @filtering = new ReactiveVar(false)
   @searching = new ReactiveVar(false)
   @selectedFeedId = new ReactiveVar()
-  @subscribe 'feeds',
-    onReady: =>
-      @selectedFeedId.set(Feeds.findOne(title: 'ProMED-mail')._id)
+  @subscribe 'feeds', =>
+    @selectedFeedId.set(Feeds.findOne(title: 'ProMED-mail')._id)
 
 Template.curatorInbox.onRendered ->
   # determine if our `back-to-top` button should be initially displayed
@@ -64,8 +77,14 @@ Template.curatorInbox.onRendered ->
 
   @autorun =>
     if @ready.get()
+      if @selectedFeedId.get() in getCustomFeedArray()
+        latestSourceDate = moment().format('L')
+        range = @dateRange.get()
+      else
+        latestSourceDate = @latestSourceDate.get()
+        range = @defaultDateRange
       Meteor.defer =>
-        createNewCalendar(@latestSourceDate.get(), @dateRange.get())
+        createNewCalendar(latestSourceDate, range)
         @$('[data-toggle="tooltip"]').tooltip
           container: 'body'
 
@@ -85,14 +104,15 @@ Template.curatorInbox.onRendered ->
 
     dateQuery =
       $gte: new Date(startDate)
-      $lte: new Date(endDate)
-    sorting = sort: publishDate: -1
+      $lte: moment(endDate).add(1, 'd').toDate()
+    sorting = sort: {}
+    sortProp = 'publishDate'
     if query.addedByUserId
-      sorting = sort: addedDate: -1
+      sortProp = 'addedDate'
       query.addedDate = dateQuery
     else
       query.publishDate = dateQuery
-
+    sorting.sort[sortProp] = -1
     @sorting.set(sorting)
 
     @query.set(query)
@@ -111,8 +131,7 @@ Template.curatorInbox.onRendered ->
       if firstSource
         @selectedSourceId.set(firstSource._id)
       @filtering.set(false)
-      if not @latestSourceDate.get()
-        @latestSourceDate.set Articles.findOne({}, sorting)?.publishDate
+      @latestSourceDate.set(Articles.findOne({}, sorting)?[sortProp])
       @ready.set(true)
 
 Template.curatorInbox.onDestroyed ->
@@ -181,17 +200,7 @@ Template.curatorInbox.helpers
 
   feeds: ->
     feeds = Feeds.find().fetch()
-    customFeeds = [
-      {
-        _id: 'userAdded'
-        title: 'User Added'
-      },
-      {
-        _id: 'currentUser'
-        title: "Current User's"
-      }
-    ]
-    feeds.concat(customFeeds)
+    feeds.concat(CUSTOM_FEEDS)
 
   selectedFeed: ->
     @_id is Template.instance().selectedFeedId.get()
@@ -226,6 +235,9 @@ Template.curatorInbox.helpers
 
   feedTitle: ->
     @title or @url
+
+  allowAddingNewDocument: ->
+    Template.instance().selectedFeedId.get() in getCustomFeedArray()
 
 Template.curatorInbox.events
   'click .curator-filter-reviewed-icon': (event, instance) ->

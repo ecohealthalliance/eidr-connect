@@ -5,12 +5,13 @@ template(name="curatorInbox")
       unless searching
         h2 Documents
       .curator-inbox-options
-        a.option.add-document.plain-focus(
-          data-toggle="tooltip"
-          title="Add New Document"
-          tabindex="0")
-          i.fa.fa-plus(aria-hidden="true")
-        .spacer
+        if allowAddingNewDocument
+          a.option.add-document.plain-focus(
+            data-toggle="tooltip"
+            title="Add New Document"
+            tabindex="0")
+            i.fa.fa-plus(aria-hidden="true")
+          .spacer
         if reviewedArticles
           a.option.curator-filter-reviewed-icon.plain-focus(
             class="{{#unless reviewFilterActive}} active {{/unless}}"
