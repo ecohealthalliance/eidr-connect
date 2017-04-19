@@ -142,25 +142,28 @@
       min-width 0
       margin-bottom 0
       margin-left -21px
-    &::before
-      margin-top 2px
-      padding 1em .4em .9em .5em
-      display none
-      vertical-align middle
-      content '\f08e' // fa-external-link
-      opacity 0
-      font-size .8em
-      font(FontAwesome)
-      line-height 0
-      font-weight normal
-      +above($break-point--curator-inbox)
-        display inline-block
-    &:hover
-      color $warning
+    &:not(.linked)
+      margin-left 0
+    &.linked
       &::before
-        opacity 1
-        background white
-        color $highlight
+        margin-top 2px
+        padding 1em .4em .9em .5em
+        display none
+        vertical-align middle
+        content '\f08e' // fa-external-link
+        opacity 0
+        font-size .8em
+        font(FontAwesome)
+        line-height 0
+        font-weight normal
+        +above($break-point--curator-inbox)
+          display inline-block
+      &:hover
+        color $warning
+        &::before
+          opacity 1
+          background white
+          color $highlight
     a
       vertical-align middle
       color $primary
