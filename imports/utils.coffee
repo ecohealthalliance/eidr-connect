@@ -1,4 +1,5 @@
 Constants = require '/imports/constants.coffee'
+Articles = require '/imports/collections/articles.coffee'
 import { pluralize } from '/imports/ui/helpers'
 
 ###
@@ -81,11 +82,11 @@ export incidentReportFormToIncident = (form) ->
 
   articleSourceUrl = form.articleSourceUrl
   if articleSourceUrl
-    incident.url = articleSourceUrl.value
+    incident.articleId = Articles.findOne(url: articleSourceUrl)._id
   else
     for child in $(form.articleSource).select2('data')
       if child.selected
-        incident.url = child.text.trim()
+        incident.articleId = Articles.findOne(url: child.text.trim())._id
   for option in $(form).find('#incident-disease-select2').select2('data')
     incident.resolvedDisease =
       id: option.id
