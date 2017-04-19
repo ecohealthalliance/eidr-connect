@@ -41,7 +41,7 @@ done
 
 # use args or default
 test_db=${test_db:=eidr-connect-test}
-mongo_host=${mongo_host:=127.0.0.1}
+mongo_host=${mongo_host:=mongodb}
 mongo_port=${mongo_port:=27017}
 app_port=${app_port:=3001}
 is_docker=${is_docker:=false}
