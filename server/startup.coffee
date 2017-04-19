@@ -68,10 +68,9 @@ Meteor.startup ->
 
   # Store urls on incidents as strings rather than arrays
   Incidents.find('url.0': {$exists: true}).forEach (incident) ->
-    console.log Articles.findOne(url: incident.url[0])?.id
     Incidents.update _id: incident._id,
+      $set: articleId: Articles.findOne(url: incident.url[0])?._id
       $unset: url: ''
-      $set: articleId: Articles.findOne(url: incident.url[0])?.id
 
   # Set resolved diseases
   Incidents.find(
@@ -98,7 +97,7 @@ Meteor.startup ->
               id: "userSpecifiedDisease:#{incident.disease}"
               text: "Other Disease: #{incident.disease}"
 
-  promedFeed = Feeds.findOne(url: 'http://promedmail.org')
+  promedFeed = Feeds.findOne(url: $regex: /promedmail.org/)
   if not promedFeed?.title
     newFeedProps =
       title: 'ProMED-mail'
@@ -132,10 +131,3 @@ Meteor.startup ->
       feedId: promedFeedId
     articleSchema.validate(article)
     Articles.upsert(article._id, article)
-
-  Incidents.find(articleId: $exists: false).forEach (incident) ->
-    parentArticle = Articles.findOne(url: $regex: incident.url)
-    if parentArticle
-      Incidents.update incident._id,
-        $unset: url: ''
-        $set: articleId: parentArticle._id

@@ -2,7 +2,7 @@ Articles = require '/imports/collections/articles.coffee'
 import { pluralize } from '/imports/ui/helpers'
 
 Template.incidentReport.onCreated ->
-  @subscribe 'incidentArticle', @articleId
+  @subscribe 'incidentArticle', @data.articleId
 
 Template.incidentReport.helpers
   caseCounts: ->
@@ -18,4 +18,4 @@ Template.incidentReport.helpers
     @deaths or @cases or @status
 
   incidentUrl: ->
-    Articles.findOne(@articleId).url
+    Articles.findOne(@articleId)?.url

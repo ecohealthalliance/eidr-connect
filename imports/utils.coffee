@@ -80,13 +80,16 @@ export incidentReportFormToIncident = (form) ->
       toastr.error("Unknown incident type [#{incidentType}]")
       return
 
-  articleSourceUrl = form.articleSourceUrl
+  articleSourceUrl = form.articleSourceUrl.value
+  sourceSelect2Data = $(form.articleSource)?.select2('data')
   if articleSourceUrl
-    incident.articleId = Articles.findOne(url: articleSourceUrl)._id
-  else
-    for child in $(form.articleSource).select2('data')
+    articleUrl = articleSourceUrl
+  else if sourceSelect2Data
+    for child in sourceSelect2Data
       if child.selected
-        incident.articleId = Articles.findOne(url: child.text.trim())._id
+        articleUrl = child.text.trim()
+  incident.articleId = Articles.findOne(url: articleUrl)._id
+
   for option in $(form).find('#incident-disease-select2').select2('data')
     incident.resolvedDisease =
       id: option.id
