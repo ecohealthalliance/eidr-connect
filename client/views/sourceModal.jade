@@ -33,12 +33,12 @@ template(name="sourceModal")
             else
               .form-group.full-width.with-tabs
                 ul.tabs.tabs-secondary.tabs-traditional(role="tablist")
-                  li.active
+                  li(class="{{#if originIsUrl}}active{{/if}}")
                     a(href="#url" data-toggle="tab" role="tab") Via URL
-                  li
+                  li(class="{{#if originIsText}}active{{/if}}")
                     a(href="#text" data-toggle="tab" role="tab") Via Pasted Text
                 .tab-content.modal-block
-                  #url.tab-pane.active(role="tabpanel")
+                  #url.tab-pane(class="{{#if originIsUrl}}active{{/if}}" role="tabpanel")
                     .form-group(class="{{suggested 'url'}}")
                       input#article.form-control.new-article(
                         type="url"
@@ -47,7 +47,7 @@ template(name="sourceModal")
                         placeholder='yourdocumenturl.com'
                         required=originIsUrl)
                       .help-block.with-errors
-                  #text.tab-pane(role="tabpanel")
+                  #text.tab-pane(class="{{#if originIsText}}active{{/if}}" role="tabpanel")
                     textarea.form-control.article-text#content(
                       placeholder="Paste text here"
                       name='content'

@@ -50,6 +50,16 @@ Template.sourceModal.onCreated ->
       add: 'off-canvas--left'
       remove: 'fade'
 
+  @clearInputs = (clearUrlInput=false) =>
+    _setDatePicker(@datePicker, new Date())
+    @$('#title').val('')
+    @$('#publishTime').val('')
+    if clearUrlInput
+      input = '#article'
+    else
+      input = '#content'
+    @$(input).val('')
+
   if @data.edit
     if @data.publishDate
       @timezoneFixedPublishDate = convertDate(@data.publishDate, 'local',
@@ -229,7 +239,13 @@ Template.sourceModal.events
         _checkForPublishDate(url, instance)
   , 200
 
+  'input #text': (event, instance) ->
+    instance.clearInputs(true)
+    removeSuggestedProperties(instance, 'all')
+
   'click #suggested-articles li': (event, instance) ->
+    instance.clearInputs()
+    instance.articleOrigin.set('url')
     _checkForPublishDate(@url, instance)
 
   'submit form': (event, instance) ->

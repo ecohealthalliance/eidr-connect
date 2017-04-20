@@ -136,6 +136,9 @@ export keyboardSelect = (event) ->
 
 export removeSuggestedProperties = (instance, props) ->
   suggestedFields = instance.suggestedFields
+  if typeof props is 'string'
+    suggestedFields.set([])
+    return
   suggestedFields.set(_.difference(suggestedFields.get(), props))
 
 export diseaseOptionsFn = (params, callback) ->
