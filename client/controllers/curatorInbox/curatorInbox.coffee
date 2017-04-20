@@ -77,16 +77,16 @@ Template.curatorInbox.onRendered ->
 
   @autorun =>
     if @ready.get()
-      if @selectedFeedId.get() in getCustomFeedArray()
-        latestSourceDate = moment().format('L')
-        range = @dateRange.get()
-      else
-        latestSourceDate = @latestSourceDate.get()
-        range = @defaultDateRange
       Meteor.defer =>
-        createNewCalendar(latestSourceDate, range)
+        createNewCalendar(@latestSourceDate.get(), @dateRange.get())
         @$('[data-toggle="tooltip"]').tooltip
           container: 'body'
+
+  @autorun =>
+    if @selectedFeedId.get() in getCustomFeedArray()
+      latestSourceDate = moment().format('L')
+      range = @dateRange.get()
+      createNewCalendar(latestSourceDate, range)
 
   @autorun =>
     @filtering.set(true)
