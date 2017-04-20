@@ -39,13 +39,14 @@ template(name="sourceModal")
                     a(href="#text" data-toggle="tab" role="tab") Via Pasted Text
                 .tab-content.modal-block
                   #url.tab-pane.active(role="tabpanel")
-                    input#article.form-control.new-article(
-                      type="url"
-                      value=url
-                      name="url"
-                      placeholder='yourdocumenturl.com'
-                      required=originIsUrl)
-                    .help-block.with-errors
+                    .form-group(class="{{suggested 'url'}}")
+                      input#article.form-control.new-article(
+                        type="url"
+                        value=url
+                        name="url"
+                        placeholder='yourdocumenturl.com'
+                        required=originIsUrl)
+                      .help-block.with-errors
                   #text.tab-pane(role="tabpanel")
                     textarea.form-control.article-text#content(
                       placeholder="Paste text here"

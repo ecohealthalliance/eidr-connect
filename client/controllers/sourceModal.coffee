@@ -20,6 +20,23 @@ _setDatePicker = (picker, date) ->
   picker.setStartDate(date)
   picker.clickApply()
 
+_checkForPublishDate = (url, instance) ->
+  match = /promedmail\.org\/post\/(\d+)/ig.exec(url)
+  if match
+    articleId = match[1]
+    Meteor.call 'retrieveProMedArticle', articleId, (error, article) ->
+      if article
+        date = moment.utc(article.promedDate)
+        # Aproximate DST for New York timezone
+        daylightSavings = moment.utc("#{date.year()}-03-08") <= date
+        daylightSavings = daylightSavings and moment.utc(
+          date.year() + "-11-01") >= date
+        tz = if daylightSavings then 'EDT' else 'EST'
+        _article = _.extend article,
+          tz: tz
+          date: date.utcOffset(UTCOffsets[tz])
+        instance.selectedArticle.set(_article)
+
 Template.sourceModal.onCreated ->
   @suggest = @data.suggest
   @suggest ?= true
@@ -69,10 +86,12 @@ Template.sourceModal.onRendered ->
   @$('#add-source').validator()
 
   @autorun =>
-    article = @selectedArticle.get()
-    if article.url and not article.promedDate
-      # Trigger input event on url field so datetime is updated
-      @$('#article').trigger('input')
+    { tz, date } = @selectedArticle.get()
+    if date
+      @$('#publishDateTZ').val(tz)
+      @$('#publishTime').data('DateTimePicker').date(date)
+      _setDatePicker(@datePicker, date)
+      @suggestedFields.set(['title', 'date', 'time', 'url'])
 
 Template.sourceModal.helpers
   timezones: ->
@@ -204,32 +223,14 @@ Template.sourceModal.events
       else
         stageModals(instance, instance.modals)
 
-  'input #article': (event, instance) ->
-    value = event.currentTarget.value.trim()
-    match = /promedmail\.org\/post\/(\d+)/ig.exec(value)
-    if match
-      articleId = Number(match[1])
-      Meteor.call 'retrieveProMedArticle', articleId, (error, article) ->
-        if article
-          date = moment.utc(article.promedDate)
-          # Aproximate DST for New York timezone
-          daylightSavings = moment.utc("#{date.year()}-03-08") <= date
-          daylightSavings = daylightSavings and moment.utc(
-            date.year() + "-11-01") >= date
-          tz = if daylightSavings then 'EDT' else 'EST'
-          date = date.utcOffset(UTCOffsets[tz])
-          instance.$('#publishDateTZ').val(tz)
-          _setDatePicker(instance.datePicker, date)
-          instance.$('#publishTime').data('DateTimePicker').date(date)
-          suggestedFields = ['title', 'date', 'time']
-          unless instance.selectedArticle.get().promedDate
-            suggestedFields.push('url')
-          instance.suggestedFields.set(suggestedFields)
-          instance.selectedArticle.set(article)
+  'input #article': _.debounce (event, instance) ->
+      url = event.target.value.trim()
+      if url.length > 20 # Check if the length at url base length
+        _checkForPublishDate(url, instance)
+  , 200
 
   'click #suggested-articles li': (event, instance) ->
-    event.preventDefault()
-    instance.selectedArticle.set(@)
+    _checkForPublishDate(@url, instance)
 
   'submit form': (event, instance) ->
     instance.formValid.set(not event.isDefaultPrevented())
@@ -238,20 +239,20 @@ Template.sourceModal.events
   'change #publishDateTZ': (e, instance) ->
     instance.tzIsSpecified = true
 
-  'dp.change #publishTime, change #publishDateTZ': (event, instance) ->
+  'click #publishTime, click #publishDateTZ': (event, instance) ->
     removeSuggestedProperties(instance, ['time'])
 
   'keyup #article': (event, instance) ->
     removeSuggestedProperties(instance, ['url'])
 
-  'apply.daterangepicker #publishDate': (event, instance) ->
+  'click #publishDate': (event, instance) ->
     removeSuggestedProperties(instance, ['date'])
 
-  'change input[name=daterangepicker_start]': (event, instance) ->
+  'click input[name=daterangepicker_start]': (event, instance) ->
     removeSuggestedProperties(instance, ['date'])
     instance.datePicker.clickApply()
 
-  'input input[name=title], input input[name=url]': (event, instance) ->
+  'click input[name=title], click input[name=url]': (event, instance) ->
     removeSuggestedProperties(instance, [event.currentTarget.name])
 
   'click .tabs li a': (event, instance) ->

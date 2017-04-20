@@ -116,7 +116,7 @@ Meteor.methods
   retrieveProMedArticle: (articleId) ->
     @unblock()
     article = PromedPosts.findOne
-      promedId: "#{articleId}"
+      promedId: articleId
 
     promedDate: article.promedDate
     url: "http://www.promedmail.org/post/#{article.promedId}"
