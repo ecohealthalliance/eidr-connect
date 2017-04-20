@@ -41,6 +41,7 @@ Meteor.publish 'smartEvents', () ->
   SmartEvents.find({deleted: {$in: [null, false]}})
 
 Meteor.publish 'ArticleIncidentReports', (articleId) ->
+  check(articleId, Match.Maybe(String))
   Incidents.find articleId: articleId,
     sort: 'annotations.case.0.textOffsets.0': 1
 
