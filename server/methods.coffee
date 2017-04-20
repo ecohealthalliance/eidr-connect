@@ -45,10 +45,9 @@ Meteor.methods
     locationAnnotations = features.filter (f) -> f.type == 'location'
     geonameIds = locationAnnotations.map((r) -> r.geoname.geonameid)
     if geonameIds.length > 0
-      geonamesResult = HTTP.get Constants.GRITS_URL + '/api/geoname_lookup/api/geonames', {
+      geonamesResult = HTTP.get Constants.GRITS_URL + '/api/geoname_lookup/api/geonames',
         params:
           ids: geonameIds
-      }
       geonames = geonamesResult.data.docs
       geonamesById = {}
       geonames.forEach (geoname) ->
@@ -205,7 +204,7 @@ Meteor.methods
     Accounts.setPassword(userId, authInfo.authTicket, logout:false)
 
   addSourceIncidentReportsToCollection: (source, options) ->
-    { acceptByDefault } = options
+    { acceptByDefault, saveResults } = options
     enhancements = source.enhancements
     check enhancements, Object
     options.articleId = source._id
@@ -213,9 +212,6 @@ Meteor.methods
     incidents = createIncidentReportsFromEnhancements(enhancements, options)
     incidents = incidents.map (incident) ->
       incident = _.pick(incident, incidentReportSchema.objectKeys())
-    # check for unexpected urls
-    # if not options.url.startsWith("promedmail.org/post/")
-    #   throw Meteor.Error("Bad url")
     # Remove prior unassociated incidents for the document
     Incidents.remove
       articleId: source._id

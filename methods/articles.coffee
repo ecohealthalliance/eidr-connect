@@ -12,6 +12,7 @@ Meteor.methods
       if existingSource
         Articles.update sourceQuery,
           $set: userEventId: source.userEventId
+        existingSource._id
       else
         insertArticle =
           url: source.url
