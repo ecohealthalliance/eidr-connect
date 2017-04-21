@@ -56,7 +56,7 @@ done
 
 # use args or default
 app_protocol=${app_protocol:=http}
-app_host=${app_host:=mongodb}
+app_host=${app_host:=localhost}
 app_port=${app_port:=3001}
 watch=${watch:=false}
 browser=${browser:=phantomjs}
