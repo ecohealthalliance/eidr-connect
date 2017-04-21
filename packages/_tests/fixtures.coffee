@@ -4,7 +4,7 @@ if Meteor.isAppTest
 
   pwd = process.env.PWD
   mongo_path = "#{pwd}/node_modules/mongodb-prebuilt/binjs"
-  mongo_host = '127.0.0.1'
+  mongo_host = 'mongodb'
   mongo_port = '27017'
   test_db = 'eidr-connect-test'
 
