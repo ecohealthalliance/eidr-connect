@@ -4,8 +4,8 @@ Incidents = require('/imports/collections/incidentReports')
 Constants = require('/imports/constants.coffee')
 { notify } = require('/imports/ui/notification')
 { stageModals } = require('/imports/ui/modals')
-{ annotateContentWithIncidents,
-  buildAnnotatedIncidentSnippet } = require('/imports/ui/annotation')
+import { annotateContentWithIncidents,
+  buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
 import { formatUrl, createIncidentReportsFromEnhancements } from '/imports/utils.coffee'
 
 # determines if the user should be prompted before leaving the current modal

@@ -1,6 +1,6 @@
 UserEvents = require '/imports/collections/userEvents.coffee'
 Incidents = require '/imports/collections/incidentReports.coffee'
-{ buildAnnotatedIncidentSnippet } = require('/imports/ui/annotation')
+import { buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
 { notify } = require '/imports/ui/notification'
 { formatLocation, formatLocations } = require '/imports/ui/helpers'
 SCROLL_WAIT_TIME = 350

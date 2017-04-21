@@ -1,4 +1,4 @@
-{ buildAnnotatedIncidentSnippet } = require('/imports/ui/annotation')
+import { buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
 import { createIncidentReportsFromEnhancements } from '/imports/utils.coffee'
 
 POPUP_DELAY = 200

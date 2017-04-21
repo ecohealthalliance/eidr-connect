@@ -1,5 +1,7 @@
-annotateContent = (content, annotations, options={})->
-  { startingIndex, endingIndex, selectedAnnotationId } = options
+export annotateContent = (content, annotations, options={}) ->
+  { startingIndex, endingIndex, selectedAnnotationId, pointerEvents} = options
+  pointerEvents ?= true
+
   if not startingIndex
     startingIndex = 0
   if not endingIndex
@@ -53,41 +55,41 @@ annotateContent = (content, annotations, options={})->
       selectedClassName = ''
       if selectedAnnotationId and attributes['data-incident-id'] is selectedAnnotationId
         selectedClassName = 'viewing'
-      html += "<span class='annotation annotation-text #{types} #{selectedClassName}' #{attributeText}>"
+      pointerEventsClass = if pointerEvents then 'linked' else ''
+      html += "<span class='annotation annotation-text #{types} #{selectedClassName} #{pointerEventsClass}' #{attributeText}>"
     lastOffset = offset
   html += Handlebars._escape("#{content.slice(lastOffset, endingIndex)}")
   if endingIndex < content.length - 1
     html += "..."
   html
 
-module.exports =
-  annotateContentWithIncidents: (content, incidents, selectedAnnotationId) ->
-    incidentAnnotations = incidents.map (incident) ->
-      if not incident.annotations?.case[0]
-        return
-      baseAnnotation = _.clone(incident.annotations?.case[0])
-      baseAnnotation.type = if incident.accepted then "accepted" else "unaccepted"
-      if incident.uncertainCountType
-        baseAnnotation.type += " uncertain"
-      baseAnnotation.attributes =
-        'data-incident-id': incident._id
-      return baseAnnotation
-    html = annotateContent content, _.compact(incidentAnnotations),
-     selectedAnnotationId: selectedAnnotationId
-    new Spacebars.SafeString(html)
+export annotateContentWithIncidents = (content, incidents, selectedAnnotationId) ->
+  incidentAnnotations = incidents.map (incident) ->
+    if not incident.annotations?.case[0]
+      return
+    baseAnnotation = _.clone(incident.annotations?.case[0])
+    baseAnnotation.type = if incident.accepted then "accepted" else "unaccepted"
+    if incident.uncertainCountType
+      baseAnnotation.type += " uncertain"
+    baseAnnotation.attributes =
+      'data-incident-id': incident._id
+    return baseAnnotation
+  html = annotateContent content, _.compact(incidentAnnotations),
+   selectedAnnotationId: selectedAnnotationId
+  new Spacebars.SafeString(html)
 
-  buildAnnotatedIncidentSnippet: (content, incident) ->
-    PADDING_CHARACTERS = 30
-    incidentAnnotations = []
-    for type, typeAnnotations of incident.annotations
-      typeAnnotations.forEach (annotation) ->
-        incidentAnnotations.push
-          type: type
-          textOffsets: annotation.textOffsets
-    startingIndex = _.min(incidentAnnotations.map (a)-> a.textOffsets[0])
-    startingIndex = Math.max(startingIndex - PADDING_CHARACTERS, 0)
-    endingIndex = _.max(incidentAnnotations.map (a)-> a.textOffsets[1])
-    endingIndex = Math.min(endingIndex + PADDING_CHARACTERS, content.length - 1)
-    annotateContent content, incidentAnnotations,
-      startingIndex: startingIndex
-      endingIndex: endingIndex
+export buildAnnotatedIncidentSnippet = (content, incident) ->
+  PADDING_CHARACTERS = 30
+  incidentAnnotations = []
+  for type, typeAnnotations of incident.annotations
+    typeAnnotations.forEach (annotation) ->
+      incidentAnnotations.push
+        type: type
+        textOffsets: annotation.textOffsets
+  startingIndex = _.min(incidentAnnotations.map (a)-> a.textOffsets[0])
+  startingIndex = Math.max(startingIndex - PADDING_CHARACTERS, 0)
+  endingIndex = _.max(incidentAnnotations.map (a)-> a.textOffsets[1])
+  endingIndex = Math.min(endingIndex + PADDING_CHARACTERS, content.length - 1)
+  annotateContent content, incidentAnnotations,
+    startingIndex: startingIndex
+    endingIndex: endingIndex
