@@ -86,4 +86,5 @@ MONGO_URL=mongodb://${mongo_host}:${mongo_port}/${test_db} meteor test --full-ap
 APP_PID=$!
 echo $APP_PID > $pid_file
 echo "Starting server with PID: ${APP_PID}"
+tail -f $log_file
 wait $APP_PID
