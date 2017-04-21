@@ -1,9 +1,10 @@
-formatLocation = require '/imports/formatLocation.coffee'
+import { formatLocation } from '/imports/ui/helpers'
 Incidents = require '/imports/collections/incidentReports.coffee'
+Constants = require '/imports/constants.coffee'
 
 incidentsToLocations = (incidents) ->
   locations = {}
-  # Loop 1: Incident Reports
+  # Loop 1: Incidents
   for incident in incidents
     if incident?.locations
       # Loop 2: Locations within each incident record
@@ -13,13 +14,9 @@ incidentsToLocations = (incidents) ->
   # Return
   _.values(locations)
 
-_setRequiredAttr = ->
-  required = false
-  if $('.select2-selection__rendered li').length is 1
-    required = true
-  $('.select2-search__field').attr('required', required)
-
 Template.locationSelect2.onCreated ->
+  @required = @data.required
+  @required ?= false
   # Display locations relevant to this event
   @suggestLocations = (term, callback) ->
     locations = incidentsToLocations Incidents.find().fetch()
@@ -30,7 +27,7 @@ Template.locationSelect2.onCreated ->
   # Retrieve locations from a server
   @ajax = (term, callback) ->
     $.ajax
-      url: "https://geoname-lookup.eha.io/api/lookup"
+      url: Constants.GRITS_URL + "/api/geoname_lookup/api/lookup"
       data:
         q: term
         maxRows: 10
@@ -46,7 +43,7 @@ Template.locationSelect2.onCreated ->
 
 Template.locationSelect2.onRendered ->
   initialValues = []
-  required = true
+  required = @data.required
   if @data.selected
     initialValues = @data.selected.map (loc)->
       id: loc.id
@@ -75,13 +72,20 @@ Template.locationSelect2.onRendered ->
     placeholder: 'Search for a location...'
     minimumInputLength: 0
     dataAdapter: queryDataAdapter
-  if initialValues.length > 0
-    required = false
-    $input.val(initialValues.map((x)->x.id)).trigger('change')
 
-  $('.select2-search__field').attr
-    'required': required
-    'data-error': 'Please select a location.'
-  # Remove required attr when location is selected and add it back when all
-  # locations are removed/unselected
-  $input.on 'change', _setRequiredAttr
+  if required
+    if initialValues.length > 0
+      required = false
+    @$('.select2-search__field').attr
+      'required': required
+      'data-error': 'Please select a location.'
+
+    # Remove required attr when location is selected and add it back when all
+    # locations are removed/unselected
+    $input.on 'change', =>
+      required = false
+      if @$('.select2-selection__rendered li').length is 1
+        required = true
+      @$('.select2-search__field').attr('required', required)
+      @$('select').attr('required', required)
+  $input.val(initialValues.map((x)->x.id)).trigger('change')

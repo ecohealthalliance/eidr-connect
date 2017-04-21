@@ -21,7 +21,7 @@
 
   > li
     display flex
-    flex 1
+    flex 1 1 auto
     justify-content center
     align-items center
     letter-spacing $letter-spacing
@@ -30,47 +30,50 @@
     +above(4)
       margin 0 .5em
 
-.tabs > li > a
-  flex 1
-  width 100%
-  padding-top .75em
-  padding-bottom .75em
-  font-size 1.25em
-  text-align center
-  display block
-  text-transform uppercase
-  text-decoration none
-  border 1px solid $border-primary
-  border-bottom 0
-  +above(2)
+.tabs > li
+  &:hover
+    background-color darken($primary-light, 3%)
+  > a
+    flex 1
+    width 100%
+    padding-top .75em
+    padding-bottom .75em
     font-size 1.25em
-  +above(4)
-    border-top-left-radius 4px
-    border-top-right-radius 4px
+    text-align center
+    display block
+    text-transform uppercase
+    text-decoration none
+    border 1px solid $border-primary
+    border-bottom 0
+    +above(2)
+      font-size 1.25em
+    +above(4)
+      border-top-left-radius 4px
+      border-top-right-radius 4px
 
 .tabs > li > a
 .tabs > li > a:hover
 .tabs > li > a:focus
-.tabs > li > a:active
   color $primary
 
-.tabs > li > a:focus
-.tabs > li.active a:focus
-  background $focus-secondary
-  border-color darken($secondary, 20%)
-  color $primary-dark
+.tabs > li
+.tabs > li.active
+  > a
+    &:focus
+      background $focus-secondary
+      border-color darken($secondary, 20%)
+      color $primary-dark
 
-.tabs > li:hover
-  background-color darken($primary-light, 3%)
-
-.tabs > li.active a
-.tabs > li.active a:hover
-  border-color $primary
-  background-color $primary
-
-.tabs > li.active > a
-  color white
-  cursor default
+.tabs > li.active
+  > a
+    color white
+    cursor default
+    &
+    &:hover
+      border-color $primary
+      background-color $primary
+    &:active
+      color white
 
 .tabs-secondary
   border-bottom 1px solid $border-primary

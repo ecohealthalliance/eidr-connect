@@ -1,0 +1,94 @@
+$acceptedAction = $danger
+
+$tableTypes = {
+  rejected: {
+    actionColor: desaturate(darken($positive, 20%), 20%)
+    icon: '\f111'
+  },
+  accepted: {
+    actionColor: $danger
+    icon: '\f111'
+  }
+}
+
+.incident-table .edit::before
+  icon()
+  content '\f040'
+  color $border-primary
+
+.event-incidents
+.incident-table
+  > tbody
+    > tr
+      border-bottom 1px solid $border-primary-light
+      &:hover
+      &:active
+        background lighten($border-primary-light, 20%)
+        > td
+          background none
+  td
+  th
+    padding 5px
+  .count-header
+    width 50px
+  .locations-header
+    width 300px
+  .edit
+    padding-right 1em
+    transition transform .1s ease-in-out
+    &:hover
+      transform scale(1.5)
+      color $primary-dark
+    &:active
+      transform scale(1.75)
+
+  .disease-name
+    text-transform capitalize
+
+  .selected-annotation
+    transition background .1s
+    background lighten($highlight-yellow, 50%)
+
+  tr
+    .select
+      font-size 1.25em
+      padding .25em
+      color lighten($m-gray, 10%)
+      display block
+      transition .1s
+      &::before
+        icon()
+        content '\f1db' // fa-circle-thin
+    &:active
+      .select
+        transform scale(1.5)
+    .edit
+      &:hover
+        &::before
+          color $primary-dark
+  for $type, $options in $tableTypes
+    $icon = $options.icon
+    &.{$type}
+      tr
+        &:hover
+          .select
+            color: lighten($options.actionColor, 10%)
+        &.selected
+          .select
+            color: $options.actionColor
+            &::before
+              content $icon
+          &:hover
+            .select
+              cursor pointer
+              &::before
+                content $icon
+  .tooltipped
+    font-style italic
+    color $link-color
+    font-size 90%
+    &:hover
+      color $primary-dark
+
+  .dates
+    white-space nowrap

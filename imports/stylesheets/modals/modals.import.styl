@@ -1,5 +1,60 @@
 $modal-border-radius = 4px
 $modal-side-padding = 20px
+$modal-transition-time = .35s
+$modal-transition-time-opacity = .25s
+
+.modal
+  &.flex
+    display flex
+    justify-content center
+  &[class*='off-canvas']
+  &[class*='staged'] .modal-dialog
+  &.transitioned
+    transition transform $modal-transition-time ease-in-out, opacity $modal-transition-time-opacity ease-in-out
+    opacity 1
+  &.off-canvas--left
+    transform translate(-100%, 0) scale(.9)
+  &.off-canvas--right
+    transform translate(100%, 0) scale(.9)
+  &.off-canvas--top
+    transform translate(0, -100%) scale(.9)
+  &[class*="off-canvas"]
+    &.in
+      transform translate(0, 0) scale(1)
+    &.out
+      opacity 0
+  &[class*='off-canvas']
+  &[class*='staged']
+    + .modal-backdrop
+      transition opacity .4s
+    .modal-dialog
+      &::before
+        full-width()
+        content ''
+        display block
+        background-color transparent
+        z-index $top-layer
+        border-radius 4px
+        transition-delay .5s
+        transition background-color .5s ease-in-out
+        pointer-events none
+    &:not(.in)
+      .modal-dialog
+        align-self center
+        transform translate(0,0)
+        &::before
+          background-color alpha(black, 20%)
+    &.transparent-backdrop
+      + .modal-backdrop
+        opacity 0
+  &.staged-left
+    &:not(.in)
+      .modal-dialog
+        transform translate(calc(-100% + 80px), 0) scale(.9)
+  &.staged-right
+    &:not(.in)
+      .modal-dialog
+        transform translate(calc(100% - 80px), 0) scale(.9)
 
 .modal-skinny
   .modal-dialog
@@ -70,10 +125,6 @@ $modal-side-padding = 20px
   &.full-width
     margin-left -20px
     margin-right -20px
-
-.small-text
-  font-size .5em
-  display inline
 
 .close-modal
   position absolute

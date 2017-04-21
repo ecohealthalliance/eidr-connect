@@ -16,9 +16,9 @@ class Zoom
 
     @bandPos = [-1, -1];
     @zoomArea =
-      x1: 0,
-      y1: 0,
-      x2: 0,
+      x1: 0
+      y1: 0
+      x2: 0
       y2: 0
     @drag = d3.drag();
     @zoomGroup = plot.container.append('g').attr('class', 'scatterPlot-zoom')
@@ -86,15 +86,20 @@ class Zoom
   ondragend: (pos, zoom) ->
     x1 = @plot.axes.xScale.invert(@bandPos[0])
     x2 = @plot.axes.xScale.invert(pos[0])
+    if @options.minimumZoom && @options.minimumZoom.hasOwnProperty("x")
+      if x1 < @options.minimumZoom.x then x1 = @options.minimumZoom.x
+      if x2 < @options.minimumZoom.x then x2 = @options.minimumZoom.x
     if x1 < x2
       @zoomArea.x1 = x1
       @zoomArea.x2 = x2
     else
       @zoomArea.x1 = x2
       @zoomArea.x2 = x1
-
     y1 = @plot.axes.yScale.invert(pos[1]);
     y2 = @plot.axes.yScale.invert(@bandPos[1])
+    if @options.minimumZoom && @options.minimumZoom.hasOwnProperty("y")
+      if y1 < @options.minimumZoom.y then y1 = @options.minimumZoom.y
+      if y2 < @options.minimumZoom.y then y2 = @options.minimumZoom.y
     if y1 < y2
       @zoomArea.y1 = y1
       @zoomArea.y2 = y2
@@ -122,8 +127,19 @@ class Zoom
   # resetZoom - reset the plot zoom back to the original viewBox
   ###
   reset: () ->
+    @resetZoomArea()
     @plot.axes.reset()
     @plot.draw()
+
+  ###
+  # resetZoomArea - Set all zoomArea properties to 0
+  ###
+  resetZoomArea: ->
+    @zoomArea =
+      x1: 0
+      y1: 0
+      x2: 0
+      y2: 0
 
   ###
   # remove - remove the zoom interface from a plot

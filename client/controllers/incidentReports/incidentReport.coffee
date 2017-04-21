@@ -1,9 +1,6 @@
-import { formatUrl } from '/imports/utils.coffee'
 import { pluralize } from '/imports/ui/helpers'
 
 Template.incidentReport.helpers
-  formatUrl: formatUrl
-
   caseCounts: ->
     @deaths or @cases
 

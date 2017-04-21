@@ -1,14 +1,14 @@
-formatLocation = require '/imports/formatLocation.coffee'
+import { formatLocation } from '/imports/ui/helpers'
 { keyboardSelect } = require '/imports/utils'
 
 Template.locationList.helpers
   incidentLocations: ->
     locations = {}
     incidents = Template.instance().data.incidents
-    # Loop 1: Incident Reports
+    # Loop 1: Incidents
     for incident in incidents
       if incident?.locations
-        # Loop 2: Locations within each incident report record
+        # Loop 2: Locations within each incident record
         for loc in incident.locations
           if locations[loc.id]  # Append the source, update the date
             mergedSources = _.without(_.union(loc.sources, incident.url), undefined)

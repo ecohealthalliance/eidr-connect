@@ -24,10 +24,15 @@ Meteor.methods
 
   deleteUserEvent: (id) ->
     if Roles.userIsInRole(Meteor.userId(), ['admin'])
-      UserEvents.update id,
+      updateOperator =
         $set:
-          deleted: true,
+          deleted: true
           deletedDate: new Date()
+      UserEvents.update id, updateOperator
+      Incidents.update {
+        userEventId: id
+        deleted: $in: [ null, false ]
+      }, updateOperator, multi: true
 
   editUserEventLastModified: (id) ->
     user = Meteor.user()

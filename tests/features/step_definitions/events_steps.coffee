@@ -7,7 +7,7 @@ do ->
       client.waitForVisible('.reactive-table tbody tr:first-child')
       elements = client.elements('.reactive-table tbody')
       if elements.value.length <= 0
-        throw new Error('Tracked Events table is empty')
+        throw new Error('Curated Events table is empty')
       client.click('.reactive-table tbody tr:first-child')
 
     @When /^I click on the create new event button$/, ->

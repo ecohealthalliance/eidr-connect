@@ -1,0 +1,49 @@
+template(name="incidentTable")
+  .curator-source-details--sub-header
+    h3(class=tableType)=tableType
+    .curator-source-details--actions.container-flex.no-break
+      button.btn.btn-sm.action(
+        disabled="{{#unless incidentsSelected}} true {{/unless}}"
+        class="btn-{{#if acceptance}}success{{else}}danger{{/if}}") #{action}
+      if accepted
+        button.btn.btn-sm.btn-primary.show-addEvent(
+          disabled="{{#unless incidentsSelected}} true {{/unless}}") Add to Event
+      button.btn.btn-sm.btn-default.select.on-right(
+        disabled="{{#unless incidents.length}} true {{/unless}}"
+        class="{{#if allSelected}} deselect-all {{else}} select-all {{/if}}")
+        if allSelected
+          | Deselect All
+        else
+          | Select All
+  if addEvent
+    +addToEvent(
+      selectedIncidents=selectedIncidents
+      tableContentScrollable=tableContentScrollable
+      source=source)
+  if incidents.length
+    .curator-source-details--table-wrapper
+      table.table.incident-table(
+        class=tableType
+        hidden=annotatedContentVisible
+        data-tableexport-display="always")
+        unless hideTableHeader
+          thead
+            tr
+              th
+              th.count-header Type
+              th Dates
+              th.locations-header Locations
+        tbody
+          each incidents
+            tr(class="{{#if selected}} selected {{/if}} {{#if annotationSelected}} selected-annotation {{/if}}"
+              data-incident-id=_id)
+              td
+                span.select
+              td=incidentCountAndDisease
+              td.dates {{formatDateRange dateRange}}
+              td #{firstLocation}
+                if otherLocations
+                  span.tooltipped(data-toggle="tooltip" title=otherLocations) other locations
+              td.edit(title="Edit Incident")
+  else
+    +noResults message="No incidents found"

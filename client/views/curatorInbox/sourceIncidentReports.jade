@@ -1,0 +1,25 @@
+template(name="sourceIncidentReports")
+  .curator-source-details--incidents-container
+    if hasIncidents
+      if hasAcceptedIncidents
+        .curator-source-details--incidents.accepted(
+          class="{{#unless tableContentIsScrollable}} no-scroll {{/unless}}")
+            +incidentTable(
+              source=source
+              scrollToAnnotations=true
+              accepted=true
+              hideTableHeader=true
+              selectedAnnotationId=selectedAnnotationId
+              tableContentScrollable=tableContentScrollable)
+      if hasRejectedIncidents
+        .curator-source-details--incidents.rejected(
+          class="{{#unless tableContentIsScrollable}} no-scroll {{/unless}}")
+              +incidentTable(
+                source=source
+                scrollToAnnotations=true
+                accepted=false
+                hideTableHeader=true
+                selectedAnnotationId=selectedAnnotationId
+                tableContentScrollable=tableContentScrollable)
+    else
+      +noResults message='No Incidents Found'

@@ -1,4 +1,3 @@
-{ dismissModal } = require '/imports/ui/modals'
 validator = require 'bootstrap-validator'
 
 Template.editEventDetailsModal.onCreated ->
@@ -37,13 +36,11 @@ Template.editEventDetailsModal.events
     event.preventDefault()
     name = event.target.eventName.value.trim()
     summary = event.target.eventSummary.value.trim()
-    disease = event.target.eventDisease?.value.trim()
     if name.length isnt 0
       Meteor.call 'upsertUserEvent',
         _id: @_id
         eventName: name
         summary: summary
-        disease: disease
         displayOnPromed: event.target.promed.checked
       , (error, result) ->
         if not error

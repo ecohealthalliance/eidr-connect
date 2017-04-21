@@ -1,12 +1,13 @@
 template(name="incidentReports")
   .container-flex.no-gutter
     .flex-col.bordered
-      .tab-form
-        +addIncidentReport
-      if incidents.length
+      unless smartEvent
+        .tab-form
+          +addIncidentReport
+      if incidents.count
         +reactiveTable collection=incidents settings=getSettings
       else
-        p No incident reports are associated with this event.
+        p.center-position No incidents are associated with this event.
     .flex-col
       .chart
         #scatterPlot-toolbar.container-flex.no-break
@@ -14,8 +15,9 @@ template(name="incidentReports")
             button#scatterPlot-toggleCumulative.btn.btn-xs.btn-default.scatterPlot-toolbar-button
               i.fa.fa-circle-o(aria-hidden="true")
               span Cumulative
-          .flex-col.on-right.items-right
-            button#scatterPlot-resetZoom.btn.btn-xs.btn-default.scatterPlot-toolbar-button
-              i.fa.fa-search-plus(aria-hidden="true")
-              span Reset
+          if plotZoomed
+            .flex-col.on-right.items-right
+              button#scatterPlot-resetZoom.btn.btn-xs.btn-default.scatterPlot-toolbar-button
+                i.fa.fa-search-plus(aria-hidden="true")
+                span Reset
         #scatterPlot

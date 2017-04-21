@@ -19,6 +19,7 @@ Template.extractIncidents.helpers
 Template.extractIncidents.events
   'click .upload-menu a': (event, instance) ->
     instance.source.set($(event.target).data('source'))
+    instance.$(event.currentTarget).blur()
 
   'input textarea, input .submit-url': (event, instance) ->
     if instance.$(event.target).val()
@@ -40,6 +41,8 @@ Template.extractIncidents.events
       userEventId: null
       showTable: true
       acceptByDefault: true
+      offCanvasStartPosition: 'top'
+      classNames: 'extracted'
       article:
         publishDate: new Date()
         addedDate: new Date()

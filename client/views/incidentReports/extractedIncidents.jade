@@ -1,0 +1,37 @@
+template(name="extractedIncidents")
+  table.table.featured.incident-table(
+    hidden=annotatedContentVisible
+    data-tableexport-display="always")
+    thead
+      tr
+        th
+        th.count-header Type
+        th.count-header Value
+        th Start Date
+        th End Date
+        th.locations-header Locations
+        th Status
+        th Species
+        th Properties
+    tbody
+      each incidents
+        tr
+          td
+            span.select(class="{{#if selected}} selected {{/if}}")
+          if cases
+            td Case Count
+            td=cases
+          else if deaths
+            td Death Count
+            td=deaths
+          else
+            td Other
+            td=specify
+          td
+            unless dateRange.cumulative
+              | {{formatDateISO dateRange.start}}
+          td {{formatDateISO dateRange.end}}
+          td {{formatLocations locations}}
+          td=status
+          td=species
+          td=incidentProperties

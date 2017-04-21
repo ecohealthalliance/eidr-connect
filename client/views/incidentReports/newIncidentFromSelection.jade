@@ -1,0 +1,7 @@
+template(name="newIncidentFromSelection")
+  .new-incident-from-selection(
+    class="{{#if scrolled}} positioned {{/if}}"
+    style="left: #{position.left}; top: #{position.top}; bottom: #{position.bottom}; width: #{position.width}; ")
+    button.btn.btn-warning.add-incident-from-selection
+      span.main-action Add Incident
+      span.text=annotatedText

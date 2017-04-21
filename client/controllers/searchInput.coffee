@@ -27,7 +27,6 @@ Template.searchInput.onCreated ->
   @searching = new ReactiveVar(searching)
   @textFilter = instanceData.textFilter or new ReactiveTable.Filter(instanceData.id, instanceData.props)
 
-
 Template.searchInput.helpers
   searchString: ->
     Template.instance().textFilter.get()
@@ -50,10 +49,10 @@ Template.searchInput.events
         $regex: regexEscape(instance.$(event.target).val())
         $options: 'i'
 
-  'click .search-icon.toggleable:not(.cancel)
-    , focusin .search-icon': (event, instance) ->
+  'focusin .search-icon.toggleable:not(.cancel)': (event, instance) ->
+    focus = event.type is 'focusin'
     searching = instance.searching
-    searching.set not searching.get()
+    searching.set(not searching.get())
     setTimeout ->
       instance.$(".search").focus()
     , 200

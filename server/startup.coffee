@@ -5,6 +5,9 @@ articleSchema = require '/imports/schemas/article.coffee'
 Articles = require '/imports/collections/articles.coffee'
 PromedPosts = require '/imports/collections/promedPosts.coffee'
 CuratorSources = require '/imports/collections/curatorSources'
+Feeds = require '/imports/collections/feeds'
+feedSchema = require '/imports/schemas/feed'
+Constants = require '/imports/constants.coffee'
 
 Meteor.startup ->
   # set incident dates
@@ -15,12 +18,6 @@ Meteor.startup ->
     catch error
       console.log error
       console.log JSON.stringify(incident, 0, 2)
-
-  CuratorSources.update
-    reviewed:
-      $exists: false
-    {$set: reviewed: false}
-    {multi: true}
 
   # Clean-up curatorInboxSourceId when user goes offline
   Meteor.users.find({'status.online': true}).observe
@@ -55,3 +52,82 @@ Meteor.startup ->
     Meteor.setTimeout(pullRemoteInstanceData, 1000)
     # Pull data every 6 hours
     Meteor.setInterval(pullRemoteInstanceData, 6 * 60 * 60 * 1000)
+
+  Incidents.find(disease: $exists: false).forEach (incident) ->
+    disease = UserEvents.findOne(incident.userEventId)?.disease
+    if disease
+      Incidents.update incident._id,
+        $set: disease: disease
+
+  # Soft delete incidents of deleted user events
+  UserEvents.find({deleted: true}, {fields: _id:1}).forEach (event) ->
+    Incidents.update {userEventId: event._id, deleted: {$in: [null, false]}},
+      $set:
+        deleted: true
+        deletedDate: new Date()
+
+  # Store urls on incidents as strings rather than arrays
+  Incidents.find('url.0': {$exists: true}).forEach (incident) ->
+    Incidents.update _id: incident._id,
+      $set: url: incident.url[0]
+
+  # Set resolved diseases
+  Incidents.find(
+    resolvedDisease: {$exists: false}
+    disease: {$exists: true}
+  ).forEach (incident) ->
+    if incident.disease
+      console.log incident.disease
+      requestResult = HTTP.get Constants.GRITS_URL + "/api/v1/disease_ontology/lookup",
+        params:
+          q: incident.disease
+      result = requestResult.data.result
+      if result.length > 0
+        d = result[0]
+        Incidents.update _id: incident._id,
+          $set:
+            resolvedDisease:
+              id: d.uri
+              text: d.label
+      else
+        Incidents.update _id: incident._id,
+          $set:
+            resolvedDisease:
+              id: "userSpecifiedDisease:#{incident.disease}"
+              text: "Other Disease: #{incident.disease}"
+
+  promedFeed = Feeds.findOne(url: 'promedmail.org/post/')
+  if not promedFeed?.title
+    newFeedProps =
+      title: 'ProMED-mail'
+      url: 'promedmail.org/post/'
+    feedSchema.validate(newFeedProps)
+    Feeds.upsert promedFeed?._id,
+      $set: newFeedProps
+      $setOnInsert:
+        addedDate: new Date()
+
+  promedFeedId = Feeds.findOne(url: $regex: /promedmail.org/)?._id
+  console.log promedFeedId
+
+  Articles.find(
+    url: $regex: /promedmail.org/
+    feedId: $exists: false
+  ).forEach (article) ->
+    Articles.update article._id,
+      $set: feedId: promedFeedId
+      $unset: feed: ''
+
+  CuratorSources.find().forEach (source) ->
+    url = "promedmail.org/post/#{source._sourceId}"
+    article =
+      _id: source._id._str
+      url: url
+      addedDate: source.addedDate
+      publishDate: source.publishDate
+      publishDateTZ: "EDT"
+      title: source.title
+      reviewed: source.reviewed
+      feedId: promedFeedId
+    articleSchema.validate(article)
+    Articles.upsert(article._id, article)

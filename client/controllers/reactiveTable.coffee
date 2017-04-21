@@ -1,5 +1,5 @@
 Template.reactiveTable.onCreated ->
-  @data.settings.keyboardFocus ?= true
+  @data.settings?.keyboardFocus ?= true
 
 Template.reactiveTable.onRendered ->
   if @data.settings.showLoader

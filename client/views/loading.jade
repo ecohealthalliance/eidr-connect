@@ -1,5 +1,5 @@
 template(name="loading")
   .loading(class="{{#if small}} small {{/if}} {{#unless static}} centered {{/unless}}")
-    img(src="images/loading#{showSmall}.gif")
+    img(src="/images/loading#{showSmall}.gif")
     unless small
-      p Loading
+      p=message

@@ -1,8 +1,9 @@
-@import 'incidentForm.import'
+viewingBG()
+  transition background-color .2s ease-in-out
+  background-color $highlight-primary
+  color black
 
 .annotation-text
-  padding-left .2em
-  padding-right .2em
   border-radius 2px
   text-decoration none
   for $type, $color in $incident-type-colors
@@ -12,36 +13,49 @@
 .annotation
   cursor pointer
   background-color: $incident-type-colors.case
+  &.viewing
+    viewingBG()
   &:hover
     background-color darken(@background-color, 30%)
     color white
   &.uncertain
     background-color transparent
     text-decoration underline
+    &.viewing
+      viewingBG()
     &:hover
-      background-color: darken($incident-type-colors.date, 20%)
+      background-color: darken($incident-type-colors.uncertain, 5%)
+      color $body-text
+      text-decoration none
   &.accepted
     background-color: $incident-type-colors.date
     text-decoration none
+    &.viewing
+      viewingBG()
     &:hover
       background-color darken(@background-color, 50%)
 
 .suggested-incidents
   margin 30px
   width calc(100% - 60px)
-  +above(3)
+  +above($break-point--medium-width)
     width 65%
     max-width 800px
-    margin 30px auto
+    &.extracted
+      max-width initial
+      width calc(100% - 150px)
   .modal-content
-  .modal-header
+    display flex
+    flex-direction column
+    height calc(100vh - 60px)
+    min-height 400px
   .modal-body
+    flex 1 1 auto
     padding 0
-    gradientTopAndBottom()
-    width 100%
+    overflow scroll
+  .modal-header
   .modal-footer
-    margin-top auto
-
+    flex 0 0 auto
   .annotation-count
     display block
     color $primary
@@ -56,37 +70,61 @@
 
   .tabs
     margin-bottom -1px
+    +above($break-point--medium-width)
+      display none
+
+  &.extracted
+    +above($break-point--medium-width)
+      .modal-body
+        display flex
+      .options-wrapper
+        flex-direction row
+
+    .color-legend
+      +above($break-point--medium-width)
+        margin-left 25px
+        margin-bottom 1em
 
 .suggested-incidents-wrapper
-  padding 25px
-  width 100%
-  height calc(100vh - 236px)
-  min-height 250px
-  overflow-y scroll
+  +above($break-point--medium-width)
+    display flex
+    flex 1 1 auto
+    > div
+      overflow scroll
+      flex 1 1 50%
+      &:first-of-type
+        border-right 1px solid $border-primary
 
-.annotated-content
+.extract-incidents-table
+  table[hidden]
+    +above($break-point--medium-width)
+      display block
+
+.suggested-annotated-content
+  margin 25px
   white-space pre-wrap
 
-.snippet
-  gradientBottom(20px, $block-BG)
-  position relative
-  display flex
-  flex-direction column
-  margin-left -20px
-  margin-right -20px
-  margin-top -11px
-  margin-bottom 1em
-  &.modal-block
-    padding 0
+.annotated-content
+  &.snippet
+    gradientBottom(20px, $block-BG)
+    position relative
+    display flex
+    flex-direction column
+    margin-left -20px
+    margin-right -20px
+    margin-top -11px
+    margin-bottom 1em
+    &.modal-block
+      padding 0
+      label
+        display flex
+        border-top 0
     label
-      display flex
-      border-top 0
-  label
-    padding 10px 20px
-    border-bottom 1px solid darken($border-primary-light, 5%)
-    margin-top 0
-    h5
-      margin 0
+      padding 10px 20px
+      border-bottom 1px solid darken($border-primary-light, 5%)
+      margin-top 0
+      h5
+        margin 0
 
 .snippet--text
   flex 1
@@ -106,20 +144,29 @@
   z-index $mid-layer
   font-weight 600
 
-.incident-table
-  tr
-    border-bottom 1px solid gray
-  td
-  th
-    padding 5px
-  .count-header
-    width 50px
-  .locations-header
-    width 300px
-  .count
-    color blue
-    text-decoration underline
-    cursor pointer
+  button
+    margin-right .5em
+    &:last-of-type
+      margin-right 0
+    +at(1)
+      margin 0 0 1em 0
+      padding-top .75em
+      padding-bottom .75em
+  .on-left
+  .select
+    margin-left auto
+    +at(1)
+      margin 0 0 1em 0
+
+.curator-inbox--add-event-container
+  justify-content center
+  padding 1em
+  border-top 1px solid $border-primary-light
+  border-bottom 1px solid $border-primary-light
+  button
+    margin-left 1em
+  .select2-container
+    max-width 50%
 
 .submit-page
   margin-top 30px

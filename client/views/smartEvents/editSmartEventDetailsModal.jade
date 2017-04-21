@@ -1,0 +1,63 @@
+template(name="editSmartEventDetailsModal")
+  #smart-event-modal.modal.fade(role="dialog")
+    .modal-dialog
+      .modal-content
+        form#editEvent(novalidate)
+          +modalCloseButton
+          .modal-header
+            .modal-header--title
+              h4
+                if adding
+                  | Add Smart Event
+                else
+                  | Edit Smart Event Details
+          .modal-body.clearfix
+            if confirmingDeletion
+              +deleteConfirmationModalBody(
+                objId=_id
+                displayName=eventName
+                objNameToDelete='smartEvent'
+                allowEdit=true)
+            else
+              .form-group
+                label Name
+                input.form-control(type='text' name='eventName' value=eventName required)
+                .help-block.with-errors
+              .form-group
+                label Disease
+                +select2(
+                  name="disease"
+                  selectId="disease-select2"
+                  placeholder="Select a disease"
+                  multiple=true
+                  optionsFn=diseaseOptionsFn
+                  selected=diseases)
+                .help-block.with-errors
+              .form-group
+                label Locations
+                +locationSelect2(
+                  selectId="event-locations"
+                  multiple="true"
+                  selected=locations)
+              if showAddDateButton
+                .form-group
+                  button.btn.btn-primary.add-date(type="button") Add Daterange
+              if showCalendar
+                .form-group.form-group--full
+                  label Dates
+                  .modal-block.full-width.centered-calendar
+                    #date-picker.inlineRangePicker
+              .form-group
+                label Summary
+                textarea.form-control(name="eventSummary" rows="15")= summary
+
+          unless confirmingDeletion
+            .modal-footer
+              unless adding
+                button.btn.btn-danger.delete-event.pull-left(type="button") Delete Event
+              button.btn.btn-default(type="button" data-dismiss="modal") Cancel
+              button.btn.btn-success.btn-wide.save-modal(type="submit")
+                if saveActionMessage
+                  {{saveActionMessage}}
+                 else
+                  | Save

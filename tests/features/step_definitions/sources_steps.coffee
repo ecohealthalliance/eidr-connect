@@ -19,11 +19,11 @@ do ->
     getSourcesFromTable = (browser) ->
       browser.elements('#event-sources-table tbody tr')
 
-    @When /^I click on the add source button$/, ->
+    @When /^I click on the add document button$/, ->
       @client.pause(1000)
       @client.clickWhenVisible('.open-source-form-in-details')
 
-    @When /^I create a source with a title of "([^']*)", url of "([^']*)", and datetime of now$/, (title, url) ->
+    @When /^I create a document with a title of "([^']*)", url of "([^']*)", and datetime of now$/, (title, url) ->
       date = new Date()
       @client.waitForVisible('#add-source')
       @client.setValue('#title', title)
@@ -33,29 +33,29 @@ do ->
       # Disable enhancement
       @client.click('[for="enhance"]')
       @browser.scroll(0, 1000)
-      @client.click('#event-source .save-modal')
+      @client.click('#event-source .save-source')
 
-    @When /^I select the existing source$/, ->
+    @When /^I select the existing document$/, ->
       @client.clickWhenVisible('#event-sources-table tbody tr:first-child')
 
-    @When /^I delete the existing source$/, ->
+    @When /^I delete the existing document$/, ->
       @client.clickWhenVisible('.delete-source')
 
-    @When /^I edit the existing source$/, ->
+    @When /^I edit the existing document$/, ->
       @client.clickWhenVisible('.edit-source')
 
-    @When /^I change the source title to "([^']*)" and datetime to now$/, (title) ->
+    @When /^I change the document title to "([^']*)" and datetime to now$/, (title) ->
       date = new Date()
       @client.waitForVisible('#add-source')
       @client.setValue('#title', title)
       @client.setValue('input[name=daterangepicker_start]', formatDate(date))
       @client.setValue('#publishTime', getTime(date))
       @browser.scroll(0, 1000)
-      @client.click('#event-source .save-edit-modal')
+      @client.click('#event-source .save-source-edit')
 
-    @Then /^I see the new source in the source table$/, ->
+    @Then /^I see the new document in the document table$/, ->
       if getSourcesFromTable(@browser).value.length <= 1
-        throw new Error('New source is not in the source table')
+        throw new Error('New document is not in the document table')
 
-    @Then /^I should see an empty sources table$/, ->
+    @Then /^I should see an empty documents table$/, ->
       @browser.waitForVisible('#event-sources-table tbody tr', 10000, true)

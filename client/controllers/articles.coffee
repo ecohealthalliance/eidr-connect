@@ -2,9 +2,6 @@ Incidents = require '/imports/collections/incidentReports.coffee'
 Articles = require '/imports/collections/articles.coffee'
 { keyboardSelect } = require '/imports/utils'
 
-import {formatUrl} from '/imports/utils.coffee'
-
-
 Template.articles.onCreated ->
   @selectedSourceId = new ReactiveVar null
 
@@ -79,12 +76,9 @@ Template.articles.helpers
           locations[location.id] = location.name
     _.flatten locations
 
-  formatUrl: (url) ->
-    formatUrl(url)
-
   searchSettings: ->
     id: 'sourceFilter'
-    placeholder: 'Search sources'
+    placeholder: 'Search documents'
     toggleable: true
     props: ['title']
 
@@ -129,5 +123,7 @@ Template.articleSelect2.onRendered ->
   $input.next('.select2-container').css('width', '100%')
 
 Template.articleSelect2.onDestroyed ->
-  templateInstance = Template.instance()
-  templateInstance.$('#' + templateInstance.data.selectId).select2('destroy')
+  selectId = @data.selectId
+  if selectId
+    Meteor.defer ->
+      @$("##{selectId}").select2('destroy')

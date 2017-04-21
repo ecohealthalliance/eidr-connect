@@ -1,0 +1,33 @@
+.notification
+  position fixed
+  top 50%
+  left 50%
+  transform translate(-50%, -50%)
+  z-index $cosmos-layer
+  padding 5em
+  background alpha(white, 95%)
+  border-radius 4px
+  opacity 0
+  transition opacity .2s linear
+  font-smoothing antialiased
+  border 3px solid transparent
+  h4
+    font-size 1.5em
+  i
+    font-size 10em
+    text-align center
+    display block
+  &.success
+    color $positive
+    border-color $positive
+  &.failure
+  &.error
+    color $danger
+    border-color $danger
+  &.warning
+    color $warning
+    border-color $positive
+  &.active
+    opacity 1
+  &.dismissing
+    opacity 0

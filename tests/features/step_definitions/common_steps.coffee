@@ -46,6 +46,16 @@ do ->
       else
         assert.ok(match)
 
+    @Then /^I should( not)? see a "([^"]*)" notification$/, (noToast, type) ->
+      # Types: success, failure, warning
+      @client.waitForVisible('.notification')
+      toastClasses = @client.getAttribute('.notification', 'class')
+      match = toastClasses?.match(type)
+      if noToast
+        assert.ok(not match)
+      else
+        assert.ok(match)
+
     @Then /^I "([^"]*)" deletion$/, (action) ->
       if action is 'cancel'
         @client.clickWhenVisible('.cancel')

@@ -4,8 +4,8 @@ import ScatterPlot from '/imports/charts/ScatterPlot.coffee'
 import Axes from '/imports/charts/Axes.coffee'
 import Group from '/imports/charts/Group.coffee'
 import SegmentMarker from '/imports/charts/SegmentMarker.coffee'
-import { formatUrl } from '/imports/utils.coffee'
-import { pluralize } from '/imports/ui/helpers'
+import { pluralize, formatDateRange } from '/imports/ui/helpers'
+import { incidentTypeWithCountAndDisease } from '/imports/utils'
 
 Template.incidentReports.onDestroyed ->
   if @plot
@@ -13,10 +13,11 @@ Template.incidentReports.onDestroyed ->
     @plot = null
 
 Template.incidentReports.onCreated ->
+  @plotZoomed = new ReactiveVar(false)
   # iron router returns an array and not a cursor for data.incidents,
   # therefore we will setup a reactive cursor to use with the plot as an
   # instance variable.
-  @incidents = Incidents.find({userEventId: @data.userEvent._id}, {sort: {'dateRange.end': 1}})
+  @incidents = @data.incidents
   # underscore template for the mouseover event of a group
   @tooltipTmpl = """
     <% if ('applyFilters' in obj) { %>
@@ -80,10 +81,13 @@ Template.incidentReports.onRendered ->
         # render the template from
         tmpl(group)
     zoom: true
+    zoomed: @plotZoomed
     # initially active filters
     filters:
       notCumulative: @filters.notCumulative
     # group events
+    minimumZoom:
+      y: 0
     group:
       # methods to be applied when a new group is created
       onEnter: () ->
@@ -120,19 +124,13 @@ Template.incidentReports.onRendered ->
       return
 
 Template.incidentReports.helpers
-  formatUrl: formatUrl
   getSettings: ->
+    tableName = 'event-incidents'
     fields = [
       {
         key: 'count'
         label: 'Incident'
-        fn: (value, object, key) ->
-          if object.cases
-            return pluralize('case', object.cases)
-          else if object.deaths
-            return pluralize('death', object.deaths)
-          else
-            return object.specify
+        fn: (value, object, key) -> incidentTypeWithCountAndDisease(object)
         sortFn: (value, object) ->
           0 + (object.deaths or 0) + (object.cases or 0)
       }
@@ -141,27 +139,15 @@ Template.incidentReports.helpers
         label: 'Locations'
         fn: (value, object, key) ->
           if object.locations
-            $.map(object.locations, (element, index) ->
-              element.name
-            ).toString()
+            locations = _.map object.locations, (location) -> location.name
+            locations.join('; ')
           else
             ''
       }
       {
         key: 'dateRange'
         label: 'Date'
-        fn: (value, object, key) ->
-          dateFormat = 'MMM D, YYYY'
-          if object.dateRange?.type is 'day'
-            if object.dateRange.cumulative
-              "Before " + moment(object.dateRange.end).format(dateFormat)
-            else
-              moment(object.dateRange.start).format(dateFormat)
-          else if object.dateRange?.type is 'precise'
-            "#{moment(object.dateRange.start).format(dateFormat)} -
-              #{moment(object.dateRange.end).format(dateFormat)}"
-          else
-            ''
+        fn: (value, object, key) -> formatDateRange(object.dateRange)
         sortFn: (value, object) ->
           +new Date(object.dateRange.end)
       }
@@ -172,62 +158,71 @@ Template.incidentReports.helpers
       label: ''
       cellClass : 'action open-down'
 
-    id: 'event-incidents-table'
+    id: "#{tableName}-table"
     fields: fields
     showFilter: false
     showNavigationRowsPerPage: false
     showRowCount: false
-    class: 'table event-incidents'
-    rowClass: "event-incident"
+    class: "table #{tableName}"
+    rowClass: "#{tableName}"
+
+  incidents: ->
+    Template.instance().incidents
+
+  smartEvent: ->
+    Template.instance().data.eventType is 'smart'
+
+  plotZoomed: ->
+    Template.instance().plotZoomed.get()
 
 Template.incidentReports.events
-  'click #scatterPlot-toggleCumulative': (event, template) ->
+  'click #scatterPlot-toggleCumulative': (event, instance) ->
     $target = $(event.currentTarget)
     $icon = $target.find('i.fa')
     if $target.hasClass('active')
       $target.removeClass('active')
       $icon.removeClass('fa-check-circle').addClass('fa-circle-o')
-      template.plot.removeFilter('cumulative')
-      template.plot.addFilter('notCumulative', template.filters.notCumulative)
-      template.plot.draw()
+      instance.plot.removeFilter('cumulative')
+      instance.plot.addFilter('notCumulative', instance.filters.notCumulative)
+      instance.plot.draw()
     else
       $target.addClass('active')
       $icon.removeClass('fa-circle-o').addClass('fa-check-circle')
-      template.plot.removeFilter('notCumulative')
-      template.plot.addFilter('cumulative', template.filters.cumulative)
-      template.plot.draw()
+      instance.plot.removeFilter('notCumulative')
+      instance.plot.addFilter('cumulative', instance.filters.cumulative)
+      instance.plot.draw()
     $(event.currentTarget).blur()
 
-  'click #scatterPlot-resetZoom': (event, template) ->
-    template.plot.resetZoom()
+  'click #scatterPlot-resetZoom': (event, instance) ->
+    instance.plot.resetZoom()
     $(event.currentTarget).blur()
 
-  'click #event-incidents-table th': (event, template) ->
-    template.$('tr').removeClass('open')
-    template.$('tr.details').remove()
+  'click #event-incidents-table th': (event, instance) ->
+    instance.$('tr').removeClass('open')
+    instance.$('tr.details').remove()
 
-  'click .reactive-table tbody tr.event-incident': (event, template) ->
+  'click .reactive-table tbody tr.event-incidents': (event, instance) ->
     $target = $(event.target)
     $parentRow = $target.closest('tr')
-    currentOpen = template.$('tr.details')
+    currentOpen = instance.$('tr.details')
     closeRow = $parentRow.hasClass('open')
     if currentOpen
-      template.$('tr').removeClass('open')
+      instance.$('tr').removeClass('open')
       currentOpen.remove()
     if not closeRow
       $parentRow.addClass('open').after $('<tr>').addClass('details')
       Blaze.renderWithData Template.incidentReport, @, $('tr.details')[0]
 
-  'click .reactive-table tbody tr .edit': (event, template) ->
-    templateData = template.data
+  'click .reactive-table tbody tr .edit': (event, instance) ->
+    instanceData = instance.data
     incident =
-      articles: templateData.articles
-      userEventId: templateData.userEvent._id
+      articles: instanceData.articles
+      userEventId: instanceData.userEvent._id
       edit: true
       incident: @
     Modal.show 'incidentModal', incident
 
-  'click .reactive-table tbody tr .delete': (event, template) ->
+  'click .reactive-table tbody tr .delete': (event, instance) ->
     date = moment(@dateRange.start).format("MMM D, YYYY")
     location = @locations[0].name
     Modal.show 'deleteConfirmationModal',
@@ -235,8 +230,8 @@ Template.incidentReports.events
       objId: @_id
       displayName: "#{location} on #{date}"
 
-  # Remove any open incident report details elements on pagination
+  # Remove any open incident details elements on pagination
   'click .next-page,
    click .prev-page,
-   change .reactive-table-navigation .form-control': (event, template) ->
-     template.$('tr.details').remove()
+   change .reactive-table-navigation .form-control': (event, instance) ->
+     instance.$('tr.details').remove()

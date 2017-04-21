@@ -1,209 +1,227 @@
 template(name="incidentForm")
-
   form#add-incident(novalidate)
-    if confirmation
-      input(type="hidden" name="articleSourceUrl" value=articleSourceUrl)
-    else
-      .form-group.form-group--full
-        label.control-label.with-info-tooltip(
-          data-toggle="tooltip"
-          data-placement="right"
-          title="URL of the article where the incident was reported."
-        ) Source URL
-        +articleSelect2(
-          selectId="articleSource"
-          articles=articles
-          selected=incidentData.articleSource
-          placeholder='Select a source')
-        .help-block.with-errors
+    .add-incident--wrapper
+      if confirmation
+        input(type="hidden" name="articleSourceUrl" value=articleSourceUrl)
+      else
+        .form-group.form-group--full
+          label.control-label.with-info-tooltip(
+            data-toggle="tooltip"
+            data-placement="right"
+            title="URL of the document where the incident was reported."
+          ) Document URL
+          if incidentData.url
+            input.form-control(readonly value=incidentData.url name="articleSourceUrl")
+          else
+            +articleSelect2(
+              selectId="articleSource"
+              articles=articles
+              selected=incidentData.url
+              placeholder='Select a Document')
+            .help-block.with-errors
 
-    .incident-type-wrapper.form-groups(
-      class="{{#if typeIsSelected}} form-groups--highlighted {{/if}} {{suggestedField 'cases'}} {{suggestedField 'deaths'}}")
-      .form-group.form-group--full.check-buttons
-        label.control-label.with-info-tooltip(
-          data-toggle="tooltip"
-          data-placement="right"
-          title="Incidents are generally reports of case counts or death counts with an associated location and time. A free-text description of some other type of incident may be used instead."
-        ) Incident Type
-        .container-flex.check-buttons.type.no-break
-          .check-button
-            input(
-              type="radio"
-              name="incidentType"
-              id="cases"
-              value="cases"
-              tabindex="-1"
-              checked="{{incidentTypeChecked 'cases'}}"
-              required)
-            label(for="cases" tabindex="0") Cases
-          .check-button
-            input(
-              type="radio"
-              name="incidentType"
-              id="deaths"
-              value="deaths"
-              tabindex="-1"
-              checked="{{incidentTypeChecked 'deaths'}}"
-              required)
-            label(for="deaths" tabindex="0") Deaths
-          .check-button
-            input(
-              type="radio"
-              name="incidentType"
-              id="other"
-              value="other"
-              tabindex="-1"
-              checked="{{incidentTypeChecked 'other'}}"
-              required)
-            label(for="other" tabindex="0") Other
-        .help-block.with-errors
-
-      if showCountForm
-        .form-group.form-group--child
-          label.control-label #{selectedIncidentType} Count
-          input.form-control(
-            name="count"
-            type="number"
-            min="0"
-            value=incidentData.value
-            required
-            tabindex="0")
+      .incident-type-wrapper.form-groups(
+        class="{{#if typeIsSelected}} form-groups--highlighted {{/if}} {{suggestedField 'cases'}} {{suggestedField 'deaths'}}")
+        .form-group.form-group--full.check-buttons
+          label.control-label.with-info-tooltip(
+            data-toggle="tooltip"
+            data-placement="right"
+            title="Incidents are generally reports of case counts or death counts with an associated location and time. A free-text description of some other type of incident may be used instead."
+          ) Incident Type
+          .container-flex.check-buttons.type.no-break
+            .check-button
+              input(
+                type="radio"
+                name="incidentType"
+                id="cases"
+                value="cases"
+                tabindex="-1"
+                checked="{{incidentTypeChecked 'cases'}}"
+                required)
+              label(for="cases" tabindex="0") Cases
+            .check-button
+              input(
+                type="radio"
+                name="incidentType"
+                id="deaths"
+                value="deaths"
+                tabindex="-1"
+                checked="{{incidentTypeChecked 'deaths'}}"
+                required)
+              label(for="deaths" tabindex="0") Deaths
+            .check-button
+              input(
+                type="radio"
+                name="incidentType"
+                id="other"
+                value="other"
+                tabindex="-1"
+                checked="{{incidentTypeChecked 'other'}}"
+                required)
+              label(for="other" tabindex="0") Other
           .help-block.with-errors
 
-      if showOtherForm
-        .form-group.form-group--child
-          label.control-label Specify Other
-          input.form-control(
-            name="specify"
-            id="specify"
-            type="text"
-            required
-            value=incidentData.value
-            tabindex="0")
+        if showCountForm
+          .form-group.form-group--child
+            label.control-label #{selectedIncidentType} Count
+            input.form-control(
+              name="count"
+              type="number"
+              min="0"
+              value=incidentData.value
+              required
+              tabindex="0")
+            .help-block.with-errors
 
-      .form-group.form-group--child(hidden=typeIsNotSelected)
+        if showOtherForm
+          .form-group.form-group--child
+            label.control-label Specify Other
+            input.form-control(
+              name="specify"
+              id="specify"
+              type="text"
+              required
+              value=incidentData.value
+              tabindex="0")
+
+        .form-group.form-group--child(hidden=typeIsNotSelected)
+          label.control-label.with-info-tooltip(
+            data-toggle="tooltip"
+            data-placement="right"
+            title='Cumulative counts include all cases since the start of the outbreak. E.g. "So far there have been 21 cases."\nApproximate counts specify an imprecise number. E.g. "There were at least 100 deaths."'
+          ) Count Attributes
+          .container-flex.other-metadata.check-buttons.no-break
+            .check-button
+              input(
+                type="checkbox"
+                name="cumulative"
+                id="cumulative"
+                tabindex="-1"
+                checked=incidentData.dateRange.cumulative)
+              label.cumulative(for="cumulative" tabindex="0") Cumulative
+
+            .check-button
+              input(
+                type="checkbox"
+                name="approximate"
+                id="approximate"
+                tabindex="-1"
+                checked=incidentData.approximate)
+              label.cumulative(for="approximate" tabindex="0") Approximate
+
+      .form-group.incident--dates.full-width.with-tabs(class="{{suggestedField 'dateRange'}}")
+        ul.tabs.tabs-traditional.tabs-secondary(role="tablist")
+          li.with-info-tooltip(role="presentation"
+            class="{{dayTabClass}}"
+            data-toggle="tooltip"
+            data-placement="top"
+            title='For incidents that occurred on a precise date. E.g. "There were 2 new patients admitted on March 11."')
+            a(
+              href="#singleDate"
+              aria-controls="single Date"
+              role="tab"
+              data-toggle="tab") Single Date
+          li.with-info-tooltip(
+            role="presentation"
+            class="{{rangeTabClass}}"
+            data-toggle="tooltip"
+            data-placement="top"
+            title='For incidents that occurred over multiple days or for which a precise date is unspecified. E.g. "There were 5 cases in the month of March."')
+            a(
+              href="#preciseRange"
+              aria-controls="date range"
+              role="tab"
+              data-toggle="tab") Date Range
+
+        .tab-content
+          #singleDate.tab-pane(role="tabpanel" class="{{dayTabClass}}")
+            #singleDatePicker.inlineRangePicker.centered
+
+          #preciseRange.tab-pane(role="tabpanel" class="{{rangeTabClass}}")
+            #rangePicker.inlineRangePicker.centered
+
+      .form-group.form-group--full(class="{{suggestedField 'locations'}}")
         label.control-label.with-info-tooltip(
           data-toggle="tooltip"
           data-placement="right"
-          title='Cumulative counts include all cases since the start of the outbreak. E.g. "So far there have been 21 cases."\nApproximate counts specify an imprecise number. E.g. "There were at least 100 deaths."'
-        ) Count Attributes
+          title="Location where the incident occurred. If the most precise location is unavailable, use the location one administrative division above. E.g. if the city isn't listed use the state."
+        ) Locations
+        +locationSelect2(
+          selectId="incident-location-select2"
+          multiple=true
+          selected=incidentData.locations
+          required=true)
+        .help-block.with-errors
+
+      .form-group.form-group--full(class="{{suggestedField 'resolvedDisease'}}")
+        label.control-label.with-info-tooltip(
+          data-toggle="tooltip"
+          data-placement="right"
+          title="The disease that caused the cases or deaths.") Disease
+        +select2(
+          name="disease"
+          selectId="incident-disease-select2"
+          multiple=false
+          placeholder="Select a disease"
+          optionsFn=diseaseOptionsFn
+          selected=incidentData.resolvedDisease)
+        .help-block.with-errors
+
+      .form-group.form-group--full(class="{{suggestedField 'species'}}")
+        label.control-label.with-info-tooltip(
+          data-toggle="tooltip"
+          data-placement="right"
+          title="Species to which the case or death count pertains.") Species
+        input.form-control(
+          type="text"
+          name="species"
+          value=incidentData.species)
+
+      .form-group.form-group--full.check-buttons(class="{{suggestedField 'status'}}")
+        label.control-label.with-info-tooltip(
+          data-toggle="tooltip"
+          data-placement="right"
+          title="Confirmation status of the incident. If unknown, leave blank."
+        ) Status
+        .container-flex.check-buttons.status.no-break
+          .check-button
+            input(
+              type="radio"
+              name="incidentStatus"
+              id="suspected"
+              value="suspected"
+              tabindex="-1"
+              checked="{{incidentStatusChecked 'suspected'}}")
+            label(for="suspected" tabindex="0") Suspected
+          .check-button
+            input(
+              type="radio"
+              name="incidentStatus"
+              id="confirmed"
+              value="confirmed"
+              tabindex="-1"
+              checked="{{incidentStatusChecked 'confirmed'}}")
+            label(for="confirmed" tabindex="0") Confirmed
+          .check-button
+            input(
+              type="radio"
+              name="incidentStatus"
+              id="revoked"
+              value="revoked"
+              tabindex="-1"
+              checked="{{incidentStatusChecked 'revoked'}}")
+            label(for="revoked" tabindex="0") Revoked
+
+      .form-group.form-group--full
+        label.control-label Other Information
         .container-flex.other-metadata.check-buttons.no-break
-          .check-button
+          .check-button(class="{{suggestedField 'travelRelated'}}")
             input(
               type="checkbox"
-              name="cumulative"
-              id="cumulative"
+              name="travelRelated"
+              id="travelRelated"
               tabindex="-1"
-              checked=incidentData.dateRange.cumulative)
-            label.cumulative(for="cumulative" tabindex="0") Cumulative
+              checked=incidentData.travelRelated)
+            label.travel-related(for="travelRelated" tabindex="0") Travel Related
 
-          .check-button
-            input(
-              type="checkbox"
-              name="approximate"
-              id="approximate"
-              tabindex="-1"
-              checked=incidentData.approximate)
-            label.cumulative(for="approximate" tabindex="0") Approximate
-
-    .form-group.incident--dates.full-width.with-tabs(class="{{suggestedField 'dateRange'}}")
-      ul.tabs.tabs-traditional.tabs-secondary(role="tablist")
-        li.with-info-tooltip(role="presentation"
-          class="{{dayTabClass}}"
-          data-toggle="tooltip"
-          data-placement="top"
-          title='For incidents that occurred on a precise date. E.g. "There were 2 new patients admitted on March 11."')
-          a(
-            href="#singleDate"
-            aria-controls="single Date"
-            role="tab"
-            data-toggle="tab") Single Date
-        li.with-info-tooltip(
-          role="presentation"
-          class="{{rangeTabClass}}"
-          data-toggle="tooltip"
-          data-placement="top"
-          title='For incidents that occurred over multiple days or for which a precise date is unspecified. E.g. "There were 5 cases in the month of March."')
-          a(
-            href="#preciseRange"
-            aria-controls="date range"
-            role="tab"
-            data-toggle="tab") Date Range
-
-      .tab-content
-        #singleDate.tab-pane(role="tabpanel" class="{{dayTabClass}}")
-          #singleDatePicker.inlineRangePicker
-
-        #preciseRange.tab-pane(role="tabpanel" class="{{rangeTabClass}}")
-          #rangePicker.inlineRangePicker
-
-    .form-group.form-group--full(class="{{suggestedField 'locations'}}")
-      label.control-label.with-info-tooltip(
-        data-toggle="tooltip"
-        data-placement="right"
-        title="Location where the incident occurred. If the most precise location is unavailable, use the location one administrative division above. E.g. if the city isn't listed use the state."
-      ) Locations
-      +locationSelect2(
-        selectId="incident-location-select2"
-        multiple="true"
-        selected=incidentData.locations)
-      .help-block.with-errors
-
-    .form-group.form-group--full(class="{{suggestedField 'species'}}")
-      label.control-label.with-info-tooltip(
-        data-toggle="tooltip"
-        data-placement="right"
-        title="Species to which the case or death count pertains.") Species
-      input.form-control(
-        type="text"
-        name="species"
-        value=incidentData.species)
-
-    .form-group.form-group--full.check-buttons(class="{{suggestedField 'status'}}")
-      label.control-label.with-info-tooltip(
-        data-toggle="tooltip"
-        data-placement="right"
-        title="Confirmation status of the incident. If unknown, leave blank."
-      ) Status
-      .container-flex.check-buttons.status.no-break
-        .check-button
-          input(
-            type="radio"
-            name="incidentStatus"
-            id="suspected"
-            value="suspected"
-            tabindex="-1"
-            checked="{{incidentStatusChecked 'suspected'}}")
-          label(for="suspected" tabindex="0") Suspected
-        .check-button
-          input(
-            type="radio"
-            name="incidentStatus"
-            id="confirmed"
-            value="confirmed"
-            tabindex="-1"
-            checked="{{incidentStatusChecked 'confirmed'}}")
-          label(for="confirmed" tabindex="0") Confirmed
-        .check-button
-          input(
-            type="radio"
-            name="incidentStatus"
-            id="revoked"
-            value="revoked"
-            tabindex="-1"
-            checked="{{incidentStatusChecked 'revoked'}}")
-          label(for="revoked" tabindex="0") Revoked
-
-    .form-group.form-group--full
-      label.control-label Other Information
-      .container-flex.other-metadata.check-buttons.no-break
-        .check-button(class="{{suggestedField 'travelRelated'}}")
-          input(
-            type="checkbox"
-            name="travelRelated"
-            id="travelRelated"
-            tabindex="-1"
-            checked=incidentData.travelRelated)
-          label.travel-related(for="travelRelated" tabindex="0") Travel Related
-
-    button.hidden(type="submit" aria-hidden="true")
+      button.hidden(type="submit" aria-hidden="true")

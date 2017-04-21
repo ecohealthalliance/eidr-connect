@@ -1,16 +1,18 @@
-articleSchema = new SimpleSchema(
+articleSchema = new SimpleSchema
   _id:
     type: String
     optional: true
   addedByUserId:
     type: String
+    optional: true
   addedByUserName:
     type: String
+    optional: true
   addedDate:
     type: Date
   publishDate:
     type: Date
-  # The timezone used to specify the publishDate in the article.
+  # The timezone used to specify the publishDate in the document.
   publishDateTZ:
     type: String
   title:
@@ -19,8 +21,12 @@ articleSchema = new SimpleSchema(
     type: String
   userEventId:
     type: String
+    optional: true
   reviewed:
     type: Boolean
+    optional: true
+  enhancements:
+    type: Object
     optional: true
   deleted:
     type: Boolean
@@ -28,5 +34,8 @@ articleSchema = new SimpleSchema(
   deletedDate:
     type: Date
     optional: true
-)
+  feedId:
+    type: String
+    optional: true
+
 module.exports = articleSchema

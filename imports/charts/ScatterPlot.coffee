@@ -71,6 +71,9 @@ class ScatterPlot extends Plot
   ###
   draw: (data) ->
     super(data)
+    # if plot is not zoomed update the axes
+    unless @isZoomed()
+      @axes.update(@getGroupsNodes())
     groups = @groups.selectAll('.group').data(@getGroups(), (d) -> d.id)
     # create
     groups.enter().append((group) -> group.detached())
@@ -120,7 +123,15 @@ class ScatterPlot extends Plot
     #if !@data || @data.length <= 0
     #  return
     if @zoom
+      @zoomed?.set(false)
       @zoom.reset()
 
+  ###
+  # resetZoom - Checks zoomArea and returns 0 if no current area selected
+  ###
+  isZoomed: ->
+    zoomed = _.compact(_.values(@zoom.zoomArea)).length
+    @zoomed?.set(zoomed)
+    zoomed
 
 module.exports = ScatterPlot

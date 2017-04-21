@@ -1,0 +1,17 @@
+template(name="smartEvent")
+  .event
+    section.event--basic-info.container-fluid-padded
+      if deleted
+        h2
+          | This event has been deleted
+      else
+        with smartEvent
+          +smartEventSummary
+
+    section.event--detailed-info
+      .heading.container-fluid-padded
+        h2 Incidents
+      if isLoading
+        +loading static=true
+      else
+        +incidentReports incidentReportsTemplateData

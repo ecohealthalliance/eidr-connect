@@ -1,46 +1,41 @@
-CuratorSources = require '/imports/collections/curatorSources.coffee'
+Articles = require '/imports/collections/articles'
+Feeds = require '/imports/collections/feeds'
 createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
-{ keyboardSelect } = require '/imports/utils'
+import { formatDateRange } from '/imports/ui/helpers'
+import { keyboardSelect, debounceCheckTop } from '/imports/utils'
+{ updateCalendarSelection } = require('/imports/ui/setRange')
 
-createNewCalendar = () ->
-  createInlineDateRangePicker($("#date-picker"), {
-    maxDate: new Date()
+createNewCalendar = (latestSourceDate, range) ->
+  {startDate, endDate} = range
+  createInlineDateRangePicker $("#date-picker"),
+    maxDate: latestSourceDate
     dateLimit:
       days: 60
     useDefaultDate: true
-  })
   calendar = $('#date-picker').data('daterangepicker')
-  currentMonth = moment({ month: moment().month() })
-  lastMonth = moment({ month: moment().subtract(1, 'months').month() })
-  calendar.rightCalendar.month = currentMonth
-  calendar.leftCalendar.month = lastMonth
-  calendar.updateCalendars()
+  updateCalendarSelection(calendar, range)
 
-###
-# prevents checking the scrollTop more than every 50 ms to avoid flicker
-# if the scrollTop is greater than zero, show the 'back-to-top' button
-#
-# @param [object] scrollableElement, the dom element from the scroll event
-###
-debounceCheckTop = _.debounce (scrollableElement) ->
-    top = $(scrollableElement).scrollTop()
-    if top > 0
-      $('.back-to-top').fadeIn()
-    else
-      $('.back-to-top').fadeOut()
-, 50
+  $('.inlineRangePicker').on 'mouseleave', '.daterangepicker', ->
+    if not calendar.endDate
+      # Remove lingering classes that indicate pending range selection
+      $(@).find('.in-range').each ->
+        $(@).removeClass('in-range')
+      # Update selection to indicate one date selected
+      $(@).find('.start-date').addClass('end-date')
 
 Template.curatorInbox.onDestroyed ->
   # cleanup the event handler
-  $('.curator-inbox-sources').off 'scroll'
+  @$('.curator-inbox-sources').off 'scroll'
 
 Template.curatorInbox.onCreated ->
   @calendarState = new ReactiveVar(false)
   @ready = new ReactiveVar(false)
   @selectedArticle = false
-  @dateRange = new ReactiveVar
-    startDate: moment().subtract(1, 'weeks').toDate()
-    endDate: new Date()
+  today = new Date()
+  @defaultDateRange =
+    endDate: today
+    startDate: moment(today).subtract(1, 'weeks').toDate()
+  @dateRange = new ReactiveVar(@defaultDateRange)
   @textFilter =
     new ReactiveTable.Filter('curator-inbox-article-filter', ['title'])
   @reviewFilter =
@@ -48,50 +43,84 @@ Template.curatorInbox.onCreated ->
   @reviewFilter.set(null)
   @selectedSourceId = new ReactiveVar(null)
   @query = new ReactiveVar(null)
+  @sorting = new ReactiveVar(null)
   @currentPaneInView = new ReactiveVar('')
-
-  @autorun =>
-    range = @dateRange.get()
-    endDate = range?.endDate || new Date()
-    startDate = moment(endDate).subtract(2, 'weeks').toDate()
-    if range?.startDate
-      startDate = range.startDate
-    query =
-      publishDate:
-        $gte: new Date(startDate)
-        $lte: new Date(endDate)
-    @query.set query
-
-    Meteor.call 'fetchPromedPosts', 100, range, (err) ->
-      if err
-        console.log(err)
-        return toastr.error(err.reason)
-
-    @subscribe "curatorSources", query, () =>
-      unReviewedQuery = $and: [ {reviewed: false}, query ]
-      firstSource = CuratorSources.findOne unReviewedQuery,
-        sort:
-          publishDate: -1
-      @selectedSourceId.set(firstSource._id)
-      @ready.set(true)
+  @latestSourceDate = new ReactiveVar(null)
+  @filtering = new ReactiveVar(false)
+  @selectedFeedId = new ReactiveVar()
+  @subscribe 'feeds',
+    onReady: =>
+      @selectedFeedId.set(Feeds.findOne(title: 'ProMED-mail')._id)
 
 Template.curatorInbox.onRendered ->
   # determine if our `back-to-top` button should be initially displayed
-  $scrollableElement = $('.curator-inbox-sources')
-  debounceCheckTop($scrollableElement)
+  $scrollableElement = @$('.curator-inbox-sources')
+  $toTopButton = @$('.curator-inbox-sources--back-to-top')
+  debounceCheckTop($scrollableElement, $toTopButton)
   # fadeIn/Out the `back-to-top` button based on if the div has scrollable content
   $scrollableElement.on 'scroll', ->
-    debounceCheckTop(@)
+    debounceCheckTop($scrollableElement, $toTopButton)
 
   @autorun =>
     if @ready.get()
       Meteor.defer =>
-        createNewCalendar()
+        createNewCalendar(@latestSourceDate.get(), @dateRange.get())
         @$('[data-toggle="tooltip"]').tooltip
           container: 'body'
-          placement: 'left'
+
+  @autorun =>
+    @filtering.set(true)
+    range = @dateRange.get()
+    endDate = range?.endDate
+    startDate = range?.startDate
+    query = {}
+
+    feedId = @selectedFeedId.get()
+    switch feedId
+      when 'userAdded' then query.addedByUserId = $exists: true
+      when 'currentUser' then query.addedByUserId = Meteor.userId()
+      else
+        query.feedId = feedId
+
+    dateQuery =
+      $gte: new Date(startDate)
+      $lte: new Date(endDate)
+    sorting = sort: publishDate: -1
+    if query.addedByUserId
+      sorting = sort: addedDate: -1
+      query.addedDate = dateQuery
+    else
+      query.publishDate = dateQuery
+
+    @sorting.set(sorting)
+
+    @query.set(query)
+
+    Meteor.call 'fetchPromedPosts', 100, range, (err) ->
+      if err
+        return toastr.error(err.reason)
+
+    calendar = $('#date-picker').data('daterangepicker')
+    if calendar
+      updateCalendarSelection(calendar, range)
+
+    @subscribe "articles", query, =>
+      unReviewedQuery = $and: [ {reviewed: false}, query ]
+      firstSource = Articles.findOne(unReviewedQuery, sorting)
+      if firstSource
+        @selectedSourceId.set(firstSource._id)
+      @filtering.set(false)
+      if not @latestSourceDate.get()
+        @latestSourceDate.set Articles.findOne({}, sorting)?.publishDate
+      @ready.set(true)
+
+Template.curatorInbox.onDestroyed ->
+  $('.inlineRangePicker').off('mouseleave')
 
 Template.curatorInbox.helpers
+  articles: ->
+    Articles.find({}, Template.instance().sorting.get())
+
   days: ->
     {startDate, endDate} = Template.instance().dateRange.get()
     days = _.range(moment(endDate).diff(startDate, 'days') + 1).map (dayOffset)->
@@ -115,10 +144,8 @@ Template.curatorInbox.helpers
     Template.instance().textFilter
 
   isReady: ->
-    Template.instance().ready.get()
-
-  isLoading: ->
-    !Template.instance().ready.get()
+    instance = Template.instance()
+    instance.ready.get() and not instance.filtering.get()
 
   selectedSourceId: ->
     Template.instance().selectedSourceId
@@ -138,6 +165,58 @@ Template.curatorInbox.helpers
 
   currentPaneInView: ->
     Template.instance().currentPaneInView
+
+  userHasFilteredByDate: ->
+    instance = Template.instance()
+    not _.isEqual(instance.defaultDateRange, instance.dateRange.get())
+
+  feeds: ->
+    feeds = Feeds.find().fetch()
+    customFeeds = [
+      {
+        _id: 'userAdded'
+        title: 'User Added'
+      },
+      {
+        _id: 'currentUser'
+        title: "Current User's"
+      }
+    ]
+    feeds.concat(customFeeds)
+
+  selectedFeed: ->
+    @_id is Template.instance().selectedFeedId.get()
+
+  noDocumentsMessage: ->
+    instance = Template.instance()
+    query = instance.query.get()
+    selectedFeedId = instance.selectedFeedId.get()
+    dateType = 'publishDate'
+    if query.addedByUserId
+      dateType = 'addedDate'
+    dateRange = formatDateRange
+      start: query[dateType].$gte
+      end: query[dateType].$lte
+    feedTitle = Feeds.findOne(selectedFeedId)?.title
+    unless feedTitle
+      if selectedFeedId is 'userAdded'
+        feedTitle = 'User Added'
+      else
+        feedTitle = "Current user's"
+
+    Spacebars.SafeString """
+      No #{feedTitle} documents found
+      <span class='secondary'>from #{dateRange}</span>
+    """
+
+  dateType: ->
+    if Template.instance().query.get().addedByUserId
+      'addedDate'
+    else
+      'publishDate'
+
+  feedTitle: ->
+    @title or @url
 
 Template.curatorInbox.events
   'click .curator-filter-reviewed-icon': (event, instance) ->
@@ -159,26 +238,23 @@ Template.curatorInbox.events
     endDate = $('#date-picker').data('daterangepicker').endDate
 
     if startDate and !endDate
-      endDate = moment(startDate).set({hour: 23, minute: 59, second: 59, millisecond: 999})
+      endDate = moment(startDate).set
+        hour: 23
+        minute: 59
+        second: 59
+        millisecond: 999
 
     if startDate and endDate
-      instance.calendarState.set(false)
-      instance.ready.set(false)
       range =
         startDate: startDate.toDate()
         endDate: endDate.toDate()
-      instance.dateRange.set range
+      instance.dateRange.set(range)
 
   'click #calendar-btn-reset': (event, instance) ->
-    instance.calendarState.set(false)
-    instance.ready.set(false)
-    createNewCalendar()
+    defaultDateRange = Template.instance().defaultDateRange
     instance.dateRange.set
-      startDate: moment().subtract(1, 'weeks').toDate()
-      endDate: new Date()
-
-  'click #calendar-btn-cancel': (event, instance) ->
-    instance.calendarState.set(false)
+      startDate: defaultDateRange.startDate
+      endDate: defaultDateRange.endDate
 
   'click .back-to-top': (event, instance) ->
     event.preventDefault()
@@ -186,131 +262,8 @@ Template.curatorInbox.events
     $('.curator-inbox-sources').stop().animate
       scrollTop: 0
     , 500
-    $('.back-to-top').fadeOut()
 
-Template.curatorInboxSection.onCreated ->
-  @sourceCount = new ReactiveVar 0
-  @curatorInboxFields = [
-    {
-      key: 'reviewed'
-      description: 'Article has been curated'
-      label: ''
-      cellClass: (value) ->
-        if value
-          'curator-inbox-curated-row'
-      sortDirection: -1
-      fn: (value) ->
-        ''
-    },
-    {
-      key: 'title'
-      description: 'The source\'s title.'
-      label: 'Title'
-      sortDirection: -1
-    },
-    {
-      key: 'publishDate'
-      description: 'Date the article was published.'
-      label: 'Published'
-      sortOrder: 0
-      sortDirection: -1
-      sortFn: (value, ctx)->
-        value
-      fn: (value) ->
-        if moment(value).diff(new Date(), 'days') > -7
-          moment(value).fromNow()
-        else
-          moment(value).format('YYYY-MM-DD')
-    },
-    {
-      key: 'addedDate'
-      description: 'Date the article was added.'
-      label: 'Added'
-      sortDirection: -1
-      hidden: true
-      fn: (value) ->
-        moment(value).format('YYYY-MM-DD')
-    },
-    {
-      key: 'expand'
-      label: ''
-      cellClass: 'action open-right'
-    }
-  ]
-
-  sectionDate = Template.instance().data.date
-  @filterId = 'inbox-date-filter-'+sectionDate.getTime()
-  @filter = new ReactiveTable.Filter(@filterId, ['publishDate'])
-  @filter.set
-    $gte: sectionDate
-    $lt: moment(sectionDate).add(1, 'day').toDate()
-
-  @isOpen = new ReactiveVar(@data.index < 5)
-
-uniteReactiveTableFilters = (filters) ->
-  reactiveFilters = []
-  _.each filters, (filter) ->
-    _filter = filter.get()
-    if _filter
-      reactiveFilters.push _.object filter.fields.map (field)->
-        [field, _filter]
-  reactiveFilters
-
-Template.curatorInboxSection.onRendered ->
-  @autorun =>
-    data = @data
-    sectionDate = data.date
-    dateFilters =
-      'publishDate':
-        $gte: sectionDate
-        $lt: moment(sectionDate).add(1, 'day').toDate()
-    filters = uniteReactiveTableFilters [ data.textFilter, data.reviewFilter ]
-    filters.push dateFilters
-    query = $and: filters
-    @sourceCount.set CuratorSources.find(query).count()
-
-Template.curatorInboxSection.helpers
-  post: ->
-    CuratorSources.findOne publishDate: Template.instance().filter.get()
-
-  posts: ->
-    CuratorSources
-
-  count: ->
-    Template.instance().sourceCount.get()
-
-  isOpen: ->
-    Template.instance().isOpen.get()
-
-  formattedDate: ->
-    moment(Template.instance().data.date).format('MMMM DD, YYYY')
-
-  settings: ->
-    instance = Template.instance()
-    fields = instance.curatorInboxFields
-    id: "article-curation-table-#{instance.data.index}"
-    showColumnToggles: false
-    fields: fields
-    showRowCount: false
-    showFilter: false
-    rowsPerPage: 200
-    showNavigation: 'never'
-    filters: [Template.instance().filterId, 'curator-inbox-article-filter', 'curator-inbox-review-filter']
-    rowClass: (source) ->
-      if source._id._str is instance.data.selectedSourceId.get()?._str
-        'selected'
-
-Template.curatorInboxSection.events
-  'click .curator-inbox-table tbody tr
-    , keyup .curator-inbox-table tbody tr': (event, instance) ->
-    return if not keyboardSelect(event) and event.type is 'keyup'
-    instanceData = instance.data
-    instanceData.selectedSourceId.set(@_id)
-    instanceData.currentPaneInView.set('details')
-    $(event.currentTarget).blur()
-
-  'click .curator-inbox-section-head
-    , keyup .curator-inbox-section-head': (event, instance) ->
-    return if not keyboardSelect(event) and event.type is 'keyup'
-    instance.isOpen.set(!instance.isOpen.curValue)
-    $(event.currentTarget).blur()
+  'change .curator-inbox--feed-selector': (event, instance) ->
+    currentTarget = event.currentTarget
+    instance.selectedFeedId.set(event.currentTarget.value)
+    currentTarget.blur()

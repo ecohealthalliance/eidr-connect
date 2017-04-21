@@ -63,7 +63,6 @@ class Plot
 
     # the axes of the plot
     @axes = new Axes(@, @options.axes)
-
     # the tooltip of the plot
     @tooltip = new Tooltip(@, @options)
 
@@ -71,6 +70,8 @@ class Plot
     zoomEnabled = @options.zoom || false
     if zoomEnabled
       @zoom = new Zoom(@, @options)
+
+    @zoomed = @options.zoomed or new ReactiveVar(false)
 
     # an svg container for the plot's groups
     @groups = @container.append('g')

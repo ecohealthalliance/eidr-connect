@@ -6,5 +6,7 @@ Meteor.startup ->
           $('.modal').each (modal) -> $(@).modal 'hide'
     .on 'hide.bs.modal', ->
       $(@).off 'keyup'
+    .on 'shown.bs.modal', ->
+      $('.modal-content').find('.form-control').first().focus()
 
   $('html').attr('lang', 'en')

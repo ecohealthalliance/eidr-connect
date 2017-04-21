@@ -1,0 +1,7 @@
+template(name="editDetailsButton")
+  i.fa.edit-event-details(class="fa-{{#if icon}}#{icon}{{else}}plus-circle{{/if}}"
+    data-toggle="modal"
+    data-target=target
+    data-editing=editing
+    title="Edit Event #{editing}"
+    tabindex="0")

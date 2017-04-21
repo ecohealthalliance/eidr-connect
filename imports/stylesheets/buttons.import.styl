@@ -65,9 +65,13 @@ $buttons()
         color $text
         background darken($bg, 20%)
       &.disabled
+      &[disabled]
+        &
         &:hover
-          background $bg
-          border-color lighten($border, 10%)
+          background lighten(desaturate($bg, 50%), 20%)
+          border-color darken(@background, 10%)
+          color desaturate(darken(@background, 30%), 30%)
+
 
 $buttons()
 

@@ -1,14 +1,13 @@
 UserEvents = require '/imports/collections/userEvents.coffee'
 Articles = require '/imports/collections/articles.coffee'
 PromedPosts = require '/imports/collections/promedPosts.coffee'
-
-import { formatUrl } from '/imports/utils.coffee'
-
+Constants = require '/imports/constants.coffee'
+Incidents = require '/imports/collections/incidentReports'
+SmartEvents = require '/imports/collections/smartEvents'
+incidentReportSchema = require '/imports/schemas/incidentReport.coffee'
+import { formatUrl, cleanUrl, createIncidentReportsFromEnhancements, regexEscape } from '/imports/utils.coffee'
 
 DateRegEx = /<span class="blue">Published Date:<\/span> ([^<]+)/
-
-GRITS_API_URL = process.env.GRITS_API_URL or "https://grits.eha.io/api/v1"
-SPA_API_URL = process.env.SPA_API_URL or "http://spa.eha.io/api/v1"
 
 Meteor.methods
   getArticleEnhancements: (article) ->
@@ -17,10 +16,9 @@ Meteor.methods
     check article.content, Match.Maybe(String)
     check article.publishDate, Match.Maybe(Date)
     check article.addedDate, Match.Maybe(Date)
-    geonameIds = []
-    console.log "Calling GRITS API @ " + GRITS_API_URL
+    console.log "Calling GRITS API @ " + Constants.GRITS_URL
     params =
-      api_key: "Cr9LPAtL"
+      api_key: Constants.GRITS_API_KEY
       returnSourceContent: true
     if article.publishDate or article.addedDate
       params.content_date = moment.utc(
@@ -33,10 +31,78 @@ Meteor.methods
       params.url = formatUrl(article.url)
     else
       Meteor.Error("InvalidArticle", "Content or a URL must be specified")
-    result = HTTP.post(GRITS_API_URL + "/public_diagnose", params: params)
+    result = HTTP.post(Constants.GRITS_URL + "/api/v1/public_diagnose", params: params)
     if result.data.error
       throw new Meteor.Error("grits-error", result.data.error)
-    return result.data
+    enhancements = result.data
+    # Normalize geoname data in GRITS annotations to match incident schema.
+    # The geoname lookup service is queried to get admin names.
+    # The GRITS api reponse only includes admin codes at the moment.
+    geonameIds = []
+    features = enhancements.features
+    locationAnnotations = features.filter (f) -> f.type == 'location'
+    geonameIds = locationAnnotations.map((r) -> r.geoname.geonameid)
+    if geonameIds.length > 0
+      geonamesResult = HTTP.get Constants.GRITS_URL + '/api/geoname_lookup/api/geonames', {
+        params:
+          ids: geonameIds
+      }
+      geonames = geonamesResult.data.docs
+      geonamesById = {}
+      geonames.forEach (geoname) ->
+        if not geoname
+          # null geonames are returned when an id doesn't match a geoname
+          # in the geoname lookup service's database.
+          return
+        geonamesById[geoname.id] =
+          id: geoname.id
+          name: geoname.name
+          admin1Name: geoname.admin1Name
+          admin2Name: geoname.admin2Name
+          latitude: parseFloat(geoname.latitude)
+          longitude: parseFloat(geoname.longitude)
+          countryName: geoname.countryName
+          population: geoname.population
+          featureClass: geoname.featureClass
+          featureCode: geoname.featureCode
+          alternateNames: geoname.alternateNames
+      locationAnnotations = locationAnnotations.filter (loc)->
+        geoname = geonamesById[loc.geoname.geonameid]
+        if geoname
+          loc.geoname = geoname
+          true
+        else
+          console.log "Missing geoname for id: " + loc.geoname.geonameid
+          false
+    return enhancements
+  
+  # Get the articles enhancements then use them to update the article
+  # and create incidents in the database.
+  getArticleEnhancementsAndUpdate: (article, rediagnose=false) ->
+    dbArticle = Articles.findOne(_id: article._id)
+    if not dbArticle
+      throw Meteor.Error('invalid-article')
+    if dbArticle.enhancements and not rediagnose
+      if dbArticle.enhancements.processingStartedAt
+        # If the processing started less than 100 seconds ago do not resubmit
+        # the aritcle.
+        if (new Date() - dbArticle.enhancements.processingStartedAt) < 100000
+          return dbArticle.enhancements
+      else
+        return dbArticle.enhancements
+    # Set the enhancements property to prevent repeated calls
+    Articles.update _id: article._id,
+      $set:
+        enhancements: { processingStartedAt: new Date() }
+    enhancements = Meteor.call('getArticleEnhancements', article)
+    Articles.update _id: article._id,
+      $set:
+        enhancements: enhancements
+    article.enhancements = enhancements
+    Meteor.call 'addSourceIncidentReportsToCollection', article, {
+      acceptByDefault: true
+    }
+    return enhancements
 
   retrieveProMedArticle: (articleId) ->
     @unblock()
@@ -51,7 +117,7 @@ Meteor.methods
     @unblock()
     check eventId, String
     event = UserEvents.findOne(eventId)
-    console.log "Calling SPA API @ " + SPA_API_URL
+    console.log "Calling SPA API @ " + Constants.SPA_API_URL
     unless event
       throw new Meteor.Error 404, "Unable to fetch the requested event record"
     # Construct an array of keywords out of the event's name
@@ -59,14 +125,14 @@ Meteor.methods
     # Add the disease name from the event to the keywords
     if event.disease
       keywords.push(event.disease)
-    # Collect related event source ID's
+    # Collect related event document ID's
     notOneOfThese = []
     Articles.find(userEventId: eventId).forEach (relatedEventSource) ->
       url = relatedEventSource.url
       if url
         notOneOfThese.push url.match(/\d+/)?[0]
     # Query the remote server API
-    response = HTTP.call('GET', "#{SPA_API_URL}/search", {
+    response = HTTP.call('GET', "#{Constants.SPA_API_URL}/search", {
       params: { text: keywords.join(' '), not: notOneOfThese.join(' ') }
     })
     if response
@@ -128,3 +194,27 @@ Meteor.methods
       userId = meteorUser._id
     Roles.addUsersToRoles([userId], ['admin'])
     Accounts.setPassword(userId, authInfo.authTicket, logout:false)
+
+  addSourceIncidentReportsToCollection: (source, options) ->
+    { acceptByDefault } = options
+    enhancements = source.enhancements
+    check enhancements, Object
+    options.url = cleanUrl(source.url)
+    options.publishDate = source.publishDate
+    incidents = createIncidentReportsFromEnhancements(enhancements, options)
+    incidents = incidents.map (incident) ->
+      incident = _.pick(incident, incidentReportSchema.objectKeys())
+    # check for unexpected urls
+    if not options.url.startsWith("promedmail.org/post/")
+      throw Meteor.Error("Bad url")
+    # Remove prior unassociated incidents for the document
+    Incidents.remove(
+      url: $regex: regexEscape(options.url) + "$"
+      userEventId: $exists: false
+      autogenerated: $ne: false
+    )
+    incidents.forEach (incident)->
+      incidentReportSchema.validate(incident)
+      incident.addedDate = new Date()
+      # The addedByUser____ fields are left empty on autogenerated incidents.
+      Incidents.insert(incident)

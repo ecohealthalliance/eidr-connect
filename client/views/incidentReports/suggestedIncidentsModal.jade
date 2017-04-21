@@ -1,13 +1,15 @@
 template(name="suggestedIncidentsModal")
-  .modal.fade#suggestedIncidentsModal(role="dialog")
-    .modal-dialog.suggested-incidents
+  .modal#suggestedIncidentsModal.flex.fade(
+    class="off-canvas--#{offCanvasStartPosition}"
+    role="dialog")
+    .modal-dialog.suggested-incidents(class=classNames)
       .modal-content
         .modal-header
           +modalCloseButton
           .modal-header--title
-            h4 Suggested Incident Reports
+            h4 Suggested Incident
             span.annotation-count=annotatedCount
-          .container-flex(class="{{#if showTable}} flex-reverse {{/if}}")
+          .container-flex.options-wrapper(class="{{#if showTable}} flex-reverse {{/if}}")
             ul.color-legend.list-unstyled.container-flex.no-break(
               class="{{#if showTable}} with-tabs {{else}} on-left {{/if}}")
               li.color-legend--accepted Accepted
@@ -15,54 +17,54 @@ template(name="suggestedIncidentsModal")
             if showTable
               ul.tabs.tabs-traditional.tabs-secondary.tabs-modal-header.list-unstyled
                 li(class="{{#if annotatedContentVisible}}active{{/if}}")
-                  a.annotated-content Source Text
+                  a.annotated-content-tab Document Text
                 li(class="{{#if tableVisible}}active{{/if}}")
-                  a.incident-table Incident Report Table
+                  a.incident-table-tab Incident Table
         .modal-body
-          .suggested-incidents-wrapper.tab-content
+          .suggested-incidents-wrapper
             #suggested-locations-form.form-horizontal(hidden=tableVisible)
-              if loading
-                i.fa.fa-circle-o-notch.fa-spin
-                | Processing article
+              if isLoading
+                +loading(message="Processing Document")
               else
                 unless incidentsFound
-                  .no-incident-reports No incident reports could be automatically extracted from the article.
-                p.annotated-content(
-                  class="{{#unless incidentsFound}} space-top-4 {{/unless}}")=annotatedContent
+                  .no-incident-reports No incidents could be automatically extracted from the document.
+                .suggested-annotated-content(
+                  class="{{#unless incidentsFound}} space-top-4 {{/unless}}")= annotatedContent
             if showTable
-              table.table.incident-table(
-                hidden=annotatedContentVisible
-                data-tableexport-display="always")
-                thead
-                  tr
-                    th.count-header Type
-                    th.count-header Value
-                    th Start Date
-                    th End Date
-                    th.locations-header Locations
-                    th Status
-                    th Species
-                    th Properties
-                tbody
-                  each incidents
+              .extract-incidents-table
+                table.table.featured.incident-table(
+                  hidden=annotatedContentVisible
+                  data-tableexport-display="always")
+                  thead
                     tr
-                      if cases
-                        td Case Count
-                        td.count(data-incident-id=_id)=cases
-                      else if deaths
-                        td Death Count
-                        td.count(data-incident-id=_id)=deaths
-                      else
-                        td Other
-                        td.count(data-incident-id=_id)=specify
-                      td
-                        unless dateRange.cumulative
-                          | {{formatDateISO dateRange.start}}
-                      td {{formatDateISO dateRange.end}}
-                      td {{formatLocations locations}}
-                      td=status
-                      td=species
-                      td=incidentProperties
+                      th.count-header Type
+                      th.count-header Value
+                      th Start Date
+                      th End Date
+                      th.locations-header Locations
+                      th Status
+                      th Species
+                      th Properties
+                  tbody
+                    each incidents
+                      tr.incident-report(data-incident-id=_id)
+                        if cases
+                          td Case Count
+                          td=cases
+                        else if deaths
+                          td Death Count
+                          td=deaths
+                        else
+                          td Other
+                          td=specify
+                        td
+                          unless dateRange.cumulative
+                            | {{formatDateISO dateRange.start}}
+                        td {{formatDateISO dateRange.end}}
+                        td {{formatLocations locations}}
+                        td=status
+                        td=species
+                        td=incidentProperties
         .modal-footer
           button.btn.btn-default.confirm-close-modal(type="button" data-dismiss="modal") Close
           if showTable

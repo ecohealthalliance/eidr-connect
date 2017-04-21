@@ -4,7 +4,7 @@
   width 100%
   height 600px
 
-.user-events
+.events
   .featured-table
     position relative
     background white
@@ -17,6 +17,74 @@
     top 3em
     transform translate(-50%, 0)
     z-index -1
+  .page-heading
+    min-height initial
+    padding 0
+    background lighten($border-primary-light, 60%)
+    flex-direction column
+    +above(3)
+      flex-direction row
+    +above(3)
+      background white
+      padding-left 15px
+      padding-right 15px
+  .page-options
+    margin-bottom 1em
+    margin-left initial
+    +below(2)
+      .check-button
+        label
+          padding .65em 2em
+    +above(3)
+      margin-left auto
+      margin-bottom 0
+    .btn
+      text-transform capitalize
+    .page-options--search
+      +between(2, 3)
+        min-width 200px
+        max-width 200px
+        width 200px
+  .tabs
+    margin-top 0
+    justify-content flex-start
+    margin 0
+    align-self stretch
+    border-bottom 2px solid $border-primary
+    margin-bottom 1em
+    +above(3)
+      max-width 50%
+      border 0
+      margin-bottom 0
+    +above(4)
+      max-width 35%
+  .tab
+    display flex
+    align-items stretch
+    &:first-of-type
+      margin-left 0
+    a
+      display flex
+      flex 1 1 auto
+      border-radius 0
+      border-top 0
+      align-self stretch
+      align-items center
+      justify-content center
+      color lighten($primary, 10%)
+      &:hover
+        background $border-primary-light
+      &:active
+        border-color $border-primary
+        background $seconary
+    &.active
+      a
+        &
+        &:hover
+          background $border-primary-light
+          border-color darken($border-primary, 10%)
+          color $primary
+          font-weight bold
 
 #user-events-table
   +below(2)

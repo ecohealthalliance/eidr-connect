@@ -2,6 +2,8 @@ convertDate = require '/imports/convertDate.coffee'
 Articles = require '/imports/collections/articles.coffee'
 createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
 validator = require 'bootstrap-validator'
+{ notify } = require '/imports/ui/notification'
+{ stageModals } = require '/imports/ui/modals'
 
 import {
   UTCOffsets,
@@ -22,6 +24,11 @@ Template.sourceModal.onCreated ->
   @tzIsSpecified = false
   @proMEDRegEx = /promedmail\.org\/post\/(\d+)/ig
   @selectedArticle = new ReactiveVar(@data)
+  @modals =
+    currentModal:
+      element: '#event-source'
+      add: 'off-canvas--left'
+      remove: 'fade'
 
   if @data.edit
     if @data.publishDate
@@ -79,9 +86,9 @@ Template.sourceModal.helpers
 
   saveButtonClass: ->
     if @edit
-      'save-edit-modal'
+      'save-source-edit'
     else
-      'save-modal'
+      'save-source'
 
   title: ->
     article = Template.instance().selectedArticle.get()
@@ -107,7 +114,7 @@ Template.sourceModal.helpers
       'suggested-minimal'
 
 Template.sourceModal.events
-  'click .save-modal': (event, instance) ->
+  'click .save-source': (event, instance) ->
     return unless _checkFormValidity(instance)
     form = instance.$('form')[0]
     article = form.article.value
@@ -138,19 +145,16 @@ Template.sourceModal.events
       if error
         toastr.error error.reason
       else
-        Modal.hide(instance)
-        form.article.value = ''
-        _setDatePicker(instance.datePicker, null)
-        timePicker.date(null)
-
-        instance.tzIsSpecified = false
-
         if enhance
+          notify('success', 'Source successfully added')
           Modal.show 'suggestedIncidentsModal',
             userEventId: instance.data.userEventId
             article: Articles.findOne(articleId)
+          stageModals(instance, instance.modals)
+        else
+          Modal.hide(instance)
 
-  'click .save-edit-modal': (event, instance) ->
+  'click .save-source-edit': (event, instance) ->
     return unless _checkFormValidity(instance)
     form = instance.$('form')[0]
     timePicker = instance.$('#publishTime').data('DateTimePicker')
@@ -178,7 +182,7 @@ Template.sourceModal.events
       if error
         toastr.error error.reason
       else
-        Modal.hide(instance)
+        stageModals(instance, instance.modals)
 
   'input #article': (event, instance) ->
     value = event.currentTarget.value.trim()

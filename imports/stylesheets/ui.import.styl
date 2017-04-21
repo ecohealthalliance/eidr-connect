@@ -7,6 +7,8 @@
 
 .container-flex
   display flex
+  &.column
+    flex-direction column
   &:not(.no-break)
     +below(3)
       flex-direction column
@@ -31,6 +33,7 @@
   +below(3)
     margin-right 0
   &.bordered
+    position relative
     border-right 1px solid $border-primary
     +below(3)
       border-right 0
@@ -68,6 +71,8 @@
     text-transform uppercase
     +above(2)
       margin-bottom 0
+    + .btn
+      margin-left 1em
 
 .page-options
   @extend .container-flex
@@ -83,6 +88,9 @@
       margin-left 0
   .page-options--search
     min-width 300px
+  label
+    margin 0
+    font-size .9em
 
 .page-heading
 .page-options

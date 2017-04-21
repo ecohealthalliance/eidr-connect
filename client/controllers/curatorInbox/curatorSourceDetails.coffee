@@ -1,36 +1,36 @@
-CuratorSources = require '/imports/collections/curatorSources.coffee'
+Articles = require '/imports/collections/articles.coffee'
+Incidents = require '/imports/collections/incidentReports.coffee'
 key = require 'keymaster'
+{ notify } = require '/imports/ui/notification'
 
 _markReviewed = (instance, showNext=true) ->
   new Promise (resolve) ->
     reviewed = instance.reviewed
     notifying = instance.notifying
-    reviewed.set not reviewed.get()
+    reviewed.set(not reviewed.get())
     Meteor.call('markSourceReviewed', instance.source.get()._id, reviewed.get())
     if reviewed.get()
-      notifying.set true
-      Meteor.setTimeout ->
+      notifying.set(true)
+      setTimeout ->
         if showNext
           unReviewedQuery = $and: [ {reviewed: false}, instance.data.query.get()]
-          nextSource = CuratorSources.findOne unReviewedQuery,
-            sort:
-              publishDate: -1
-          instance.data.selectedSourceId.set nextSource._id
-        notifying.set false
+          sort = sort: {}
+          sort.sort[instance.data.dateType] = -1
+          nextSource = Articles.findOne unReviewedQuery, sort
+          if nextSource
+            instance.data.selectedSourceId.set(nextSource._id)
+        notifying.set(false)
         resolve()
       , 1200
 
-_getSource = (instance, sourceId) ->
-  source = CuratorSources.findOne
-    _id: sourceId
-  instance.reviewed.set source?.reviewed or false
-  instance.source.set source
-
 Template.curatorSourceDetails.onCreated ->
-  @contentIsOpen = new ReactiveVar(false)
-  @notifying = new ReactiveVar false
-  @source = new ReactiveVar null
-  @reviewed = new ReactiveVar false
+  @notifying = new ReactiveVar(false)
+  @source = new ReactiveVar(null)
+  @reviewed = new ReactiveVar(false)
+  @incidentsLoaded = new ReactiveVar(false)
+  @selectedIncidentTab = new ReactiveVar(0)
+  @addingSourceToEvent = new ReactiveVar(false)
+  @selectedAnnotationId = new ReactiveVar(null)
 
 Template.curatorSourceDetails.onRendered ->
   instance = @
@@ -44,31 +44,52 @@ Template.curatorSourceDetails.onRendered ->
       swippablePane.on 'swiperight', (event) ->
         instance.data.currentPaneInView.set('')
 
-  @autorun =>
-    title = instance.source.get()?.title
-    Meteor.defer =>
-      $title = $('#sourceDetailsTitle')
-      titleEl = $title[0]
-      # Remove title and tooltip if the title is complete & without ellipsis
-      if titleEl.offsetWidth >= titleEl.scrollWidth
-        $title.tooltip('hide').attr('data-original-title', '')
-      else
-        $title.attr('data-original-title', title)
-
-  # Create key binding which marks sources as reviewed.
+  # Create key binding which marks documents as reviewed.
   key 'ctrl + enter, command + enter', (event) =>
     _markReviewed(@)
 
-  @autorun ->
-    sourceId = instance.data.selectedSourceId.get()
-    _getSource(instance, sourceId)
+  @autorun =>
+    # When document is selected in the curatorInbox template, `selectedSourceId`,
+    # which is handed down, is updated and triggers this autorun
+    sourceId = @data.selectedSourceId.get()
+    source = Articles.findOne(sourceId)
+    instance.reviewed.set source?.reviewed or false
+    instance.source.set source
+
+  @autorun =>
+    source = @source.get()
+    if source
+      @incidentsLoaded.set(false)
+      title = source.title
+      # Update the document title and its tooltip in the right pane
+      Meteor.defer =>
+        $title = $('#sourceDetailsTitle')
+        titleEl = $title[0]
+        # Remove title and tooltip if the title is complete & without ellipsis
+        if titleEl?.offsetWidth >= titleEl?.scrollWidth
+          $title.tooltip('hide').attr('data-original-title', '')
+        else
+          $title.attr('data-original-title', title)
+      @subscribe 'ArticleIncidentReports', source.url
+      if source.enhancements?.dateOfDiagnosis
+        instance.incidentsLoaded.set(true)
+      else
+        Meteor.call 'getArticleEnhancementsAndUpdate', source, (error, enhancements) =>
+          if error
+            notify('error', error.reason)
+          else
+            source.enhancements = enhancements
+            instance.incidentsLoaded.set(true)
+
+Template.curatorSourceDetails.onDestroyed ->
+  $(window).off('resize')
 
 Template.curatorSourceDetails.helpers
+  incidents: ->
+    Incidents.find()
+
   source: ->
     Template.instance().source.get()
-
-  contentIsOpen: ->
-    Template.instance().contentIsOpen.get()
 
   formattedScrapeDate: ->
     moment(Template.instance().data.sourceDate).format('MMMM DD, YYYY')
@@ -85,14 +106,43 @@ Template.curatorSourceDetails.helpers
   selectedSourceId: ->
     Template.instance().data.selectedSourceId
 
-Template.curatorSourceDetails.events
-  "click .toggle-reviewed": (event, instance) ->
-    _markReviewed(instance)
+  incidentsLoaded: ->
+    Template.instance().incidentsLoaded.get()
 
-  'click .toggle-source-content': (event, instance) ->
-    open = instance.contentIsOpen
-    open.set not open.get()
-    $(event.currentTarget).tooltip 'destroy'
+  selectedIncidentTab: ->
+    Template.instance().selectedIncidentTab
+
+  addingSourceToEvent: ->
+    Template.instance().addingSourceToEvent.get()
+
+  relatedElements: ->
+    instance = Template.instance()
+    parent: '.curator-source-details--copy-wrapper'
+    sibling: '.curator-source-details--copy'
+    sourceContainer: '.curator-source-details--copy'
+
+  selectedAnnotationId: ->
+    Template.instance().selectedAnnotationId
+
+Template.curatorSourceDetails.events
+  'click .toggle-reviewed': (event, instance) ->
+    _markReviewed(instance)
+    event.currentTarget.blur()
 
   'click .back-to-list': (event, instance) ->
-    instance.data.currentPaneInView.set('')
+    instanceData = instance.data
+    instanceData.selectedSourceId.set('')
+    instanceData.currentPaneInView.set('')
+
+  'click .tabs a': (event, instance) ->
+    instance.selectedIncidentTab.set(instance.$(event.currentTarget).data('tab'))
+
+  'click .add-source-to-event': (event, instance) ->
+    addingSourceToEvent = instance.addingSourceToEvent
+    addingSourceToEvent.set(not addingSourceToEvent.get())
+
+  'click .add-incident': (event, instance) ->
+    Modal.show 'incidentModal',
+      articles: [instance.source.get()]
+      add: true
+      accept: true

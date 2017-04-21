@@ -59,4 +59,5 @@ createInlineDateRangePicker = ($parentElement, options) ->
 
   picker
 
+
 module.exports = createInlineDateRangePicker

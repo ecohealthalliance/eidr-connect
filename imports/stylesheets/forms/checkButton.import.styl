@@ -35,3 +35,11 @@
         color $primary
       &:focus
         border-color $primary
+
+  &.small-text
+    [type=checkbox]
+    [type=radio]
+      + label
+        font-size .85em
+        &::before
+          padding-right .35em

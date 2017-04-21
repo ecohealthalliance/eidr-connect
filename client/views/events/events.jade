@@ -1,0 +1,27 @@
+template(name="events")
+  .events
+    .container-fluid-padded.page-heading.container-flex.no-break
+      ul.tabs
+        li.tab(class="{{#if activeTab 'curated'}} active {{/if}}")
+          a.curated-events(href="{{pathFor route='events' _view='curated'}}")
+            span Curated Events
+        li.tab(class="{{#if activeTab 'smart'}} active {{/if}}")
+          a.smart-events(href="{{pathFor route='events' _view='smart'}}")
+            span Smart Events
+      .page-options.container-flex.no-break.vertically-centered
+        if isInRole "admin"
+          button.create-event.btn.btn-primary.btn-sm
+            i.fa.fa-plus-circle(aria-hidden="true")
+            span Add #{eventTypeText} Event
+        if showUserOptions
+          .check-button.small-text
+            input(
+              type="checkbox"
+              name="showCurrentUserEvents"
+              tabindex="-1"
+              checked=showCurrentUserEventsChecked)
+            label.show-current-user-events(for="showCurrentUserEvents" tabindex="0") My Events
+        +searchInput searchSettings
+
+    .featured-table.table-wrapper
+      +eventsTable eventType=eventType

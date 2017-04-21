@@ -1,6 +1,6 @@
 createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
 validator = require 'bootstrap-validator'
-{ keyboardSelect, removeSuggestedProperties } = require '/imports/utils'
+{ keyboardSelect, removeSuggestedProperties, diseaseOptionsFn } = require '/imports/utils'
 
 _selectInput = (event, instance, prop, isCheckbox) ->
   return if not keyboardSelect(event) and event.type is 'keyup'
@@ -16,15 +16,20 @@ _selectInput = (event, instance, prop, isCheckbox) ->
       state.set(clickedInput)
 
 Template.incidentForm.onCreated ->
+  instanceData = @data
   @incidentStatus = new ReactiveVar('')
   @incidentType = new ReactiveVar('')
-  incident = @data.incident
+  incident = instanceData.incident
   @suggestedFields = incident?.suggestedFields or new ReactiveVar([])
 
   @incidentData =
     species: 'Human'
     dateRange:
       type: 'day'
+
+  article = instanceData.articles[0]
+  if article
+    @incidentData.url = article.url
 
   if incident
     @incidentData = _.extend(@incidentData, incident)
@@ -46,17 +51,10 @@ Template.incidentForm.onCreated ->
 
     @incidentType.set(type)
 
-    if @incidentData.url
-      @incidentData.articleSource = _.findWhere(@data.articles,
-        url: @incidentData.url[0]
-      )?._id
-
     @incidentStatus.set(incident.status or '')
 
 Template.incidentForm.onRendered ->
-  instance = @
   @$('[data-toggle=tooltip]').tooltip()
-
   datePickerOptions = {}
   if @incidentData.dateRange.start and @incidentData.dateRange.end
     datePickerOptions.startDate = moment(moment.utc(@incidentData.dateRange.start).format("YYYY-MM-DD"))
@@ -106,7 +104,7 @@ Template.incidentForm.helpers
       when 'deaths' then 'Death'
 
   suggestedField: (fieldName)->
-    if fieldName in Template.instance().suggestedFields.get()
+    if fieldName in Template.instance().suggestedFields?.get()
       'suggested'
 
   typeIsSelected: ->
@@ -117,6 +115,8 @@ Template.incidentForm.helpers
 
   articleSourceUrl: ->
     Template.instance().data.articles[0]?.url
+
+  diseaseOptionsFn: -> diseaseOptionsFn
 
 Template.incidentForm.events
   'change input[name=daterangepicker_start]': (event, instance) ->

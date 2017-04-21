@@ -36,16 +36,17 @@ template(name="incidentReport")
             li.container-flex.single.no-break
               h6.metadata--title Species:
               span=species
+          if resolvedDisease
+            li.container-flex.single.no-break
+              h6.metadata--title Disease:
+              span=resolvedDisease.text
           li.container-flex.single.no-break
             h6.metadata--title Dates:
             span {{formatDateRange(dateRange)}}
           li.container-flex.no-break
-            h6.metadata--title Source:
-            ul.list-unstyled
-              each val in url
-                li
-                  a.ref-link(href="{{formatUrl(val)}}" target="_blank")
-                    span {{formatUrl(val)}}
+            h6.metadata--title Document:
+            a.ref-link(href="{{formatUrl(url)}}" target="_blank")
+              span {{formatUrl(url)}}
           ul.integrity.metadata.list-unstyled
             if dateRange.cumulative
               li
@@ -59,6 +60,6 @@ template(name="incidentReport")
       if isInRole "admin"
         .incident-report--details--actions.container-flex.no-break
           a.edit
-            i.fa.fa-edit(aria-hidden="true" title="Edit incident report")
+            i.fa.fa-edit(aria-hidden="true" title="Edit incident")
           a.delete
-            i.fa.fa-trash(aria-hidden="true" title="Delete incident report")
+            i.fa.fa-trash(aria-hidden="true" title="Delete incident")

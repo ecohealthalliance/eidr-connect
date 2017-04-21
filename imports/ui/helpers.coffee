@@ -1,13 +1,13 @@
-formatLocation = require '/imports/formatLocation.coffee'
+import { incidentTypeWithCountAndDisease, formatUrl } from '/imports/utils'
 
 UI.registerHelper 'formatLocation', (location)->
-  return formatLocation(location)
+  formatLocation(location)
 
 UI.registerHelper 'formatLocations', (locations)->
-  return locations.map(formatLocation).join('; ')
+  formatLocations(locations)
 
 UI.registerHelper 'formatDateRange', (dateRange)->
-  return formatDateRange(dateRange)
+  formatDateRange(dateRange)
 
 UI.registerHelper 'incidentToText', (incident) ->
   if @cases
@@ -31,34 +31,66 @@ UI.registerHelper 'incidentToText', (incident) ->
     result += "<span> #{formatDateRange(@dateRange, true)}</span>"
   Spacebars.SafeString result
 
+
+UI.registerHelper 'incidentCountAndDisease', ->
+  incidentTypeWithCountAndDisease(@)
+
 UI.registerHelper 'formatDate', (date) ->
   moment(date).format("MMM DD, YYYY")
 
 UI.registerHelper 'formatDateISO', (date) ->
   moment.utc(date).format("YYYY-MM-DDTHH:mm")
 
-pluralize = (word, count, showCount=true) ->
+UI.registerHelper 'formatUrl', (url) ->
+  formatUrl(url)
+
+export pluralize = (word, count, showCount=true) ->
   if Number(count) isnt 1
     word += "s"
   if showCount then "#{count} #{word}" else word
 
-formatDateRange = (dateRange, readable)->
-  dateFormat = "MMM D, YYYY"
+export formatDateRange = (dateRange, readable)->
+  dateRange ?= ''
+  start = moment.utc(dateRange.start)
+  end = moment.utc(dateRange.end)
+  dateFormatEnd = "MMM D, YYYY"
+  dateFormatStart = dateFormatEnd
+  inSameYear = start?.year() == end?.year()
+  inSameMonthAndYear = inSameYear and start?.month() == end?.month()
+  sameMonthAndYearDateRange =
+    start.format('MMM D') + ' - ' + end.format('D') + ', ' + end.format('YYYY')
+  if inSameYear
+    dateFormatStart = "MMM D"
+  startFormated = start.format(dateFormatStart)
+  startFormatedWithYear = start.format(dateFormatEnd)
+  endFormated = end.format(dateFormatEnd)
+
   if dateRange.type is "day"
     if dateRange.cumulative
-      return "before " + moment.utc(dateRange.end).format(dateFormat)
+      "before " + endFormated
     else
       if readable
-        return "on " + moment.utc(dateRange.start).format(dateFormat)
+        "on " + startFormatedWithYear
       else
-        return moment.utc(dateRange.start).format(dateFormat)
+        startFormatedWithYear
   else if dateRange.type is "precise"
     if readable
-      return "between " + moment.utc(dateRange.start).format(dateFormat) + " and " + moment.utc(dateRange.end).format(dateFormat)
+      "between " + startFormated + " and " + endFormated
+    else if inSameMonthAndYear
+      sameMonthAndYearDateRange
     else
-      return moment.utc(dateRange.start).format(dateFormat) + " - " + moment.utc(dateRange.end).format(dateFormat)
-  return ""
+      startFormated + " - " + endFormated
+  else if inSameMonthAndYear
+    sameMonthAndYearDateRange
+  else
+    startFormated + " - " + endFormated
 
-module.exports =
-  pluralize: pluralize
-  formatDateRange: formatDateRange
+export formatLocation = ({name, admin2Name, admin1Name, countryName}) ->
+  _.chain([name, admin2Name, admin1Name, countryName])
+    .compact()
+    .uniq()
+    .value()
+    .join(", ")
+
+export formatLocations = (locations) ->
+  locations.map(formatLocation).join('; ')

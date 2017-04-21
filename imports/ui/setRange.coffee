@@ -13,7 +13,17 @@ clearDateRange = (picker) ->
   picker.updateFormInputs()
   picker.updateCalendars()
 
+updateCalendarSelection = (picker, range) ->
+  {startDate, endDate} = range
+  currentMonth = moment(month: moment().month())
+  lastMonth = moment(month: moment().subtract(1, 'months').month())
+  picker.rightCalendar.month = currentMonth
+  picker.leftCalendar.month = lastMonth
+  picker.setStartDate(startDate)
+  picker.setEndDate(endDate)
+  picker.updateCalendars()
 
 module.exports =
   setVariables: setVariables
   clearDateRange: clearDateRange
+  updateCalendarSelection: updateCalendarSelection

@@ -4,23 +4,7 @@ template(name="summary")
       .event-name-wrap
         h1.event-name= eventName
         if isInRole "admin"
-          i.fa.fa-edit.edit-event-details(
-            data-toggle="modal"
-            data-target="#edit-event-modal"
-            data-editing="name"
-            title="Edit event details"
-            tabindex="0")
-      p.disease-name
-        if disease
-          span= disease
-        else
-          span.not-available No disease available.
-          if isInRole "admin"
-            i.fa.fa-plus-circle.edit-event-details(
-              data-toggle="modal"
-              data-target="#edit-event-modal"
-              data-editing="disease"
-              tabindex="0")
+          +editDetailsButton(target="#edit-event-modal" icon="pencil" editing="name")
 
       if summary
         p.summary(class="{{#if collapsed}}collapsed{{/if}}")
@@ -31,22 +15,18 @@ template(name="summary")
         p.summary.not-available
           span No summary available.
           if isInRole "admin"
-            i.fa.fa-plus-circle.edit-event-details(
-              data-toggle="modal"
-              data-target="#edit-event-modal"
-              data-editing="summary"
-              tabindex="0")
+            +editDetailsButton(target="#edit-event-modal" editing="summary")
 
     .event--metadata.container-flex
       .event--metadata--counts.container-flex.no-gutter.no-break
         .count.flex-col
           span= caseCount
-          h4 Incident Reports
+          h4 Incidents
           if isInRole "admin"
             +addIncidentReport class='-in-details'
         .count.flex-col
           span= articleCount
-          h4 Sources
+          h4 Documents
           if isInRole "admin"
             +sourceModalButton class='-in-details'
       .event--metadata--secondary-content.container-flex.no-break
@@ -58,7 +38,7 @@ template(name="summary")
         .secondary-content
           button.copy-link.btn.btn-xs.btn-default(
             type="button"
-            data-clipboard-text="{{urlFor 'user-event'}}"
+            data-clipboard-text="{{urlFor 'curated-event'}}"
             class="{{#if copied}} copied {{/if}}")
             if copied
               i.fa.fa-check(aria-hidden="true")

@@ -1,0 +1,8 @@
+template(name="addToEvent")
+  .curator-inbox--add-event-container.container-flex.vertically-centered
+    select.form-control.select2(
+      id=selectId
+      name="event")
+      option()
+    button.btn.btn-primary.add-to-event(
+      disabled="{{#unless allowAddingEvent}} true {{/unless}}") Add #{whatToAddText} to Event

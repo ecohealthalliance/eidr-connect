@@ -1,4 +1,4 @@
-{ pluralize } = require '/imports/ui/helpers'
+import { pluralize } from '/imports/ui/helpers'
 
 Template.markerPopup.helpers
   getEvents: () ->

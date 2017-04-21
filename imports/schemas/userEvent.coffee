@@ -1,4 +1,4 @@
-userEventSchema = new SimpleSchema(
+userEventSchema = new SimpleSchema
   _id:
     type: String
     optional: true
@@ -16,6 +16,7 @@ userEventSchema = new SimpleSchema(
     optional: true
   disease:
     type: String
+    optional: true
   eventName:
     type: String
   lastIncidentDate:
@@ -41,5 +42,5 @@ userEventSchema = new SimpleSchema(
   displayOnPromed:
     type: Boolean
     optional: true
-)
+
 module.exports = userEventSchema

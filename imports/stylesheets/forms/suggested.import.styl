@@ -15,15 +15,14 @@ $warning-border = darken($warning-bg, 12%)
   &:not(.full-width)
     autofillBG()
   .tabs
-    li
-      &.active
-        autofillBG(false)
+    li.active
+      autofillBG(false)
   &.full-width
     .tabs.tabs-secondary
       border-bottom-color $warning-border
-      li
-        border-color $warning-border
-        &.active
+      li.active
+        a
+          border-color $warning-border
           background $warning-bg
     .tab-content
       background $warning-bg !important
@@ -57,7 +56,7 @@ $warning-border = darken($warning-bg, 12%)
 #suggestedIncidentModal
   +above(4)
     .modal-dialog
-      width 90%
+      width calc(100% - 150px)
     .modal-header
       border-color $border-primary-m
     .modal-body
