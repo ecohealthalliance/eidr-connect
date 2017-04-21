@@ -30,6 +30,14 @@ Meteor.methods
     else
       throw new Meteor.Error("auth", "User does not have permission to add documents")
 
+  associateWithEvent: (sourceId, eventId) ->
+    user = Meteor.user()
+    if user and Roles.userIsInRole(user._id, ['admin'])
+      Articles.update sourceId,
+        $set: userEventId: eventId
+    else
+      throw new Meteor.Error("auth", "User does not have permission to edit documents")
+
   updateEventSource: (source) ->
     user = Meteor.user()
     if user and Roles.userIsInRole(user._id, ['admin'])
