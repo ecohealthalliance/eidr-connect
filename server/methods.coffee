@@ -78,11 +78,11 @@ Meteor.methods
   
   # Get the articles enhancements then use them to update the article
   # and create incidents in the database.
-  getArticleEnhancementsAndUpdate: (article) ->
+  getArticleEnhancementsAndUpdate: (article, rediagnose=false) ->
     dbArticle = Articles.findOne(_id: article._id)
     if not dbArticle
       throw Meteor.Error('invalid-article')
-    if dbArticle.enhancements
+    if dbArticle.enhancements and not rediagnose
       if dbArticle.enhancements.processingStartedAt
         # If the processing started less than 100 seconds ago do not resubmit
         # the aritcle.
