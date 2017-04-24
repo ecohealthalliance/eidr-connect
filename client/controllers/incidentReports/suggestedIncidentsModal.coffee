@@ -93,7 +93,9 @@ Template.suggestedIncidentsModal.helpers
     Template.instance().data.showTable and incidents.count()
 
   incidents: ->
-    Template.instance().incidentCollection.find()
+    Template.instance().incidentCollection.find
+      accepted: true
+      specify: $exists: false
 
   incidentsFound: ->
     Template.instance().incidentCollection.find().count() > 0
