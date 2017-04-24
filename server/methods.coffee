@@ -10,16 +10,18 @@ import { formatUrl, cleanUrl, createIncidentReportsFromEnhancements, regexEscape
 DateRegEx = /<span class="blue">Published Date:<\/span> ([^<]+)/
 
 Meteor.methods
-  getArticleEnhancements: (article) ->
+  getArticleEnhancements: (article, options={}) ->
     @unblock()
     check article.url, Match.Maybe(String)
     check article.content, Match.Maybe(String)
     check article.publishDate, Match.Maybe(Date)
     check article.addedDate, Match.Maybe(Date)
-    console.log "Calling GRITS API @ " + Constants.GRITS_URL
+    if not options.hideLogs
+      console.log "Calling GRITS API @ " + Constants.GRITS_URL
     params =
       api_key: Constants.GRITS_API_KEY
       returnSourceContent: true
+      priority: options.priority != false
     if article.publishDate or article.addedDate
       params.content_date = moment.utc(
         article.publishDate or article.addedDate
@@ -78,11 +80,11 @@ Meteor.methods
   
   # Get the articles enhancements then use them to update the article
   # and create incidents in the database.
-  getArticleEnhancementsAndUpdate: (article, rediagnose=false) ->
+  getArticleEnhancementsAndUpdate: (article, options={}) ->
     dbArticle = Articles.findOne(_id: article._id)
     if not dbArticle
       throw Meteor.Error('invalid-article')
-    if dbArticle.enhancements and not rediagnose
+    if dbArticle.enhancements and not options.rediagnose
       if dbArticle.enhancements.processingStartedAt
         # If the processing started less than 100 seconds ago do not resubmit
         # the aritcle.
@@ -94,15 +96,22 @@ Meteor.methods
     Articles.update _id: article._id,
       $set:
         enhancements: { processingStartedAt: new Date() }
-    enhancements = Meteor.call('getArticleEnhancements', article)
-    Articles.update _id: article._id,
-      $set:
-        enhancements: enhancements
-    article.enhancements = enhancements
-    Meteor.call 'addSourceIncidentReportsToCollection', article, {
-      acceptByDefault: true
-    }
-    return enhancements
+    try
+      enhancements = Meteor.call('getArticleEnhancements', article, options)
+      Articles.update _id: article._id,
+        $set:
+          enhancements: enhancements
+      article.enhancements = enhancements
+      Meteor.call 'addSourceIncidentReportsToCollection', article, {
+        acceptByDefault: true
+      }
+      return enhancements
+    catch e
+      Articles.update _id: article._id,
+        $set:
+          enhancements:
+            error: "" + e
+      throw e
 
   retrieveProMedArticle: (articleId) ->
     @unblock()
