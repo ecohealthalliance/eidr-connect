@@ -73,13 +73,13 @@ Meteor.methods
     if existingSource
       Articles.update(source._id, $set: userEventId: userEventId)
     else
-      console.log "SourceId", sourceId
       Meteor.call 'addEventSource',
         url: "promedmail.org/post/#{sourceId}"
         userEventId: userEventId
         title: source.title
         publishDate: source.publishDate
-        publishDateTZ: 'EST'
+        publishDateTZ: 'EST',
+        userEventId
     # Associate Incidents with Event
     Incidents.update _id: $in: incidentIds,
       $set: userEventId: userEventId

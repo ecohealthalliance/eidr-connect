@@ -46,10 +46,10 @@ Meteor.methods
   editUserEventArticleCount: (id, countModifier) ->
     if Roles.userIsInRole(Meteor.userId(), ['admin'])
       event = UserEvents.findOne(id)
-      console.log "event", id, event
       UserEvents.update id,
         $set:
           articleCount: event.articleCount + countModifier
+
 
   editUserEventLastIncidentDate: (id) ->
     event = UserEvents.findOne(id)

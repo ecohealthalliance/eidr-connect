@@ -69,7 +69,8 @@ Template.addToEvent.events
         userEventId: userEventId
         title: source.title
         publishDate: source.publishDate
-        publishDateTZ: 'EST'
+        publishDateTZ: 'EST',
+        instance.selectedEventId.get()
       , (error) ->
         if error
           notify('error', error.reason)

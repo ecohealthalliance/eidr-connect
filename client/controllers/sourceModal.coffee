@@ -4,6 +4,7 @@ createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
 validator = require 'bootstrap-validator'
 { notify } = require '/imports/ui/notification'
 { stageModals } = require '/imports/ui/modals'
+UserEvents = require '/imports/collections/userEvents.coffee'
 
 import {
   UTCOffsets,
@@ -141,13 +142,12 @@ Template.sourceModal.events
       source.publishDate = selectedDate.toDate()
 
     enhance = form.enhance.checked
-    Meteor.call 'addEventSource', source, (error, articleId) ->
+    Meteor.call 'addEventSource', source, instance.data.userEventId, (error, articleId) ->
       if error
         toastr.error error.reason
       else
         if enhance
           notify('success', 'Source successfully added')
-          console.log "sourceModal article", articleId, Articles.findOne({_id: articleId})
           Modal.show 'suggestedIncidentsModal',
             userEventId: instance.data.userEventId
             article: Articles.findOne({_id: articleId})
