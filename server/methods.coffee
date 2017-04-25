@@ -123,7 +123,7 @@ Meteor.methods
 
   queryForSuggestedArticles: (eventId) ->
     @unblock()
-    check eventId, String
+    check eventId, Match.Maybe(String)
     event = UserEvents.findOne(eventId)
     console.log "Calling SPA API @ " + Constants.SPA_API_URL
     unless event

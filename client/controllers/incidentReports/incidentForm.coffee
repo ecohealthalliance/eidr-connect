@@ -2,6 +2,7 @@ Articles = require '/imports/collections/articles.coffee'
 createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
 validator = require 'bootstrap-validator'
 { keyboardSelect, removeSuggestedProperties, diseaseOptionsFn } = require '/imports/utils'
+import { getIncidentSnippet } from '/imports/ui/snippets'
 
 _selectInput = (event, instance, prop, isCheckbox) ->
   return if not keyboardSelect(event) and event.type is 'keyup'
@@ -57,6 +58,10 @@ Template.incidentForm.onCreated ->
 
     @incidentStatus.set(incident.status or '')
 
+  @isSuggestedField = (fieldName) =>
+    if fieldName in @suggestedFields?.get()
+      'suggested'
+
 Template.incidentForm.onRendered ->
   @$('[data-toggle=tooltip]').tooltip()
   datePickerOptions = {}
@@ -107,9 +112,8 @@ Template.incidentForm.helpers
       when 'cases' then 'Case'
       when 'deaths' then 'Death'
 
-  suggestedField: (fieldName)->
-    if fieldName in Template.instance().suggestedFields?.get()
-      'suggested'
+  suggestedField: (fieldName) ->
+    Template.instance().isSuggestedField(fieldName)
 
   typeIsSelected: ->
     Template.instance().incidentType.get()
@@ -124,6 +128,25 @@ Template.incidentForm.helpers
 
   documentUrl: ->
     Articles.findOne(Template.instance().data.incident?.articleId)?.url
+
+  allowUrlInput: ->
+    not @edit and not @articleId
+
+  incidentTypeClassNames: ->
+    classNames = []
+    instance = Template.instance()
+    if Template.instance().incidentType.get()
+      classNames.push('form-groups--highlighted')
+    classNames.push(instance.isSuggestedField('cases'))
+    classNames.push(instance.isSuggestedField('deaths'))
+    classNames.join(' ')
+
+  incidentSnippet: ->
+    incident = @incident
+    if incident
+      articleContent = Articles.findOne(incident.articleId)?.enhancements?.source?.cleanContent.content
+      if articleContent
+        Spacebars.SafeString(getIncidentSnippet(articleContent, incident))
 
 Template.incidentForm.events
   'change input[name=daterangepicker_start]': (event, instance) ->

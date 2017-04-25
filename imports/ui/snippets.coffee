@@ -1,6 +1,6 @@
 import { annotateContent } from '/imports/ui/annotation'
 
-export getIncidentSnippet = (content, incident, paddingCharaters=50) ->
+export getIncidentSnippet = (content, incident, paddingCharaters=100) ->
   textOffsets = incident.annotations.case[0].textOffsets
   annotation = [
     type: 'case'

@@ -141,7 +141,7 @@ IncidentReportSchema = new SimpleSchema
     type: Boolean
     optional: true
   url:
-    type: [String]
+    type: String
     optional: true
 
 module.exports = IncidentReportSchema

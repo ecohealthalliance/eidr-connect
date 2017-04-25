@@ -80,7 +80,7 @@ export incidentReportFormToIncident = (form) ->
       toastr.error("Unknown incident type [#{incidentType}]")
       return
 
-  articleSourceUrl = form.articleSourceUrl.value
+  articleSourceUrl = form.articleSourceUrl?.value
   sourceSelect2Data = $(form.articleSource)?.select2('data')
   if articleSourceUrl
     articleUrl = articleSourceUrl

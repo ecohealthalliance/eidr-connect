@@ -129,6 +129,10 @@ Template.sourceModal.helpers
   url: ->
     Template.instance().selectedArticle.get().url
 
+  presentUrl: ->
+    instance = Template.instance()
+    instance.selectedArticle.get().url and instance.data.edit
+
   suggestedArticles: ->
     Template.instance().suggestedArticles.find()
 

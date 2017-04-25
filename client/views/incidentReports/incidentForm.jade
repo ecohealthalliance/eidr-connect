@@ -4,23 +4,22 @@ template(name="incidentForm")
       if confirmation
         input(type="hidden" name="articleSourceUrl" value=articleSourceUrl)
       else
-        .form-group.form-group--full
-          label.control-label.with-info-tooltip(
-            data-toggle="tooltip"
-            data-placement="right"
-            title="URL of the document where the incident was reported."
-          ) Document URL
-          if documentUrl
+        if documentUrl
+          .form-group.form-group--full
+            +documentInputLabel
             input.form-control(readonly value=documentUrl name="articleSourceUrl")
-          else
+        if incidentSnippet
+          p.incident-snippet=incidentSnippet
+        if allowUrlInput
+          .form-group.form-group--full
+            +documentInputLabel
             +articleSelect2(
               selectId="articleSource"
               articles=articles
               placeholder='Select a Document')
             .help-block.with-errors
 
-      .incident-type-wrapper.form-groups(
-        class="{{#if typeIsSelected}} form-groups--highlighted {{/if}} {{suggestedField 'cases'}} {{suggestedField 'deaths'}}")
+      .incident-type-wrapper.form-groups(class=incidentTypeClassNames)
         .form-group.form-group--full.check-buttons
           label.control-label.with-info-tooltip(
             data-toggle="tooltip"
@@ -224,3 +223,10 @@ template(name="incidentForm")
             label.travel-related(for="travelRelated" tabindex="0") Travel Related
 
       button.hidden(type="submit" aria-hidden="true")
+
+template(name="documentInputLabel")
+  label.control-label.with-info-tooltip(
+    data-toggle="tooltip"
+    data-placement="right"
+    title="URL of the document where the incident was reported."
+  ) Document URL
