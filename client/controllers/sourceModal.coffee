@@ -150,7 +150,7 @@ Template.sourceModal.events
           notify('success', 'Source successfully added')
           Modal.show 'suggestedIncidentsModal',
             userEventId: instance.data.userEventId
-            article: Articles.findOne({_id: articleId})
+            article: Articles.findOne(articleId)
           stageModals(instance, instance.modals)
         else
           Modal.hide(instance)

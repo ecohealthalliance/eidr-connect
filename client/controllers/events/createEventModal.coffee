@@ -42,7 +42,8 @@ Template.createEventModal.events
             userEventId: result.insertedId
             title: source.title
             publishDate: source.publishDate
-            publishDateTZ: "EST"
+            publishDateTZ: "EST",
+            result.insertedId
           , (error) ->
             handleCompletion(error, 'Document', modal)
         else

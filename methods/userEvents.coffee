@@ -50,7 +50,6 @@ Meteor.methods
         $set:
           articleCount: event.articleCount + countModifier
 
-
   editUserEventLastIncidentDate: (id) ->
     event = UserEvents.findOne(id)
     latestEventIncident = Incidents.findOne
