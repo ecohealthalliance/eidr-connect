@@ -88,7 +88,7 @@ export incidentReportFormToIncident = (form) ->
     for child in sourceSelect2Data
       if child.selected
         articleUrl = child.text.trim()
-  incident.articleId = Articles.findOne(url: articleUrl)._id
+  incident.articleId = Articles.findOne(url: articleUrl)?._id
 
   for option in $(form).find('#incident-disease-select2').select2('data')
     incident.resolvedDisease =

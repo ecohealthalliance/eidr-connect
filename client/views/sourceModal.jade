@@ -27,10 +27,14 @@ template(name="sourceModal")
                     else
                       .no-results No documents found
 
-            if edit
+            if url
               label.control-label Document URL
               p.form-control-static {{url}}
-            else
+            if showContent
+              .content
+                p=content
+
+            if showArticleInputs
               .form-group.full-width.with-tabs
                 ul.tabs.tabs-secondary.tabs-traditional(role="tablist")
                   li(class="{{#if originIsUrl}}active{{/if}}")

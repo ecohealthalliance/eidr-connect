@@ -159,6 +159,12 @@ Template.sourceModal.helpers
     instance = Template.instance()
     not instance.data.edit and instance.suggest
 
+  showArticleInputs: ->
+    not @edit and not @url
+
+  showContent: ->
+    not @url and @content
+
 Template.sourceModal.events
   'click .save-source': (event, instance) ->
     return unless _checkFormValidity(instance)
