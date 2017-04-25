@@ -156,7 +156,7 @@ Template.incidentTable.events
   'click table.incident-table tr td.edit': (event, instance) ->
     event.stopPropagation()
     source = instance.data.source
-    snippetHtml = buildAnnotatedIncidentSnippet(source.enhancements.source.cleanContent.content, @)
+    snippetHtml = buildAnnotatedIncidentSnippet(source.enhancements.source.cleanContent.content, @, false)
     Modal.show 'suggestedIncidentModal',
       edit: true
       articles: [source]

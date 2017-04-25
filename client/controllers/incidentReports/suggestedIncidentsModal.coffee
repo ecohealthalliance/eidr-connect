@@ -32,7 +32,7 @@ showSuggestedIncidentModal = (event, instance)->
     .findOne($(event.currentTarget)
     .data("incident-id"))
   content = Template.instance().content.get()
-  snippetHtml = buildAnnotatedIncidentSnippet(content, incident)
+  snippetHtml = buildAnnotatedIncidentSnippet(content, incident, false)
 
   Modal.show 'suggestedIncidentModal',
     articles: [instance.data.article]
@@ -131,7 +131,7 @@ Template.suggestedIncidentsModal.helpers
   annotatedContent: ->
     instance = Template.instance()
     incidents = instance.collection().find().fetch()
-    annotateContentWithIncidents(instance.content.get(), incidents)
+    annotateContentWithIncidents(instance.content.get(), incidents, null, ['linked'])
 
   annotatedCount: ->
     collection = Template.instance().collection()

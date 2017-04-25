@@ -13,4 +13,3 @@ export getIncidentSnippet = (content, incident, paddingCharaters=100) ->
   annotateContent content, annotation,
     startingIndex: startingIndex
     endingIndex: endingIndex
-    pointerEvents: false

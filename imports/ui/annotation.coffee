@@ -1,6 +1,14 @@
+###
+# annotateContent - Annotates text content by adding spans based on text offsets
+# of annotations
+#
+# @param {String} content, text content to annotate
+# @param {Array} annotations, annotations with textoffsets
+# @param {Object} options
+# @return {String} html, html with annotation spans added
+###
 export annotateContent = (content, annotations, options={}) ->
-  { startingIndex, endingIndex, selectedAnnotationId, pointerEvents} = options
-  pointerEvents ?= true
+  { startingIndex, endingIndex } = options
 
   if not startingIndex
     startingIndex = 0
@@ -40,6 +48,7 @@ export annotateContent = (content, annotations, options={}) ->
       0
   activeAnnotations = []
   endpoints.forEach ({offset, annotation, start})->
+    classNames = annotation.classNames?.concat([]) or []
     html += Handlebars._escape(content.slice(lastOffset, offset))
     if activeAnnotations.length > 0
       html += "</span>"
@@ -48,22 +57,30 @@ export annotateContent = (content, annotations, options={}) ->
     else
       activeAnnotations = _.without(activeAnnotations, annotation)
     if activeAnnotations.length > 0
-      types = activeAnnotations.map((a)-> a.type).join(" ")
       attributes = {}
-      activeAnnotations.forEach (a)-> _.extend(attributes, a?.attributes or {})
+      activeAnnotations.forEach (attr)->
+        type = attr.type
+        if type
+          classNames.push(type)
+        _.extend(attributes, attr?.attributes or {})
       attributeText = _.map(attributes, (value, key)-> "#{key}='#{value}'").join(" ")
-      selectedClassName = ''
-      if selectedAnnotationId and attributes['data-incident-id'] is selectedAnnotationId
-        selectedClassName = 'viewing'
-      pointerEventsClass = if pointerEvents then 'linked' else ''
-      html += "<span class='annotation annotation-text #{types} #{selectedClassName} #{pointerEventsClass}' #{attributeText}>"
+      html += "<span class='annotation annotation-text #{classNames.join(' ')}' #{attributeText}>"
     lastOffset = offset
   html += Handlebars._escape("#{content.slice(lastOffset, endingIndex)}")
   if endingIndex < content.length - 1
     html += "..."
   html
 
-export annotateContentWithIncidents = (content, incidents, selectedAnnotationId) ->
+###
+# annotateContentWithIncidents
+#
+# @param {String} content, text content to annotate
+# @param {Array} incidents
+# @param {String} selectedAnnotationId, id of the selected annotation in inbox
+# @param {Array} classNames
+# @return {String} html with annotation spans added
+###
+export annotateContentWithIncidents = (content, incidents, selectedAnnotationId, classNames=[]) ->
   incidentAnnotations = incidents.map (incident) ->
     if not incident.annotations?.case[0]
       return
@@ -73,11 +90,21 @@ export annotateContentWithIncidents = (content, incidents, selectedAnnotationId)
       baseAnnotation.type += " uncertain"
     baseAnnotation.attributes =
       'data-incident-id': incident._id
-    return baseAnnotation
-  html = annotateContent content, _.compact(incidentAnnotations),
-   selectedAnnotationId: selectedAnnotationId
+    _classNames = classNames.concat([])
+    if selectedAnnotationId is incident._id
+      _classNames.push('viewing')
+    baseAnnotation.classNames = _classNames
+    baseAnnotation
+  html = annotateContent(content, _.compact(incidentAnnotations))
   new Spacebars.SafeString(html)
 
+###
+# buildAnnotatedIncidentSnippet
+#
+# @param {String} content, text content to annotate
+# @param {Object} incident
+# @return {String} html with annotation spans added
+###
 export buildAnnotatedIncidentSnippet = (content, incident) ->
   PADDING_CHARACTERS = 30
   incidentAnnotations = []

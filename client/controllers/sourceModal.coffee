@@ -207,7 +207,7 @@ Template.sourceModal.events
           instance.subscribe 'ArticleIncidentReports', articleId
           Modal.show 'suggestedIncidentsModal',
             userEventId: instance.data.userEventId
-            article: source
+            article: Articles.findOne(articleId)
           stageModals(instance, instance.modals)
         else
           instance.data.selectedSourceId?.set(articleId)
