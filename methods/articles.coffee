@@ -8,15 +8,19 @@ Meteor.methods
       # Check if Document is in collection
       sourceQuery = url: $regex: "#{regexEscape(source.url)}$"
       existingSource = Articles.findOne(sourceQuery)
+      console.log "existing source:", existingSource
       if existingSource
-        Articles.update sourceQuery,
-          $set: userEventId: source.userEventId
+        #if this source is already in the DB and the userEvent isn't already associated - push it
+        if !existingSource.userEventIds or existingSource.userEventIds.indexOf(source.userEventId) == -1
+          Articles.update sourceQuery,
+            $push: userEventIds: source.userEventId
+        existingSource._id
       else
         if source.url
           insertArticle =
             url: source.url
             title: source.title
-            userEventId: source.userEventId
+            userEventIds: [source.userEventId]
           insertArticle = source
           insertArticle.addedByUserId = user._id
           insertArticle.addedByUserName = user.profile.name
@@ -40,15 +44,24 @@ Meteor.methods
     else
       throw new Meteor.Error("auth", "User does not have permission to edit documents")
 
-  removeEventSource: (id) ->
+  removeEventSource: (id, userEventId) ->
     if Roles.userIsInRole(Meteor.userId(), ['admin'])
       removed = Articles.findOne(id)
-      Articles.update id,
-        $set:
-          deleted: true,
-          deletedDate: new Date()
-      Meteor.call("editUserEventLastModified", removed.userEventId)
-      Meteor.call("editUserEventArticleCount", removed.userEventId, -1)
+      console.log "removed", id, removed
+      removed.userEventIds = _.filter removed.userEventIds, (currentUserEventId) ->
+        currentUserEventId != userEventId
+      # if there is nothing in the userEventIds array after we delete the userEventId in question then mark the article as deleted
+      if !removed.userEventIds.length
+        Articles.update id,
+          $set:
+            deleted: true,
+            deletedDate: new Date()
+      else # otherwise just remove the userEventId in question from the array
+        Articles.update id,
+          $set:
+            userEventIds: removed.userEventIds
+      Meteor.call("editUserEventLastModified", userEventId)
+      Meteor.call("editUserEventArticleCount", userEventId, -1)
 
   markSourceReviewed: (id, reviewed) ->
     if Roles.userIsInRole(Meteor.userId(), ['curator', 'admin'])

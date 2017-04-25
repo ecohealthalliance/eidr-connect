@@ -108,7 +108,7 @@ Router.route "/events/curated-events/:_id/:_view?",
     ]
   data: ->
     userEvent: UserEvents.findOne({'_id': @params._id})
-    articles: Articles.find({'userEventId': @params._id}, {sort: {publishDate: -1}})
+    articles: Articles.find({'userEventIds': @params._id}, {sort: {publishDate: -1}})
     incidents: Incidents.find({'userEventId': @params._id}, {sort: {date: -1}})
 
 Router.route "/events/smart-events/:_id/:_view?",

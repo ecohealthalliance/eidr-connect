@@ -59,6 +59,12 @@ Meteor.startup ->
       Incidents.update incident._id,
         $set: disease: disease
 
+  # update articles to use arrays instead of strings for their UserEventId values
+  Articles.find({userEventId: $exists: true}).forEach (article) ->
+    Articles.update _id: article._id,
+      $set: userEventIds: [article.userEventId]
+      # $unset: userEventId: ''
+
   # Soft delete incidents of deleted user events
   UserEvents.find({deleted: true}, {fields: _id:1}).forEach (event) ->
     Incidents.update {userEventId: event._id, deleted: {$in: [null, false]}},

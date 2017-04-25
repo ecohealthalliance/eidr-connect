@@ -20,7 +20,7 @@ articleSchema = new SimpleSchema
   url:
     type: String
   userEventId:
-    type: String
+    type: [String]
     optional: true
   reviewed:
     type: Boolean

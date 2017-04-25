@@ -46,7 +46,7 @@ Meteor.publish 'ArticleIncidentReports', (articleUrl) ->
 
 Meteor.publish 'eventArticles', (ueId) ->
   Articles.find(
-    userEventId: ueId
+    userEventIds: ueId
     deleted: {$in: [null, false]}
   )
 

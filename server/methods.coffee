@@ -79,6 +79,7 @@ Meteor.methods
   # Get the articles enhancements then use them to update the article
   # and create incidents in the database.
   getArticleEnhancementsAndUpdate: (article) ->
+    console.log "and update article", article
     dbArticle = Articles.findOne(_id: article._id)
     if not dbArticle
       throw Meteor.Error('invalid-article')
