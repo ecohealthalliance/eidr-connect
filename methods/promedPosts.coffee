@@ -1,6 +1,7 @@
 if Meteor.isServer
   PromedPosts = require '/imports/collections/promedPosts.coffee'
   Articles = require '/imports/collections/articles.coffee'
+  Feeds = require '/imports/collections/feeds.coffee'
 
   Meteor.methods
     fetchPromedPosts: (limit, range) ->
@@ -29,6 +30,7 @@ if Meteor.isServer
       recordNewPosts(posts)
 
   recordNewPosts = (posts) ->
+    promedFeedId = Feeds.findOne(url: 'promedmail.org/post/')?._id
     for post in posts
       # Normalize post for display/subscription
       normalizedPost =
@@ -38,5 +40,5 @@ if Meteor.isServer
         publishDateTZ: "EDT"
         title: post.subject.raw
         reviewed: false
-        feed: "promed-mail"
+        feedId: promedFeedId
       Articles.upsert({_id: post._id._str}, {$setOnInsert: normalizedPost})
