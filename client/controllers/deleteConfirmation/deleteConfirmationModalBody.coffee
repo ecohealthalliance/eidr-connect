@@ -6,6 +6,7 @@ Template.deleteConfirmationModalBody.events
     data = instance.data
     id = data.objId
     objNameToDelete = data.objNameToDelete
+    
     switch objNameToDelete
       when 'incident'
         Meteor.call 'removeIncidentReport', id, (error) ->

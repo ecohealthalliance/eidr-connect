@@ -4,7 +4,6 @@ createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
 validator = require 'bootstrap-validator'
 { notify } = require '/imports/ui/notification'
 { stageModals } = require '/imports/ui/modals'
-UserEvents = require '/imports/collections/userEvents.coffee'
 
 import {
   UTCOffsets,
