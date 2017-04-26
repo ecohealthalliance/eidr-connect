@@ -10,9 +10,9 @@ Meteor.methods
       existingSource = Articles.findOne(sourceQuery)
       if existingSource
         #if this source is already in the DB and the userEvent isn't already associated - push it
-        if !existingSource.userEventIds or existingSource.userEventIds.indexOf(source.userEventId) == -1
+        if !existingSource.userEventIds
           Articles.update sourceQuery,
-            $push: userEventIds: eventId
+            $addToSet: userEventIds: eventId
           Meteor.call("editUserEventArticleCount", eventId, 1)
         existingSource._id
       else
