@@ -35,6 +35,7 @@ _checkForPublishDate = (url, instance) ->
         _article = _.extend article,
           tz: tz
           date: date.utcOffset(UTCOffsets[tz])
+          suggested: true
         instance.selectedArticle.set(_article)
 
 Template.sourceModal.onCreated ->
@@ -50,7 +51,7 @@ Template.sourceModal.onCreated ->
       add: 'off-canvas--left'
       remove: 'fade'
 
-  @clearInputs = (clearUrlInput=false) =>
+  @clearSelectedArticle = (clearUrlInput=false) =>
     _setDatePicker(@datePicker, new Date())
     @$('#title').val('')
     @$('#publishTime').val('')
@@ -59,6 +60,7 @@ Template.sourceModal.onCreated ->
     else
       input = '#content'
     @$(input).val('')
+    @selectedArticle.set({})
 
   if @data.edit
     if @data.publishDate
@@ -244,17 +246,20 @@ Template.sourceModal.events
         stageModals(instance, instance.modals)
 
   'input #article': _.debounce (event, instance) ->
+      $('#content').val('')
       url = event.target.value.trim()
       if url.length > 20 # Check if the length at url base length
         _checkForPublishDate(url, instance)
   , 200
 
-  'input #text': (event, instance) ->
-    instance.clearInputs(true)
-    removeSuggestedProperties(instance, 'all')
+  'input #content': (event, instance) ->
+    $('#article').val('')
+    if instance.selectedArticle.get().suggested
+      instance.clearSelectedArticle(true)
+      removeSuggestedProperties(instance, 'all')
 
   'click #suggested-articles li': (event, instance) ->
-    instance.clearInputs()
+    instance.clearSelectedArticle()
     instance.articleOrigin.set('url')
     _checkForPublishDate(@url, instance)
 
