@@ -39,7 +39,6 @@ Template.createEventModal.events
         else if source
           Meteor.call 'addEventSource',
             url: source.url
-            userEventId: result.insertedId
             title: source.title
             publishDate: source.publishDate
             publishDateTZ: "EST",
