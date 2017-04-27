@@ -10,15 +10,6 @@ feedSchema = require '/imports/schemas/feed'
 Constants = require '/imports/constants.coffee'
 
 Meteor.startup ->
-  # set incident dates
-  incidents = Incidents.find({deleted: {$in: [null, false]}}).fetch()
-  for incident in incidents
-    try
-      incidentReportSchema.validate(incident)
-    catch error
-      console.log error
-      console.log JSON.stringify(incident, 0, 2)
-
   # Clean-up curatorInboxSourceId when user goes offline
   Meteor.users.find({'status.online': true}).observe
     removed: (user) ->
@@ -131,3 +122,11 @@ Meteor.startup ->
       feedId: promedFeedId
     articleSchema.validate(article)
     Articles.upsert(article._id, article)
+
+  # validate incidents
+  Incidents.find({deleted: {$in: [null, false]}}).forEach (incident)->
+    try
+      incidentReportSchema.validate(incident)
+    catch error
+      console.log error
+      console.log JSON.stringify(incident, 0, 2)

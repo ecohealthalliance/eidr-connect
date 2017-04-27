@@ -4,8 +4,9 @@ import ScatterPlot from '/imports/charts/ScatterPlot.coffee'
 import Axes from '/imports/charts/Axes.coffee'
 import Group from '/imports/charts/Group.coffee'
 import SegmentMarker from '/imports/charts/SegmentMarker.coffee'
-import { pluralize, formatDateRange } from '/imports/ui/helpers'
+import { pluralize, formatDateRange, formatLocations } from '/imports/ui/helpers'
 import { incidentTypeWithCountAndDisease } from '/imports/utils'
+
 
 Template.incidentReports.onDestroyed ->
   if @plot
@@ -235,3 +236,50 @@ Template.incidentReports.events
    click .prev-page,
    change .reactive-table-navigation .form-control': (event, instance) ->
      instance.$('tr.details').remove()
+
+  'click .open-download-csv': (event, instance)->
+    Modal.show('downloadCSVModal',
+      columns: [
+        {name: 'Type'}
+        {name: 'Value'}
+        {name: 'Start Date'}
+        {name: 'End Date'}
+        {name: 'Locations', classNames: "wide"}
+        {name: 'Status'}
+        {name: 'Species'}
+        {name: 'Properties'}
+        {name: 'Disease'}
+        {name: 'Feed'}
+        {name: 'Document URL'}
+        {name: 'Document Title'}
+        {name: 'Document Publication Date'}
+      ],
+      rows: instance.incidents.map (incident)->
+        properties = []
+        if incident.travelRelated
+          properties.push "Travel Related"
+        if incident.dateRange?.cumulative
+          properties.push "Cumulative"
+        if incident.approximate
+          properties.push "Approximate"
+        startDate = null
+        if not incident.dateRange.cumulative
+          startDate = moment.utc(incident.dateRange.start).format("YYYY-MM-DD")
+        endDate = moment.utc(incident.dateRange.end).format("YYYY-MM-DD")
+        return {
+          'Type': _.keys(_.pick(incident, 'cases', 'deaths', 'specify'))[0]
+          'Value': _.values(_.pick(incident, 'cases', 'deaths', 'specify'))[0]
+          'Start Date': startDate
+          'End Date': endDate
+          'Locations': formatLocations(incident.locations)
+          'Status': incident.status
+          'Species': incident.species
+          'Properties': properties.join(";")
+          'Disease': incident.resolvedDisease.text
+          # TODO: Update these after articleId property is merged
+          'Feed': incident.url
+          'Document URL': incident.url
+          'Document Title': incident.url
+          'Document Publication Date': incident.url
+        }
+    )
