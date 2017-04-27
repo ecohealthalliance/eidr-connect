@@ -7,6 +7,11 @@ $modal-transition-time-opacity = .25s
   &.flex
     display flex
     justify-content center
+  &.wide
+    .modal-dialog
+      width 95%
+      +above(3)
+        max-width 90%
   &[class*='off-canvas']
   &[class*='staged'] .modal-dialog
   &.transitioned

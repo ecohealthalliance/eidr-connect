@@ -238,7 +238,7 @@ Template.incidentReports.events
      instance.$('tr.details').remove()
 
   'click .open-download-csv': (event, instance)->
-    Modal.show('downloadCSVModal',
+    Modal.show 'downloadCSVModal',
       columns: [
         {name: 'Type'}
         {name: 'Value'}
@@ -282,4 +282,3 @@ Template.incidentReports.events
           'Document Title': incident.url
           'Document Publication Date': incident.url
         }
-    )

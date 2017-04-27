@@ -1,10 +1,11 @@
 template(name="incidentReports")
   .container-flex.no-gutter
     .flex-col.bordered
-      .tab-form
+      .tab-form.container-flex
         unless smartEvent
           +addIncidentReport
-        button.btn.btn-primary(type="button" class="open-download-csv" style="margin-left:7px;")
+        button.open-download-csv.right-action.btn.btn-primary(type="button")
+          i.fa.fa-download
           span Download CSV
       if incidents.count
         +reactiveTable collection=incidents settings=getSettings
