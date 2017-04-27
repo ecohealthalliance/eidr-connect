@@ -7,6 +7,8 @@ services:
       - ghprbSourceBranch
     volumes:
       - /shared/eidr-connect:/shared
+    env_file:
+      - /shared/eidr-connect/sensitive-environment-vars.env
     depends_on:
       - mongodb
     command: ['bash', '-c', '/home/meteor/eidr-connect/start-test-server.sh --mongo_host=mongodb --is_docker=true']
