@@ -35,5 +35,5 @@ autoprocessArticles = ->
     autoprocessArticles()
 
 Meteor.startup ->
-  Meteor.setTimeout(autoprocessArticles, 100000)
-    
+  if not Meteor.isAppTest
+    Meteor.setTimeout(autoprocessArticles, 100000)
