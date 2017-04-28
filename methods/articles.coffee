@@ -14,20 +14,15 @@ Meteor.methods
           $addToSet: userEventIds: eventId
         Meteor.call("editUserEventArticleCount", eventId, 1)
         existingSource._id
-      else
-        if source.url
-          insertArticle =
-            url: source.url
-            title: source.title
-            userEventIds: [eventId]
-          insertArticle = source
-          insertArticle.addedByUserId = user._id
-          insertArticle.addedByUserName = user.profile.name
-          insertArticle.addedDate = new Date()
-          newId = Articles.insert(insertArticle)
-          Meteor.call("editUserEventLastModified", eventId)
-          Meteor.call("editUserEventArticleCount", eventId, 1)
-          return newId
+      else if source.url
+        source.userEventIds = [eventId]
+        source.addedByUserId = user._id
+        source.addedByUserName = user.profile.name
+        source.addedDate = new Date()
+        newId = Articles.insert(source)
+        Meteor.call("editUserEventLastModified", eventId)
+        Meteor.call("editUserEventArticleCount", eventId, 1)
+        return newId
     else
       throw new Meteor.Error("auth", "User does not have permission to add documents")
 
