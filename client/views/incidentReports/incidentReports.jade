@@ -6,7 +6,7 @@ template(name="incidentReports")
           +addIncidentReport
         button.open-download-csv.right-action.btn.btn-primary(type="button")
           i.fa.fa-download
-          span Export CSV
+          span Export
       if incidents.count
         +reactiveTable collection=incidents settings=getSettings
       else
