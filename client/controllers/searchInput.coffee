@@ -9,6 +9,7 @@
                  icon within the input, the input returns to its hidden state.
     placeholder: Defaults to 'Search'
     classes:     Classes which will be applied to the input's parent element
+    searching:   Reactive Var that is true when the search input is visible
 ####
 { regexEscape } = require '/imports/utils'
 
@@ -24,7 +25,7 @@ Template.searchInput.onCreated ->
   searching = true
   if instanceData.toggleable
     searching = false
-  @searching = new ReactiveVar(searching)
+  @searching = @data.searching or new ReactiveVar(searching)
   @textFilter = instanceData.textFilter or new ReactiveTable.Filter(instanceData.id, instanceData.props)
 
 Template.searchInput.helpers

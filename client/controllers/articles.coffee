@@ -110,6 +110,13 @@ Template.articles.events
     Modal.show 'sourceModal', source
     instance.$(event.currentTarget).tooltip('destroy')
 
+  'click .show-document-text-modal': (event, instance) ->
+    selectedId = instance.selectedSourceId.get()
+    article = Articles.findOne(selectedId)
+    Modal.show 'documentTextModal',
+      title: article.title
+      text: article.enhancements.source.cleanContent.content
+
 Template.articleSelect2.onRendered ->
   $input = @$('select')
   options = {}

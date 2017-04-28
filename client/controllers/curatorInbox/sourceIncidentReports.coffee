@@ -2,7 +2,7 @@ Incidents = require '/imports/collections/incidentReports.coffee'
 
 findIncident = (accepted) ->
   query = {}
-  query.url = Template.instance().data.source.url
+  query.articleId = Template.instance().data.source._id
   if accepted
     query.accepted = $eq: true
   else if not _.isUndefined(accepted)

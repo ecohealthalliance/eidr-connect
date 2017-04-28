@@ -1,4 +1,4 @@
-{ annotateContentWithIncidents } = require('/imports/ui/annotation')
+import { annotateContentWithIncidents } from '/imports/ui/annotation'
 
 POPUP_DELAY = 100
 
