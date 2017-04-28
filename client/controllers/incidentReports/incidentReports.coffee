@@ -6,7 +6,8 @@ import Group from '/imports/charts/Group.coffee'
 import SegmentMarker from '/imports/charts/SegmentMarker.coffee'
 import { pluralize, formatDateRange, formatLocations } from '/imports/ui/helpers'
 import { incidentTypeWithCountAndDisease } from '/imports/utils'
-
+import Articles from '/imports/collections/articles.coffee'
+import Feeds from '/imports/collections/feeds.coffee'
 
 Template.incidentReports.onDestroyed ->
   if @plot
@@ -14,6 +15,7 @@ Template.incidentReports.onDestroyed ->
     @plot = null
 
 Template.incidentReports.onCreated ->
+  @subscribe('feeds')
   @plotZoomed = new ReactiveVar(false)
   # iron router returns an array and not a cursor for data.incidents,
   # therefore we will setup a reactive cursor to use with the plot as an
@@ -251,7 +253,7 @@ Template.incidentReports.events
         {name: 'Disease'}
         {name: 'Feed'}
         {name: 'Document URL'}
-        {name: 'Document Title'}
+        {name: 'Document Title', classNames: "wide"}
         {name: 'Document Publication Date'}
       ],
       rows: instance.incidents.map (incident)->
@@ -266,6 +268,8 @@ Template.incidentReports.events
         if not incident.dateRange.cumulative
           startDate = moment.utc(incident.dateRange.start).format("YYYY-MM-DD")
         endDate = moment.utc(incident.dateRange.end).format("YYYY-MM-DD")
+        article = Articles.findOne(incident.articleId)
+        feed = Feeds.findOne(article?.feedId)
         return {
           'Type': _.keys(_.pick(incident, 'cases', 'deaths', 'specify'))[0]
           'Value': _.values(_.pick(incident, 'cases', 'deaths', 'specify'))[0]
@@ -275,10 +279,9 @@ Template.incidentReports.events
           'Status': incident.status
           'Species': incident.species
           'Properties': properties.join(";")
-          'Disease': incident.resolvedDisease.text
-          # TODO: Update these after articleId property is merged
-          'Feed': incident.url
-          'Document URL': incident.url
-          'Document Title': incident.url
-          'Document Publication Date': incident.url
+          'Disease': incident.resolvedDisease?.text
+          'Feed': feed?.title or feed?.url
+          'Document URL': article?.url
+          'Document Title': article?.title
+          'Document Publication Date': moment(article?.publishDate).format("YYYY-MM-DD")
         }
