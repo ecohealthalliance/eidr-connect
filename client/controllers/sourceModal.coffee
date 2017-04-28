@@ -20,15 +20,47 @@ _setDatePicker = (picker, date) ->
   picker.setStartDate(date)
   picker.clickApply()
 
+_checkForPublishDate = (url, instance) ->
+  match = /promedmail\.org\/post\/(\d+)/ig.exec(url)
+  if match
+    articleId = match[1]
+    Meteor.call 'retrieveProMedArticle', articleId, (error, article) ->
+      if article
+        date = moment.utc(article.promedDate)
+        # Aproximate DST for New York timezone
+        daylightSavings = moment.utc("#{date.year()}-03-08") <= date
+        daylightSavings = daylightSavings and moment.utc(
+          date.year() + "-11-01") >= date
+        tz = if daylightSavings then 'EDT' else 'EST'
+        _article = _.extend article,
+          tz: tz
+          date: date.utcOffset(UTCOffsets[tz])
+          suggested: true
+        instance.selectedArticle.set(_article)
+
 Template.sourceModal.onCreated ->
+  @suggest = @data.suggest
+  @suggest ?= true
   @tzIsSpecified = false
   @proMEDRegEx = /promedmail\.org\/post\/(\d+)/ig
   @selectedArticle = new ReactiveVar(@data)
+  @articleOrigin = new ReactiveVar('url')
   @modals =
     currentModal:
       element: '#event-source'
       add: 'off-canvas--left'
       remove: 'fade'
+
+  @clearSelectedArticle = (clearUrlInput=false) =>
+    _setDatePicker(@datePicker, new Date())
+    @$('#title').val('')
+    @$('#publishTime').val('')
+    if clearUrlInput
+      input = '#article'
+    else
+      input = '#content'
+    @$(input).val('')
+    @selectedArticle.set({})
 
   if @data.edit
     if @data.publishDate
@@ -66,10 +98,12 @@ Template.sourceModal.onRendered ->
   @$('#add-source').validator()
 
   @autorun =>
-    article = @selectedArticle.get()
-    if article.url and not article.promedDate
-      # Trigger input event on url field so datetime is updated
-      @$('#article').trigger('input')
+    { tz, date } = @selectedArticle.get()
+    if date
+      @$('#publishDateTZ').val(tz)
+      @$('#publishTime').data('DateTimePicker').date(date)
+      _setDatePicker(@datePicker, date)
+      @suggestedFields.set(['title', 'date', 'time', 'url'])
 
 Template.sourceModal.helpers
   timezones: ->
@@ -97,6 +131,10 @@ Template.sourceModal.helpers
   url: ->
     Template.instance().selectedArticle.get().url
 
+  presentUrl: ->
+    instance = Template.instance()
+    instance.selectedArticle.get().url and instance.data.edit
+
   suggestedArticles: ->
     Template.instance().suggestedArticles.find()
 
@@ -109,9 +147,29 @@ Template.sourceModal.helpers
   editing: ->
     Template.instance().data.edit
 
+  showSuggestedDocuments: ->
+    instance = Template.instance()
+    not instance.data.edit and instance.suggest
+
   suggested: (field) ->
     if field in Template.instance().suggestedFields.get()
       'suggested-minimal'
+
+  originIsUrl: ->
+    Template.instance().articleOrigin.get() is 'url'
+
+  originIsText: ->
+    Template.instance().articleOrigin.get() is 'text'
+
+  showEnhanceOption: ->
+    instance = Template.instance()
+    not instance.data.edit and instance.suggest
+
+  showArticleInputs: ->
+    not @edit and not @url
+
+  showContent: ->
+    not @url and @content
 
 Template.sourceModal.events
   'click .save-source': (event, instance) ->
@@ -126,6 +184,7 @@ Template.sourceModal.events
     source =
       userEventId: instance.data.userEventId
       url: cleanUrl(article)
+      content: form.content.value
       publishDateTZ: form.publishDateTZ.value
       title: form.title.value
 
@@ -140,18 +199,20 @@ Template.sourceModal.events
                                     UTCOffsets[source.publishDateTZ], 'local')
       source.publishDate = selectedDate.toDate()
 
-    enhance = form.enhance.checked
+    enhance = form.enhance?.checked
     Meteor.call 'addEventSource', source, (error, articleId) ->
       if error
         toastr.error error.reason
       else
-        if enhance
+        if enhance and instance.suggest
           notify('success', 'Source successfully added')
+          instance.subscribe 'ArticleIncidentReports', articleId
           Modal.show 'suggestedIncidentsModal',
             userEventId: instance.data.userEventId
-            article: source
+            article: Articles.findOne(articleId)
           stageModals(instance, instance.modals)
         else
+          instance.data.selectedSourceId?.set(articleId)
           Modal.hide(instance)
 
   'click .save-source-edit': (event, instance) ->
@@ -184,32 +245,23 @@ Template.sourceModal.events
       else
         stageModals(instance, instance.modals)
 
-  'input #article': (event, instance) ->
-    value = event.currentTarget.value.trim()
-    match = /promedmail\.org\/post\/(\d+)/ig.exec(value)
-    if match
-      articleId = Number(match[1])
-      Meteor.call 'retrieveProMedArticle', articleId, (error, article) ->
-        if article
-          date = moment.utc(article.promedDate)
-          # Aproximate DST for New York timezone
-          daylightSavings = moment.utc("#{date.year()}-03-08") <= date
-          daylightSavings = daylightSavings and moment.utc(
-            date.year() + "-11-01") >= date
-          tz = if daylightSavings then 'EDT' else 'EST'
-          date = date.utcOffset(UTCOffsets[tz])
-          instance.$('#publishDateTZ').val(tz)
-          _setDatePicker(instance.datePicker, date)
-          instance.$('#publishTime').data('DateTimePicker').date(date)
-          suggestedFields = ['title', 'date', 'time']
-          unless instance.selectedArticle.get().promedDate
-            suggestedFields.push('url')
-          instance.suggestedFields.set(suggestedFields)
-          instance.selectedArticle.set(article)
+  'input #article': _.debounce (event, instance) ->
+      $('#content').val('')
+      url = event.target.value.trim()
+      if url.length > 20 # Check if the length at url base length
+        _checkForPublishDate(url, instance)
+  , 200
+
+  'input #content': (event, instance) ->
+    $('#article').val('')
+    if instance.selectedArticle.get().suggested
+      instance.clearSelectedArticle(true)
+      removeSuggestedProperties(instance, 'all')
 
   'click #suggested-articles li': (event, instance) ->
-    event.preventDefault()
-    instance.selectedArticle.set(@)
+    instance.clearSelectedArticle()
+    instance.articleOrigin.set('url')
+    _checkForPublishDate(@url, instance)
 
   'submit form': (event, instance) ->
     instance.formValid.set(not event.isDefaultPrevented())
@@ -218,18 +270,21 @@ Template.sourceModal.events
   'change #publishDateTZ': (e, instance) ->
     instance.tzIsSpecified = true
 
-  'dp.change #publishTime, change #publishDateTZ': (event, instance) ->
+  'click #publishTime, click #publishDateTZ': (event, instance) ->
     removeSuggestedProperties(instance, ['time'])
 
   'keyup #article': (event, instance) ->
     removeSuggestedProperties(instance, ['url'])
 
-  'apply.daterangepicker #publishDate': (event, instance) ->
+  'click #publishDate': (event, instance) ->
     removeSuggestedProperties(instance, ['date'])
 
-  'change input[name=daterangepicker_start]': (event, instance) ->
+  'click input[name=daterangepicker_start]': (event, instance) ->
     removeSuggestedProperties(instance, ['date'])
     instance.datePicker.clickApply()
 
-  'input input[name=title], input input[name=url]': (event, instance) ->
+  'click input[name=title], click input[name=url]': (event, instance) ->
     removeSuggestedProperties(instance, [event.currentTarget.name])
+
+  'click .tabs li a': (event, instance) ->
+    instance.articleOrigin.set($(event.currentTarget).attr('href').slice(1))

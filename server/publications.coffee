@@ -40,8 +40,9 @@ Meteor.publish 'smartEvent', (eidID) ->
 Meteor.publish 'smartEvents', () ->
   SmartEvents.find({deleted: {$in: [null, false]}})
 
-Meteor.publish 'ArticleIncidentReports', (articleUrl) ->
-  Incidents.find {url: $regex: new RegExp("#{regexEscape(cleanUrl(articleUrl))}$")},
+Meteor.publish 'ArticleIncidentReports', (articleId) ->
+  check(articleId, Match.Maybe(String))
+  Incidents.find articleId: articleId,
     sort: 'annotations.case.0.textOffsets.0': 1
 
 Meteor.publish 'eventArticles', (ueId) ->
@@ -56,6 +57,9 @@ Meteor.publish 'articles', (query={}) ->
 
 Meteor.publish 'article', (sourceId) ->
   Articles.find(url: $regex: new RegExp("#{sourceId}$"))
+
+Meteor.publish 'incidentArticle', (articleId) ->
+  Articles.find(articleId)
 
 Meteor.publish 'feeds', ->
   Feeds.find()

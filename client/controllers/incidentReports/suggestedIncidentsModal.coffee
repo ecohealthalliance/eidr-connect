@@ -1,10 +1,11 @@
 incidentReportSchema = require('/imports/schemas/incidentReport.coffee')
-UserEvents = require '/imports/collections/userEvents.coffee'
-Constants = require '/imports/constants.coffee'
+UserEvents = require('/imports/collections/userEvents')
+Incidents = require('/imports/collections/incidentReports')
+Constants = require('/imports/constants.coffee')
 { notify } = require('/imports/ui/notification')
 { stageModals } = require('/imports/ui/modals')
-{ annotateContentWithIncidents,
-  buildAnnotatedIncidentSnippet } = require('/imports/ui/annotation')
+import { annotateContentWithIncidents,
+  buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
 import { formatUrl, createIncidentReportsFromEnhancements } from '/imports/utils.coffee'
 
 # determines if the user should be prompted before leaving the current modal
@@ -12,8 +13,9 @@ import { formatUrl, createIncidentReportsFromEnhancements } from '/imports/utils
 # @param {object} event, the DOM event
 # @param {object} instance, the template instance
 confirmAbandonChanges = (event, instance) ->
-  total = instance.incidentCollection.find().count()
-  count = instance.incidentCollection.find(accepted: true).count();
+  collection = instance.collection()
+  total = collection.find().count()
+  count = collection.find(accepted: true).count()
   if count > 0 && instance.hasBeenWarned.get() == false
     event.preventDefault()
     Modal.show 'cancelConfirmationModal',
@@ -25,14 +27,17 @@ confirmAbandonChanges = (event, instance) ->
     true
 
 showSuggestedIncidentModal = (event, instance)->
-  incident = instance.incidentCollection.findOne($(event.currentTarget).data("incident-id"))
+  incident = instance
+    .collection()
+    .findOne($(event.currentTarget)
+    .data("incident-id"))
   content = Template.instance().content.get()
-  snippetHtml = buildAnnotatedIncidentSnippet(content, incident)
+  snippetHtml = buildAnnotatedIncidentSnippet(content, incident, false)
 
   Modal.show 'suggestedIncidentModal',
     articles: [instance.data.article]
     userEventId: instance.data.userEventId
-    incidentCollection: instance.incidentCollection
+    incidentCollection: Incidents
     incident: incident
     incidentText: Spacebars.SafeString(snippetHtml)
 
@@ -52,7 +57,6 @@ sendModalOffStage = (instance) ->
   stageModals(instance, modal, false)
 
 Template.suggestedIncidentsModal.onCreated ->
-  @incidentCollection = new Meteor.Collection(null)
   @hasBeenWarned = new ReactiveVar(false)
   @loading = new ReactiveVar(true)
   @content = new ReactiveVar('')
@@ -60,6 +64,20 @@ Template.suggestedIncidentsModal.onCreated ->
   @modal =
     currentModal:
       element: '#suggestedIncidentsModal'
+  @saveResults = @data.saveResults
+  @saveResults ?= true
+
+  if @saveResults
+    @autorun =>
+      @subscribe 'ArticleIncidentReports', @data.article._id
+  else
+    @incidentsCollection = new Meteor.Collection(null)
+
+  @collection = =>
+    if @saveResults
+      Incidents
+    else
+      @incidentsCollection
 
 Template.suggestedIncidentsModal.onRendered ->
   $('#event-source').on 'hidden.bs.modal', ->
@@ -72,45 +90,54 @@ Template.suggestedIncidentsModal.onRendered ->
       toastr.error error.reason
       return
     source.enhancements = enhancements
-    incidents = createIncidentReportsFromEnhancements(enhancements, {
-      acceptByDefault: @data.acceptByDefault
-      url: source.url
-      publishDate: source.publishDate
-    })
-    for incident in incidents
-      @incidentCollection.insert(incident)
-    @loading.set(false)
-    @content.set(enhancements.source.cleanContent.content)
+    if @saveResults
+      Meteor.call 'getArticleEnhancementsAndUpdate', source,  (error, enhancements) =>
+        if error
+          notify('error', error.reason)
+        else
+          source.enhancements = enhancements
+          @loading.set(false)
+          @content.set(enhancements.source.cleanContent.content)
+    else
+      incidents = createIncidentReportsFromEnhancements enhancements,
+        acceptByDefault: true
+      @loading.set(false)
+      @content.set(enhancements.source.cleanContent.content)
+      incidents.forEach (incident) =>
+        @incidentsCollection.insert(incident)
 
 Template.suggestedIncidentsModal.onDestroyed ->
   $('#suggestedIncidentsModal').off('hide.bs.modal')
 
 Template.suggestedIncidentsModal.helpers
   showTable: ->
-    incidents = Template.instance().incidentCollection.find
+    instance = Template.instance()
+    incidents = instance.collection().find
       accepted: true
       specify: $exists: false
-    Template.instance().data.showTable and incidents.count()
+    instance.data.showTable and incidents?.count()
 
   incidents: ->
-    Template.instance().incidentCollection.find
+    Template.instance().collection().find
       accepted: true
       specify: $exists: false
 
   incidentsFound: ->
-    Template.instance().incidentCollection.find().count() > 0
+    Template.instance().collection().find().count()
 
   isLoading: ->
     Template.instance().loading.get()
 
   annotatedContent: ->
     instance = Template.instance()
-    annotateContentWithIncidents(instance.content.get(), instance.incidentCollection.find().fetch())
+    incidents = instance.collection().find().fetch()
+    annotateContentWithIncidents(instance.content.get(), incidents, null, ['linked'])
 
   annotatedCount: ->
-    total = Template.instance().incidentCollection.find().count()
+    collection = Template.instance().collection()
+    total = collection.find().count()
     if total
-      count = Template.instance().incidentCollection.find(accepted: true).count()
+      count = collection.find(accepted: true).count()
       "#{count} of #{total} incidents accepted"
 
   annotatedContentVisible: ->
@@ -143,6 +170,9 @@ Template.suggestedIncidentsModal.helpers
   offCanvasStartPosition: ->
     Template.instance().data.offCanvasStartPosition or 'right'
 
+  saveResults: ->
+    Template.instance().saveResults
+
 Template.suggestedIncidentsModal.events
   'hide.bs.modal #suggestedIncidentsModal': (event, instance) ->
     proceed = confirmAbandonChanges(event, instance)
@@ -156,8 +186,7 @@ Template.suggestedIncidentsModal.events
 
   'click #add-suggestions': (event, instance) ->
     instance.$(event.currentTarget).blur()
-    incidentCollection = Template.instance().incidentCollection
-    incidents = incidentCollection.find(
+    incidents = Incidents.find(
       accepted: true
     ).map (incident)->
       _.pick(incident, incidentReportSchema.objectKeys())
@@ -172,7 +201,6 @@ Template.suggestedIncidentsModal.events
         # we need to allow the modal to close without warning confirmAbandonChanges
         # since the incidents have been saved to the remote, it makes sense to
         # empty our collection temporary work.
-        incidentCollection.remove({})
         # hide the modal
         notify('success', 'Incident Added')
         dismissModal(instance)
@@ -184,7 +212,7 @@ Template.suggestedIncidentsModal.events
       userEventId: instance.data.userEventId
       add: true
       incident:
-        url: instance.data.article.url
+        articleId: instance.data.article._id
       offCanvas: 'right'
 
   'click #save-csv': (event, instance) ->

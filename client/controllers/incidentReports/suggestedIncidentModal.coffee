@@ -15,7 +15,6 @@ Template.suggestedIncidentModal.onRendered ->
 Template.suggestedIncidentModal.onCreated ->
   @showBackdrop = @data.showBackdrop
   @showBackdrop ?= false
-  @incidentCollection = @data.incidentCollection
   @incident = @data.incident or {}
   @incident.suggestedFields = new ReactiveVar(@incident.suggestedFields or [])
   @valid = new ReactiveVar(false)
@@ -76,9 +75,6 @@ Template.suggestedIncidentModal.events
 
   'click .reject': (event, instance) ->
     stageModals(instance, instance.modals)
-    Template.instance().incidentCollection.update instance.incident._id,
-      $set:
-        accepted: false
 
   'click .cancel': (event, instance) ->
     stageModals(instance, instance.modals)
@@ -96,15 +92,5 @@ Template.suggestedIncidentModal.events
     incident.suggestedFields = instance.incident.suggestedFields.get()
     incident.userEventId = instanceData.userEventId
     incident.accepted = true
-    if instance.incidentCollection
-      instance.incidentCollection.update instance.incident._id,
-        $unset:
-          cases: true
-          deaths: true
-          specify: true
-        $set: incident
-      notify('success', 'Incident Accepted', 1200)
-      stageModals(instance, instance.modals)
-    else
-      incident = _.extend({}, instanceData.incident, incident)
-      instance.editIncident(incident)
+    incident = _.extend({}, instanceData.incident, incident)
+    instance.editIncident(incident)

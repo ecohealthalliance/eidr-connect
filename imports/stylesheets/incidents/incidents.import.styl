@@ -11,29 +11,32 @@ viewingBG()
       background-color $color
 
 .annotation
-  cursor pointer
   background-color: $incident-type-colors.case
+  &.linked
+    cursor pointer
+    &:hover
+      background-color darken(@background-color, 30%)
+      color white
   &.viewing
     viewingBG()
-  &:hover
-    background-color darken(@background-color, 30%)
-    color white
   &.uncertain
     background-color transparent
     text-decoration underline
     &.viewing
       viewingBG()
-    &:hover
-      background-color: darken($incident-type-colors.uncertain, 5%)
-      color $body-text
-      text-decoration none
+    &.linked
+      &:hover
+        background-color: darken($incident-type-colors.uncertain, 5%)
+        color $body-text
+        text-decoration none
   &.accepted
     background-color: $incident-type-colors.date
     text-decoration none
     &.viewing
       viewingBG()
-    &:hover
-      background-color darken(@background-color, 50%)
+    &.linked
+      &:hover
+        background-color darken(@background-color, 50%)
 
 .suggested-incidents
   margin 30px
@@ -44,18 +47,6 @@ viewingBG()
     &.extracted
       max-width initial
       width calc(100% - 150px)
-  .modal-content
-    display flex
-    flex-direction column
-    height calc(100vh - 60px)
-    min-height 400px
-  .modal-body
-    flex 1 1 auto
-    padding 0
-    overflow scroll
-  .modal-header
-  .modal-footer
-    flex 0 0 auto
   .annotation-count
     display block
     color $primary
