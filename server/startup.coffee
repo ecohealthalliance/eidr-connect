@@ -8,17 +8,9 @@ CuratorSources = require '/imports/collections/curatorSources'
 Feeds = require '/imports/collections/feeds'
 feedSchema = require '/imports/schemas/feed'
 Constants = require '/imports/constants.coffee'
+{ regexEscape } = require '/imports/utils'
 
 Meteor.startup ->
-  # set incident dates
-  incidents = Incidents.find({deleted: {$in: [null, false]}}).fetch()
-  for incident in incidents
-    try
-      incidentReportSchema.validate(incident)
-    catch error
-      console.log error
-      console.log JSON.stringify(incident, 0, 2)
-
   # Clean-up curatorInboxSourceId when user goes offline
   Meteor.users.find({'status.online': true}).observe
     removed: (user) ->
@@ -65,11 +57,6 @@ Meteor.startup ->
       $set:
         deleted: true
         deletedDate: new Date()
-
-  Incidents.find('articleId': {$exists: false}).forEach (incident) ->
-    Incidents.update _id: incident._id,
-      $set: articleId: Articles.findOne(url: incident.url)?._id
-      $unset: url: ''
 
   # Set resolved diseases
   Incidents.find(
@@ -130,3 +117,29 @@ Meteor.startup ->
       feedId: promedFeedId
     articleSchema.validate(article)
     Articles.upsert(article._id, article)
+
+  Incidents.find(
+    'articleId': {$exists: false}
+    deleted: {$in: [null, false]}
+  ).forEach (incident) ->
+    incidentUrl = incident.url
+    if _.isArray(incidentUrl)
+      incidentUrl = incidentUrl[0]
+    if not _.isString(incidentUrl)
+      console.log "Invalid URL:", incidentUrl
+      return
+    article = Articles.findOne(url: {$regex: regexEscape(incidentUrl) + "$" })
+    if article
+      Incidents.update _id: incident._id,
+        $set: articleId: article._id
+        $unset: url: ''
+    else
+      console.log "No article with url:", incident.url
+
+  # validate incidents
+  Incidents.find({deleted: {$in: [null, false]}}).forEach (incident)->
+    try
+      incidentReportSchema.validate(incident)
+    catch error
+      console.log error
+      console.log JSON.stringify(incident, 0, 2)
