@@ -22,40 +22,48 @@ template(name="incidentReport")
         if specify
           h5=specify
 
-        ul.metadata.list-unstyled
-          li.container-flex.no-break
-            h6.metadata--title Locations:
-            if locations.length
-              ul.list-unstyled.locations
-                each locations
-                  li
-                    span {{formatLocation(this)}}
-            else
-              span No location specified.
-          if species
+        if Template.subscriptionsReady
+          ul.metadata.list-unstyled
+            li.container-flex.no-break
+              h6.metadata--title Locations:
+              if locations.length
+                ul.list-unstyled.locations
+                  each locations
+                    li
+                      span {{formatLocation(this)}}
+              else
+                span No location specified.
+            if species
+              li.container-flex.single.no-break
+                h6.metadata--title Species:
+                span=species
+            if resolvedDisease
+              li.container-flex.single.no-break
+                h6.metadata--title Disease:
+                span=resolvedDisease.text
             li.container-flex.single.no-break
-              h6.metadata--title Species:
-              span=species
-          if resolvedDisease
-            li.container-flex.single.no-break
-              h6.metadata--title Disease:
-              span=resolvedDisease.text
-          li.container-flex.single.no-break
-            h6.metadata--title Dates:
-            span {{formatDateRange(dateRange)}}
-          li.container-flex.no-break
-            h6.metadata--title Document:
-            a.ref-link(href="{{formatUrl(url)}}" target="_blank")
-              span {{formatUrl(url)}}
-          ul.integrity.metadata.list-unstyled
-            if dateRange.cumulative
-              li
-                i.fa.fa-asterisk(aria-hidden="true")
-                | Cumulative
-            if approximate
-              li
-                i.fa.fa-asterisk(aria-hidden="true")
-                | Approximate
+              h6.metadata--title Dates:
+              span {{formatDateRange(dateRange)}}
+            if incidentUrl
+              li.container-flex.no-break
+                h6.metadata--title Document:
+                a.ref-link(href="{{formatUrl(incidentUrl)}}" target="_blank")
+                  span {{formatUrl(incidentUrl)}}
+            if incidentContent
+              li.container-flex.no-break
+                h6.metadata--title Document Snippet:
+                p=incidentContent
+            ul.integrity.metadata.list-unstyled
+              if dateRange.cumulative
+                li
+                  i.fa.fa-asterisk(aria-hidden="true")
+                  | Cumulative
+              if approximate
+                li
+                  i.fa.fa-asterisk(aria-hidden="true")
+                  | Approximate
+        else
+          +loading small=true
 
       if isInRole "admin"
         .incident-report--details--actions.container-flex.no-break
