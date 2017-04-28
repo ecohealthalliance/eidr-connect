@@ -5,6 +5,7 @@ services:
     container_name: eidrconnect_app_1
     environment:
       - ghprbSourceBranch
+      - SPA_MONGO_URL=mongodb://172.30.2.160:27017/promed
     volumes:
       - /shared/eidr-connect:/shared
     env_file:
