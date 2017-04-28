@@ -1,4 +1,5 @@
 Constants = require '/imports/constants.coffee'
+Articles = require '/imports/collections/articles.coffee'
 import { pluralize } from '/imports/ui/helpers'
 
 ###
@@ -79,13 +80,19 @@ export incidentReportFormToIncident = (form) ->
       toastr.error("Unknown incident type [#{incidentType}]")
       return
 
-  articleSourceUrl = form.articleSourceUrl
+  articleSourceUrl = form.articleSourceUrl?.value
+  sourceSelect2Data = $(form.articleSource)?.select2('data')
   if articleSourceUrl
-    incident.url = articleSourceUrl.value
-  else
-    for child in $(form.articleSource).select2('data')
+    articleUrl = articleSourceUrl
+  else if sourceSelect2Data
+    for child in sourceSelect2Data
       if child.selected
-        incident.url = child.text.trim()
+        articleUrl = child.text.trim()
+
+  article = Articles.findOne(url: articleUrl)
+  if article
+    incident.articleId = article._id
+
   for option in $(form).find('#incident-disease-select2').select2('data')
     incident.resolvedDisease =
       id: option.id
@@ -132,6 +139,9 @@ export keyboardSelect = (event) ->
 
 export removeSuggestedProperties = (instance, props) ->
   suggestedFields = instance.suggestedFields
+  if typeof props is 'string'
+    suggestedFields.set([])
+    return
   suggestedFields.set(_.difference(suggestedFields.get(), props))
 
 export diseaseOptionsFn = (params, callback) ->
@@ -225,7 +235,7 @@ export getTerritories = (annotationsWithOffsets, sents) ->
   return territories
 
 export createIncidentReportsFromEnhancements = (enhancements, options)->
-  { countAnnotations, acceptByDefault, url, publishDate } = options
+  { countAnnotations, acceptByDefault, articleId, publishDate } = options
   if not publishDate
     publishDate = new Date()
   incidents = []
@@ -333,7 +343,7 @@ export createIncidentReportsFromEnhancements = (enhancements, options)->
       ], attributes)
       if suspectedAttributes.length > 0
         incident.status = 'suspected'
-    incident.url = url
+    incident.articleId = articleId
     # The disease field is set to the last disease mentioned.
     diseaseTerritory.annotations.forEach (annotation)->
       incident.resolvedDisease =

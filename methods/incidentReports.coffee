@@ -65,9 +65,7 @@ Meteor.methods
       Meteor.call("editUserEventLastIncidentDate", incident.userEventId)
 
   addIncidentsToEvent: (incidentIds, userEventId, source) ->
-    sourceId = source._sourceId
-    sourceUrl = "promedmail.org/post/#{sourceId}"
-    existingSource = Articles.findOne(url: $regex: regexEscape(sourceUrl) + "$")
+    existingSource = Articles.findOne(source._id)
     # If document is in collection associate with event, otherwise add to Articles
     # collection and associate
     if existingSource

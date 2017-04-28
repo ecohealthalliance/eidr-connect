@@ -43,6 +43,7 @@ Template.extractIncidents.events
       acceptByDefault: true
       offCanvasStartPosition: 'top'
       classNames: 'extracted'
+      saveResults: false
       article:
         publishDate: new Date()
         addedDate: new Date()

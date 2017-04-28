@@ -1,6 +1,8 @@
+Articles = require '/imports/collections/articles.coffee'
 createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
 validator = require 'bootstrap-validator'
 { keyboardSelect, removeSuggestedProperties, diseaseOptionsFn } = require '/imports/utils'
+import { getIncidentSnippet } from '/imports/ui/snippets'
 
 _selectInput = (event, instance, prop, isCheckbox) ->
   return if not keyboardSelect(event) and event.type is 'keyup'
@@ -17,9 +19,12 @@ _selectInput = (event, instance, prop, isCheckbox) ->
 
 Template.incidentForm.onCreated ->
   instanceData = @data
+  incident = instanceData.incident
+  articleId = incident?.articleId
+  if articleId
+    @subscribe 'incidentArticle', articleId
   @incidentStatus = new ReactiveVar('')
   @incidentType = new ReactiveVar('')
-  incident = instanceData.incident
   @suggestedFields = incident?.suggestedFields or new ReactiveVar([])
 
   @incidentData =
@@ -29,7 +34,7 @@ Template.incidentForm.onCreated ->
 
   article = instanceData.articles[0]
   if article
-    @incidentData.url = article.url
+    @incidentData.articleId = article._id
 
   if incident
     @incidentData = _.extend(@incidentData, incident)
@@ -52,6 +57,10 @@ Template.incidentForm.onCreated ->
     @incidentType.set(type)
 
     @incidentStatus.set(incident.status or '')
+
+  @isSuggestedField = (fieldName) =>
+    if fieldName in @suggestedFields?.get()
+      'suggested'
 
 Template.incidentForm.onRendered ->
   @$('[data-toggle=tooltip]').tooltip()
@@ -103,9 +112,8 @@ Template.incidentForm.helpers
       when 'cases' then 'Case'
       when 'deaths' then 'Death'
 
-  suggestedField: (fieldName)->
-    if fieldName in Template.instance().suggestedFields?.get()
-      'suggested'
+  suggestedField: (fieldName) ->
+    Template.instance().isSuggestedField(fieldName)
 
   typeIsSelected: ->
     Template.instance().incidentType.get()
@@ -117,6 +125,28 @@ Template.incidentForm.helpers
     Template.instance().data.articles[0]?.url
 
   diseaseOptionsFn: -> diseaseOptionsFn
+
+  documentUrl: ->
+    Articles.findOne(Template.instance().data.incident?.articleId)?.url
+
+  allowUrlInput: ->
+    not @edit and not @articleId
+
+  incidentTypeClassNames: ->
+    classNames = []
+    instance = Template.instance()
+    if Template.instance().incidentType.get()
+      classNames.push('form-groups--highlighted')
+    classNames.push(instance.isSuggestedField('cases'))
+    classNames.push(instance.isSuggestedField('deaths'))
+    classNames.join(' ')
+
+  incidentSnippet: ->
+    incident = @incident
+    if incident
+      articleContent = Articles.findOne(incident.articleId)?.enhancements?.source?.cleanContent.content
+      if articleContent
+        Spacebars.SafeString(getIncidentSnippet(articleContent, incident))
 
 Template.incidentForm.events
   'change input[name=daterangepicker_start]': (event, instance) ->

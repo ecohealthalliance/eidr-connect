@@ -35,5 +35,5 @@ autoprocessArticles = ->
     autoprocessArticles()
 
 Meteor.startup ->
-  Meteor.setTimeout(autoprocessArticles, 0)
+  Meteor.setTimeout(autoprocessArticles, 100000)
     

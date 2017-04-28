@@ -1,0 +1,24 @@
+template(name="downloadCSVModal")
+  .modal.fade.wide(role="dialog")
+    .modal-dialog
+      .modal-content
+        .modal-header
+          +modalCloseButton
+          .modal-header--title
+            h4 Download CSV
+        .modal-body.table-container
+          table.table.featured.incident-table(
+            hidden=annotatedContentVisible
+            data-tableexport-display="always")
+            thead
+              tr
+                each columns
+                  th(class="#{classNames}")=name
+            tbody
+              each row in rows
+                tr
+                  each columns
+                    td {{getField row name}}
+        .modal-footer
+          button.btn.btn-default.confirm-close-modal(type="button" data-dismiss="modal") Close
+          button.btn.btn-default.download-csv(type="button" data-type="csv") Download CSV
