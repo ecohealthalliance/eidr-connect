@@ -70,7 +70,7 @@ Template.curatorSourceDetails.onRendered ->
           $title.tooltip('hide').attr('data-original-title', '')
         else
           $title.attr('data-original-title', title)
-      @subscribe 'ArticleIncidentReports', source.url
+      @subscribe 'ArticleIncidentReports', source._id
       if source.enhancements?.dateOfDiagnosis
         instance.incidentsLoaded.set(true)
       else
@@ -124,6 +124,9 @@ Template.curatorSourceDetails.helpers
   selectedAnnotationId: ->
     Template.instance().selectedAnnotationId
 
+  hasTextContent: ->
+    Template.instance().source.get().enhancements.source?.cleanContent?.content
+
 Template.curatorSourceDetails.events
   'click .toggle-reviewed': (event, instance) ->
     _markReviewed(instance)
@@ -131,8 +134,11 @@ Template.curatorSourceDetails.events
 
   'click .back-to-list': (event, instance) ->
     instanceData = instance.data
-    instanceData.selectedSourceId.set('')
     instanceData.currentPaneInView.set('')
+    # Clear selected after animation so details UI does not dissapear
+    setTimeout ->
+      instanceData.selectedSourceId.set('')
+    , 300
 
   'click .tabs a': (event, instance) ->
     instance.selectedIncidentTab.set(instance.$(event.currentTarget).data('tab'))

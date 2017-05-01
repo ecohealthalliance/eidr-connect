@@ -6,8 +6,9 @@ Meteor.methods
     user = Meteor.user()
     if user and Roles.userIsInRole(user._id, ['admin'])
       # Check if Document is in collection
-      sourceQuery = url: $regex: "#{regexEscape(source.url)}$"
-      existingSource = Articles.findOne(sourceQuery)
+      if source.url
+        sourceQuery = url: $regex: "#{regexEscape(source.url)}$"
+        existingSource = Articles.findOne(sourceQuery)
       if existingSource
         #if this source is already in the DB and the userEvent isn't already associated - push it
         Articles.update sourceQuery,
@@ -25,6 +26,14 @@ Meteor.methods
         return newId
     else
       throw new Meteor.Error("auth", "User does not have permission to add documents")
+
+  associateWithEvent: (sourceId, eventId) ->
+    user = Meteor.user()
+    if user and Roles.userIsInRole(user._id, ['admin'])
+      Articles.update sourceId,
+        $addToSet: userEventIds: eventId
+    else
+      throw new Meteor.Error("auth", "User does not have permission to edit documents")
 
   updateEventSource: (source) ->
     user = Meteor.user()

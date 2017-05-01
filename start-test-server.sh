@@ -41,7 +41,7 @@ done
 
 # use args or default
 test_db=${test_db:=eidr-connect-test}
-mongo_host=${mongo_host:=127.0.0.1}
+mongo_host=${mongo_host:=mongodb}
 mongo_port=${mongo_port:=27017}
 app_port=${app_port:=3001}
 is_docker=${is_docker:=false}
@@ -63,6 +63,7 @@ if [ $is_docker = "true" ]; then
   mongo --host $mongo_host --port $mongo_port $test_db --eval "db.dropDatabase()"
   # copy settings-dev.json from the shared volume
   cp $shared_dir/settings-dev.json ${pwd}/settings-dev.json
+  cp $shared_dir/sensitive-environment-vars.env ${pwd}/sensitive-environment-vars.env
   # checkout the correct branch
   git fetch && git checkout origin/$ghprbSourceBranch
   # perform npm install in case the branch added new dependencies
@@ -86,4 +87,5 @@ MONGO_URL=mongodb://${mongo_host}:${mongo_port}/${test_db} meteor test --full-ap
 APP_PID=$!
 echo $APP_PID > $pid_file
 echo "Starting server with PID: ${APP_PID}"
+tail -f $log_file
 wait $APP_PID

@@ -5,6 +5,20 @@ import { formatDateRange } from '/imports/ui/helpers'
 import { keyboardSelect, debounceCheckTop } from '/imports/utils'
 { updateCalendarSelection } = require('/imports/ui/setRange')
 
+CUSTOM_FEEDS = [
+  {
+    _id: 'userAdded'
+    title: 'User Added'
+  },
+  {
+    _id: 'currentUser'
+    title: "Current User's"
+  }
+]
+
+getCustomFeedArray = ->
+  _.pluck(CUSTOM_FEEDS, '_id')
+
 createNewCalendar = (latestSourceDate, range) ->
   {startDate, endDate} = range
   createInlineDateRangePicker $("#date-picker"),
@@ -47,10 +61,10 @@ Template.curatorInbox.onCreated ->
   @currentPaneInView = new ReactiveVar('')
   @latestSourceDate = new ReactiveVar(null)
   @filtering = new ReactiveVar(false)
+  @searching = new ReactiveVar(false)
   @selectedFeedId = new ReactiveVar()
-  @subscribe 'feeds',
-    onReady: =>
-      @selectedFeedId.set(Feeds.findOne(title: 'ProMED-mail')._id)
+  @subscribe 'feeds', =>
+    @selectedFeedId.set(Feeds.findOne(title: 'ProMED-mail')._id)
 
 Template.curatorInbox.onRendered ->
   # determine if our `back-to-top` button should be initially displayed
@@ -69,6 +83,12 @@ Template.curatorInbox.onRendered ->
           container: 'body'
 
   @autorun =>
+    if @selectedFeedId.get() in getCustomFeedArray()
+      latestSourceDate = moment().format('L')
+      range = @dateRange.get()
+      createNewCalendar(latestSourceDate, range)
+
+  @autorun =>
     @filtering.set(true)
     range = @dateRange.get()
     endDate = range?.endDate
@@ -84,14 +104,15 @@ Template.curatorInbox.onRendered ->
 
     dateQuery =
       $gte: new Date(startDate)
-      $lte: new Date(endDate)
-    sorting = sort: publishDate: -1
+      $lte: moment(endDate).add(1, 'd').toDate()
+    sorting = sort: {}
+    sortProp = 'publishDate'
     if query.addedByUserId
-      sorting = sort: addedDate: -1
+      sortProp = 'addedDate'
       query.addedDate = dateQuery
     else
       query.publishDate = dateQuery
-
+    sorting.sort[sortProp] = -1
     @sorting.set(sorting)
 
     @query.set(query)
@@ -110,8 +131,7 @@ Template.curatorInbox.onRendered ->
       if firstSource
         @selectedSourceId.set(firstSource._id)
       @filtering.set(false)
-      if not @latestSourceDate.get()
-        @latestSourceDate.set Articles.findOne({}, sorting)?.publishDate
+      @latestSourceDate.set(Articles.findOne({}, sorting)?[sortProp])
       @ready.set(true)
 
 Template.curatorInbox.onDestroyed ->
@@ -154,11 +174,13 @@ Template.curatorInbox.helpers
     Template.instance().query
 
   searchSettings: ->
+    instance = Template.instance()
     id:"inboxFilter"
-    textFilter: Template.instance().textFilter
+    textFilter: instance.textFilter
     classes: 'option'
     placeholder: 'Search inbox'
     toggleable: true
+    searching: instance.searching
 
   detailsInView: ->
     Template.instance().currentPaneInView.get() is 'details'
@@ -170,19 +192,15 @@ Template.curatorInbox.helpers
     instance = Template.instance()
     not _.isEqual(instance.defaultDateRange, instance.dateRange.get())
 
+  reviewedArticles: ->
+    Articles.findOne(reviewed: true)
+
+  searching: ->
+    Template.instance().searching.get()
+
   feeds: ->
     feeds = Feeds.find().fetch()
-    customFeeds = [
-      {
-        _id: 'userAdded'
-        title: 'User Added'
-      },
-      {
-        _id: 'currentUser'
-        title: "Current User's"
-      }
-    ]
-    feeds.concat(customFeeds)
+    feeds.concat(CUSTOM_FEEDS)
 
   selectedFeed: ->
     @_id is Template.instance().selectedFeedId.get()
@@ -217,6 +235,9 @@ Template.curatorInbox.helpers
 
   feedTitle: ->
     @title or @url
+
+  allowAddingNewDocument: ->
+    Template.instance().selectedFeedId.get() in getCustomFeedArray()
 
 Template.curatorInbox.events
   'click .curator-filter-reviewed-icon': (event, instance) ->
@@ -267,3 +288,8 @@ Template.curatorInbox.events
     currentTarget = event.currentTarget
     instance.selectedFeedId.set(event.currentTarget.value)
     currentTarget.blur()
+
+  'click .add-document': (event, instance) ->
+    Modal.show 'sourceModal',
+      suggest: false
+      selectedSourceId: instance.selectedSourceId

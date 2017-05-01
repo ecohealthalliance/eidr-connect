@@ -1,6 +1,6 @@
 UserEvents = require '/imports/collections/userEvents.coffee'
 Incidents = require '/imports/collections/incidentReports.coffee'
-{ buildAnnotatedIncidentSnippet } = require('/imports/ui/annotation')
+import { buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
 { notify } = require '/imports/ui/notification'
 { formatLocation, formatLocations } = require '/imports/ui/helpers'
 SCROLL_WAIT_TIME = 350
@@ -88,7 +88,7 @@ Template.incidentTable.helpers
   incidents: ->
     instance = Template.instance()
     query = instance.acceptedQuery()
-    query.url = instance.data.source.url
+    query.articleId = instance.data.source._id
     _.sortBy Incidents.find(query).fetch(), (incident) ->
       incident.annotations?.case?[0].textOffsets?[0]
 
@@ -156,7 +156,7 @@ Template.incidentTable.events
   'click table.incident-table tr td.edit': (event, instance) ->
     event.stopPropagation()
     source = instance.data.source
-    snippetHtml = buildAnnotatedIncidentSnippet(source.enhancements.source.cleanContent.content, @)
+    snippetHtml = buildAnnotatedIncidentSnippet(source.enhancements.source.cleanContent.content, @, false)
     Modal.show 'suggestedIncidentModal',
       edit: true
       articles: [source]

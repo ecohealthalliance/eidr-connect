@@ -69,6 +69,6 @@ template(name="suggestedIncidentsModal")
           button.btn.btn-default.confirm-close-modal(type="button" data-dismiss="modal") Close
           if showTable
             button.btn.btn-default#save-csv(type="button" data-type="csv") Download CSV
-          else
+          if saveResults
             button.btn.btn-default#non-suggested-incident(type="button") Add New Incident
             button.btn.btn-primary#add-suggestions(type="button") Add Confirmed Suggestions

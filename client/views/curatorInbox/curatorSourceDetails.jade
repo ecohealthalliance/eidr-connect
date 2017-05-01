@@ -4,10 +4,16 @@ template(name="curatorSourceDetails")
       class="{{#if isReviewed}} reviewed {{/if}} {{#if notifying}} notifying {{/if}}")
       unless notifying
         +curatorUserStatus selectedSourceId=selectedSourceId
-        h2(id="sourceDetailsTitle" data-toggle="tooltip" data-placement="bottom")
+        h2(id="sourceDetailsTitle"
+          data-toggle="tooltip"
+          data-placement="bottom"
+          class="{{#if url}} linked {{/if}}")
           .back-to-list
             i.fa.fa-chevron-circle-left(title="Return to document list")
-          a(href="#{url}" target="_blank")= title
+          if url
+            a(href="#{url}" target="_blank")= title
+          else
+           | #{title}
       if notifying
         .inbox-notification
           .checks
@@ -17,32 +23,37 @@ template(name="curatorSourceDetails")
       .transition(class="{{#if notifying}} active {{/if}}")
     .curator-source-details--content
       if incidentsLoaded
-        .curator-source-details--copy-wrapper.curator-source-details--section
-          .curator-source-details--header.curator-source-details--actions.container-flex.no-break
-            button.btn.btn-success.btn-sm.toggle-reviewed(class="{{#if isReviewed}} reviewed {{/if}}")
-              if isReviewed
-                span Reviewed
-              else
-                span Mark Reviewed
-            button.btn.btn-default.btn-sm.add-source-to-event.on-right Add Document to Event
-          if addingSourceToEvent
-            +addToEvent(source=source objNameToAssociate="Document")
-          .curator-source-details--copy
-            +annotatedContent(
-              content=source.enhancements.source.cleanContent.content
-              incidents=incidents
-              relatedElements=relatedElements
+        if hasTextContent
+          .curator-source-details--copy-wrapper.curator-source-details--section
+            .curator-source-details--header.curator-source-details--actions.container-flex.no-break
+              button.btn.btn-success.btn-sm.toggle-reviewed(class="{{#if isReviewed}} reviewed {{/if}}")
+                if isReviewed
+                  span Reviewed
+                else
+                  span Mark Reviewed
+              button.btn.btn-default.btn-sm.add-source-to-event.on-right Add Document to Event
+            if addingSourceToEvent
+              +addToEvent(source=source objNameToAssociate="Document")
+            .curator-source-details--copy
+              +annotatedContent(
+                content=source.enhancements.source.cleanContent.content
+                incidents=incidents
+                relatedElements=relatedElements
+                selectedAnnotationId=selectedAnnotationId
+                source=source)
+          .curator-source-details--incidents-wrapper
+            .curator-source-details--header
+              h2 Incidents
+              button.btn.btn-default.btn-sm.add-incident.on-right Add New Incident
+            +sourceIncidentReports(
+              selectedIncidentTab=selectedIncidentTab
               selectedAnnotationId=selectedAnnotationId
               source=source)
-        .curator-source-details--incidents-wrapper
-          .curator-source-details--header
-            h2 Incidents
-            button.btn.btn-default.btn-sm.add-incident.on-right Add New Incident
-          +sourceIncidentReports(
-            selectedIncidentTab=selectedIncidentTab
-            selectedAnnotationId=selectedAnnotationId
-            source=source)
-        if notifying
-          .veil
+          if notifying
+            .veil
+        else
+          .curator-inbox--warning
+            i.fa.fa-warning
+            h2 This document contains no text content
       else
         +loading message="Loading"

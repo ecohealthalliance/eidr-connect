@@ -1,4 +1,9 @@
+Articles = require '/imports/collections/articles.coffee'
 import { pluralize } from '/imports/ui/helpers'
+import { getIncidentSnippet } from '/imports/ui/snippets'
+
+Template.incidentReport.onCreated ->
+  @subscribe 'incidentArticle', @data.articleId
 
 Template.incidentReport.helpers
   caseCounts: ->
@@ -12,3 +17,11 @@ Template.incidentReport.helpers
 
   importantDetails: ->
     @deaths or @cases or @status
+
+  incidentUrl: ->
+    Articles.findOne(@articleId)?.url
+
+  incidentContent: ->
+    articleContent = Articles.findOne(@articleId)?.enhancements?.source?.cleanContent.content
+    if articleContent
+      Spacebars.SafeString(getIncidentSnippet(articleContent, @))

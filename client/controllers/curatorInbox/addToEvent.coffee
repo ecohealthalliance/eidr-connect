@@ -64,14 +64,7 @@ Template.addToEvent.events
         else
           notify('success', 'Incidents successfuly added to event')
     else
-      Meteor.call 'addEventSource',
-        url: source.url
-        userEventId: userEventId
-        title: source.title
-        publishDate: source.publishDate
-        publishDateTZ: 'EST',
-        userEventId
-      , (error) ->
+      Meteor.call 'associateWithEvent', source._id, userEventId, (error) ->
         if error
           notify('error', error.reason)
         else

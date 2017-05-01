@@ -5,8 +5,11 @@ services:
     container_name: eidrconnect_app_1
     environment:
       - ghprbSourceBranch
+      - SPA_MONGO_URL=mongodb://172.30.2.160:27017/promed
     volumes:
       - /shared/eidr-connect:/shared
+    env_file:
+      - /shared/eidr-connect/sensitive-environment-vars.env
     depends_on:
       - mongodb
     command: ['bash', '-c', '/home/meteor/eidr-connect/start-test-server.sh --mongo_host=mongodb --is_docker=true']

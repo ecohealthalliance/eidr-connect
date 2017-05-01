@@ -4,8 +4,10 @@ import ScatterPlot from '/imports/charts/ScatterPlot.coffee'
 import Axes from '/imports/charts/Axes.coffee'
 import Group from '/imports/charts/Group.coffee'
 import SegmentMarker from '/imports/charts/SegmentMarker.coffee'
-import { pluralize, formatDateRange } from '/imports/ui/helpers'
+import { pluralize, formatDateRange, formatLocations } from '/imports/ui/helpers'
 import { incidentTypeWithCountAndDisease } from '/imports/utils'
+import Articles from '/imports/collections/articles.coffee'
+import Feeds from '/imports/collections/feeds.coffee'
 
 Template.incidentReports.onDestroyed ->
   if @plot
@@ -13,6 +15,7 @@ Template.incidentReports.onDestroyed ->
     @plot = null
 
 Template.incidentReports.onCreated ->
+  @subscribe('feeds')
   @plotZoomed = new ReactiveVar(false)
   # iron router returns an array and not a cursor for data.incidents,
   # therefore we will setup a reactive cursor to use with the plot as an
@@ -235,3 +238,50 @@ Template.incidentReports.events
    click .prev-page,
    change .reactive-table-navigation .form-control': (event, instance) ->
      instance.$('tr.details').remove()
+
+  'click .open-download-csv': (event, instance)->
+    Modal.show 'downloadCSVModal',
+      columns: [
+        {name: 'Type'}
+        {name: 'Value'}
+        {name: 'Start Date'}
+        {name: 'End Date'}
+        {name: 'Locations', classNames: "wide"}
+        {name: 'Status'}
+        {name: 'Species'}
+        {name: 'Properties'}
+        {name: 'Disease'}
+        {name: 'Feed'}
+        {name: 'Document URL'}
+        {name: 'Document Title', classNames: "wide"}
+        {name: 'Document Publication Date'}
+      ],
+      rows: instance.incidents.map (incident)->
+        properties = []
+        if incident.travelRelated
+          properties.push "Travel Related"
+        if incident.dateRange?.cumulative
+          properties.push "Cumulative"
+        if incident.approximate
+          properties.push "Approximate"
+        startDate = null
+        if not incident.dateRange.cumulative
+          startDate = moment.utc(incident.dateRange.start).format("YYYY-MM-DD")
+        endDate = moment.utc(incident.dateRange.end).format("YYYY-MM-DD")
+        article = Articles.findOne(incident.articleId)
+        feed = Feeds.findOne(article?.feedId)
+        return {
+          'Type': _.keys(_.pick(incident, 'cases', 'deaths', 'specify'))[0]
+          'Value': _.values(_.pick(incident, 'cases', 'deaths', 'specify'))[0]
+          'Start Date': startDate
+          'End Date': endDate
+          'Locations': formatLocations(incident.locations)
+          'Status': incident.status
+          'Species': incident.species
+          'Properties': properties.join(";")
+          'Disease': incident.resolvedDisease?.text
+          'Feed': feed?.title or feed?.url
+          'Document URL': article?.url
+          'Document Title': article?.title
+          'Document Publication Date': moment(article?.publishDate).format("YYYY-MM-DD")
+        }
