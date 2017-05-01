@@ -57,7 +57,7 @@ do ->
 
     @When /^I add the first suggested incident$/, ->
       # SuggestedIncidentsModal
-      @client.waitForVisible('#suggested-locations-form p.annotated-content')
+      @client.waitForVisible('.suggested-annotated-content')
       if @client.isVisible('div.warn')
         text = @client.getText('div.warn')
         assert.equal(text.trim(), 'No incidents could be automatically extracted from the document.')
@@ -65,7 +65,7 @@ do ->
         return true
       if @client.isVisible('span.annotation.annotation-text')
         scrollWithinModal(@client,
-            '#suggestedIncidentsModal div.suggested-incidents-wrapper',
+            '#suggested-locations-form',
             'span.annotation.annotation-text', -200)
         @client.clickWhenVisible('span.annotation.annotation-text')
         # SuggestedIncidentModal
