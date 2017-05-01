@@ -67,14 +67,15 @@ Meteor.methods
           featureClass: geoname.featureClass
           featureCode: geoname.featureCode
           alternateNames: geoname.alternateNames
-      locationAnnotations = locationAnnotations.filter (loc)->
+      locationAnnotations.forEach (loc)->
         geoname = geonamesById[loc.geoname.geonameid]
         if geoname
           loc.geoname = geoname
-          true
         else
-          console.log "Missing geoname for id: " + loc.geoname.geonameid
-          false
+          # Marking the location as invalid will cause it not to be used.
+          loc.type = "invalidLocation"
+          loc.reason = "Cound not find geoname for id: " + loc.geoname.geonameid
+          console.log(loc.reason)
     return enhancements
 
   # Get the articles enhancements then use them to update the article
