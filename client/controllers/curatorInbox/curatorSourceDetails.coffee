@@ -124,6 +124,9 @@ Template.curatorSourceDetails.helpers
   selectedAnnotationId: ->
     Template.instance().selectedAnnotationId
 
+  hasTextContent: ->
+    Template.instance().source.get().enhancements.source?.cleanContent?.content
+
 Template.curatorSourceDetails.events
   'click .toggle-reviewed': (event, instance) ->
     _markReviewed(instance)
