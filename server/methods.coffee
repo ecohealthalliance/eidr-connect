@@ -89,7 +89,7 @@ Meteor.methods
         # the aritcle.
         if (new Date() - dbArticle.enhancements.processingStartedAt) < 100000
           return dbArticle.enhancements
-      else
+      else if not dbArticle.enhancements.error
         return dbArticle.enhancements
     # Set the enhancements property to prevent repeated calls
     Articles.update _id: article._id,
