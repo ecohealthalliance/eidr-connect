@@ -9,27 +9,27 @@ Template.eventsTable.onCreated ->
   @rowsPerPage = new ReactiveVar(Session.get("#{eventType}-rows-per-page") or 10)
   fields =
     eventName:
-      arrayName: ''
       description: 'The name of the EID.'
       displayName: 'Event Name'
       defaultSortDirection: 1
+      sortOrder: 2
     articleCount:
-      arrayName: ''
       description: 'The number of documents associated with the event.'
       displayName: 'Document Count'
       defaultSortDirection: 1
+      sortOrder: 3
       displayFn: (value, object, key) ->
         new Spacebars.SafeString("<span data-heading='Document Count'>#{value}</span>")
     createdByUserName:
-      arrayName: ''
       displayName: 'Created By'
       description: 'User who created the event.'
       defaultSortDirection: 1
+      sortOrder: 4
     lastModifiedDate:
-      arrayName: ''
       description: 'Date the event was last modified.'
       displayName: 'Last Modified Date'
       defaultSortDirection: -1
+      sortOrder: 1
       displayFn: (value, object, key) ->
         if value != null
           content =  moment(value).format('MMM D, YYYY')
@@ -41,6 +41,7 @@ Template.eventsTable.onCreated ->
     sortOrder: {}
     sortDirection: {}
     fields: fields
+    name: eventType
   manageTableSorting(@)
 
 Template.eventsTable.helpers
