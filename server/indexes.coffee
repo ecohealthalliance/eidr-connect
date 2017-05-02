@@ -7,5 +7,5 @@ import { ensureIndexes} from './dbUtils.coffee'
 ###
 
 Meteor.startup ->
-  ensureIndexes(Articles, {url: 1})
+  ensureIndexes(Articles, {url: 1, addedDate: 1})
   ensureIndexes(IncidentReports, {url: 1})

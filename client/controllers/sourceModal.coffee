@@ -162,8 +162,9 @@ Template.sourceModal.helpers
     Template.instance().articleOrigin.get() is 'text'
 
   showEnhanceOption: ->
-    instance = Template.instance()
-    not instance.data.edit and instance.suggest
+    # instance = Template.instance()
+    # not instance.data.edit and instance.suggest
+    false
 
   showArticleInputs: ->
     not @edit and not @url

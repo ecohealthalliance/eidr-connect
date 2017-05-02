@@ -19,6 +19,10 @@ articleSchema = new SimpleSchema
     type: String
   url:
     type: String
+    optional: true
+  content:
+    type: String
+    optional: true
   userEventId:
     type: String
     optional: true
