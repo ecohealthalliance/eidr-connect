@@ -1,8 +1,9 @@
 Articles = require '/imports/collections/articles.coffee'
+ArticleSchema = require '/imports/schemas/article'
 { regexEscape } = require '/imports/utils'
 
 Meteor.methods
-  addEventSource: (source) -> #eventId, url, publishDate, publishDateTZ
+  addEventSource: (source) ->
     user = Meteor.user()
     if user and Roles.userIsInRole(user._id, ['admin'])
       # Check if Document is in collection
@@ -14,14 +15,11 @@ Meteor.methods
           $set: userEventId: source.userEventId
         existingSource._id
       else
-        insertArticle =
-          url: source.url
-          title: source.title
-          userEventId: source.userEventId
         insertArticle = source
         insertArticle.addedByUserId = user._id
         insertArticle.addedByUserName = user.profile.name
         insertArticle.addedDate = new Date()
+        ArticleSchema.validate(insertArticle)
         newId = Articles.insert(insertArticle)
         if insertArticle.userEventId
           Meteor.call("editUserEventLastModified", insertArticle.userEventId)
