@@ -15,7 +15,7 @@ do ->
 
     @When 'I toggle sorting on the "$column" column', (column)->
       @client.clickWhenVisible("th." + column)
-      @client.pause(100)
+      @client.pause(5000)
 
     @When /^I create an event with name "([^']*)" and summary "([^']*)"$/, (name, summary) ->
       @client.waitForVisible('#create-event-modal')
