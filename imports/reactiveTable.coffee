@@ -9,12 +9,14 @@ module.exports =
     tableOptions = instance.tableOptions
     fields = tableOptions.fields
     tableName = tableOptions.name
+    i = 0
     for fieldName, field of fields
       visibility = Session.get("#{tableName}-field-visible-#{fieldName}") or true
       tableOptions.fieldVisibility[fieldName] = new ReactiveVar(visibility)
 
-      sortOrder = Session.get("#{tableName}-field-sort-order-#{fieldName}") or Infinity
+      sortOrder = Session.get("#{tableName}-field-sort-order-#{fieldName}") or field.sortOrder or i
       tableOptions.sortOrder[fieldName] = new ReactiveVar(sortOrder)
+      i++
 
       sortDirection = Session.get("#{tableName}-field-sort-direction-#{fieldName}") or field.defaultSortDirection
       tableOptions.sortDirection[fieldName] = new ReactiveVar(sortDirection)
@@ -41,10 +43,9 @@ module.exports =
       tableField =
         key: fieldName
         label: field.displayName
-        isVisible: options.fieldVisibility[fieldName]
-        sortOrder: options.sortOrder[fieldName]
-        sortDirection: options.sortDirection[fieldName]
-        sortable: not field.arrayName
+        isVisible: options.fieldVisibility[fieldName].get()
+        sortOrder: options.sortOrder[fieldName].get()
+        sortDirection: options.sortDirection[fieldName].get()
 
       if field.displayFn
         tableField.fn = field.displayFn
