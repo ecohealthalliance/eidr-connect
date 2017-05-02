@@ -12,19 +12,19 @@ Meteor.publish 'eventIncidents', (userEventId) ->
 Meteor.publish 'smartEventIncidents', (query) ->
   query.deleted = {$in: [null, false]}
   Incidents.find(query)
-Meteor.publish 'mapIncidents', () ->
-  Incidents.find({
-    locations: {$ne: null},
-    deleted: {$in: [null, false]}
-  },
-  {fields:
-      userEventId: 1
-      'dateRange.start': 1
-      'dateRange.end': 1
-      'dateRange.cumulative': 1
-      locations: 1
-      cases: 1
-  })
+# Meteor.publish 'mapIncidents', () ->
+#   Incidents.find({
+#     locations: {$ne: null},
+#     deleted: {$in: [null, false]}
+#   },
+#   {fields:
+#       userEventId: 1
+#       'dateRange.start': 1
+#       'dateRange.end': 1
+#       'dateRange.cumulative': 1
+#       locations: 1
+#       cases: 1
+#   })
 
 # User Events
 ReactiveTable.publish 'userEvents', UserEvents, {deleted: {$in: [null, false]}}
