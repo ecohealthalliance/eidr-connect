@@ -40,9 +40,6 @@ Router.route "/about",
 Router.route "/event-map",
   name: 'event-map'
   title: 'Event Map'
-  waitOn: ->
-    Meteor.subscribe "userEvents"
-    Meteor.subscribe "mapIncidents"
 
 Router.route "/admins",
   name: 'admins'
