@@ -19,7 +19,6 @@ USER root
 # Copy project files
 COPY . .
 
-# Admin chores
 RUN ln -s /usr/bin/meteor /usr/local/bin/meteor  && \
   ln -s /home/meteor/eidr-connect/node_modules/phantomjs-prebuilt/lib/phantom/bin/phantomjs /usr/local/bin/phantomjs  && \
   chown -R meteor:meteor /home/meteor/
