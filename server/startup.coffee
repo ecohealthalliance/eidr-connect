@@ -7,10 +7,6 @@ Meteor.startup ->
   Meteor.users.find({'status.online': true}).observe
     removed: (user) ->
       Meteor.users.update(user._id, {$set : {'status.curatorInboxSourceId': null}})
-  # update articles to use arrays instead of strings for their UserEventId values
-  Articles.find({userEventIds: $exists: false}).forEach (article) ->
-    Articles.update _id: article._id,
-      $set: userEventIds: [article.userEventId]
 
   # Validate incidents
   console.log "starting incident validation"

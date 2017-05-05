@@ -7,7 +7,7 @@ Feature: Documentss
     And I toggle sorting on the "eventName" column
     And I toggle sorting on the "eventName" column
     And I navigate to the first event
-
+    
   Scenario: I add a custom document to an event
     When I click on the add document button
     And I create a document with a title of "Test Document", url of "http://www.promedmail.org/post/2579682", and datetime of now

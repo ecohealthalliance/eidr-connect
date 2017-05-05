@@ -29,8 +29,8 @@ do ->
       @client.clickWhenVisible('span[aria-labelledby="select2-articleSource-container"]')
       @client.clickWhenVisible('#select2-articleSource-results li:first-child')
       # Location
-      @client.click('input[placeholder="Search for a location..."]')
-      @client.clickWhenVisible('#select2-incident-location-select2-results li:first-child')
+      @client.setValue('input.select2-search__field', 'f')
+      @client.clickWhenVisible('.select2-results__option--highlighted')
       # Status
       @client.click('label[for="suspected"]')
       # Type

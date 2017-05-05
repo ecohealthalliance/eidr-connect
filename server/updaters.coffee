@@ -10,7 +10,7 @@ feedSchema = require '/imports/schemas/feed'
 Constants = require '/imports/constants.coffee'
 { regexEscape } = require '/imports/utils'
 
-DATA_VERSION = 1
+DATA_VERSION = 2
 AppMetadata = new Meteor.Collection('appMetadata')
 priorDataVersion = AppMetadata.findOne(property: "dataVersion")?.value
 
@@ -101,6 +101,11 @@ Meteor.startup ->
         $unset: url: ''
     else
       console.log "No article with url:", incident.url
+
+  # update articles to use arrays instead of strings for their UserEventId values
+  Articles.find({userEventIds: $exists: false}).forEach (article) ->
+    Articles.update _id: article._id,
+      $set: userEventIds: [article.userEventId]
 
   AppMetadata.upsert({property: "dataVersion"}, $set: {value: DATA_VERSION})
   console.log "database update complete"
