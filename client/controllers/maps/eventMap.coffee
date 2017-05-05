@@ -12,6 +12,7 @@ Template.eventMap.onCreated ->
   @disablePrev = new ReactiveVar true
   @disableNext = new ReactiveVar false
   @selectedEvents = new Meteor.Collection null
+  @subscribe('userEvents')
 
 Template.eventMap.onRendered ->
   bounds = L.latLngBounds(L.latLng(-85, -180), L.latLng(85, 180))
@@ -54,48 +55,69 @@ Template.eventMap.onRendered ->
     eventIndex = startingPosition
 
     if totalEventCount
-      filteredEvents = []
-      colorScale = chroma.scale(MapHelpers.getDefaultGradientColors()).colors(eventsPerPage)
-
-      # Remove events that have no locations to plot on the map
-      filteredEvents = []
-      for event in allEvents
-        incidents = Incidents.find({userEventId: event._id, locations: {$ne: null}}, {sort: {date: -1}}).fetch()
-        if incidents.length
-          event.incidents = incidents
-          filteredEvents.push event
-
-      if filteredEvents.length
-        while templateEvents.length < eventsPerPage and eventIndex < filteredEvents.length
-          event = filteredEvents[eventIndex]
+      colorScale = chroma.scale(
+        MapHelpers.getDefaultGradientColors()).colors(eventsPerPage)
+      if allEvents.length
+        while templateEvents.length < eventsPerPage and eventIndex < allEvents.length
+          event = allEvents[eventIndex]
           rgbColor = chroma(colorScale[templateEvents.length]).rgb()
           templateEvents.push
             _id: event._id
             eventName: event.eventName
             date: event.creationDate
-            lastIncidentDate: event.lastIncidentDate
             rgbColor: rgbColor
-            incidents: event.incidents
-          MapHelpers.addEventToMarkers filteredMapLocations, event, rgbColor
           eventIndex += 1
-
     instance.templateEvents.set templateEvents
-    instance.disableNext.set if eventIndex < filteredEvents?.length then false else true
+    instance.disableNext.set if eventIndex < allEvents?.length then false else true
     instance.disablePrev.set if currentPage is 0 then true else false
-    if instance.allMapMarkers
-      map.removeLayer instance.allMapMarkers
-    MapHelpers.addMarkersToMap map, instance, filteredMapLocations
+    instance.subscribe('mapIncidents', _.pluck(templateEvents, '_id'))
 
   # Update the map markers to reflect user selection of events
   @autorun ->
-    _selectedEvents = instance.selectedEvents.find().fetch()
-    if _selectedEvents.length
-      selecedMapLocations = {}
-      _.each _selectedEvents, (selectedEvent) ->
-        MapHelpers.addEventToMarkers selecedMapLocations, selectedEvent, selectedEvent.rgbColor
-      MapHelpers.addMarkersToMap map, instance, selecedMapLocations
-    else
-      MapHelpers.addMarkersToMap map, instance, instance.filteredMapLocations
+    mapLocations = {}
+    templateEvents = instance.templateEvents.get()
+    Incidents.find(
+      userEventId: $in: instance.selectedEvents.find().map (e)-> e._id
+    ).map (incident)->
+      for location in incident.locations
+        latLng = location.latitude + "," + location.longitude
+        if not mapLocations[latLng]
+          mapLocations[latLng] =
+            name: location.name
+            incidents: []
+            events: []
+        mapLocations[latLng].events = _.union(
+          mapLocations[latLng].events, [incident.userEventId])
+        mapLocations[latLng].incidents = _.union(
+          mapLocations[latLng].incidents, [incident])
+
+    map.removeLayer(instance.mapMarkers)
+    markers = instance.mapMarkers = new L.FeatureGroup()
+    for coordinates, location of mapLocations
+      locationEvents = templateEvents.filter (e)->
+        e._id in location.events
+      popupHtml = Blaze.toHTMLWithData(Template.markerPopup, {
+        name: location.name
+        locationEvents: locationEvents.map (event)->
+          eventCopy = _.clone(event)
+          eventCopy.mostRecentIncident = _.chain(location.incidents)
+            .filter (i)-> i.userEventId == event._id
+            .sortBy (i)-> i.dateRange.start
+            .value()[0]
+          eventCopy
+      })
+      marker = L.marker(coordinates.split(","),
+        icon: L.divIcon
+          className: 'map-marker-container'
+          iconSize: null
+          html: MapHelpers.getMarkerHtml(locationEvents)
+      ).bindPopup(popupHtml, closeButton: false)
+      markers.addLayer(marker)
+    map.addLayer(markers)
+    if not _.isEmpty(mapLocations)
+      map.fitBounds markers.getBounds(),
+        maxZoom: 10
+        padding: [20, 20]
 
 Template.eventMap.helpers
   getQuery: ->

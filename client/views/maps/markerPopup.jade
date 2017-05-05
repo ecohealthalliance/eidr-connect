@@ -1,20 +1,19 @@
 template(name="markerPopup")
   .popup
     .popup--title
-      h4= location
+      h4= name
     ul.list-unstyled
-      each getEvents
+      each locationEvents
         li
           .popup--event.container-flex.vertically-centered
             svg.popup--event--marker-color-spot
-              circle(fill="rgb(#{mapColorRGB})" r="8" cx="8" cy="8")
+              circle(fill="rgb(#{rgbColor})" r="8" cx="8" cy="8")
             .popup--event--content
-              a(href="{{pathFor 'curated-event' _id=id}}")=eventName
-              .popup--incidents-text
-                with getMostSevere incidents
-                  if count
-                    span.popup--incidents-text--label Most Severe:
-                    span #{count} #{type} on {{formatDate dateRange.start}}
+              a(href="{{pathFor 'curated-event' _id=_id}}")=eventName
+              if mostRecentIncident
+                .popup--incidents-text
+                  span.popup--incidents-text--label Most Recent Incident:
+                  div {{incidentToText mostRecentIncident}}
 
 template(name="markerPopupMinimal")
   .popup

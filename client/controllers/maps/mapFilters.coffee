@@ -32,7 +32,9 @@ Template.mapFilters.onRendered ->
               'dateRange.end': {$gte: startFilterDate}
             }
           ]
-        eventIds = _.uniq(Incidents.find(dateProjection, {fields: {userEventId: 1}}).fetch().map((x) -> x.userEventId))
+        eventIds = _.uniq(Incidents.find(dateProjection, {
+          fields: userEventId: 1
+        }).fetch().map((x) -> x.userEventId))
         varQuery._id = {$in: eventIds}
         filters.push(varQuery)
 
@@ -41,7 +43,8 @@ Template.mapFilters.onRendered ->
       instance.data.selectedEvents.remove({})
       nameQuery = []
       searchWords = userSearchText.split(' ')
-      _.each searchWords, -> nameQuery.push {eventName: new RegExp(userSearchText, 'i')}
+      _.each searchWords, ->
+        nameQuery.push {eventName: new RegExp(userSearchText, 'i')}
       filters.push $or: nameQuery
 
     if filters.length
@@ -72,7 +75,7 @@ Template.mapFilters.helpers
     Template.instance().filtering
 
   selected: ->
-    Template.instance().data.selectedEvents.findOne id: @_id
+    Template.instance().data.selectedEvents.findOne(_id: @_id)
 
   eventsAreSelected: ->
     Template.instance().data.selectedEvents.findOne()
@@ -92,16 +95,15 @@ Template.mapFilters.events
 
   'click .map-event-list--item': (e, instance) ->
     selectedEvents = instance.data.selectedEvents
-    id = @_id
-    if selectedEvents.findOne(id: id)
-      selectedEvents.remove id: id
+    _id = @_id
+    if selectedEvents.findOne(_id: _id)
+      selectedEvents.remove(_id: _id)
     else
-      event = _.find(instance.data.templateEvents.get(), (e) -> e._id == id)
+      event = _.find(instance.data.templateEvents.get(), (e) -> e._id == _id)
       selectedEvents.insert
-        id: id
+        _id: _id
         rgbColor: @rgbColor
         eventName: event.eventName
-        incidents: @incidents
         selected: true
 
   'click .toggle-calendar-state': (e, instance) ->

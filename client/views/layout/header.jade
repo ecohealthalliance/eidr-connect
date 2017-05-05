@@ -17,8 +17,8 @@ template(name="navLinks")
 
     li(class="{{checkActive 'events'}}")
       a(href="{{pathFor 'events' _view='curated'}}") Events
-    // li(class="{{checkActive 'event-map'}}")
-    //   a(href="{{pathFor 'event-map'}}") Event Map
+    li(class="{{checkActive 'event-map'}}")
+      a(href="{{pathFor 'event-map'}}") Event Map
 
     unless currentUser
       li
