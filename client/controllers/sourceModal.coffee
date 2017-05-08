@@ -202,9 +202,7 @@ Template.sourceModal.events
       source.publishDate = selectedDate.toDate()
 
     enhance = form.enhance?.checked
-    console.log source, userEventId
     Meteor.call 'addEventSource', source, userEventId, (error, articleId) ->
-      console.log error, articleId
       if error
         toastr.error error.reason
       else
