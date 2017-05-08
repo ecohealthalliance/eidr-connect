@@ -76,7 +76,8 @@ Meteor.methods
         userEventId: userEventId
         title: source.title
         publishDate: source.publishDate
-        publishDateTZ: 'EST'
+        publishDateTZ: 'EST',
+        userEventId
     # Associate Incidents with Event
     Incidents.update _id: $in: incidentIds,
       $set: userEventId: userEventId

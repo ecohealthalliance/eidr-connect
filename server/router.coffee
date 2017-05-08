@@ -66,10 +66,10 @@ Router.route("/api/event-article", {where: "server"})
   if userEventId.length and article.length
     userEvent = getUserEvents().findOne(userEventId)
     if userEvent
-      existingArticle = Articles.find({url: article, userEventId: userEventId}).fetch()
+      existingArticle = Articles.find({url: article, userEventIds: userEventId}).fetch()
       
       if existingArticle.length is 0
-        Articles.insert({userEventId: userEventId, url: article})
+        Articles.insert({userEventIds: [userEventId], url: article})
   
   @response.setHeader('Access-Control-Allow-Origin', '*')
   @response.statusCode = 200

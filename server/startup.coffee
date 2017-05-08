@@ -1,5 +1,6 @@
 incidentReportSchema = require '/imports/schemas/incidentReport.coffee'
 Incidents = require '/imports/collections/incidentReports.coffee'
+Articles = require '/imports/collections/articles.coffee'
 
 Meteor.startup ->
   # Clean-up curatorInboxSourceId when user goes offline

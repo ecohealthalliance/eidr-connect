@@ -25,16 +25,31 @@ if Meteor.isAppTest
     # @see https://github.com/golang/go/issues/17490
     ###
     load: ->
-      if mongo_path.includes('binjs')
-        cmd = "#{mongo_path}/mongorestore.js --host #{mongo_host} --port #{mongo_port} -d #{test_db} #{pwd}/tests/dump/#{test_db} --quiet"
-      else
-        cmd = "#{mongo_path}/mongorestore --host #{mongo_host} --port #{mongo_port} -d #{test_db} #{pwd}/tests/dump/#{test_db} --quiet"
       try
-        syncExec(cmd)
-        Meteor.call('createTestingAdmin')
+        # Loading test data into database
+        Meteor.call 'createTestingAdmin'
+        console.log "created admin"
+        userEvent = Meteor.call 'upsertUserEvent', 
+                    eventName: 'Test Event 1',
+                    summary: 'Test summary'
+        article = Meteor.call 'addEventSource', 
+                    title: 'Test Article',
+                    url: 'http://promedmail.org/post/418162'
+                    publishDate: new Date()
+                    publishDateTZ: 'EST',
+                    userEvent.insertedId,
+                    (error, article) ->
+                      console.log "article", error, article
+        incident = Meteor.call 'addIncidentReport', 
+                    userEventId: userEvent.insertedId,
+                    species: 'Test Species',
+                    cases: 1,
+                    dateRange: {}
+
       catch error
-        console.error(error.message)
+        console.log "error loading data", error
         Meteor.call('reset')
+
 
     ###
     # reset - removes all data from the database
@@ -57,6 +72,7 @@ if Meteor.isAppTest
           profile:
             name: 'Chimp'
         })
+        @setUserId newId
         Roles.addUsersToRoles(newId, ['admin'])
       catch error
         # this user shouldn't belong in the production database
