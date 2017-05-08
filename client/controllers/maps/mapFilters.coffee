@@ -20,23 +20,15 @@ Template.mapFilters.onRendered ->
       if checkValues.dates.length
         startFilterDate = checkValues.dates[0]
         endFilterDate = checkValues.dates[1]
-        dateProjection =
-          $or: [
+        filters.push(
+          $and: [
             {
-              'dateRange.cumulative': false
-              'dateRange.start': {$lte: endFilterDate}
-              'dateRange.end': {$gte: startFilterDate}
-            },
-            {
-              'dateRange.cumulative': true
-              'dateRange.end': {$gte: startFilterDate}
+              lastIncidentDate: $gte: startFilterDate
+            }, {
+              lastIncidentDate: $lte: endFilterDate
             }
           ]
-        eventIds = _.uniq(Incidents.find(dateProjection, {
-          fields: userEventId: 1
-        }).fetch().map((x) -> x.userEventId))
-        varQuery._id = {$in: eventIds}
-        filters.push(varQuery)
+        )
 
     userSearchText = instance.userSearchText.get().$regex
     if userSearchText

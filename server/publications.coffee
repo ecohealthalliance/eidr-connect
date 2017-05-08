@@ -17,8 +17,7 @@ Meteor.publish 'mapIncidents', (userEventIds) ->
     userEventId: $in: userEventIds
     locations: $ne: null
     deleted: $in: [null, false]
-  },
-  {
+  }, {
     fields:
       userEventId: 1
       'dateRange.start': 1
@@ -27,6 +26,7 @@ Meteor.publish 'mapIncidents', (userEventIds) ->
       locations: 1
       cases: 1
       deaths: 1
+      specify: 1
   })
 
 # User Events

@@ -37,6 +37,10 @@ Template.eventMap.onRendered ->
   @mapMarkers = new L.FeatureGroup()
   instance = @
 
+  @autorun =>
+    @query.get()
+    @pageNum.set(0)
+
   @autorun ->
     query = instance.query.get()
     currentPage = instance.pageNum.get()
@@ -64,7 +68,7 @@ Template.eventMap.onRendered ->
           templateEvents.push
             _id: event._id
             eventName: event.eventName
-            date: event.creationDate
+            lastIncidentDate: event.lastIncidentDate
             rgbColor: rgbColor
           eventIndex += 1
     instance.templateEvents.set templateEvents
@@ -114,7 +118,9 @@ Template.eventMap.onRendered ->
       ).bindPopup(popupHtml, closeButton: false)
       markers.addLayer(marker)
     map.addLayer(markers)
-    if not _.isEmpty(mapLocations)
+    if _.isEmpty(mapLocations)
+      map.setView([10, -0], 3)
+    else
       map.fitBounds markers.getBounds(),
         maxZoom: 10
         padding: [20, 20]

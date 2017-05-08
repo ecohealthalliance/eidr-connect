@@ -35,10 +35,10 @@ UI.registerHelper 'incidentToText', (incident) ->
 UI.registerHelper 'incidentCountAndDisease', (incident)->
   incidentTypeWithCountAndDisease(incident)
 
-UI.registerHelper 'formatDate', (date) ->
+UI.registerHelper 'formatDate', (date=null) ->
   moment(date).format("MMM DD, YYYY")
 
-UI.registerHelper 'formatDateISO', (date) ->
+UI.registerHelper 'formatDateISO', (date=null) ->
   moment.utc(date).format("YYYY-MM-DDTHH:mm")
 
 UI.registerHelper 'formatUrl', (url) ->
