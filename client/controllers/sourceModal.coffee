@@ -183,7 +183,7 @@ Template.sourceModal.events
     time = timePicker.date()
 
     source =
-      userEventId: instance.data.userEventId
+      userEventIds: [instance.data.userEventId]
       url: cleanUrl(article)
       content: form.content.value
       publishDateTZ: form.publishDateTZ.value

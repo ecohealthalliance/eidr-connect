@@ -60,17 +60,17 @@ Template.articles.helpers
     if selectedId
       Articles.findOne selectedId
 
-  incidentsForSource: (sourceUrl) ->
+  incidentsForSource: (source) ->
     Incidents.find
       userEventId: Template.instance().data.userEvent._id
-      url: sourceUrl
+      articleId: source._id
 
-  locationsForSource: (sourceUrl) ->
+  locationsForSource: (source) ->
     locations = {}
     Incidents
       .find
         userEventId: Template.instance().data.userEvent._id
-        url: sourceUrl
+        articleId: source._id
       .forEach (incident) ->
         for location in incident.locations
           locations[location.id] = location.name

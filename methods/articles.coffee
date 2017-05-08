@@ -14,7 +14,7 @@ Meteor.methods
         #if this source is already in the DB and the userEvent isn't already associated - push it
         Articles.update sourceQuery,
           $addToSet: userEventIds: eventId
-        Meteor.call("editUserEventArticleCount", eventId, 1)
+        Meteor.call("updateUserEventArticleCount", eventId)
         existingSource._id
       else if source.url
         source.userEventIds = [eventId]
@@ -24,7 +24,7 @@ Meteor.methods
         ArticleSchema.validate(source)
         newId = Articles.insert(source)
         Meteor.call("editUserEventLastModified", eventId)
-        Meteor.call("editUserEventArticleCount", eventId, 1)
+        Meteor.call("updateUserEventArticleCount", eventId)
         return newId
     else
       throw new Meteor.Error("auth", "User does not have permission to add documents")
@@ -58,7 +58,7 @@ Meteor.methods
         $set:
           userEventIds: removed.userEventIds
       Meteor.call("editUserEventLastModified", userEventId)
-      Meteor.call("editUserEventArticleCount", userEventId, -1)
+      Meteor.call("updateUserEventArticleCount", userEventId)
 
   markSourceReviewed: (id, reviewed) ->
     if Roles.userIsInRole(Meteor.userId(), ['curator', 'admin'])
