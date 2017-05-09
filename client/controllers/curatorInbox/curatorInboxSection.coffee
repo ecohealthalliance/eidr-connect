@@ -35,8 +35,22 @@ Template.curatorInboxSection.onCreated ->
       key: 'expand'
       label: ''
       cellClass: 'action open-right'
-    }
+    },
   ]
+
+  # Sort reactive table based on what type of feed is selected
+  # by publishDate if feed like ProMed or by addedDate for user added and
+  # current user lists
+  dateSortField =
+    key: 'publishDate'
+    label: 'Publish Date'
+    sortOrder: 1
+    sortDirection: -1
+    hidden: true
+  if @data.sortKey is 'addedDate'
+    dateSortField.key = 'addedDate'
+    dateSortField.label = 'Added Date'
+  @curatorInboxFields.push(dateSortField)
 
   sectionDate = Template.instance().data.date
   @filterId = 'inbox-date-filter-'+sectionDate.getTime()

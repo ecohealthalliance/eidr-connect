@@ -103,16 +103,16 @@ Template.curatorInbox.onRendered ->
         query.feedId = feedId
 
     dateQuery =
-      $gte: new Date(startDate)
-      $lte: moment(endDate).add(1, 'd').toDate()
+      $gte: moment(startDate).startOf('day').toDate()
+      $lte: moment(endDate).endOf('day').toDate()
     sorting = sort: {}
-    sortProp = 'publishDate'
+    sortKey = 'publishDate'
     if query.addedByUserId
-      sortProp = 'addedDate'
+      sortKey = 'addedDate'
       query.addedDate = dateQuery
     else
       query.publishDate = dateQuery
-    sorting.sort[sortProp] = -1
+    sorting.sort[sortKey] = -1
     @sorting.set(sorting)
 
     @query.set(query)
@@ -126,12 +126,12 @@ Template.curatorInbox.onRendered ->
       updateCalendarSelection(calendar, range)
 
     @subscribe "articles", query, =>
-      unReviewedQuery = $and: [ {reviewed: false}, query ]
+      unReviewedQuery = _.extend({reviewed: $in: [false, null]}, query)
       firstSource = Articles.findOne(unReviewedQuery, sorting)
       if firstSource
         @selectedSourceId.set(firstSource._id)
       @filtering.set(false)
-      @latestSourceDate.set(Articles.findOne({}, sorting)?[sortProp])
+      @latestSourceDate.set(Articles.findOne({}, sorting)?[sortKey])
       @ready.set(true)
 
 Template.curatorInbox.onDestroyed ->
@@ -238,6 +238,9 @@ Template.curatorInbox.helpers
 
   allowAddingNewDocument: ->
     Template.instance().selectedFeedId.get() in getCustomFeedArray()
+
+  sortKey: ->
+    _.keys(Template.instance().sorting.get().sort)[0]
 
 Template.curatorInbox.events
   'click .curator-filter-reviewed-icon': (event, instance) ->
