@@ -103,8 +103,8 @@ Template.curatorInbox.onRendered ->
         query.feedId = feedId
 
     dateQuery =
-      $gte: new Date(startDate)
-      $lte: moment(endDate).add(1, 'd').toDate()
+      $gte: moment(startDate).startOf('day').toDate()
+      $lte: moment(endDate).endOf('day').toDate()
     sorting = sort: {}
     sortKey = 'publishDate'
     if query.addedByUserId
