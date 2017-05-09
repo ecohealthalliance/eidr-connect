@@ -47,7 +47,10 @@ Template.eventMap.onRendered ->
     eventsPerPage = instance.eventsPerPage
 
     if _.isObject query
-      allEvents = UserEvents.find(query, {sort: {lastIncidentDate: -1}}).fetch()
+      allEvents = UserEvents
+        .find(query, {sort: {lastIncidentDate: -1}})
+        .fetch()
+        .filter (x)-> x.lastIncidentDate
       startingPosition = currentPage * eventsPerPage
       totalEventCount = allEvents.length
     else
