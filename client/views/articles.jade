@@ -52,14 +52,14 @@ template(name="articles")
           .event-source-summary--item
             h5 Locations
             ul.list-unstyled
-              each locationsForSource selectedSource.url
+              each locationsForSource selectedSource
                 li= this
               else
                 li No locations
           .event-source-summary--item
             h5 Incidents
             ul.list-unstyled
-              each incidentsForSource selectedSource.url
+              each incidentsForSource selectedSource
                 li {{incidentToText this}}
               else
                 li No cases

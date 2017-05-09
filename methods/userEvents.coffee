@@ -1,5 +1,6 @@
 Incidents = require '/imports/collections/incidentReports.coffee'
 UserEvents = require '/imports/collections/userEvents.coffee'
+Articles = require '/imports/collections/articles.coffee'
 UserEventSchema = require '/imports/schemas/userEvent.coffee'
 
 Meteor.methods
@@ -43,19 +44,22 @@ Meteor.methods
           lastModifiedByUserId: user._id,
           lastModifiedByUserName: user.profile.name
 
-  editUserEventArticleCount: (id, countModifier) ->
-    if Roles.userIsInRole(Meteor.userId(), ['admin'])
-      event = UserEvents.findOne(id)
-      UserEvents.update id,
-        $set:
-          articleCount: event.articleCount + countModifier
+  updateUserEventArticleCount: (id) ->
+    event = UserEvents.findOne(id)
+    articleCount = Articles.find(userEventIds: id).count()
+    UserEvents.update(id,
+      $set:
+        articleCount: articleCount
+    )
 
   editUserEventLastIncidentDate: (id) ->
     event = UserEvents.findOne(id)
-    latestEventIncident = Incidents.findOne
+    latestEventIncident = Incidents.findOne({
       userEventId: event._id
-      deleted: {$in: [null, false]}
-      {sort: addedDate: -1}
+      deleted: $in: [null, false]
+    }, {
+      sort: 'dateRange.end': -1
+    })
     if latestEventIncident
       UserEvents.update id,
         $set:

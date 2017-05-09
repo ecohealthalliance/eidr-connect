@@ -10,35 +10,35 @@ UI.registerHelper 'formatDateRange', (dateRange)->
   formatDateRange(dateRange)
 
 UI.registerHelper 'incidentToText', (incident) ->
-  if @cases
-    incidentDescription = pluralize("case", @cases)
-  else if @deaths
-    incidentDescription = pluralize("death", @deaths)
-  else if @specify
-    incidentDescription = @specify
-  if @locations.length < 2
-    formattedLocations = formatLocation(@locations[0])
+  if incident.cases
+    incidentDescription = pluralize("case", incident.cases)
+  else if incident.deaths
+    incidentDescription = pluralize("death", incident.deaths)
+  else if incident.specify
+    incidentDescription = incident.specify
+  if incident.locations.length < 2
+    formattedLocations = formatLocation(incident.locations[0])
   else
     formattedLocations = (
-      @locations.map(formatLocation).slice(0, -1).join(", ") +
-      ", and " + formatLocation(@locations.slice(-1)[0])
+      incident.locations.map(formatLocation).slice(0, -1).join(", ") +
+      ", and " + formatLocation(incident.locations.slice(-1)[0])
     )
 
   result = """
     <span>#{incidentDescription}</span> in <span>#{formattedLocations}</span>
   """
-  if @dateRange
-    result += "<span> #{formatDateRange(@dateRange, true)}</span>"
+  if incident.dateRange
+    result += "<span> #{formatDateRange(incident.dateRange, true)}</span>"
   Spacebars.SafeString result
 
 
-UI.registerHelper 'incidentCountAndDisease', ->
-  incidentTypeWithCountAndDisease(@)
+UI.registerHelper 'incidentCountAndDisease', (incident)->
+  incidentTypeWithCountAndDisease(incident)
 
-UI.registerHelper 'formatDate', (date) ->
+UI.registerHelper 'formatDate', (date=null) ->
   moment(date).format("MMM DD, YYYY")
 
-UI.registerHelper 'formatDateISO', (date) ->
+UI.registerHelper 'formatDateISO', (date=null) ->
   moment.utc(date).format("YYYY-MM-DDTHH:mm")
 
 UI.registerHelper 'formatUrl', (url) ->

@@ -39,7 +39,7 @@ template(name="incidentTable")
               data-incident-id=_id)
               td
                 span.select
-              td=incidentCountAndDisease
+              td {{incidentCountAndDisease this}}
               td.dates {{formatDateRange dateRange}}
               td #{firstLocation}
                 if otherLocations
