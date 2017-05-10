@@ -85,7 +85,7 @@ Template.curatorInbox.onRendered ->
 
   @autorun =>
     if @selectedFeedId.get() in getCustomFeedArray()
-      latestSourceDate = moment().format('L')
+      latestSourceDate = moment().endOf('day').format('L')
       range = @dateRange.get()
       createNewCalendar(latestSourceDate, range)
 

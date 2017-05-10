@@ -41,6 +41,7 @@ do ->
         @client.setValue('#content', DOCUMENT_TEXT)
       @client.setValue('#title', 'Test Article')
       @client.setValue('#publishTime', '12:00 PM')
+      @client.pause(3000)
       @client.click('.save-source')
 
     @Then /^I should see the content of the document$/, ->
