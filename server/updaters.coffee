@@ -10,7 +10,7 @@ feedSchema = require '/imports/schemas/feed'
 Constants = require '/imports/constants.coffee'
 { regexEscape } = require '/imports/utils'
 
-DATA_VERSION = 2
+DATA_VERSION = 3
 AppMetadata = new Meteor.Collection('appMetadata')
 priorDataVersion = AppMetadata.findOne(property: "dataVersion")?.value
 
@@ -18,6 +18,17 @@ Meteor.startup ->
   if priorDataVersion and priorDataVersion >= DATA_VERSION
     return
   console.log "Running database update code..."
+
+  Incidents.find(userEventId: $exists: true).forEach (incident) ->
+    incidentData =
+      id: incident._id
+      associationDate: incident.creationDate or new Date
+      associationUserId: incident.addedByUserId or ''
+    UserEvents.update _id: incident.userEventId,
+      $addToSet: incidents: incidentData
+    Incidents.update _id: incident._id,
+      $unset: userEventId: ''
+
   Incidents.find(disease: $exists: false).forEach (incident) ->
     disease = UserEvents.findOne(incident.userEventId)?.disease
     if disease
