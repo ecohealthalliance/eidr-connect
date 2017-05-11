@@ -136,7 +136,7 @@ Meteor.methods
       keywords.push(event.disease)
     # Collect related event document ID's
     notOneOfThese = []
-    Articles.find(userEventId: eventId).forEach (relatedEventSource) ->
+    Articles.find(userEventIds: eventId).forEach (relatedEventSource) ->
       url = relatedEventSource.url
       if url
         notOneOfThese.push url.match(/\d+/)?[0]

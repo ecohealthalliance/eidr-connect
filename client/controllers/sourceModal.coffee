@@ -183,7 +183,7 @@ Template.sourceModal.events
     time = timePicker.date()
 
     source =
-      userEventId: instance.data.userEventId
+      userEventIds: [instance.data.userEventId]
       url: cleanUrl(article)
       content: form.content.value
       publishDateTZ: form.publishDateTZ.value
@@ -201,7 +201,7 @@ Template.sourceModal.events
       source.publishDate = selectedDate.toDate()
 
     enhance = form.enhance?.checked
-    Meteor.call 'addEventSource', source, (error, articleId) ->
+    Meteor.call 'addEventSource', source, instance.data.userEventId, (error, articleId) ->
       if error
         toastr.error error.reason
       else

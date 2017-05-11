@@ -40,9 +40,6 @@ Router.route "/about",
 Router.route "/event-map",
   name: 'event-map'
   title: 'Event Map'
-  waitOn: ->
-    Meteor.subscribe "userEvents"
-    Meteor.subscribe "mapIncidents"
 
 Router.route "/admins",
   name: 'admins'
@@ -109,7 +106,7 @@ Router.route "/events/curated-events/:_id/:_view?",
   data: ->
     userEvent: UserEvents.findOne({'_id': @params._id})
     articles: Articles.find
-      userEventId: @params._id
+      userEventIds: @params._id
       url: $ne: ''
       {sort: {publishDate: -1}}
     incidents: Incidents.find({'userEventId': @params._id}, {sort: {date: -1}})

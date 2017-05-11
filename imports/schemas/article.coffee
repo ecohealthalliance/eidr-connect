@@ -23,8 +23,8 @@ articleSchema = new SimpleSchema
   content:
     type: String
     optional: true
-  userEventId:
-    type: String
+  userEventIds:
+    type: [String]
     optional: true
   reviewed:
     type: Boolean

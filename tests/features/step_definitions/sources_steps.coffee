@@ -31,7 +31,7 @@ do ->
       @client.setValue('input[name=daterangepicker_start]', formatDate(date))
       @client.setValue('#publishTime', getTime(date))
       # Disable enhancement
-      @client.click('[for="enhance"]')
+      # @client.click('[for="enhance"]')
       @browser.scroll(0, 1000)
       @client.click('#event-source .save-source')
 

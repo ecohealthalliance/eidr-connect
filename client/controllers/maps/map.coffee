@@ -33,7 +33,7 @@ Template.map.rendered = ->
     for marker in markers
       eventMap.removeLayer marker
     markers = []
-    eventData.mapColorRGB = '240, 115, 130'
+    eventData.rgbColor = '240, 115, 130'
     if locations
       latLngs = ([location.latitude, location.longitude] for location in locations)
       latLngs = _.filter latLngs, (latLng) ->
