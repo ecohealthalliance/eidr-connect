@@ -18,7 +18,7 @@ Template.smartEvent.onRendered ->
     if event
       eventDateRange = event.dateRange
       locations = event.locations
-      query = {}
+      query = accepted: true
       if event.diseases and event.diseases.length > 0
         query['resolvedDisease.id'] = $in: event.diseases.map (x)-> x.id
       if eventDateRange
