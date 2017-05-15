@@ -27,9 +27,6 @@ Template.summary.helpers
   articleCount: ->
     Template.instance().data.articleCount
 
-  caseCount: ->
-    Incidents.find(userEventId: @_id).count()
-
   copied: ->
     Template.instance().copied.get()
 

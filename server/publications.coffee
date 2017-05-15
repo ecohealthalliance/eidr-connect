@@ -7,8 +7,10 @@ Feeds = require '/imports/collections/feeds.coffee'
 
 # Incidents
 ReactiveTable.publish 'curatorEventIncidents', Incidents, {deleted: {$in: [null, false]}}
-Meteor.publish 'eventIncidents', (userEventId) ->
-  Incidents.find({userEventId: userEventId, deleted: {$in: [null, false]}})
+Meteor.publish 'eventIncidents', (incidentIds) ->
+  Incidents.find
+    _id: $in: incidentIds
+    deleted: $in: [null, false]
 Meteor.publish 'smartEventIncidents', (query) ->
   query.deleted = {$in: [null, false]}
   Incidents.find(query)
