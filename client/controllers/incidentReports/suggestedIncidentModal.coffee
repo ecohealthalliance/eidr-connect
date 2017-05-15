@@ -23,7 +23,8 @@ Template.suggestedIncidentModal.onCreated ->
     previousModal:
       element: '#suggestedIncidentsModal'
       add: 'fade'
-  @editIncident = (incident) =>
+
+  @editIncident = (incident, userEventId) =>
     method = 'addIncidentReport'
     action = 'added'
     if @incident._id
@@ -32,7 +33,7 @@ Template.suggestedIncidentModal.onCreated ->
 
     incident.annotations = @data.incident?.annotations
     incident = _.pick(incident, incidentReportSchema.objectKeys())
-    Meteor.call method, incident, (error, result) =>
+    Meteor.call method, incident, userEventId, (error, result) =>
       if error
         return notify('error', error)
       notify('success', "Incident #{action}.")
@@ -101,7 +102,6 @@ Template.suggestedIncidentModal.events
 
     return if not incident
     incident.suggestedFields = instance.incident.suggestedFields.get()
-    incident.userEventId = instanceData.userEventId
     incident.accepted = true
     incident = _.extend({}, instanceData.incident, incident)
     if instanceData.incidentCollection
@@ -116,4 +116,4 @@ Template.suggestedIncidentModal.events
       stageModals(instance, instance.modals)
     else
       incident = _.extend({}, instance.data.incident, incident)
-      instance.editIncident(incident)
+      instance.editIncident(incident, instanceData.userEventId)

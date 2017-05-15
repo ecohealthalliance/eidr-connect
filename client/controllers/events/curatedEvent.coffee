@@ -7,15 +7,23 @@ Modal.allowMultiple = true
 Template.curatedEvent.onCreated ->
   @editState = new ReactiveVar(false)
   @loaded = new ReactiveVar(false)
+  @incidentIds = new ReactiveVar([])
   userEventId = @data.userEventId
-  @subscribe "userEvent", @data.userEventId, =>
+  @subscribe "userEvent", @data.userEventId
+
+  @autorun =>
     userEvent = UserEvents.findOne(userEventId)
-    document.title += ": #{userEvent.eventName}"
-    incidentIds = _.map userEvent.incidents, (incident) ->
-      incident.id
+    if userEvent
+      document.title += ": #{userEvent.eventName}"
+      @incidentIds.set _.map userEvent.incidents, (incident) ->
+        incident.id
+
+  @autorun =>
     @subscribe "eventArticles", userEventId
-    @subscribe 'eventIncidents', incidentIds, =>
-      @loaded.set(true)
+    incidentIds = @incidentIds.get()
+    if incidentIds
+      @subscribe 'eventIncidents', incidentIds, =>
+        @loaded.set(true)
 
 Template.curatedEvent.onRendered ->
   new Clipboard '.copy-link'
@@ -68,12 +76,12 @@ Template.curatedEvent.events
   'click .open-incident-form-in-details': (event, instance) ->
     data = instance.data
     Modal.show 'incidentModal',
-      articles: data.articles
-      userEventId: data.userEvent._id
+      articles: Articles.find()
+      userEventId: UserEvents.findOne(instance.data.userEventId)
       add: true
 
   'click .open-source-form-in-details': (event, instance) ->
-    Modal.show('sourceModal', userEventId: instance.data.userEvent._id)
+    Modal.show('sourceModal', userEventId: instance.userEventId)
 
   'click .tabs li a': (event) ->
     event.currentTarget.blur()

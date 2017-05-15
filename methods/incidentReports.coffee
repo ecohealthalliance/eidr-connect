@@ -6,7 +6,7 @@ Constants = require '/imports/constants.coffee'
 { regexEscape } = require '/imports/utils'
 
 Meteor.methods
-  addIncidentReport: (incident) ->
+  addIncidentReport: (incident, userEventId) ->
     incidentReportSchema.validate(incident)
     user = Meteor.user()
     if not Roles.userIsInRole(user._id, ['admin'])
@@ -15,10 +15,22 @@ Meteor.methods
     incident.addedByUserName = user.profile.name
     incident.addedDate = new Date()
     newId = Incidents.insert(incident)
-    if incident.userEventId
-      Meteor.call("editUserEventLastModified", incident.userEventId)
-      Meteor.call("editUserEventLastIncidentDate", incident.userEventId)
+    if userEventId
+      Meteor.call('addIncidentReportToEvent', userEventId, newId)
+      Meteor.call("editUserEventLastModified", userEventId)
+      Meteor.call("editUserEventLastIncidentDate", userEventId)
     return newId
+
+  addIncidentReportToEvent: (userEventId, incidentId) ->
+    userId = Meteor.user()._id
+    if not Roles.userIsInRole(userId, ['admin'])
+      throw new Meteor.Error("auth", "User does not have permission to create incidents")
+    unless UserEvents.findOne('incidents.id': incidentId)
+      UserEvents.update userEventId,
+        $addToSet: incidents:
+          id: incidentId
+          associationDate: new Date()
+          associationUserId: userId
 
   # similar to editIncidentReport, but allows you to set a single field without changing any other existing fields.
   updateIncidentReport: (incident) ->
@@ -35,18 +47,20 @@ Meteor.methods
       Meteor.call("editUserEventLastIncidentDate", incident.userEventId)
     return incident._id
 
-  editIncidentReport: (incident) ->
+  editIncidentReport: (incident, userEventId) ->
     incidentReportSchema.validate(incident)
+    incidentId = incident._id
     user = Meteor.user()
     if not Roles.userIsInRole(user._id, ['admin'])
       throw new Meteor.Error("auth", "User does not have permission to edit incidents")
     incident.modifiedByUserId = user._id
     incident.modifiedByUserName = user.profile.name
-    res = Incidents.update(incident._id, incident)
-    if incident.userEventId
-      Meteor.call("editUserEventLastModified", incident.userEventId)
-      Meteor.call("editUserEventLastIncidentDate", incident.userEventId)
-    return incident._id
+    res = Incidents.update(incidentId, incident)
+    if userEventId
+      Meteor.call('addIncidentReportToEvent', userEventId, incidentId)
+      Meteor.call("editUserEventLastModified", userEventId)
+      Meteor.call("editUserEventLastIncidentDate", userEventId)
+    return incidentId
 
   addIncidentReports: (incidents) ->
     incidents.map (incident)->
@@ -79,6 +93,5 @@ Meteor.methods
         publishDateTZ: 'EST',
         userEventId
     # Associate Incidents with Event
-    Incidents.update _id: $in: incidentIds,
-      $set: userEventId: userEventId
-      {multi: true}
+    incidentIds.forEach (incidentId) ->
+      Meteor.call('addIncidentReportToEvent', userEventId, incidentId)
