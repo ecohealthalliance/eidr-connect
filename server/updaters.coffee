@@ -29,6 +29,10 @@ Meteor.startup ->
     Incidents.update _id: incident._id,
       $unset: userEventId: ''
 
+  UserEvents.update {},
+    $unset: articleCount: ''
+    {multi: true}
+
   Incidents.find(disease: $exists: false).forEach (incident) ->
     disease = UserEvents.findOne(incident.userEventId)?.disease
     if disease
