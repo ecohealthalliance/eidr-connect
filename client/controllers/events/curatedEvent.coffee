@@ -19,8 +19,8 @@ Template.curatedEvent.onCreated ->
         incident.id
 
   @autorun =>
-    @subscribe "eventArticles", userEventId
     incidentIds = @incidentIds.get()
+    @subscribe "eventArticles", userEventId, incidentIds
     if incidentIds
       @subscribe 'eventIncidents', incidentIds, =>
         @loaded.set(true)

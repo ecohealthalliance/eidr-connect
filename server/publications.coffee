@@ -63,11 +63,16 @@ Meteor.publish 'ArticleIncidentReports', (articleId) ->
   Incidents.find articleId: articleId,
     sort: 'annotations.case.0.textOffsets.0': 1
 
-Meteor.publish 'eventArticles', (ueId) ->
-  Articles.find(
-    userEventIds: ueId
+Meteor.publish 'eventArticles', (userEventId, incidentIds) ->
+  incidentArticleIds = _.pluck(
+    Incidents.find(_id: $in: incidentIds, {fields: articleId: 1}).fetch()
+  , 'articleId')
+  Articles.find
+    $or: [
+      {_id: $in: incidentArticleIds}
+      {userEventIds: userEventId}
+    ]
     deleted: {$in: [null, false]}
-  )
 
 Meteor.publish 'articles', (query={}) ->
   query.deleted = {$in: [null, false]}
