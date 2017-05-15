@@ -6,5 +6,9 @@ template(name="eventMap")
         selectedEvents=selectedEvents
         disablePrev=disablePrev
         disableNext=disableNext
-        query=query)
+        query=query
+        loading=incidentsLoading)
       #event-map
+      unless incidentsLoaded
+        .event-map-loading.veil
+          +loading

@@ -14,9 +14,9 @@ Meteor.publish 'eventIncidents', (incidentIds) ->
 Meteor.publish 'smartEventIncidents', (query) ->
   query.deleted = {$in: [null, false]}
   Incidents.find(query)
-Meteor.publish 'mapIncidents', (userEventIds) ->
+Meteor.publish 'mapIncidents', (incidentIds) ->
   Incidents.find({
-    userEventId: $in: userEventIds
+    _id: $in: incidentIds
     locations: $ne: null
     deleted: $in: [null, false]
   }, {
