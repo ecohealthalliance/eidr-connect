@@ -13,18 +13,6 @@ Template.eventsTable.onCreated ->
       displayName: 'Event Name'
       defaultSortDirection: 1
       sortOrder: 2
-    articleCount:
-      description: 'The number of documents associated with the event.'
-      displayName: 'Document Count'
-      defaultSortDirection: 1
-      sortOrder: 3
-      displayFn: (value, object, key) ->
-        new Spacebars.SafeString("<span data-heading='Document Count'>#{value}</span>")
-    createdByUserName:
-      displayName: 'Created By'
-      description: 'User who created the event.'
-      defaultSortDirection: 1
-      sortOrder: 4
     lastModifiedDate:
       description: 'Date the event was last modified.'
       displayName: 'Last Modified Date'
@@ -49,9 +37,6 @@ Template.eventsTable.helpers
     instance = Template.instance()
     eventType = instance.data.eventType.get()
     fields = instance.tableOptions.fields
-
-    if eventType is 'smart'
-      fields = _.omit(fields, 'articleCount')
 
     id: "#{eventType}-events-table"
     fields: tableFields(fields, instance.tableOptions)

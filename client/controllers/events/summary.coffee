@@ -24,9 +24,6 @@ Template.summary.helpers
   formatDate: (date) ->
     moment(date).format('MMM D, YYYY')
 
-  articleCount: ->
-    Template.instance().data.articleCount
-
   copied: ->
     Template.instance().copied.get()
 

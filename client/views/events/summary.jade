@@ -2,13 +2,13 @@ template(name="summary")
   .container-flex
     .event--details
       .event-name-wrap
-        h1.event-name= eventName
+        h1.event-name= event.eventName
         if isInRole "admin"
           +editDetailsButton(target="#edit-event-modal" icon="pencil" editing="name")
 
-      if summary
+      if event.summary
         p.summary(class="{{#if collapsed}}collapsed{{/if}}")
-          span= summary
+          span= event.summary
         if collapsed
           a.expand(tabindex="0") Expand full event summary
       else
@@ -20,12 +20,12 @@ template(name="summary")
     .event--metadata.container-flex
       .event--metadata--counts.container-flex.no-gutter.no-break
         .count.flex-col
-          span= incidents.length
+          span= event.incidents.length
           h4 Incidents
           if isInRole "admin"
             +addIncidentReport class='-in-details'
         .count.flex-col
-          span= articleCount
+          span= documentCount
           h4 Documents
           if isInRole "admin"
             +sourceModalButton class='-in-details'

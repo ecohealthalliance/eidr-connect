@@ -7,7 +7,9 @@ template(name="curatedEvent")
             | This event has been deleted
         else
           with userEvent
-            +summary
+            +summary(
+              event=this
+              documentCount=documentCount)
 
       section.event--detailed-info
         if incidents.count

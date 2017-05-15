@@ -69,6 +69,9 @@ Template.curatedEvent.helpers
   loaded: ->
     Template.instance().loaded.get()
 
+  documentCount: ->
+    Articles.find().count()
+
 Template.curatedEvent.events
   'click .edit-link, click #cancel-edit': (event, instance) ->
     instance.editState.set(not instance.editState.get())
