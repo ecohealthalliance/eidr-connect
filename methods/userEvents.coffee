@@ -24,7 +24,6 @@ Meteor.methods
         creationDate: now
         createdByUserId: user._id
         createdByUserName: user.profile.name
-        articleCount: 0
 
   deleteUserEvent: (id) ->
     if Roles.userIsInRole(Meteor.userId(), ['admin'])
@@ -46,14 +45,6 @@ Meteor.methods
           lastModifiedDate: new Date(),
           lastModifiedByUserId: user._id,
           lastModifiedByUserName: user.profile.name
-
-  updateUserEventArticleCount: (id) ->
-    event = UserEvents.findOne(id)
-    articleCount = Articles.find(userEventIds: id).count()
-    UserEvents.update(id,
-      $set:
-        articleCount: articleCount
-    )
 
   editUserEventLastIncidentDate: (id) ->
     event = UserEvents.findOne(id)

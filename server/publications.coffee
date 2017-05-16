@@ -36,7 +36,6 @@ ReactiveTable.publish('userEvents', UserEvents, {
   deleted: {$in: [null, false]}
 }, {
   fields:
-    articleCount: 1
     lastModifiedDate: 1
     eventName: 1
 })

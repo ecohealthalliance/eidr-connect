@@ -16,7 +16,6 @@ Meteor.methods
         # associated - push it
         Articles.update sourceQuery,
           $addToSet: userEventIds: eventId
-        Meteor.call('updateUserEventArticleCount', eventId)
         existingSource._id
       else
         source.userEventIds = [eventId]
@@ -25,8 +24,7 @@ Meteor.methods
         source.addedDate = new Date()
         ArticleSchema.validate(source)
         newId = Articles.insert(source)
-        Meteor.call('editUserEventLastModified', eventId)
-        Meteor.call('updateUserEventArticleCount', eventId)
+        Meteor.call("editUserEventLastModified", eventId)
         return newId
     else
       throw new Meteor.Error('auth',
@@ -62,8 +60,7 @@ Meteor.methods
       Articles.update id,
         $set:
           userEventIds: removed.userEventIds
-      Meteor.call('editUserEventLastModified', userEventId)
-      Meteor.call('updateUserEventArticleCount', userEventId)
+      Meteor.call("editUserEventLastModified", userEventId)
 
   markSourceReviewed: (id, reviewed) ->
     if Roles.userIsInRole(Meteor.userId(), ['curator', 'admin'])
