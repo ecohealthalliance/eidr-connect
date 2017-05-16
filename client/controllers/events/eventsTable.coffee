@@ -13,6 +13,12 @@ Template.eventsTable.onCreated ->
       displayName: 'Event Name'
       defaultSortDirection: 1
       sortOrder: 2
+    incidents:
+      description: 'Number of incidents associated with event'
+      displayName: 'Incident Count'
+      sortable: false
+      displayFn: (value, object) ->
+        value?.length or 0
     lastModifiedDate:
       description: 'Date the event was last modified.'
       displayName: 'Last Modified Date'

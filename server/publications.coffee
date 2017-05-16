@@ -38,6 +38,7 @@ ReactiveTable.publish('userEvents', UserEvents, {
   fields:
     lastModifiedDate: 1
     eventName: 1
+    incidents: 1
 })
 Meteor.publish 'userEvent', (eidID) ->
   UserEvents.find({_id: eidID})
