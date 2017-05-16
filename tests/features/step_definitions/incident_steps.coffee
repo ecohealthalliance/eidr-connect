@@ -24,7 +24,7 @@ do ->
     @When /^I add an incident with count "([^']*)"$/, (count) ->
       if not @client.waitForVisible(firstEvent)
         throw new Error('Event Incidents table is empty')
-      @client.click('button.open-incident-form')
+      @client.click('button.open-incident-form-in-details')
       # article URL
       @client.clickWhenVisible('span[aria-labelledby="select2-articleSource-container"]')
       @client.clickWhenVisible('#select2-articleSource-results li:first-child')
