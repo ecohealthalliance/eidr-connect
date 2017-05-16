@@ -86,7 +86,6 @@ Template.mapFilters.events
     setVariables instance, 'on', []
 
   'click .map-event-list--item': (event, instance) ->
-    instance.data.loading.set(true)
     selectedEvents = instance.data.selectedEvents
     _id = @_id
     if selectedEvents.findOne(_id: _id)
