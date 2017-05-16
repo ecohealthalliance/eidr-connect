@@ -16,21 +16,9 @@ Meteor.methods
     incident.addedDate = new Date()
     newId = Incidents.insert(incident)
     if userEventId
-      Meteor.call('addIncidentReportToEvent', userEventId, newId)
-      Meteor.call("editUserEventLastModified", userEventId)
-      Meteor.call("editUserEventLastIncidentDate", userEventId)
+      Meteor.call('addIncidentToEvent', userEventId, newId)
     return newId
 
-  addIncidentReportToEvent: (userEventId, incidentId) ->
-    userId = Meteor.user()._id
-    if not Roles.userIsInRole(userId, ['admin'])
-      throw new Meteor.Error("auth", "User does not have permission to create incidents")
-    unless UserEvents.findOne('incidents.id': incidentId)
-      UserEvents.update userEventId,
-        $addToSet: incidents:
-          id: incidentId
-          associationDate: new Date()
-          associationUserId: userId
 
   # similar to editIncidentReport, but allows you to set a single field without changing any other existing fields.
   updateIncidentReport: (incident) ->
@@ -42,9 +30,6 @@ Meteor.methods
     incident.modifiedByUserId = user._id
     incident.modifiedByUserName = user.profile.name
     res = Incidents.update({_id: _id}, {$set: incident})
-    if incident.userEventId
-      Meteor.call("editUserEventLastModified", incident.userEventId)
-      Meteor.call("editUserEventLastIncidentDate", incident.userEventId)
     return incident._id
 
   editIncidentReport: (incident, userEventId) ->
@@ -57,14 +42,13 @@ Meteor.methods
     incident.modifiedByUserName = user.profile.name
     res = Incidents.update(incidentId, incident)
     if userEventId
-      Meteor.call('addIncidentReportToEvent', userEventId, incidentId)
       Meteor.call("editUserEventLastModified", userEventId)
       Meteor.call("editUserEventLastIncidentDate", userEventId)
     return incidentId
 
-  addIncidentReports: (incidents) ->
+  addIncidentReports: (incidents, userEventId) ->
     incidents.map (incident)->
-      Meteor.call("addIncidentReport", incident)
+      Meteor.call("addIncidentReport", incident, userEventId)
 
   removeIncidentReport: (id) ->
     if not Roles.userIsInRole(@userId, ['admin'])
@@ -77,6 +61,19 @@ Meteor.methods
     if incident.userEventId
       Meteor.call("editUserEventLastModified", incident.userEventId)
       Meteor.call("editUserEventLastIncidentDate", incident.userEventId)
+
+  addIncidentToEvent: (userEventId, incidentId) ->
+    userId = Meteor.user()._id
+    if not Roles.userIsInRole(userId, ['admin'])
+      throw new Meteor.Error("auth", "User does not have permission to create incidents")
+    unless UserEvents.findOne('incidents.id': incidentId)
+      UserEvents.update userEventId,
+        $addToSet: incidents:
+          id: incidentId
+          associationDate: new Date()
+          associationUserId: userId
+      Meteor.call("editUserEventLastModified", userEventId)
+      Meteor.call("editUserEventLastIncidentDate", userEventId)
 
   addIncidentsToEvent: (incidentIds, userEventId, source) ->
     existingSource = Articles.findOne(source._id)
@@ -94,4 +91,4 @@ Meteor.methods
         userEventId
     # Associate Incidents with Event
     incidentIds.forEach (incidentId) ->
-      Meteor.call('addIncidentReportToEvent', userEventId, incidentId)
+      Meteor.call('addIncidentToEvent', userEventId, incidentId)

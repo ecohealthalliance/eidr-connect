@@ -14,7 +14,7 @@ Template.curatedEvent.onCreated ->
   @autorun =>
     userEvent = UserEvents.findOne(userEventId)
     if userEvent
-      document.title += ": #{userEvent.eventName}"
+      document.title = "Eidr-Connect: #{userEvent.eventName}"
       @incidentIds.set _.map userEvent.incidents, (incident) ->
         incident.id
 
@@ -77,10 +77,9 @@ Template.curatedEvent.events
     instance.editState.set(not instance.editState.get())
 
   'click .open-incident-form-in-details': (event, instance) ->
-    data = instance.data
     Modal.show 'incidentModal',
       articles: Articles.find()
-      userEventId: UserEvents.findOne(instance.data.userEventId)
+      userEventId: instance.data.userEventId
       add: true
 
   'click .open-source-form-in-details': (event, instance) ->

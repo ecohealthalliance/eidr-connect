@@ -19,20 +19,6 @@ Meteor.startup ->
     return
   console.log "Running database update code..."
 
-  Incidents.find(userEventId: $exists: true).forEach (incident) ->
-    incidentData =
-      id: incident._id
-      associationDate: incident.creationDate or new Date
-      associationUserId: incident.addedByUserId or ''
-    UserEvents.update _id: incident.userEventId,
-      $addToSet: incidents: incidentData
-    Incidents.update _id: incident._id,
-      $unset: userEventId: ''
-
-  UserEvents.update {},
-    $unset: articleCount: ''
-    {multi: true}
-
   Incidents.find(disease: $exists: false).forEach (incident) ->
     disease = UserEvents.findOne(incident.userEventId)?.disease
     if disease
@@ -121,6 +107,20 @@ Meteor.startup ->
   Articles.find({userEventIds: $exists: false}).forEach (article) ->
     Articles.update _id: article._id,
       $set: userEventIds: [article.userEventId]
+
+  Incidents.find(userEventId: $exists: true).forEach (incident) ->
+    incidentData =
+      id: incident._id
+      associationDate: incident.creationDate or new Date
+      associationUserId: incident.addedByUserId or ''
+    UserEvents.update _id: incident.userEventId,
+      $addToSet: incidents: incidentData
+    Incidents.update _id: incident._id,
+      $unset: userEventId: ''
+
+  UserEvents.update {},
+    $unset: articleCount: ''
+    {multi: true}
 
   AppMetadata.upsert({property: "dataVersion"}, $set: {value: DATA_VERSION})
   console.log "database update complete"
