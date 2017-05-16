@@ -23,11 +23,10 @@ Template.suggestedIncidentModal.onCreated ->
     previousModal:
       element: '#suggestedIncidentsModal'
       add: 'fade'
-
   @editIncident = (incident) =>
     method = 'addIncidentReport'
     action = 'added'
-    if @data.edit
+    if @incident._id
       method = 'editIncidentReport'
       action = 'updated'
 
