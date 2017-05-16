@@ -47,13 +47,11 @@ Meteor.methods
           lastModifiedByUserName: user.profile.name
 
   editUserEventLastIncidentDate: (id) ->
-    event = UserEvents.findOne(id)
-    latestEventIncident = Incidents.findOne({
-      userEventId: event._id
+    incidentIds = _.pluck(UserEvents.findOne(id).incidents, 'id')
+    latestEventIncident = Incidents.findOne
+      _id: $in: incidentIds
       deleted: $in: [null, false]
-    }, {
-      sort: 'dateRange.end': -1
-    })
+      {sort: 'dateRange.end': -1}
     if latestEventIncident
       UserEvents.update id,
         $set:

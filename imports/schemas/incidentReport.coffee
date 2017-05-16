@@ -40,9 +40,6 @@ IncidentReportSchema = new SimpleSchema
   locations:
     type: [Object]
     optional: true
-  userEventId:
-    type: String
-    optional: true
   dateRange:
     type: Object
   "dateRange.type":

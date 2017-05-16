@@ -50,6 +50,8 @@ module.exports =
 
       if field.displayFn
         tableField.fn = field.displayFn
+      if field.sortFn
+        tableField.sortFn = field.sortFn
       _fields.push(tableField)
     _fields
 

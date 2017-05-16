@@ -44,6 +44,9 @@ Template.eventsTable.helpers
     eventType = instance.data.eventType.get()
     fields = instance.tableOptions.fields
 
+    if eventType is 'smart'
+      fields = _.omit(fields, 'incidents')
+
     id: "#{eventType}-events-table"
     fields: tableFields(fields, instance.tableOptions)
     currentPage: instance.currentPage
