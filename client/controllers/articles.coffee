@@ -3,14 +3,18 @@ Articles = require '/imports/collections/articles.coffee'
 { keyboardSelect } = require '/imports/utils'
 
 Template.articles.onCreated ->
-  @selectedSourceId = new ReactiveVar null
+  @selectedSourceId = new ReactiveVar(null)
+  @incidentsLoaded = new ReactiveVar(false)
 
 Template.articles.onRendered ->
   instance = @
-  @autorun ->
-    instance.selectedSourceId.get()
-    Meteor.defer ->
-      instance.$('[data-toggle=tooltip]').tooltip delay: show: '300'
+  @autorun =>
+    sourceId = @selectedSourceId.get()
+    @incidentsLoaded.set(false)
+    @subscribe 'articleIncidents', sourceId, true, =>
+      @incidentsLoaded.set(true)
+    Meteor.defer =>
+      @$('[data-toggle=tooltip]').tooltip delay: show: '300'
 
 Template.articles.helpers
   getSettings: ->
@@ -61,15 +65,12 @@ Template.articles.helpers
       Articles.findOne selectedId
 
   incidentsForSource: (source) ->
-    Incidents.find
-      userEventId: Template.instance().data.userEvent._id
-      articleId: source._id
+    Incidents.find(articleId: source._id)
 
   locationsForSource: (source) ->
     locations = {}
     Incidents
       .find
-        userEventId: Template.instance().data.userEvent._id
         articleId: source._id
       .forEach (incident) ->
         for location in incident.locations
@@ -81,6 +82,13 @@ Template.articles.helpers
     placeholder: 'Search documents'
     toggleable: true
     props: ['title']
+
+  incidentsLoaded: ->
+    Template.instance().incidentsLoaded.get()
+
+  incidentAssociatedWithEvent: ->
+    eventIncidentIds = _.pluck(Template.instance().data.userEvent.incidents, 'id')
+    @_id in eventIncidentIds
 
 Template.articles.events
   'click #event-sources-table tbody tr

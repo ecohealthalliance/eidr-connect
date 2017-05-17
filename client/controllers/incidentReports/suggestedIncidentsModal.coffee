@@ -69,7 +69,7 @@ Template.suggestedIncidentsModal.onCreated ->
 
   if @saveResults
     @autorun =>
-      @subscribe 'ArticleIncidentReports', @data.article._id
+      @subscribe 'articleIncidents', @data.article._id
   else
     @incidentsCollection = new Meteor.Collection(null)
 

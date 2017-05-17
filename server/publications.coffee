@@ -10,14 +10,18 @@ ReactiveTable.publish 'curatorEventIncidents', Incidents, {deleted: {$in: [null,
 Meteor.publish 'eventIncidents', (incidentIds) ->
   Incidents.find
     _id: $in: incidentIds
+    accepted: true
     deleted: $in: [null, false]
 Meteor.publish 'smartEventIncidents', (query) ->
-  query.deleted = {$in: [null, false]}
+  query = _.extend query,
+    deleted: {$in: [null, false]}
+    accepted: true
   Incidents.find(query)
 Meteor.publish 'mapIncidents', (incidentIds) ->
   Incidents.find({
     _id: $in: incidentIds
     locations: $ne: null
+    accepted: true
     deleted: $in: [null, false]
   }, {
     fields:
@@ -58,15 +62,20 @@ Meteor.publish 'smartEvent', (eidID) ->
 Meteor.publish 'smartEvents', () ->
   SmartEvents.find({deleted: {$in: [null, false]}})
 
-Meteor.publish 'ArticleIncidentReports', (articleId) ->
+Meteor.publish 'articleIncidents', (articleId, onlyAccepted=false) ->
   check(articleId, Match.Maybe(String))
-  Incidents.find articleId: articleId,
+  query = articleId: articleId
+  if onlyAccepted
+    query.accepted = true
+  Incidents.find query,
     sort: 'annotations.case.0.textOffsets.0': 1
 
 Meteor.publish 'eventArticles', (userEventId, incidentIds) ->
-  incidentArticleIds = _.pluck(
-    Incidents.find(_id: $in: incidentIds, {fields: articleId: 1}).fetch()
-  , 'articleId')
+  incidents = Incidents.find
+    _id: $in: incidentIds
+    accepted: true
+    {fields: articleId: 1}
+  incidentArticleIds = _.pluck(incidents.fetch() , 'articleId')
   Articles.find
     $or: [
       {_id: $in: incidentArticleIds}
