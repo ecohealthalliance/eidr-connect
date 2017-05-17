@@ -6,7 +6,8 @@ Feeds = require '/imports/collections/feeds.coffee'
 { regexEscape, cleanUrl } = require '/imports/utils'
 
 # Incidents
-ReactiveTable.publish 'curatorEventIncidents', Incidents, {deleted: {$in: [null, false]}}
+ReactiveTable.publish 'curatorEventIncidents', Incidents,
+  deleted: {$in: [null, false]}
 Meteor.publish 'eventIncidents', (incidentIds) ->
   Incidents.find
     _id: $in: incidentIds
@@ -36,14 +37,14 @@ Meteor.publish 'mapIncidents', (incidentIds) ->
   })
 
 # User Events
-ReactiveTable.publish('userEvents', UserEvents, {
+ReactiveTable.publish 'userEvents', UserEvents,
   deleted: {$in: [null, false]}
-}, {
-  fields:
-    lastModifiedDate: 1
-    eventName: 1
-    incidents: 1
-})
+  {
+    fields:
+      lastModifiedDate: 1
+      eventName: 1
+      incidents: 1
+  }
 Meteor.publish 'userEvent', (eidID) ->
   UserEvents.find({_id: eidID})
 Meteor.publish 'userEvents', ()->

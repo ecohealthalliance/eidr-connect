@@ -8,6 +8,7 @@ import { pluralize, formatDateRange, formatLocations } from '/imports/ui/helpers
 import { incidentTypeWithCountAndDisease } from '/imports/utils'
 import Articles from '/imports/collections/articles.coffee'
 import Feeds from '/imports/collections/feeds.coffee'
+{ notify } = require '/imports/ui/notification'
 
 Template.incidentReports.onDestroyed ->
   if @plot
@@ -226,12 +227,13 @@ Template.incidentReports.events
     Modal.show 'incidentModal', incident
 
   'click .reactive-table tbody tr .delete': (event, instance) ->
-    date = moment(@dateRange.start).format("MMM D, YYYY")
-    location = @locations[0].name
-    Modal.show 'deleteConfirmationModal',
-      objNameToDelete: 'incident'
-      objId: @_id
-      displayName: "#{location} on #{date}"
+    Meteor.call 'removeIncidentFromEvent', (error, res) =>
+      if error
+        notify('error', error.reason)
+        return
+      instance.data.incidentIds.remove(id: @_id)
+      instance.$('tr.details').remove()
+      notify('success', 'Incident report removed from event')
 
   # Remove any open incident details elements on pagination
   'click .next-page,

@@ -5,6 +5,12 @@ import { getIncidentSnippet } from '/imports/ui/snippets'
 Template.incidentReport.onCreated ->
   @subscribe 'incidentArticle', @data.articleId
 
+Template.incidentReport.onCreated ->
+  Meteor.defer =>
+    @$('[data-toggle=tooltip]').tooltip
+      delay: show: '200'
+      container: 'body'
+
 Template.incidentReport.helpers
   caseCounts: ->
     @deaths or @cases

@@ -9,7 +9,7 @@ Template.deleteConfirmationModalBody.events
     
     switch objNameToDelete
       when 'incident'
-        Meteor.call 'removeIncidentReport', id, (error) ->
+        Meteor.call 'removeIncident', id, (error) ->
           commonPostDeletionTasks(error, objNameToDelete)
           unless error
             $('.incident-report--details').closest('tr').fadeOut(-> @.remove())

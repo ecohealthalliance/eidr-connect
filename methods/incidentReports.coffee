@@ -52,7 +52,7 @@ Meteor.methods
     incidents.map (incident)->
       Meteor.call('addIncidentReport', incident, userEventId)
 
-  removeIncidentReport: (id) ->
+  removeIncident: (id) ->
     checkPermission(@userId)
     incident = Incidents.findOne(id)
     Incidents.update id,
@@ -63,6 +63,11 @@ Meteor.methods
     if userEventId
       Meteor.call('editUserEventLastModified', userEventId)
       Meteor.call('editUserEventLastIncidentDate', userEventId)
+
+  removeIncidentFromEvent: (id) ->
+    checkPermission(@userId)
+    UserEvents.update 'incidents.id': id,
+      $pull: 'incidents.id': id
 
   addIncidentToEvent: (userEventId, incidentId) ->
     userId = Meteor.user()._id
