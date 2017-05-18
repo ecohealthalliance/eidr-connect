@@ -73,7 +73,6 @@ Template.newIncidentFromSelection.events
       source.enhancements.source.cleanContent.content, incident
     )
     Modal.show 'suggestedIncidentModal',
-      add: true
       articles: [source]
       incident: incident
       incidentText: Spacebars.SafeString(snippetHtml)
