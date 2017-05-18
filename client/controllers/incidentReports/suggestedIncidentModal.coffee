@@ -59,7 +59,7 @@ Template.suggestedIncidentModal.helpers
   saveButtonText: ->
     buttonText = 'Confirm'
     instanceData = Template.instance().data
-    if instanceData.edit
+    if instanceData.incident._id
       buttonText = 'Save'
       unless instanceData.incident.accepted
         buttonText += ' & Accept'
