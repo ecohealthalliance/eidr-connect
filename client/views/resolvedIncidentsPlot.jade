@@ -1,2 +1,6 @@
 template(name="resolvedIncidentsPlot")
-  .container
+  .resolved-incidents-plot
+    .container
+    .btn-group.incident-type-selector(role="group")
+      button.btn.btn-default.cases(type="button" class="{{casesActive}}") Cases
+      button.btn.btn-default.deaths(type="button" class="{{deathsActive}}") Deaths

@@ -9,10 +9,12 @@ import LocationTree from '/imports/incidentResolution/LocationTree.coffee'
 
 Template.resolvedIncidentsPlot.onCreated ->
   @incidents = @data.incidents
+  @incidentType = new ReactiveVar("deaths")
+
 Template.resolvedIncidentsPlot.onRendered ->
   @autorun =>
     allIncidents = @incidents.fetch()
-    incidentType = @incidentType?.get() or "deaths"
+    incidentType = @incidentType.get()
     allIncidents = allIncidents.filter (i)->
       i.locations.every (l)-> l.featureCode
     differentials = convertAllIncidentsToDifferentials(allIncidents)
@@ -46,9 +48,9 @@ Template.resolvedIncidentsPlot.onRendered ->
         panning: true
         panKey: 'shift'
       title:
-        text: 'Death Rate'
+        text: if incidentType == "cases" then 'Case Rate' else 'Death Rate'
       subtitle:
-        text: 'Overall rates based on incident report data'
+        text: 'Rates are derived from incident report data'
       xAxis:
         type: 'datetime'
         dateTimeLabelFormats:
@@ -60,7 +62,7 @@ Template.resolvedIncidentsPlot.onRendered ->
           text: 'Date'
       yAxis:
         title:
-          text: 'Deaths'
+          text: 'Number Per Day'
         min: 0
       tooltip:
         shared: true
@@ -110,3 +112,19 @@ Template.resolvedIncidentsPlot.onRendered ->
           .flatten(true)
           .value()
     })
+
+Template.resolvedIncidentsPlot.helpers
+  deathsActive: ->
+    if Template.instance().incidentType.get() == "deaths"
+      "active"
+
+  casesActive: ->
+    if Template.instance().incidentType.get() == "cases"
+      "active"
+
+Template.resolvedIncidentsPlot.events
+  "click .incident-type-selector .cases": (e, instance)->
+    instance.incidentType.set("cases")
+
+  "click .incident-type-selector .deaths": (e, instance)->
+    instance.incidentType.set("deaths")
