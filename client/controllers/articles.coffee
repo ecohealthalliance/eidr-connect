@@ -11,7 +11,7 @@ Template.articles.onRendered ->
   @autorun =>
     sourceId = @selectedSourceId.get()
     @incidentsLoaded.set(false)
-    @subscribe 'articleIncidents', sourceId, true, =>
+    @subscribe 'articleIncidents', sourceId, =>
       @incidentsLoaded.set(true)
     Meteor.defer =>
       @$('[data-toggle=tooltip]').tooltip delay: show: '300'
