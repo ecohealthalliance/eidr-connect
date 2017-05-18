@@ -29,10 +29,10 @@ if Meteor.isAppTest
         # Loading test data into database
         Meteor.call 'createTestingAdmin'
         console.log "created admin"
-        userEvent = Meteor.call 'upsertUserEvent', 
+        userEvent = Meteor.call 'upsertUserEvent',
                     eventName: 'Test Event 1',
                     summary: 'Test summary'
-        article = Meteor.call 'addEventSource', 
+        article = Meteor.call 'addEventSource',
                     title: 'Test Article',
                     url: 'http://promedmail.org/post/418162'
                     publishDate: new Date()
@@ -40,8 +40,7 @@ if Meteor.isAppTest
                     userEvent.insertedId,
                     (error, article) ->
                       console.log "article", error, article
-        incident = Meteor.call 'addIncidentReport', 
-                    userEventId: userEvent.insertedId,
+        incident = Meteor.call 'addIncidentReport',
                     species: 'Test Species',
                     cases: 1,
                     dateRange: {}
