@@ -69,7 +69,7 @@ Meteor.methods
     # If document is in collection associate with event, otherwise add to Articles
     # collection and associate
     if existingSource
-      Articles.update(source._id, $set: userEventId: userEventId)
+      Articles.update(source._id, $addToSet: userEventIds: userEventId)
     else
       Meteor.call 'addEventSource',
         url: "promedmail.org/post/#{sourceId}"
