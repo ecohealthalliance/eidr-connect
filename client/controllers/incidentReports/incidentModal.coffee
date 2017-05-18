@@ -83,8 +83,20 @@ Template.incidentModal.events
         instance.submitting.set(false)
 
     if @edit
-      incident = _.extend({}, @incident, incident)
-      Meteor.call 'editIncidentReport', incident, (error, result) ->
+      _incident = _.extend({}, @incident, incident)
+
+      # Remove existing type props if user changes incident type
+      fieldsToRemove = []
+      if incident.cases
+        fieldsToRemove = ['deaths', 'specify']
+      else if incident.deaths
+        fieldsToRemove = ['cases', 'specify']
+      else if incident.specify
+        fieldsToRemove = ['cases', 'deaths']
+      fieldsToRemove.forEach (field) ->
+        delete _incident[field]
+
+      Meteor.call 'updateIncidentReport', _incident, fieldsToRemove, (error, result) ->
         if not error
           $('.reactive-table tr').removeClass('open')
           $('.reactive-table tr.details').remove()
