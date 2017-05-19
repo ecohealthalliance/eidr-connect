@@ -82,7 +82,7 @@ Template.curatorInboxSection.helpers
     Articles.findOne(query)
 
   posts: ->
-    Articles
+    Articles.find().fetch()
 
   count: ->
     Template.instance().sourceCount.get()

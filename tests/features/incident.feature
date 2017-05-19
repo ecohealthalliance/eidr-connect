@@ -26,3 +26,11 @@ Feature: Incident
     And I add the first suggested event document
     And I add the first suggested incident
     Then I can "confirm" suggestions
+
+  Scenario: Extract incidents on extract incidents page
+    When I navigate to "/extract-incidents"
+    And I extract incidents from the url "http://www.promedmail.org/post/2579682"
+    And I open the first incident
+    And I set the count to "500"
+    And I accept the incident
+    Then the first incident should have a count of "500"

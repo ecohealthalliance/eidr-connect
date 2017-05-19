@@ -177,13 +177,14 @@ Template.sourceModal.events
     return unless _checkFormValidity(instance)
     form = instance.$('form')[0]
     article = form.article.value
+    userEventId = instance.data.userEventId
     validURL = form.article.checkValidity()
     timePicker = instance.$('#publishTime').data('DateTimePicker')
     date = instance.datePicker.startDate
     time = timePicker.date()
 
     source =
-      userEventIds: [instance.data.userEventId]
+      userEventIds: [userEventId]
       url: cleanUrl(article)
       content: form.content.value
       publishDateTZ: form.publishDateTZ.value
@@ -201,7 +202,7 @@ Template.sourceModal.events
       source.publishDate = selectedDate.toDate()
 
     enhance = form.enhance?.checked
-    Meteor.call 'addEventSource', source, instance.data.userEventId, (error, articleId) ->
+    Meteor.call 'addEventSource', source, userEventId, (error, articleId) ->
       if error
         toastr.error error.reason
       else
@@ -209,7 +210,7 @@ Template.sourceModal.events
           notify('success', 'Source successfully added')
           instance.subscribe 'ArticleIncidentReports', articleId
           Modal.show 'suggestedIncidentsModal',
-            userEventId: instance.data.userEventId
+            userEventId: userEventId
             article: Articles.findOne(articleId)
           stageModals(instance, instance.modals)
         else
