@@ -10,24 +10,27 @@ Meteor.methods
       if source.url
         sourceQuery = url: $regex: "#{regexEscape(source.url)}$"
         existingSource = Articles.findOne(sourceQuery)
+
       if existingSource
-        #if this source is already in the DB and the userEvent isn't already associated - push it
+        # If this source is already in the DB and the userEvent isn't already
+        # associated - push it
         Articles.update sourceQuery,
           $addToSet: userEventIds: eventId
-        Meteor.call("updateUserEventArticleCount", eventId)
+        Meteor.call('updateUserEventArticleCount', eventId)
         existingSource._id
-      else if source.url
+      else
         source.userEventIds = [eventId]
         source.addedByUserId = user._id
         source.addedByUserName = user.profile.name
         source.addedDate = new Date()
         ArticleSchema.validate(source)
         newId = Articles.insert(source)
-        Meteor.call("editUserEventLastModified", eventId)
-        Meteor.call("updateUserEventArticleCount", eventId)
+        Meteor.call('editUserEventLastModified', eventId)
+        Meteor.call('updateUserEventArticleCount', eventId)
         return newId
     else
-      throw new Meteor.Error("auth", "User does not have permission to add documents")
+      throw new Meteor.Error('auth',
+        'User does not have permission to add documents')
 
   associateWithEvent: (sourceId, eventId) ->
     user = Meteor.user()
@@ -35,7 +38,8 @@ Meteor.methods
       Articles.update sourceId,
         $addToSet: userEventIds: eventId
     else
-      throw new Meteor.Error("auth", "User does not have permission to edit documents")
+      throw new Meteor.Error('auth',
+        'User does not have permission to edit documents')
 
   updateEventSource: (source) ->
     user = Meteor.user()
@@ -45,9 +49,10 @@ Meteor.methods
           title: source.title
           publishDate: source.publishDate
           publishDateTZ: source.publishDateTZ
-      Meteor.call("editUserEventLastModified", source.userEventId)
+      Meteor.call('editUserEventLastModified', source.userEventId)
     else
-      throw new Meteor.Error("auth", "User does not have permission to edit documents")
+      throw new Meteor.Error('auth',
+        'User does not have permission to edit documents')
 
   removeEventSource: (id, userEventId) ->
     if Roles.userIsInRole(Meteor.userId(), ['admin'])
@@ -57,8 +62,8 @@ Meteor.methods
       Articles.update id,
         $set:
           userEventIds: removed.userEventIds
-      Meteor.call("editUserEventLastModified", userEventId)
-      Meteor.call("updateUserEventArticleCount", userEventId)
+      Meteor.call('editUserEventLastModified', userEventId)
+      Meteor.call('updateUserEventArticleCount', userEventId)
 
   markSourceReviewed: (id, reviewed) ->
     if Roles.userIsInRole(Meteor.userId(), ['curator', 'admin'])

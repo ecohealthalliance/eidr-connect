@@ -118,9 +118,10 @@ Meteor.methods
     article = PromedPosts.findOne
       promedId: articleId
 
-    promedDate: article.promedDate
-    url: "http://www.promedmail.org/post/#{article.promedId}"
-    subject: article.subject.raw
+    if article
+      promedDate: article.promedDate
+      url: "http://www.promedmail.org/post/#{article.promedId}"
+      subject: article.subject.raw
 
   queryForSuggestedArticles: (eventId) ->
     @unblock()

@@ -15,6 +15,7 @@ CUSTOM_FEEDS = [
     title: "Current User's"
   }
 ]
+DEFAULT_FEED_ID = CUSTOM_FEEDS[0]._id
 
 getCustomFeedArray = ->
   _.pluck(CUSTOM_FEEDS, '_id')
@@ -62,9 +63,9 @@ Template.curatorInbox.onCreated ->
   @latestSourceDate = new ReactiveVar(null)
   @filtering = new ReactiveVar(false)
   @searching = new ReactiveVar(false)
-  @selectedFeedId = new ReactiveVar()
+  @selectedFeedId = new ReactiveVar(DEFAULT_FEED_ID)
   @subscribe 'feeds', =>
-    @selectedFeedId.set(Feeds.findOne(title: 'ProMED-mail')._id)
+    @selectedFeedId.set(Feeds.findOne(title: 'ProMED-mail')?._id or DEFAULT_FEED_ID)
 
 Template.curatorInbox.onRendered ->
   # determine if our `back-to-top` button should be initially displayed
@@ -84,7 +85,7 @@ Template.curatorInbox.onRendered ->
 
   @autorun =>
     if @selectedFeedId.get() in getCustomFeedArray()
-      latestSourceDate = moment().format('L')
+      latestSourceDate = moment().endOf('day').format('L')
       range = @dateRange.get()
       createNewCalendar(latestSourceDate, range)
 
