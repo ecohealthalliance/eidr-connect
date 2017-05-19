@@ -37,7 +37,7 @@ showSuggestedIncidentModal = (event, instance)->
   Modal.show 'suggestedIncidentModal',
     articles: [instance.data.article]
     userEventId: instance.data.userEventId
-    incidentCollection: Incidents
+    incidentCollection: instance.collection()
     incident: incident
     incidentText: Spacebars.SafeString(snippetHtml)
 
