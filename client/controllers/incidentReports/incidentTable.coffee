@@ -109,7 +109,7 @@ Template.incidentTable.helpers
 
   action: ->
     if Template.instance().accepted
-      'Reject'
+      'Delete'
     else
       'Accept'
 

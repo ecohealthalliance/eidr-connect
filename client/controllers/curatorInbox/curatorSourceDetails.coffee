@@ -124,7 +124,7 @@ Template.curatorSourceDetails.helpers
   selectedAnnotationId: ->
     Template.instance().selectedAnnotationId
 
-  hasTextContent: ->
+  textContent: ->
     Template.instance().source.get().enhancements.source?.cleanContent?.content
 
 Template.curatorSourceDetails.events
