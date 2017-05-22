@@ -37,7 +37,7 @@ $max-event-details-width = $max-ui-width+300
     padding-top 0
     padding-bottom 0
     margin-bottom 4em
-    border-bottom 1px solid $border-primary
+    border-bottom 1px solid $border-primary-light
     &:first-of-type
     &:last-of-type
       border 0
@@ -285,9 +285,22 @@ $max-event-details-width = $max-ui-width+300
     margin-bottom 1em
 
 .resolved-incidents-plot
-  position relative
+  padding 3em 0
+  .controls
+    text-align center
+    p
+      color $m-gray
+      font-size .9em
+
+.chart
+  margin 0 5%
 
 .incident-type-selector
-  position absolute
-  top 20px
-  right 20px
+  margin-bottom 1em
+  .btn
+    padding-left 5em
+    padding-right 5em
+    &.active
+      background $primary
+      color white
+      border-color $primary

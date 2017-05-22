@@ -41,23 +41,22 @@ Template.resolvedIncidentsPlot.onRendered ->
         loc = subInterval.location
         if LocationTree.locationContains(topLocation, loc)
           locToSubintervals[topLocation.id].push(subInterval)
-    Highcharts.chart(@$(".container")[0], {
+    Highcharts.chart(@$('.chart')[0], {
       chart:
         type: 'area'
         zoomType: 'x'
         panning: true
         panKey: 'shift'
       title:
-        text: if incidentType == "cases" then 'Case Rate' else 'Death Rate'
-      subtitle:
-        text: 'Rates are derived from incident report data'
+        text: null
+      credits: false
       xAxis:
         type: 'datetime'
         dateTimeLabelFormats:
-        	day: '%b %e'
-        	week: '%b %e'
-        	month: '%b \'%y'
-        	year: '%Y'
+          day: '%b %e'
+          week: '%b %e'
+          month: '%b \'%y'
+          year: '%Y'
         title:
           text: 'Date'
       yAxis:
