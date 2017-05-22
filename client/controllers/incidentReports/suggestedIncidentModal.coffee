@@ -23,11 +23,10 @@ Template.suggestedIncidentModal.onCreated ->
     previousModal:
       element: '#suggestedIncidentsModal'
       add: 'fade'
-
   @editIncident = (incident) =>
     method = 'addIncidentReport'
     action = 'added'
-    if @data.edit
+    if @incident._id
       method = 'editIncidentReport'
       action = 'updated'
 
@@ -60,7 +59,7 @@ Template.suggestedIncidentModal.helpers
   saveButtonText: ->
     buttonText = 'Confirm'
     instanceData = Template.instance().data
-    if instanceData.edit
+    if instanceData.incident._id
       buttonText = 'Save'
       unless instanceData.incident.accepted
         buttonText += ' & Accept'
@@ -93,4 +92,16 @@ Template.suggestedIncidentModal.events
     incident.userEventId = instanceData.userEventId
     incident.accepted = true
     incident = _.extend({}, instanceData.incident, incident)
-    instance.editIncident(incident)
+    if instanceData.incidentCollection
+      delete incident._id
+      instanceData.incidentCollection.update instance.incident._id,
+        $unset:
+          cases: true
+          deaths: true
+          specify: true
+        $set: incident
+      notify('success', 'Incident Accepted', 1200)
+      stageModals(instance, instance.modals)
+    else
+      incident = _.extend({}, instance.data.incident, incident)
+      instance.editIncident(incident)
