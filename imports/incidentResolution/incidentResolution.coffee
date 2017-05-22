@@ -24,7 +24,7 @@
 # linear programming is used.
 # There is a variable for each subinterval that indicates how many cases occur
 # within it.
-# The contraints are formed by the incident intervals. The number cases in the 
+# The constraints are formed by the incident intervals. The number of cases in the 
 # subintervals an interval contains must sum to at least the number of cases in
 # the interval.
 # The objective function minimizes the following objectives
