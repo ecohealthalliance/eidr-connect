@@ -23,7 +23,7 @@ template(name="curatorSourceDetails")
       .transition(class="{{#if notifying}} active {{/if}}")
     .curator-source-details--content
       if incidentsLoaded
-        if hasTextContent
+        if textContent
           .curator-source-details--copy-wrapper.curator-source-details--section
             .curator-source-details--header.curator-source-details--actions.container-flex.no-break
               button.btn.btn-success.btn-sm.toggle-reviewed(class="{{#if isReviewed}} reviewed {{/if}}")
@@ -36,7 +36,7 @@ template(name="curatorSourceDetails")
               +addToEvent(source=source objNameToAssociate="Document")
             .curator-source-details--copy
               +annotatedContent(
-                content=source.enhancements.source.cleanContent.content
+                content=textContent
                 incidents=incidents
                 relatedElements=relatedElements
                 selectedAnnotationId=selectedAnnotationId

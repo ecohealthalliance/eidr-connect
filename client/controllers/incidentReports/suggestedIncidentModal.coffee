@@ -73,6 +73,18 @@ Template.suggestedIncidentModal.events
       stageModals(instance, instance.modals)
 
   'click .reject': (event, instance) ->
+    instanceData = instance.data
+    if instanceData.incidentCollection
+      instanceData.incidentCollection.update instance.incident._id,
+        $set:
+          accepted: false
+    else
+      Meteor.call 'updateIncidentReport', {
+        _id: instance.incident._id
+        accepted: false
+      }, (error, result) =>
+        if error
+          toastr.error "Error: " + error
     stageModals(instance, instance.modals)
 
   'click .cancel': (event, instance) ->
