@@ -9,6 +9,7 @@ template(name="curatedEvent")
           with userEvent
             +summary(
               event=this
+              incidentCount=incidents.count
               documentCount=documentCount)
 
       section.event--detailed-info

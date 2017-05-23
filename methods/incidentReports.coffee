@@ -66,8 +66,13 @@ Meteor.methods
 
   removeIncidentFromEvent: (id) ->
     checkPermission(@userId)
+    incidents = UserEvents.findOne('incidents.id': id).incidents
+
+    _incidents = _.filter incidents, (incident) ->
+      incident.id != id
+
     UserEvents.update 'incidents.id': id,
-      $pull: 'incidents.id': id
+      $set: incidents: _incidents
 
   addIncidentToEvent: (userEventId, incidentId) ->
     userId = Meteor.user()._id

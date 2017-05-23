@@ -227,12 +227,12 @@ Template.incidentReports.events
     Modal.show 'incidentModal', incident
 
   'click .reactive-table tbody tr .delete': (event, instance) ->
-    Meteor.call 'removeIncidentFromEvent', (error, res) =>
+    Meteor.call 'removeIncidentFromEvent', @_id, (error, res) =>
       if error
         notify('error', error.reason)
         return
-      instance.data.incidentIds.remove(id: @_id)
       instance.$('tr.details').remove()
+      $('.tooltip').remove()
       notify('success', 'Incident report removed from event')
 
   # Remove any open incident details elements on pagination

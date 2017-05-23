@@ -7,7 +7,6 @@ Modal.allowMultiple = true
 Template.curatedEvent.onCreated ->
   @editState = new ReactiveVar(false)
   @loaded = new ReactiveVar(false)
-  @incidentIds = new Meteor.Collection(null)
   userEventId = @data.userEventId
   @subscribe "userEvent", @data.userEventId
 
@@ -15,16 +14,10 @@ Template.curatedEvent.onCreated ->
     userEvent = UserEvents.findOne(userEventId)
     if userEvent
       document.title = "Eidr-Connect: #{userEvent.eventName}"
-      userEvent.incidents.forEach (incident) =>
-        @incidentIds.upsert id: incident.id,
-          id: incident.id
 
-  @autorun =>
-    incidentIds = _.pluck(@incidentIds.find().fetch(), 'id')
-    @subscribe "eventArticles", userEventId, incidentIds
-    if incidentIds
-      @subscribe 'eventIncidents', incidentIds, =>
-        @loaded.set(true)
+  @subscribe "eventArticles", userEventId
+  @subscribe 'eventIncidents', userEventId, =>
+    @loaded.set(true)
 
 Template.curatedEvent.onRendered ->
   new Clipboard '.copy-link'
@@ -41,7 +34,11 @@ Template.curatedEvent.helpers
     userEvent: UserEvents.findOne(Template.instance().data.userEventId)
 
   incidents: ->
-    Incidents.find()
+    event = UserEvents.findOne(Template.instance().data.userEventId)
+    Incidents.find(_id: $in: _.pluck(event.incidents, 'id'))
+
+  incidentCount: ->
+    Incidents.find().count()
 
   isEditing: ->
     Template.instance().editState.get()
@@ -65,10 +62,10 @@ Template.curatedEvent.helpers
   templateData: ->
     instance = Template.instance()
 
-    userEvent: UserEvents.findOne(instance.data.userEventId)
+    userEvent = UserEvents.findOne(instance.data.userEventId)
+    userEvent: userEvent
     articles: Articles.find()
-    incidents: Incidents.find()
-    incidentIds: instance.incidentIds
+    incidents: Incidents.find(_id: $in: _.pluck(userEvent.incidents, 'id'))
 
   loaded: ->
     Template.instance().loaded.get()

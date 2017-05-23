@@ -8,10 +8,13 @@ Feeds = require '/imports/collections/feeds.coffee'
 # Incidents
 ReactiveTable.publish 'curatorEventIncidents', Incidents,
   deleted: {$in: [null, false]}
-Meteor.publish 'eventIncidents', (incidentIds) ->
+Meteor.publish 'eventIncidents', (userEventId) ->
+  event = UserEvents.findOne(userEventId)
+  incidentIds = _.pluck(event.incidents, 'id')
   Incidents.find
     _id: $in: incidentIds
     deleted: $in: [null, false]
+
 Meteor.publish 'smartEventIncidents', (query) ->
   query = _.extend query,
     accepted: $in: [null, true]
@@ -67,11 +70,10 @@ Meteor.publish 'articleIncidents', (articleId) ->
   Incidents.find query,
     sort: 'annotations.case.0.textOffsets.0': 1
 
-Meteor.publish 'eventArticles', (userEventId, incidentIds) ->
-  incidents = Incidents.find
-    _id: $in: incidentIds
-    {fields: articleId: 1}
-  incidentArticleIds = _.pluck(incidents.fetch() , 'articleId')
+Meteor.publish 'eventArticles', (userEventId) ->
+  incidentIds = _.pluck(UserEvents.findOne(userEventId).incidents, 'id')
+  incidents = Incidents.find(_id: $in: incidentIds)
+  incidentArticleIds = _.pluck(incidents.fetch(), 'articleId')
   Articles.find
     $or: [
       {_id: $in: incidentArticleIds}

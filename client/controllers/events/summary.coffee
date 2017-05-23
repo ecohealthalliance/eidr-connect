@@ -30,9 +30,6 @@ Template.summary.helpers
   collapsed: ->
     Template.instance().collapsed.get()
 
-  incidentCount: ->
-    Template.instance().data.event.incidents?.length or 0
-
 Template.summary.events
   'click .copy-link': (event, instance) ->
     copied = instance.copied
