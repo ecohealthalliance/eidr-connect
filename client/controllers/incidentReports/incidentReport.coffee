@@ -22,6 +22,7 @@ Template.incidentReport.helpers
     Articles.findOne(@articleId)?.url
 
   incidentContent: ->
-    articleContent = Articles.findOne(@articleId)?.enhancements?.source?.cleanContent.content
-    if articleContent
-      Spacebars.SafeString(getIncidentSnippet(articleContent, @))
+    if @annotations
+      articleContent = Articles.findOne(@articleId)?.enhancements?.source?.cleanContent.content
+      if articleContent
+        Spacebars.SafeString(getIncidentSnippet(articleContent, @))
