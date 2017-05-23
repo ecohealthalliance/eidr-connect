@@ -30,14 +30,8 @@ Meteor.methods
     delete incident._id
     incident.modifiedByUserId = user._id
     incident.modifiedByUserName = user.profile.name
-    updateOperators =
+    res = Incidents.update _id: _id,
       $set: incident
-    if fieldsToRemove.length
-      fieldsToUnset = {}
-      fieldsToRemove.forEach (field) ->
-        fieldsToUnset[field] = ''
-      updateOperators.$unset = fieldsToUnset
-    res = Incidents.update({_id: _id}, updateOperators)
     if incident.userEventId
       Meteor.call("editUserEventLastModified", incident.userEventId)
       Meteor.call("editUserEventLastIncidentDate", incident.userEventId)
@@ -47,15 +41,30 @@ Meteor.methods
     user = Meteor.user()
     checkPermission(user._id)
     incidentReportSchema.validate(incident)
-    incidentId = incident._id
-    incident.modifiedByUserId = user._id
-    incident.modifiedByUserName = user.profile.name
-    res = Incidents.update(incidentId, incident)
-    userEventId = UserEvents.findOne('incidents.id': incidentId)._id
-    if userEventId
-      Meteor.call('editUserEventLastModified', userEventId)
-      Meteor.call('editUserEventLastIncidentDate', userEventId)
-    return incidentId
+
+    # Remove existing type props if user changes incident type and merge incident
+    # from client with existing incident
+    if incident.cases
+      fieldsToRemove = deaths: true, specify: true
+    else if incident.deaths
+      fieldsToRemove = cases: true, specify: true
+    else if incident.specify
+      fieldsToRemove = cases: true, deaths: true
+    existingIncident = Incidents.findOne(incident._id)
+    updatedIncident = _.extend(existingIncident, incident)
+    updateOperators = {}
+    if fieldsToRemove
+      updateOperators = $unset: fieldsToRemove
+      for type of fieldsToRemove
+        delete updatedIncident[type]
+
+    updatedIncident.modifiedByUserId = user._id
+    updatedIncident.modifiedByUserName = user.profile.name
+    res = Incidents.update(updatedIncident._id, updatedIncident, updateOperators)
+    if incident.userEventId
+      Meteor.call("editUserEventLastModified", incident.userEventId)
+      Meteor.call("editUserEventLastIncidentDate", incident.userEventId)
+    return incident._id
 
   addIncidentReports: (incidents, userEventId) ->
     checkPermission(@userId)
