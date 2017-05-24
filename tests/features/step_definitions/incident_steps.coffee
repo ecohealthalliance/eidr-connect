@@ -41,6 +41,34 @@ do ->
       # Submit
       @client.click('button.save-incident[type="button"]')
 
+    @When /^I click the first incident$/, ->
+      @client.click('#event-incidents-table tbody tr:first-child')
+
+    @When /^I open the edit incident report modal$/, ->
+      @client.clickWhenVisible('.incident-report--details--actions .edit i')
+      @client.waitForVisible('.incident-report.modal')
+
+    @When /^I save the incident$/, ->
+      @browser.scroll(0, 1000)
+      @client.click('.save-incident')
+
+    @When /^I change the incident "([^']*)" to "([^']*)"$/, (propertyName, value) ->
+      types = ['deaths', 'cases', 'other']
+      if propertyName in types
+        @client.click("label[for='#{propertyName}']")
+        @client.pause()
+        if propertyName is 'other'
+          @client.waitForVisible('[name="other"]')
+          @client.setValue('[name="other"]', value)
+        else
+          @client.waitForVisible('[name="count"]')
+          @client.setValue('[name="count"]', value)
+      else if propertyName is 'location'
+        @client.setValue('input.select2-search__field', value)
+        @client.clickWhenVisible('.select2-results__option--highlighted')
+      else
+        @client.setValue("[name='#{propertyName}']", value)
+
     @When /^I should see a scatter plot group with count "([^']*)"$/, (count) ->
       @client.pause(2000)
       selector = "[id*=\":#{count}:false\"]"
