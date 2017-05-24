@@ -46,13 +46,26 @@ Template.annotatedContent.events
         scrolled: instance.scrolled
         selecting: instance.selecting
         popupDelay: POPUP_DELAY
+        view: 'newIncidentFromSelection'
       Blaze.renderWithData(
-        Template.newIncidentFromSelection,
+        Template.popup,
         data,
         $("#{instance.data.relatedElements.parent}")[0]
         $("#{instance.data.relatedElements.sibling}")[0]
       )
     else
+      data =
+        source: instance.data.source
+        scrolled: instance.scrolled
+        selecting: instance.selecting
+        popupDelay: POPUP_DELAY
+        view: ''
+      Blaze.renderWithData(
+        Template.popup,
+        data,
+        $("#{instance.data.relatedElements.parent}")[0]
+        $("#{instance.data.relatedElements.sibling}")[0]
+      )
       $currentTarget = $(event.currentTarget)
       # Temporarily 'shuffle' the text layers so selectable-content is on
       # bottom and annotated-content is on top
