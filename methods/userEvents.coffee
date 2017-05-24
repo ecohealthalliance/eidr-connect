@@ -6,9 +6,12 @@ UserEventSchema = require '/imports/schemas/userEvent.coffee'
 Meteor.methods
   upsertUserEvent: (userEvent) ->
     if not Roles.userIsInRole(@userId, ['admin'])
-      throw new Meteor.Error("auth", "Admin level permissions are required for this action.")
+      throw new Meteor.Error('auth', 'Admin level permissions are required for this action.')
     user = Meteor.user()
     now = new Date()
+    eventName = userEvent.eventName
+    if UserEvents.findOne(eventName: eventName)
+      throw new Meteor.Error('duplicate_entry', "#{eventName} already exists.")
     userEvent = _.extend userEvent,
       lastModifiedDate: now
       lastModifiedByUserId: user._id
