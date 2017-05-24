@@ -1,4 +1,3 @@
-import Highcharts from 'highcharts'
 import 'rickshaw/rickshaw.css'
 import Rickshaw from 'rickshaw'
 import solverExport from 'javascript-lp-solver'
