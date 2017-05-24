@@ -1,6 +1,7 @@
-Incidents = require '/imports/collections/incidentReports.coffee'
-UserEvents = require '/imports/collections/userEvents.coffee'
-Articles = require '/imports/collections/articles.coffee'
+EventIncidents = require '/imports/collections/eventIncidents'
+EventArticles = require '/imports/collections/eventArticles'
+UserEvents = require '/imports/collections/userEvents'
+
 #Allow multiple modals or the suggested locations list won't show after the loading modal is hidden
 Modal.allowMultiple = true
 
@@ -8,16 +9,14 @@ Template.curatedEvent.onCreated ->
   @editState = new ReactiveVar(false)
   @loaded = new ReactiveVar(false)
   userEventId = @data.userEventId
-  @subscribe "userEvent", @data.userEventId
+
+  @subscribe 'userEvent', @data.userEventId, =>
+    @loaded.set(true)
 
   @autorun =>
     userEvent = UserEvents.findOne(userEventId)
     if userEvent
       document.title = "Eidr-Connect: #{userEvent.eventName}"
-
-  @subscribe "eventArticles", userEventId
-  @subscribe 'eventIncidents', userEventId, =>
-    @loaded.set(true)
 
 Template.curatedEvent.onRendered ->
   new Clipboard '.copy-link'
@@ -27,18 +26,19 @@ Template.curatedEvent.helpers
     UserEvents.findOne(Template.instance().data.userEventId)
 
   eventHasArticles: ->
-    Articles.find().count()
+    EventArticles.find().count()
 
   articleData: ->
-    articles: Articles.find()
-    userEvent: UserEvents.findOne(Template.instance().data.userEventId)
+    instance = Template.instance()
+
+    articles: EventArticles.find()
+    userEvent: UserEvents.findOne(instance.data.userEventId)
 
   incidents: ->
-    event = UserEvents.findOne(Template.instance().data.userEventId)
-    Incidents.find(_id: $in: _.pluck(event.incidents, 'id'))
+    EventIncidents.find()
 
   incidentCount: ->
-    Incidents.find().count()
+    EventIncidents.find().count()
 
   isEditing: ->
     Template.instance().editState.get()
@@ -64,14 +64,14 @@ Template.curatedEvent.helpers
 
     userEvent = UserEvents.findOne(instance.data.userEventId)
     userEvent: userEvent
-    articles: Articles.find()
-    incidents: Incidents.find(_id: $in: _.pluck(userEvent.incidents, 'id'))
+    articles: EventArticles.find()
+    incidents: EventIncidents.find()
 
   loaded: ->
     Template.instance().loaded.get()
 
   documentCount: ->
-    Articles.find().count()
+    EventArticles.find().count()
 
 Template.curatedEvent.events
   'click .edit-link, click #cancel-edit': (event, instance) ->
@@ -79,7 +79,7 @@ Template.curatedEvent.events
 
   'click .open-incident-form-in-details': (event, instance) ->
     Modal.show 'incidentModal',
-      articles: Articles.find()
+      articles: EventArticles.find()
       userEventId: instance.data.userEventId
       add: true
 

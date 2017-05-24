@@ -3,18 +3,19 @@ Articles = require '/imports/collections/articles.coffee'
 { keyboardSelect } = require '/imports/utils'
 
 Template.articles.onCreated ->
-  @selectedSourceId = new ReactiveVar(null)
+  @selectedSource = new ReactiveVar(null)
   @incidentsLoaded = new ReactiveVar(false)
 
 Template.articles.onRendered ->
   instance = @
   @autorun =>
-    sourceId = @selectedSourceId.get()
-    @incidentsLoaded.set(false)
-    @subscribe 'articleIncidents', sourceId, =>
-      @incidentsLoaded.set(true)
-    Meteor.defer =>
-      @$('[data-toggle=tooltip]').tooltip delay: show: '300'
+    sourceId = @selectedSource.get()?._id
+    if sourceId
+      @incidentsLoaded.set(false)
+      @subscribe 'articleIncidents', sourceId, =>
+        @incidentsLoaded.set(true)
+      Meteor.defer =>
+        @$('[data-toggle=tooltip]').tooltip delay: show: '300'
 
 Template.articles.helpers
   getSettings: ->
@@ -60,9 +61,7 @@ Template.articles.helpers
     filters: ['sourceFilter']
 
   selectedSource: ->
-    selectedId = Template.instance().selectedSourceId.get()
-    if selectedId
-      Articles.findOne selectedId
+    Template.instance().selectedSource.get()
 
   incidentsForSource: (source) ->
     Incidents.find(articleId: source._id)
@@ -95,7 +94,7 @@ Template.articles.events
     , keyup #event-sources-table tbody tr': (event, instance) ->
     event.preventDefault()
     return if not keyboardSelect(event) and event.type is 'keyup'
-    instance.selectedSourceId.set @_id
+    instance.selectedSource.set(@)
     instance.$(event.currentTarget).parent().find('tr').removeClass 'open'
     instance.$(event.currentTarget).addClass('open').blur()
     instance.$('.event-sources-detail').focus()
@@ -104,7 +103,7 @@ Template.articles.events
     Modal.show 'sourceModal', userEventId: instance.data.userEvent._id
 
   'click .delete-source': (event, instance) ->
-    source = Articles.findOne instance.selectedSourceId.get()
+    source = instance.selectedSource.get()
     Modal.show 'deleteConfirmationModal',
       userEventId: instance.data.userEvent._id
       objNameToDelete: 'source'
@@ -113,14 +112,13 @@ Template.articles.events
     instance.$(event.currentTarget).tooltip('destroy')
 
   'click .edit-source': (event, instance) ->
-    source = Articles.findOne instance.selectedSourceId.get()
+    source = instance.selectedSource.get()
     source.edit = true
     Modal.show 'sourceModal', source
     instance.$(event.currentTarget).tooltip('destroy')
 
   'click .show-document-text-modal': (event, instance) ->
-    selectedId = instance.selectedSourceId.get()
-    article = Articles.findOne(selectedId)
+    article = instance.selectedSource.get()
     Modal.show 'documentTextModal',
       title: article.title
       text: article.enhancements.source.cleanContent.content
