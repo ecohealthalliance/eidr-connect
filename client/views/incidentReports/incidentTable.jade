@@ -18,7 +18,8 @@ template(name="incidentTable")
     +addToEvent(
       selectedIncidents=selectedIncidents
       tableContentScrollable=tableContentScrollable
-      source=source)
+      source=source
+      objNameToAssociate="Incident")
   if incidents.length
     .curator-source-details--table-wrapper
       table.table.incident-table(

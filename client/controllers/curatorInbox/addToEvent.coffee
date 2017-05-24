@@ -1,6 +1,7 @@
 UserEvents = require '/imports/collections/userEvents.coffee'
 Articles = require '/imports/collections/articles.coffee'
 { notify } = require '/imports/ui/notification'
+{ pluralize } = require '/imports/ui/helpers'
 
 Template.addToEvent.onCreated ->
   @subscribe('userEvents')
@@ -24,15 +25,19 @@ Template.addToEvent.onRendered ->
       placeholder: 'Search for an Event...'
       minimumInputLength: 0
 
-    $(document).on 'click', '.add-new-event', (event) ->
+    $(document).on 'click', ".add-new-event-#{instanceData.objNameToAssociate}", (event) ->
       event.stopPropagation()
       eventName = $('.select2-search__field').val()
-      $select2.select2('close')
+      objNameToAssociate = instanceData.objNameToAssociate
+      selectedIncidentsCount = instanceData.selectedIncidents?.count()
+      if objNameToAssociate is 'Incident' and selectedIncidentsCount
+        objNameToAssociate = pluralize(objNameToAssociate, selectedIncidentsCount, false)
       Modal.show 'createEventModal',
-        associationMessage: " & Associate #{instanceData.objNameToAssociate}"
+        associationMessage: " & Associate #{objNameToAssociate}"
         eventName: eventName
         incidents: instanceData.selectedIncidents
         source: instanceData.source
+      $select2.select2('close')
 
 Template.addToEvent.helpers
   selectingEvent: ->
@@ -82,7 +87,10 @@ Template.addToEvent.events
       $('.select2-results').append(
         """
           <div class='select2-results__additional-options'>
-            <button class='btn btn-default add-new-event'>Add New Event</a>
+            <button
+              class='btn btn-default add-new-event-#{instance.data.objNameToAssociate}'>
+              Add New Event
+            </button>
           </div>
         """
       )
@@ -91,4 +99,4 @@ Template.addToEvent.events
     instance.tableContentScrollable?.set(true)
 
 Template.addToEvent.onDestroyed ->
-  $(document).off('click', '.add-new-event')
+  $(document).off('click', ".add-new-event-#{@data.objNameToAssociate}")
