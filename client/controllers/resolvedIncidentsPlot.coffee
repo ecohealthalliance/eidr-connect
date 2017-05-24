@@ -1,4 +1,6 @@
 import Highcharts from 'highcharts'
+import 'rickshaw/rickshaw.css'
+import Rickshaw from 'rickshaw'
 import solverExport from 'javascript-lp-solver'
 import convertAllIncidentsToDifferentials from '/imports/incidentResolution/convertAllIncidentsToDifferentials.coffee'
 import {
@@ -9,20 +11,22 @@ import LocationTree from '/imports/incidentResolution/LocationTree.coffee'
 
 Template.resolvedIncidentsPlot.onCreated ->
   @incidents = @data.incidents
-  @incidentType = new ReactiveVar("deaths")
+  @incidentType = new ReactiveVar("cases")
+  @legend = new ReactiveVar([])
 
 Template.resolvedIncidentsPlot.onRendered ->
   @autorun =>
+    @hoveredIntervalClickEvent = null
     allIncidents = @incidents.fetch()
     incidentType = @incidentType.get()
     allIncidents = allIncidents.filter (i)->
       i.locations.every (l)-> l.featureCode
     differentials = convertAllIncidentsToDifferentials(allIncidents)
-    deathDifferentials = _.where(differentials, type: incidentType)
-    subIntervals = differentailIncidentsToSubIntervals(deathDifferentials)
+    differentials = _.where(differentials, type: incidentType)
+    subIntervals = differentailIncidentsToSubIntervals(differentials)
     subIntervals.forEach (s)->
       s.value = 0
-    model = subIntervalsToLP(deathDifferentials, subIntervals)
+    model = subIntervalsToLP(differentials, subIntervals)
     solution = solver.Solve(solver.ReformatLP(model))
     for key, value of solution
       if key.startsWith("s")
@@ -30,7 +34,7 @@ Template.resolvedIncidentsPlot.onRendered ->
         subInterval = subIntervals[parseInt(subId)]
         subInterval.value = value
     for subInterval in subIntervals
-      subInterval.incidents = subInterval.incidentIds.map (id)-> deathDifferentials[id]
+      subInterval.incidents = subInterval.incidentIds.map (id)-> differentials[id]
     locationTree = LocationTree.from(subIntervals.map (x)->x.location)
     topLocations = locationTree.children.map (x)->x.value
     locToSubintervals = {}
@@ -41,76 +45,89 @@ Template.resolvedIncidentsPlot.onRendered ->
         loc = subInterval.location
         if LocationTree.locationContains(topLocation, loc)
           locToSubintervals[topLocation.id].push(subInterval)
-    Highcharts.chart(@$('.chart')[0], {
-      chart:
-        type: 'area'
-        zoomType: 'x'
-        panning: true
-        panKey: 'shift'
-      title:
-        text: null
-      credits: false
-      xAxis:
-        type: 'datetime'
-        dateTimeLabelFormats:
-          day: '%b %e'
-          week: '%b %e'
-          month: '%b \'%y'
-          year: '%Y'
-        title:
-          text: 'Date'
-      yAxis:
-        title:
-          text: 'Number Per Day'
-        min: 0
-      tooltip:
-        shared: true
-        headerFormat: '<b>{series.name}</b><br>'
-        pointFormat: '{point.x:%Y-%m-%d}: {point.y:.2f}'
-      series: _.map locToSubintervals, (locSubIntervals, key)->
+    @$('.chart').html('''<div class="y-axis"></div>
+      <div class="graph"></div>
+      <div class="slider"></div>
+      <div class="legend"></div>''')
+    palette = new Rickshaw.Color.Palette(
+      scheme: 'colorwheel'
+      interpolatedStopCount: topLocations.length
+    )
+    pairedLocs = _.pairs(locToSubintervals)
+    @legend.set(pairedLocs.map ([key], sIdx)->
+      name: locationTree.getLocationById(key).name
+      color: palette.color(sIdx)
+    )
+    graph = new Rickshaw.Graph({
+      element: @$('.graph')[0]
+      renderer: 'multi'
+      stack: false
+      interpolation: 'linear'
+      dotSize: 5
+      strokeWidth: 1
+      series: pairedLocs.map ([key, locSubIntervals], sIdx)->
         location = locationTree.getLocationById(key)
         groupedLocSubIntervals = _.groupBy(locSubIntervals, 'start')
         maxSubintervals = []
         for group, subIntervalGroup of groupedLocSubIntervals
           maxSubintervals.push(_.max(subIntervalGroup, (x)-> x.value))
         maxSubintervals = _.sortBy(maxSubintervals, (x)-> x.start)
-
-        findNearestPointBy: 'xy'
-        name: location.name
-        cursor: 'pointer'
-        point:
-          events:
-            click: (e)->
-              concurrentIntervals = groupedLocSubIntervals[@interval.start] or []
-              Modal.show('intervalDetailsModal',
-                interval: @interval
-                concurrentIntervals: concurrentIntervals
-                incidents: @interval.incidentIds.map (id)->
-                  deathDifferentials[id]
-              )
-        data: _.chain(_.zip(maxSubintervals, maxSubintervals.slice(1)))
-          .map(([i, iNext])->
-            rate = i.value / ((i.end - i.start) / 1000 / 60 / 60 / 24)
-            result = [
-              {x: i.start, y: rate, interval: i}
-              {x: i.end, y: rate, interval: i}
-            ]
-            if iNext and i.end != iNext.start
-              result.push [i.end, 0]
-              result.push [iNext.start, 0]
-            result
-          )
-          .reduce((sofar, cur)->
-            prev = sofar.slice(0)[1]
-            if prev and prev[0] == cur[0]
-              cur[0] += 10
-              sofar.concat([cur])
-            else
-              sofar.concat([cur])
-          , [])
-          .flatten(true)
-          .value()
+        return {
+          name: location.name
+          color: palette.color(sIdx)
+          renderer: 'line'
+          data: _.chain(_.zip(maxSubintervals, maxSubintervals.slice(1)))
+            .map(([subInt, iNext])->
+              onClick = ->
+                concurrentIntervals = groupedLocSubIntervals[subInt.start] or []
+                Modal.show('intervalDetailsModal',
+                  interval: subInt
+                  concurrentIntervals: concurrentIntervals
+                  incidents: subInt.incidentIds.map (id)->
+                    differentials[id]
+                )
+              rate = subInt.value / ((subInt.end - subInt.start) / 1000 / 60 / 60 / 24)
+              result = [
+                {x: subInt.start / 1000, y: rate, onClick: onClick}
+                {x: subInt.end / 1000, y: rate, onClick: onClick}
+              ]
+              if iNext and subInt.end != iNext.start
+                result.push {x: subInt.end / 1000, y:0}
+                result.push {x: iNext.start / 1000, y:0}
+              result
+            )
+            .flatten(true)
+            .reduce((sofar, cur)->
+              prev = sofar.slice(0)[1]
+              if prev and prev.x == cur.x
+                cur.x += 1
+                sofar.concat([cur])
+              else
+                sofar.concat([cur])
+            , [])
+            .value()
+        }
     })
+    slider = new Rickshaw.Graph.RangeSlider.Preview(
+      graph: graph
+      element: @$('.slider')[0]
+    )
+    detail = new Rickshaw.Graph.HoverDetail(
+      graph: graph
+    )
+    new Rickshaw.Graph.Axis.Time(
+      graph: graph
+    )
+    new Rickshaw.Graph.Axis.Y(
+      graph: graph
+    )
+    new Rickshaw.Graph.HoverDetail(
+      graph: graph
+      formatter: (series, x, y, formattedX, formattedY, obj)=>
+        @hoveredIntervalClickEvent = obj.value.onClick
+        "#{series.name}: #{y.toFixed(2)} cases per day"
+    )
+    graph.render()
 
 Template.resolvedIncidentsPlot.helpers
   deathsActive: ->
@@ -121,9 +138,16 @@ Template.resolvedIncidentsPlot.helpers
     if Template.instance().incidentType.get() == "cases"
       "active"
 
+  labels: ->
+    Template.instance().legend.get()
+
 Template.resolvedIncidentsPlot.events
   "click .incident-type-selector .cases": (e, instance)->
     instance.incidentType.set("cases")
 
   "click .incident-type-selector .deaths": (e, instance)->
     instance.incidentType.set("deaths")
+
+  "click .rickshaw_graph": (e, instance)->
+    if instance.hoveredIntervalClickEvent
+      instance.hoveredIntervalClickEvent(e, instance)
