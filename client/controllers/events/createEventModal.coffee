@@ -30,7 +30,9 @@ Template.createEventModal.events
       summary: summary
       displayOnPromed: event.target.promed.checked
     , (error, result) ->
-      unless error
+      if error
+        notify('error', error.reason)
+      else
         modal = instance.$('#create-event-modal')
         if incidents?.length
           incidentIds = _.pluck(incidents, 'id')

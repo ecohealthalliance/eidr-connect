@@ -149,6 +149,7 @@ Template.curatorSourceDetails.events
 
   'click .add-incident': (event, instance) ->
     Modal.show 'incidentModal',
-      articles: [instance.source.get()]
+      incident:
+        articleId: instance.source.get()._id
       add: true
       accept: true

@@ -5,6 +5,7 @@ validator = require 'bootstrap-validator'
 
 Template.incidentModal.onCreated ->
   @valid = new ReactiveVar(false)
+  @submitting = new ReactiveVar(false)
   @modals =
     currentModal: element: '.incident-report'
     previousModal:
@@ -35,11 +36,15 @@ Template.incidentModal.helpers
       classNames += 'fade'
     classNames
 
+  submitting: ->
+    Template.instance().submitting.get()
+
 Template.incidentModal.events
   'click .save-incident, click .save-incident-duplicate': (event, instance) ->
     # Submit the form to trigger validation and to update the 'valid'
     # reactiveVar — its value is based on whether the form's hidden submit
     # button's default is prevented
+    instance.submitting.set(true)
     $('#add-incident').submit()
     return unless instance.valid.get()
     duplicate = $(event.target).hasClass('save-modal-duplicate')
@@ -76,6 +81,7 @@ Template.incidentModal.events
           if error.details[0].name is 'locations' and error.details[0].type is 'minCount'
             errorString = 'You must specify at least one loction'
           notify('error', errorString)
+        instance.submitting.set(false)
 
     if @edit
       incident = _.extend({}, @incident, incident)
@@ -87,3 +93,4 @@ Template.incidentModal.events
           Modal.hide('incidentModal')
         else
           notify('error', error.reason)
+        instance.submitting.set(false)

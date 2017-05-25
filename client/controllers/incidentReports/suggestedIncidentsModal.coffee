@@ -208,7 +208,6 @@ Template.suggestedIncidentsModal.events
   'click #non-suggested-incident': (event, instance) ->
     sendModalOffStage(instance)
     Modal.show 'incidentModal',
-      articles: [instance.data.article]
       userEventId: instance.data.userEventId
       add: true
       incident:
