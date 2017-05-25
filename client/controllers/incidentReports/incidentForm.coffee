@@ -136,7 +136,8 @@ Template.incidentForm.helpers
   incidentSnippet: ->
     incident = @incident
     if incident?.annotations
-      articleContent = Articles.findOne(incident.articleId)?.enhancements?.source?.cleanContent.content
+      article = Articles.findOne(@articleId)
+      articleContent = article?.enhancements?.source.cleanContent.content
       if articleContent
         Spacebars.SafeString(getIncidentSnippet(articleContent, incident))
 
