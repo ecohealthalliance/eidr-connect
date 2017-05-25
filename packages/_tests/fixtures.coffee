@@ -30,20 +30,45 @@ if Meteor.isAppTest
         Meteor.call 'createTestingAdmin'
         console.log "created admin"
         userEvent = Meteor.call 'upsertUserEvent',
-                    eventName: 'Test Event 1',
-                    summary: 'Test summary'
-        article = Meteor.call 'addEventSource',
-                    title: 'Test Article',
-                    url: 'http://promedmail.org/post/418162'
-                    publishDate: new Date()
-                    publishDateTZ: 'EST',
-                    userEvent.insertedId,
-                    (error, article) ->
-                      console.log "article", error, article
-        incident = Meteor.call 'addIncidentReport',
-                    species: 'Test Species',
-                    cases: 1,
-                    dateRange: {}
+          eventName: 'Test Event 1',
+          summary: 'Test summary'
+          (error, userEvent) ->
+            console.log 'UserEvent created', userEvent
+            Meteor.call 'addEventSource',
+              title: 'Test Article',
+              url: 'http://promedmail.org/post/418162'
+              publishDate: new Date()
+              publishDateTZ: 'EST',
+              (error, articleId) ->
+                console.log 'Article created', articleId
+                Meteor.call 'addIncidentReport',
+                  articleId: articleId
+                  species: 'Test Species'
+                  cases: 1
+                  locations: [
+                    id: '5165418'
+                    name: 'Ohio'
+                    admin1Name: 'Ohio'
+                    admin2Name: null
+                    latitude: 40.25034
+                    longitude: -83.00018
+                    countryName: 'United States'
+                    population: 11467123
+                    featureClass: 'A'
+                    featureCode: 'ADM1'
+                    alternateNames: [
+                      '\'Ohaio'
+                      'Buckeye State'
+                    ]
+                  ]
+                  dateRange:
+                    start: new Date()
+                    end: new Date()
+                    cumulative: false
+                    type: 'day'
+                  (error, incidentId) ->
+                    console.log 'Incident created', incidentId
+                    Meteor.call 'addIncidentToEvent', userEvent.insertedId, incidentId
 
       catch error
         console.log "error loading data", error
