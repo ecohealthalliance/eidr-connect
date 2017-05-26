@@ -80,10 +80,9 @@ Template.suggestedIncidentModal.events
         $set:
           accepted: false
     else
-      Meteor.call 'updateIncidentReport', {
-        _id: instance.incident._id
-        accepted: false
-      }, (error, result) =>
+      incident = isntance.incident
+      incident.accepted = false
+      Meteor.call 'editIncidentReport', instance, (error, result) =>
         if error
           toastr.error "Error: " + error
     stageModals(instance, instance.modals)

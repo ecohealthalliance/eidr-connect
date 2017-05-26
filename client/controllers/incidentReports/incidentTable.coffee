@@ -172,9 +172,9 @@ Template.incidentTable.events
       accept = false
     selectedIncidents = instance.selectedIncidents
     selectedIncidents.find(instance.acceptedQuery()).forEach (incident) ->
-      incident = _id: incident.id
+      incident = incident
       incident.accepted = accept
-      Meteor.call 'updateIncidentReport', incident, (error, result) ->
+      Meteor.call 'editIncidentReport', incident, (error, result) ->
         if error
           notify('error', 'There was a problem updating your incidents.')
           return
