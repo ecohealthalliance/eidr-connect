@@ -8,4 +8,6 @@ template(name="resolvedIncidentsPlot")
     .chart
     .legend
       each labels
-        label(style="background-color:{{color}};")=name
+        label
+          span=name
+          i.fa.fa-circle(style="color:{{color}};")

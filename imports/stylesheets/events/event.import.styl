@@ -293,16 +293,21 @@ $max-event-details-width = $max-ui-width+300
       font-size .9em
 
 .chart
-  margin 0 5%
+  margin 0 5% 1em 5%
 
 .legend
-  display block
-  text-align center
+  display flex
+  align-items center
+  justify-content center
+  flex-wrap wrap
   label
-    color white
-    margin 15px
-    margin-bottom 0
-    padding 4px
+    display flex
+    align-items center
+    flex-direction row-reverse
+    margin 15px 15px 0 15px
+    i
+      font-size 2em
+      margin-right .25em
 
 .incident-type-selector
   margin-bottom 1em
