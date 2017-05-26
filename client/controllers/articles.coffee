@@ -14,8 +14,8 @@ Template.articles.onRendered ->
       @incidentsLoaded.set(false)
       @subscribe 'articleIncidents', sourceId, =>
         @incidentsLoaded.set(true)
-      Meteor.defer =>
-        @$('[data-toggle=tooltip]').tooltip delay: show: '300'
+        Meteor.defer =>
+          @$('[data-toggle=tooltip]').tooltip delay: show: '300'
 
 Template.articles.helpers
   getSettings: ->
@@ -64,7 +64,7 @@ Template.articles.helpers
     Template.instance().selectedSource.get()
 
   incidentsForSource: (source) ->
-    Incidents.find(articleId: source._id)
+    Incidents.find(articleId: Template.instance().selectedSource.get()._id)
 
   locationsForSource: (source) ->
     locations = {}
@@ -89,6 +89,10 @@ Template.articles.helpers
     eventIncidentIds = _.pluck(Template.instance().data.userEvent.incidents, 'id')
     @_id in eventIncidentIds
 
+  eventHasArticleIncidents: ->
+    eventIncidentIds = _.pluck(Template.instance().data.userEvent.incidents, 'id')
+    Incidents.find(_id: $in: eventIncidentIds).count()
+
 Template.articles.events
   'click #event-sources-table tbody tr
     , keyup #event-sources-table tbody tr': (event, instance) ->
@@ -102,10 +106,11 @@ Template.articles.events
   'click .open-source-form': (event, instance) ->
     Modal.show 'sourceModal', userEventId: instance.data.userEvent._id
 
-  'click .delete-source': (event, instance) ->
+  'click .delete-source:not(.disabled)': (event, instance) ->
     source = instance.selectedSource.get()
     Modal.show 'deleteConfirmationModal',
       userEventId: instance.data.userEvent._id
+      source: source
       objNameToDelete: 'source'
       objId: source._id
       displayName: source.title

@@ -30,9 +30,10 @@ template(name="articles")
                 span
                   i.fa.fa-edit(aria-hidden="true")
               li.delete-source.link(
+                  class="{{#if eventHasArticleIncidents}}disabled{{/if}}"
                   data-toggle="tooltip"
                   data-placement="bottom"
-                  title="Remove from Event")
+                  data-original-title="{{#if eventHasArticleIncidents}}This article has implied association through its incidents and cannot be removed {{else}} Remove from Event{{/if}}")
                 span
                   i.fa.fa-trash(aria-hidden="true")
             li.link

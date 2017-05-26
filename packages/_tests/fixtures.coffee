@@ -10,6 +10,41 @@ if Meteor.isAppTest
 
   syncExec = Meteor.wrapAsync(exec)
 
+  testEvent =
+    eventName: 'Test Event 1'
+    summary: 'Test summary'
+
+  testSource =
+    title: 'Test Article',
+    url: 'http://promedmail.org/post/418162'
+    publishDate: new Date()
+    publishDateTZ: 'EST'
+
+  testIncident =
+    species: 'Test Species'
+    cases: 375
+    locations: [
+      id: '5165418'
+      name: 'Ohio'
+      admin1Name: 'Ohio'
+      admin2Name: null
+      latitude: 40.25034
+      longitude: -83.00018
+      countryName: 'United States'
+      population: 11467123
+      featureClass: 'A'
+      featureCode: 'ADM1'
+      alternateNames: [
+        '\'Ohaio'
+        'Buckeye State'
+      ]
+    ]
+    dateRange:
+      start: new Date()
+      end: new Date()
+      cumulative: false
+      type: 'day'
+
   Meteor.methods
     ###
     # load the database from a dump file
@@ -29,46 +64,16 @@ if Meteor.isAppTest
         # Loading test data into database
         Meteor.call 'createTestingAdmin'
         console.log "created admin"
-        userEvent = Meteor.call 'upsertUserEvent',
-          eventName: 'Test Event 1',
-          summary: 'Test summary'
-          (error, userEvent) ->
-            console.log 'UserEvent created', userEvent
-            Meteor.call 'addEventSource',
-              title: 'Test Article',
-              url: 'http://promedmail.org/post/418162'
-              publishDate: new Date()
-              publishDateTZ: 'EST',
-              (error, articleId) ->
-                console.log 'Article created', articleId
-                Meteor.call 'addIncidentReport',
-                  articleId: articleId
-                  species: 'Test Species'
-                  cases: 1
-                  locations: [
-                    id: '5165418'
-                    name: 'Ohio'
-                    admin1Name: 'Ohio'
-                    admin2Name: null
-                    latitude: 40.25034
-                    longitude: -83.00018
-                    countryName: 'United States'
-                    population: 11467123
-                    featureClass: 'A'
-                    featureCode: 'ADM1'
-                    alternateNames: [
-                      '\'Ohaio'
-                      'Buckeye State'
-                    ]
-                  ]
-                  dateRange:
-                    start: new Date()
-                    end: new Date()
-                    cumulative: false
-                    type: 'day'
-                  (error, incidentId) ->
-                    console.log 'Incident created', incidentId
-                    Meteor.call 'addIncidentToEvent', userEvent.insertedId, incidentId
+        Meteor.call 'upsertUserEvent', testEvent, (error, { insertedId }) ->
+          eventId = insertedId
+          console.log 'UserEvent created', eventId
+          testSource.userEventIds = [eventId]
+          Meteor.call 'addEventSource', testSource, eventId, (error, articleId) ->
+            console.log 'Article created', articleId
+            testIncident.articleId = articleId
+            Meteor.call 'addIncidentReport', testIncident, (error, incidentId) ->
+              console.log 'Incident created', incidentId
+              Meteor.call 'addIncidentToEvent', eventId, incidentId
 
       catch error
         console.log "error loading data", error

@@ -1,4 +1,4 @@
-@eventMap @dev
+@eventMap
 Feature: Event Map
 
   Background:

@@ -6,7 +6,7 @@ Template.deleteConfirmationModalBody.events
     data = instance.data
     id = data.objId
     objNameToDelete = data.objNameToDelete
-    
+
     switch objNameToDelete
       when 'incident'
         Meteor.call 'removeIncident', id, (error) ->
@@ -14,7 +14,7 @@ Template.deleteConfirmationModalBody.events
           unless error
             $('.incident-report--details').closest('tr').fadeOut(-> @.remove())
       when 'source'
-        Meteor.call 'removeEventSource', id, data.userEventId, (error) ->
+        Meteor.call 'removeEventSource', data.source, data.userEventId, (error) ->
           commonPostDeletionTasks(error, objNameToDelete)
       when 'event'
         Meteor.call 'deleteUserEvent', id, (error, result) ->

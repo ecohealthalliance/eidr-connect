@@ -111,10 +111,10 @@ do ->
       @client.waitForVisible('.suggested-annotated-content')
 
     @Then 'I open the first incident', ->
-      if @client.isVisible('.incident-table-tab')
-        @client.click('.incident-table-tab')
-      @client.clickWhenVisible('.incident-report')
-      @client.waitForVisible('[name="count"]')
+      if client.isVisible('.incident-table-tab')
+        client.click('.incident-table-tab')
+      client.clickWhenVisible('.incident-report')
+      client.waitForVisible('[name="count"]')
 
     @Then 'I set the count to "$count"', (count)->
       @client.setValue('[name="count"]', count)
@@ -126,3 +126,10 @@ do ->
     @Then 'the first incident should have a count of "$count"', (count)->
       text = @client.getText('.incident-report')
       assert.ok(text[0].indexOf(count) > 0)
+
+    @Then 'I view details of the first incident', ->
+      @client.clickWhenVisible('#event-incidents-table tbody tr:first-child')
+
+    @Then 'I remove the first incident', ->
+      @client.clickWhenVisible('.delete')
+      @client.pause(3000)

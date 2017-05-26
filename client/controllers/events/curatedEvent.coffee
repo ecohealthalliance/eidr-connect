@@ -84,7 +84,7 @@ Template.curatedEvent.events
       add: true
 
   'click .open-source-form-in-details': (event, instance) ->
-    Modal.show('sourceModal', userEventId: instance.userEventId)
+    Modal.show('sourceModal', userEventId: instance.data.userEventId)
 
   'click .tabs li a': (event) ->
     event.currentTarget.blur()

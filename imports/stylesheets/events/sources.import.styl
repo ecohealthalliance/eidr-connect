@@ -57,6 +57,13 @@
               color darken($delete, 20%)
         &.edit-source
           padding-left .2em
+        &.disabled
+          cursor default
+          opacity .5
+          &:hover
+            background none
+            span
+              color darken($border-primary, 20%)
       &:not(.link)
         font-size .8em
       &:last-of-type
