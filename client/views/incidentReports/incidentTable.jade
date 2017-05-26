@@ -33,6 +33,7 @@ template(name="incidentTable")
               th.count-header Type
               th Dates
               th.locations-header Locations
+              th.associations Events
         tbody
           each incidents
             tr(class="{{#if selected}} selected {{/if}} {{#if annotationSelected}} selected-annotation {{/if}}"
@@ -44,6 +45,15 @@ template(name="incidentTable")
               td #{firstLocation}
                 if otherLocations
                   span.tooltipped(data-toggle="tooltip" title=otherLocations) other locations
+              if incidentEvents
+                with incidentEvents
+                  td.associations(
+                    title="This has associated events. Click to see them.")
+                    | #{incidentEvents.length}
+                    i.fa.fa-tags(
+                      aria-hidden="true")
+              else
+                td
               td.edit(title="Edit Incident")
   else
     +noResults message="No incidents found"

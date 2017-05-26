@@ -29,6 +29,7 @@ Router.onBeforeAction ->
   @next()
 
 Router.onAfterAction ->
+  Modal.hide()
   window.scroll 0, 0
 
 Router.route "/",
