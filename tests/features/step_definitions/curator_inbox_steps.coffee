@@ -45,7 +45,7 @@ do ->
       @client.click('.save-source')
 
     @Then /^I should see the content of the document$/, ->
-      @client.waitForExist('.selectable-content', 5000)
+      @client.waitForExist('.selectable-content')
 
     @Then /^I should see accepted or rejected incidents$/, ->
-      @client.waitForExist('.incident-table tbody tr', 5000)
+      @client.waitForExist('.incident-table tbody tr')

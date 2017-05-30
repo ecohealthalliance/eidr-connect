@@ -2,9 +2,6 @@ userEventSchema = new SimpleSchema
   _id:
     type: String
     optional: true
-  articleCount:
-    type: Number
-    optional: true
   createdByUserId:
     type: String
     optional: true
@@ -42,5 +39,14 @@ userEventSchema = new SimpleSchema
   displayOnPromed:
     type: Boolean
     optional: true
+  incidents:
+    type: [Object]
+    optional: true
+  'incidents.id':
+    type: String
+  'incidents.associationDate':
+    type: Date
+  'incidents.associationUserId':
+    type: String
 
 module.exports = userEventSchema

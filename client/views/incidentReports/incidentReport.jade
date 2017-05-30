@@ -67,7 +67,11 @@ template(name="incidentReport")
 
       if isInRole "admin"
         .incident-report--details--actions.container-flex.no-break
-          a.edit
-            i.fa.fa-edit(aria-hidden="true" title="Edit incident")
-          a.delete
-            i.fa.fa-trash(aria-hidden="true" title="Delete incident")
+          a.edit(
+            title="Edit Incident"
+            data-toggle="tooltip")
+            i.fa.fa-edit(aria-hidden="true")
+          a.delete(
+            title="Remove Incident from Event"
+            data-toggle="tooltip")
+            i.fa.fa-trash(aria-hidden="true")

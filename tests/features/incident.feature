@@ -11,6 +11,15 @@ Feature: Incident
     Then I should see a "success" notification
     And I should see a scatter plot group with count "100000001"
 
+  Scenario: Remove an incident report
+    When I navigate to "/events"
+    And I click the first item in the event list
+    Then I should see content "375"
+    And I view details of the first incident
+    Then I should see content "Test Species"
+    Then I remove the first incident
+    Then I should not see content "375"
+
   @ignore
   Scenario: Add suggested source and abandon changes
     When I navigate to "/events"

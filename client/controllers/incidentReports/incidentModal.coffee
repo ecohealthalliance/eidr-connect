@@ -54,7 +54,6 @@ Template.incidentModal.events
 
     if not incident
       return
-    incident.userEventId = instanceData.userEventId
 
     if instance.data.accept or @incident?.accepted
       incident.accepted = true
@@ -65,7 +64,7 @@ Template.incidentModal.events
       incident.annotations.case = [manualAnnotation]
 
     if @add
-      Meteor.call 'addIncidentReport', incident, (error, result) ->
+      Meteor.call 'addIncidentReport', incident, instanceData.userEventId, (error, result) ->
         if not error
           $('.reactive-table tr').removeClass('open')
           $('.reactive-table tr.tr-details').remove()

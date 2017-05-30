@@ -30,9 +30,10 @@ template(name="articles")
                 span
                   i.fa.fa-edit(aria-hidden="true")
               li.delete-source.link(
+                  class="{{#if eventHasArticleIncidents}}disabled{{/if}}"
                   data-toggle="tooltip"
                   data-placement="bottom"
-                  title="Remove from Event")
+                  data-original-title="{{#if eventHasArticleIncidents}}This article has implied association through its incidents and cannot be removed {{else}} Remove from Event{{/if}}")
                 span
                   i.fa.fa-trash(aria-hidden="true")
             li.link
@@ -49,20 +50,23 @@ template(name="articles")
             li Published on {{formatDate selectedSource.publishDate}}
             li Submitted by {{selectedSource.addedByUserName}} on {{formatDate selectedSource.addedDate}}
         .event-source-summary.container-flex
-          .event-source-summary--item
-            h5 Locations
-            ul.list-unstyled
-              each locationsForSource selectedSource
-                li= this
-              else
-                li No locations
-          .event-source-summary--item
-            h5 Incidents
-            ul.list-unstyled
-              each incidentsForSource selectedSource
-                li {{incidentToText this}}
-              else
-                li No cases
+          if incidentsLoaded
+            .event-source-summary--item
+              h5 Locations
+              ul.list-unstyled
+                each locationsForSource selectedSource
+                  li=this
+                else
+                  li No locations
+            .event-source-summary--item
+              h5 Incidents
+              ul.list-unstyled
+                  each incidentsForSource selectedSource
+                    li(class="{{#if incidentAssociatedWithEvent}} associated {{/if}}") {{incidentToText this}}
+                  else
+                    li No cases
+          else
+            +loading small=true
       else
         h4.make-selection Please select a document
 

@@ -57,6 +57,13 @@
               color darken($delete, 20%)
         &.edit-source
           padding-left .2em
+        &.disabled
+          cursor default
+          opacity .5
+          &:hover
+            background none
+            span
+              color darken($border-primary, 20%)
       &:not(.link)
         font-size .8em
       &:last-of-type
@@ -87,6 +94,8 @@
       color darken($border-primary, 40%)
 
   .event-source-summary
+    position relative
+    min-height 100px
     ul
       margin 0
       padding 0
@@ -94,6 +103,9 @@
       color lighten($body-text, 30%)
       li
         padding 0 0 1em 0
+        &.associated
+          font-weight bold
+
   .event-source-summary--item
     border-right 1px solid $border-primary-light
     padding 1.5em 1.25em

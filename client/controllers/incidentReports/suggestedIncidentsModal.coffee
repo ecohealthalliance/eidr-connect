@@ -69,7 +69,7 @@ Template.suggestedIncidentsModal.onCreated ->
 
   if @saveResults
     @autorun =>
-      @subscribe 'ArticleIncidentReports', @data.article._id
+      @subscribe 'articleIncidents', @data.article._id
   else
     @incidentsCollection = new Meteor.Collection(null)
 
@@ -194,7 +194,7 @@ Template.suggestedIncidentsModal.events
     if count <= 0
       notify('warning', 'No incidents have been confirmed')
       return
-    Meteor.call 'addIncidentReports', incidents, (err, result)->
+    Meteor.call 'addIncidentReports', incidents, instance.data.article._id, (err, result)->
       if err
         toastr.error err.reason
       else

@@ -95,21 +95,9 @@ Router.route "/curator-inbox",
 
 Router.route "/events/curated-events/:_id/:_view?",
   name: 'curated-event'
-  title: ->
-    @data().userEvent.eventName
-  waitOn: ->
-    [
-      Meteor.subscribe "userEvent", @params._id
-      Meteor.subscribe "eventArticles", @params._id
-      Meteor.subscribe "eventIncidents", @params._id
-    ]
   data: ->
-    userEvent: UserEvents.findOne({'_id': @params._id})
-    articles: Articles.find
-      userEventIds: @params._id
-      url: $ne: ''
-      {sort: {publishDate: -1}}
-    incidents: Incidents.find({'userEventId': @params._id}, {sort: {date: -1}})
+    view: @params._view
+    userEventId: @params._id
 
 Router.route "/events/smart-events/:_id/:_view?",
   name: 'smart-event'
