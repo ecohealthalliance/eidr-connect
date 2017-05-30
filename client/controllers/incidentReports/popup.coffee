@@ -11,6 +11,8 @@ Template.popup.onCreated ->
   @data.showPopup.set(true)
   @popupPosition = new ReactiveVar(null)
   @nearBottom = new ReactiveVar(false)
+  @allowRepositioning = @data.allowRepositioning
+  @allowRepositioning ?= true
 
   range = @selection.getRangeAt(0)
   {top, bottom, left, width} = range.getBoundingClientRect()
@@ -39,11 +41,14 @@ Template.popup.onRendered ->
 
   @autorun =>
     if @data.scrolled.get()
-      @popupPosition.set
-        width: '100%'
-        top: "#{$('.curator-source-details--actions').outerHeight()}px"
-        left: "auto"
-        bottom: 'auto'
+      if @allowRepositioning
+        @popupPosition.set
+          width: '100%'
+          top: "#{$('.curator-source-details--actions').outerHeight()}px"
+          left: "auto"
+          bottom: 'auto'
+      else
+        @data.showPopup.set(false)
 
 Template.popup.helpers
   position: ->

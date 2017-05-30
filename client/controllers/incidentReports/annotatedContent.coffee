@@ -69,6 +69,7 @@ Template.annotatedContent.events
           showPopup: instance.showPopup
           popupDelay: POPUP_DELAY
           selectedIncidents: instance.data.selectedIncidents
+          allowRepositioning: false
           view: 'annotationOptions'
 
         Blaze.renderWithData(
