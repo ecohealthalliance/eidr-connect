@@ -74,6 +74,12 @@ Stop the meteor test application
 npm run-script stop-test-server
 ```
 
+## Running unit tests
+
+```
+meteor test --driver-package practicalmeteor:mocha
+```
+
 ## License
 
 Copyright 2016 EcoHealth Alliance

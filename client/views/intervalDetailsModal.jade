@@ -1,0 +1,32 @@
+template(name="intervalDetailsModal")
+  .modal.modal-skinny.fade(role="dialog")
+    .modal-dialog
+      .modal-content
+        .modal-header
+          .modal-header--title Interval Details
+          +modalCloseButton
+          
+        .modal-body
+          div 
+            p Start: {{formatDate interval.start}}
+            p End: {{formatDate interval.end}}
+            p Total: {{interval.value}}
+          hr
+          h3 Components
+          each concurrentIntervals
+            .incident.panel.panel-default
+              .panel-body
+                p Location: {{formatLocation location}}
+                p Count: #{value}
+                h4 Source Incidents
+                ul
+                  each incidents
+                    li
+                      if cumulative
+                        | Difference between cumulative counts: #{count}
+                        ul
+                          each incident in originalIncidents
+                            li {{incidentToText incident}}
+                      else
+                        each incident in originalIncidents
+                          | {{incidentToText incident}}
