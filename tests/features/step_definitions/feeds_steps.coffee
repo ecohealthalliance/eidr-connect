@@ -10,7 +10,7 @@ do ->
 
     @Then /^I add the feed "([^"]*)"$/, (feed) ->
       @client.setValue('input[name=feedUrl]', feed)
-      @client.submitForm('.add-feed')
+      @client.click('.add-feed .btn-primary')
 
     @Then /^I delete the feed$/, ->
       @client.moveToObject('.feeds--list:first-child')
