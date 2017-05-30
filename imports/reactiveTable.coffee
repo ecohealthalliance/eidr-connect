@@ -46,9 +46,12 @@ module.exports =
         isVisible: options.fieldVisibility[fieldName].get()
         sortOrder: options.sortOrder[fieldName].get()
         sortDirection: options.sortDirection[fieldName].get()
+        sortable: field.sortable
 
       if field.displayFn
         tableField.fn = field.displayFn
+      if field.sortFn
+        tableField.sortFn = field.sortFn
       _fields.push(tableField)
     _fields
 

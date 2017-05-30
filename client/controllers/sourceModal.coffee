@@ -208,7 +208,7 @@ Template.sourceModal.events
       else
         if enhance and instance.suggest
           notify('success', 'Source successfully added')
-          instance.subscribe 'ArticleIncidentReports', articleId
+          instance.subscribe 'articleIncidents', articleId
           Modal.show 'suggestedIncidentsModal',
             userEventId: userEventId
             article: Articles.findOne(articleId)

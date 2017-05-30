@@ -1,26 +1,35 @@
 template(name="curatedEvent")
-  .event
-    section.event--basic-info.container-fluid-padded
-      if deleted
-        h2
-          | This event has been deleted
-      else
-        with userEvent
-          +summary
+  if loaded
+    .event
+      section.event--basic-info.container-fluid-padded
+        if deleted
+          h2
+            | This event has been deleted
+        else
+          with userEvent
+            +summary(
+              event=this
+              incidentCount=incidents.count
+              documentCount=documentCount)
 
-    section.event--detailed-info
-      if incidents.count
-        .tabs-wrapper
-          ul.tabs.primary-tabs.container-fluid-padded(role="tablist")
-            li(class="{{#if incidentView}}active{{/if}}" role="presentation")
-              a(href="{{pathFor route='curated-event' _id=userEvent._id _view='incidents'}}") Incident Reports
-            li(class="{{#if locationView}}active{{/if}}" role="presentation")
-              a(href="{{pathFor route='curated-event' _id=userEvent._id _view='locations'}}") Locations
+      section.event--detailed-info
+        if incidents.count
+          .tabs-wrapper
+            ul.tabs.primary-tabs.container-fluid-padded(role="tablist")
+              li(class="{{#if incidentView}}active{{/if}}" role="presentation")
+                a(href="{{pathFor route='curated-event' _id=userEvent._id _view='incidents'}}") Incident Reports
+              li(class="{{#if locationView}}active{{/if}}" role="presentation")
+                a(href="{{pathFor route='curated-event' _id=userEvent._id _view='locations'}}") Locations
 
-        .tab-content
-          .tab-pane.active(role="tabpanel")
-            +Template.dynamic template=view data=templateData
+          .tab-content
+            .tab-pane.active(role="tabpanel")
+              +Template.dynamic template=view data=templateData
 
-    if articles.count
-      section.event--articles
-        +articles
+      +resolvedIncidentsPlot incidents=incidents
+
+
+      if eventHasArticles
+        section.event--articles
+          +articles articleData
+  else
+    +loading

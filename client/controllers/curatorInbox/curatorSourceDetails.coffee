@@ -70,7 +70,7 @@ Template.curatorSourceDetails.onRendered ->
           $title.tooltip('hide').attr('data-original-title', '')
         else
           $title.attr('data-original-title', title)
-      @subscribe 'ArticleIncidentReports', source._id
+      @subscribe 'articleIncidents', source._id
       if source.enhancements?.dateOfDiagnosis
         instance.incidentsLoaded.set(true)
       else
