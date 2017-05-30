@@ -4,12 +4,14 @@ import { createIncidentReportsFromEnhancements } from '/imports/utils.coffee'
 POPUP_DELAY = 200
 POPUP_PADDING = 5
 POPUP_PADDING_TOP = 20
-POPUP_WINDOW_PADDING = 50
+POPUP_WINDOW_PADDING = 100
 
 Template.popup.onCreated ->
   @selection = window.getSelection()
-  @data.selecting.set(true)
+  @data.showPopup.set(true)
   @popupPosition = new ReactiveVar(null)
+  @nearBottom = new ReactiveVar(false)
+
   range = @selection.getRangeAt(0)
   {top, bottom, left, width} = range.getBoundingClientRect()
   selectionHeight = bottom - top
@@ -19,11 +21,11 @@ Template.popup.onCreated ->
   if (bottom + POPUP_WINDOW_PADDING) > window.innerHeight
     topPosition = 'auto'
     bottomPosition = "#{window.innerHeight - top + POPUP_PADDING_TOP}px"
+    @nearBottom.set(true)
   @popupPosition.set
     top: topPosition
     bottom: bottomPosition
     left:  "#{Math.floor(left + width / 2)}px"
-
 
 Template.popup.onRendered ->
   Meteor.setTimeout =>
@@ -31,7 +33,7 @@ Template.popup.onRendered ->
   , @data.popupDelay or POPUP_DELAY
 
   @autorun =>
-    if not @data.selecting.get()
+    if not @data.showPopup.get()
       @$('.popup').remove()
       @data.scrolled.set(false)
 
@@ -50,10 +52,5 @@ Template.popup.helpers
   scrolled: ->
     Template.instance().data.scrolled.get()
 
-  annotatedText: ->
-    instance = Template.instance()
-    selection = instance.selection
-    range = selection.getRangeAt(0)
-    textOffsets = [range.startOffset, range.endOffset]
-    content = selection.anchorNode.textContent
-    content.slice(textOffsets[0], textOffsets[1])
+  nearBottom: ->
+    Template.instance().nearBottom.get()

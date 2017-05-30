@@ -1,23 +1,23 @@
 template(name="markerPopup")
-  .popup
-    .popup--title
+  .map-popup
+    .map-popup--title
       h4= name
     ul.list-unstyled
       each locationEvents
         li
-          .popup--event.container-flex.vertically-centered
-            svg.popup--event--marker-color-spot
+          .map-popup--event.container-flex.vertically-centered
+            svg.map-popup--event--marker-color-spot
               circle(fill="rgb(#{rgbColor})" r="8" cx="8" cy="8")
-            .popup--event--content
+            .map-popup--event--content
               a(href="{{pathFor 'curated-event' _id=_id}}")=eventName
               if mostRecentIncident
-                .popup--incidents-text
+                .map-popup--incidents-text
                   span.popup--incidents-text--label Most Recent Incident:
                   div {{incidentToText mostRecentIncident}}
 
 template(name="markerPopupMinimal")
-  .popup
-    .popup--title
+  .map-popup
+    .map-popup--title
       h4= location
-    .popup--content
+    .map-popup--content
       p Added on {{ formatDate addedDate }}

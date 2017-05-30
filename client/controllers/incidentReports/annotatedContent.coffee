@@ -5,11 +5,8 @@ import Incidents from '/imports/collections/incidentReports.coffee'
 
 POPUP_DELAY = 100
 
-_setSelectingState = (instance, state) ->
-  instance.selecting.set(state)
-
 Template.annotatedContent.onCreated ->
-  @selecting = new ReactiveVar(false)
+  @showPopup = new ReactiveVar(false)
   @scrolled = new ReactiveVar(false)
 
 Template.annotatedContent.onRendered ->
@@ -17,7 +14,7 @@ Template.annotatedContent.onRendered ->
     # Allow event to propagate to 'add-incident-from-selection' button before
     # element is removed from DOM
     setTimeout =>
-      _setSelectingState(@, false)
+      @showPopup.set(false)
     , POPUP_DELAY
   $(@data.relatedElements.sourceContainer).on 'scroll', _.throttle (event) =>
     unless @scrolled.get()
@@ -44,7 +41,7 @@ Template.annotatedContent.events
       data =
         source: instance.data.source
         scrolled: instance.scrolled
-        selecting: instance.selecting
+        showPopup: instance.showPopup
         popupDelay: POPUP_DELAY
         view: 'newIncidentFromSelection'
       Blaze.renderWithData(
@@ -54,18 +51,6 @@ Template.annotatedContent.events
         $("#{instance.data.relatedElements.sibling}")[0]
       )
     else
-      data =
-        source: instance.data.source
-        scrolled: instance.scrolled
-        selecting: instance.selecting
-        popupDelay: POPUP_DELAY
-        view: ''
-      Blaze.renderWithData(
-        Template.popup,
-        data,
-        $("#{instance.data.relatedElements.parent}")[0]
-        $("#{instance.data.relatedElements.sibling}")[0]
-      )
       $currentTarget = $(event.currentTarget)
       # Temporarily 'shuffle' the text layers so selectable-content is on
       # bottom and annotated-content is on top
@@ -77,6 +62,19 @@ Template.annotatedContent.events
         # Set reactive variable that's handed down from curatorSourceDetails and
         # shared with the incidentTable templates to the clicked annotation's ID
         instance.data.selectedAnnotationId.set(annotationId)
+        data =
+          source: instance.data.source
+          scrolled: instance.scrolled
+          showPopup: instance.showPopup
+          popupDelay: POPUP_DELAY
+          view: 'annotationOptions'
+
+        Blaze.renderWithData(
+          Template.popup,
+          data,
+          $("#{instance.data.relatedElements.parent}")[0]
+          $("#{instance.data.relatedElements.sibling}")[0]
+        )
       else if elementAtPoint.classList.contains('uncertain')
         source = instance.data.source
         incident = Incidents.findOne(annotationId)
