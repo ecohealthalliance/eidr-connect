@@ -7,24 +7,40 @@ autoprocessArticles = ->
   else
     busyProcessing = true
   count = 0
-  Articles.find({
+  batch = Articles.find({
     enhancements: $exists: false
   }, {
     limit: 20
     sort:
       addedDate: -1
-  }).forEach (article) ->
+  }).fetch()
+  forEachAsync = (list, func, done)->
+    if list.length > 0
+      func(list[0], (error)->
+        if error
+          done()
+        else
+          forEachAsync(list.slice(1), func, done)
+      )
+    else
+      done()
+  forEachAsync(batch, (article, next) ->
     count++
-    try
-      Meteor.call('getArticleEnhancementsAndUpdate', article, {
-        hideLogs: true
-        priority: false
-      })
-    catch e
-      console.log article
-      console.log e
-  console.log "processed #{count} articles"
-  busyProcessing = false
+    Meteor.call('getArticleEnhancementsAndUpdate', article, {
+      hideLogs: true
+      priority: false
+    }, (error)->
+      if error
+        console.log article
+        console.log error
+        next(error)
+      else
+        next()
+    )
+  , ->
+    console.log "processed #{count} articles"
+    busyProcessing = false
+  )
 
 Meteor.startup ->
   if not Meteor.isAppTest
