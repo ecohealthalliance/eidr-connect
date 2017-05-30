@@ -85,18 +85,19 @@ Template.mapFilters.events
     $(e.target).val("")
     setVariables instance, 'on', []
 
-  'click .map-event-list--item': (e, instance) ->
+  'click .map-event-list--item': (event, instance) ->
     selectedEvents = instance.data.selectedEvents
     _id = @_id
     if selectedEvents.findOne(_id: _id)
       selectedEvents.remove(_id: _id)
     else
-      event = _.find(instance.data.templateEvents.get(), (e) -> e._id == _id)
+      userEvent = _.find(instance.data.templateEvents.get(), (e) -> e._id == _id)
       selectedEvents.insert
         _id: _id
         rgbColor: @rgbColor
-        eventName: event.eventName
+        eventName: userEvent.eventName
         selected: true
+        incidents: userEvent.incidents
 
   'click .toggle-calendar-state': (e, instance) ->
     calendarState = instance.calendarState

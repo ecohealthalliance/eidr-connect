@@ -11,6 +11,15 @@ Feature: Incident
     Then I should see a "success" notification
     And I should see a scatter plot group with count "100000001"
 
+  Scenario: Remove an incident report
+    When I navigate to "/events"
+    And I click the first item in the event list
+    Then I should see content "375"
+    And I view details of the first incident
+    Then I should see content "Test Species"
+    Then I remove the first incident
+    Then I should not see content "375"
+
   @ignore
   Scenario: Add suggested source and abandon changes
     When I navigate to "/events"
@@ -26,3 +35,11 @@ Feature: Incident
     And I add the first suggested event document
     And I add the first suggested incident
     Then I can "confirm" suggestions
+
+  Scenario: Extract incidents on extract incidents page
+    When I navigate to "/extract-incidents"
+    And I extract incidents from the url "http://www.promedmail.org/post/2579682"
+    And I open the first incident
+    And I set the count to "500"
+    And I accept the incident
+    Then the first incident should have a count of "500"

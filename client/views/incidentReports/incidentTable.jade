@@ -1,6 +1,5 @@
 template(name="incidentTable")
   .curator-source-details--sub-header
-    h3(class=tableType)=tableType
     .curator-source-details--actions.container-flex.no-break
       button.btn.btn-sm.action(
         disabled="{{#unless incidentsSelected}} true {{/unless}}"
@@ -19,7 +18,8 @@ template(name="incidentTable")
     +addToEvent(
       selectedIncidents=selectedIncidents
       tableContentScrollable=tableContentScrollable
-      source=source)
+      source=source
+      objNameToAssociate="Incident")
   if incidents.length
     .curator-source-details--table-wrapper
       table.table.incident-table(

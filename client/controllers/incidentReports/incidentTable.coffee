@@ -109,7 +109,7 @@ Template.incidentTable.helpers
 
   action: ->
     if Template.instance().accepted
-      'Reject'
+      'Delete'
     else
       'Accept'
 
@@ -158,7 +158,6 @@ Template.incidentTable.events
     source = instance.data.source
     snippetHtml = buildAnnotatedIncidentSnippet(source.enhancements.source.cleanContent.content, @, false)
     Modal.show 'suggestedIncidentModal',
-      edit: true
       articles: [source]
       userEventId: null
       incident: @

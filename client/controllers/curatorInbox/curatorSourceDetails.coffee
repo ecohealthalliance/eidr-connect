@@ -70,7 +70,7 @@ Template.curatorSourceDetails.onRendered ->
           $title.tooltip('hide').attr('data-original-title', '')
         else
           $title.attr('data-original-title', title)
-      @subscribe 'ArticleIncidentReports', source._id
+      @subscribe 'articleIncidents', source._id
       if source.enhancements?.dateOfDiagnosis
         instance.incidentsLoaded.set(true)
       else
@@ -124,7 +124,7 @@ Template.curatorSourceDetails.helpers
   selectedAnnotationId: ->
     Template.instance().selectedAnnotationId
 
-  hasTextContent: ->
+  textContent: ->
     Template.instance().source.get().enhancements.source?.cleanContent?.content
 
 Template.curatorSourceDetails.events
@@ -149,6 +149,7 @@ Template.curatorSourceDetails.events
 
   'click .add-incident': (event, instance) ->
     Modal.show 'incidentModal',
-      articles: [instance.source.get()]
+      incident:
+        articleId: instance.source.get()._id
       add: true
       accept: true

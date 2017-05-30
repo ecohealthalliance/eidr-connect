@@ -41,10 +41,10 @@ Template.eventMap.onRendered ->
     @query.get()
     @pageNum.set(0)
 
-  @autorun ->
-    query = instance.query.get()
-    currentPage = instance.pageNum.get()
-    eventsPerPage = instance.eventsPerPage
+  @autorun =>
+    query = @query.get()
+    currentPage = @pageNum.get()
+    eventsPerPage = @eventsPerPage
 
     if _.isObject query
       allEvents = UserEvents
@@ -57,7 +57,7 @@ Template.eventMap.onRendered ->
       map.removeLayer instance.mapMarkers
       return
 
-    filteredMapLocations = instance.filteredMapLocations = {}
+    filteredMapLocations = @filteredMapLocations = {}
     templateEvents = []
     eventIndex = startingPosition
 
@@ -73,37 +73,44 @@ Template.eventMap.onRendered ->
             eventName: event.eventName
             lastIncidentDate: event.lastIncidentDate
             rgbColor: rgbColor
+            incidents: event.incidents
           eventIndex += 1
-    instance.templateEvents.set templateEvents
-    instance.disableNext.set if eventIndex < allEvents?.length then false else true
-    instance.disablePrev.set if currentPage is 0 then true else false
-    instance.subscribe('mapIncidents', _.pluck(templateEvents, '_id'))
+    @templateEvents.set templateEvents
+    @disableNext.set if eventIndex < allEvents?.length then false else true
+    @disablePrev.set if currentPage is 0 then true else false
+
+    incidentIds = []
+    templateEvents.forEach (event) ->
+      incidentIds = _.union(incidentIds, _.pluck(event.incidents, 'id'))
+    @subscribe('mapIncidents', incidentIds)
 
   # Update the map markers to reflect user selection of events
-  @autorun ->
+  @autorun =>
     mapLocations = {}
-    templateEvents = instance.templateEvents.get()
-    Incidents.find(
-      userEventId: $in: instance.selectedEvents.find().map (e)-> e._id
-    ).map (incident)->
-      for location in incident.locations
-        latLng = location.latitude + "," + location.longitude
-        if not mapLocations[latLng]
-          mapLocations[latLng] =
-            name: location.name
-            incidents: []
-            events: []
-        mapLocations[latLng].events = _.union(
-          mapLocations[latLng].events, [incident.userEventId])
-        mapLocations[latLng].incidents = _.union(
-          mapLocations[latLng].incidents, [incident])
+    templateEvents = @templateEvents.get()
+    selectedEvents = @selectedEvents.find()
+    selectedEvents.forEach (selectedEvent) ->
+      eventIncidentIds = _.pluck(selectedEvent.incidents, 'id')
+      Incidents.find(_id: $in: eventIncidentIds).map (incident) =>
+        for location in incident.locations
+          incident.userEventId = selectedEvent._id
+          latLng = location.latitude + "," + location.longitude
+          if not mapLocations[latLng]
+            mapLocations[latLng] =
+              name: location.name
+              incidents: []
+              events: []
+          mapLocations[latLng].events = _.union(
+            mapLocations[latLng].events, [selectedEvent._id])
+          mapLocations[latLng].incidents = _.union(
+            mapLocations[latLng].incidents, [incident])
 
-    map.removeLayer(instance.mapMarkers)
-    markers = instance.mapMarkers = new L.FeatureGroup()
+    map.removeLayer(@mapMarkers)
+    markers = @mapMarkers = new L.FeatureGroup()
     for coordinates, location of mapLocations
       locationEvents = templateEvents.filter (e)->
         e._id in location.events
-      popupHtml = Blaze.toHTMLWithData(Template.markerPopup, {
+      popupHtml = Blaze.toHTMLWithData Template.markerPopup,
         name: location.name
         locationEvents: locationEvents.map (event)->
           eventCopy = _.clone(event)
@@ -112,7 +119,7 @@ Template.eventMap.onRendered ->
             .sortBy (i)-> i.dateRange.start
             .value()[0]
           eventCopy
-      })
+
       marker = L.marker(coordinates.split(","),
         icon: L.divIcon
           className: 'map-marker-container'
@@ -121,6 +128,7 @@ Template.eventMap.onRendered ->
       ).bindPopup(popupHtml, closeButton: false)
       markers.addLayer(marker)
     map.addLayer(markers)
+
     if _.isEmpty(mapLocations)
       map.setView([10, -0], 3)
     else

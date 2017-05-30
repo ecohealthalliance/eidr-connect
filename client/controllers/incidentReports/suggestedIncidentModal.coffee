@@ -24,16 +24,16 @@ Template.suggestedIncidentModal.onCreated ->
       element: '#suggestedIncidentsModal'
       add: 'fade'
 
-  @editIncident = (incident) =>
+  @editIncident = (incident, userEventId) =>
     method = 'addIncidentReport'
     action = 'added'
-    if @data.edit
+    if @incident._id
       method = 'editIncidentReport'
       action = 'updated'
 
     incident.annotations = @data.incident?.annotations
     incident = _.pick(incident, incidentReportSchema.objectKeys())
-    Meteor.call method, incident, (error, result) =>
+    Meteor.call method, incident, userEventId, (error, result) =>
       if error
         return notify('error', error)
       notify('success', "Incident #{action}.")
@@ -60,7 +60,7 @@ Template.suggestedIncidentModal.helpers
   saveButtonText: ->
     buttonText = 'Confirm'
     instanceData = Template.instance().data
-    if instanceData.edit
+    if instanceData.incident._id
       buttonText = 'Save'
       unless instanceData.incident.accepted
         buttonText += ' & Accept'
@@ -74,6 +74,18 @@ Template.suggestedIncidentModal.events
       stageModals(instance, instance.modals)
 
   'click .reject': (event, instance) ->
+    instanceData = instance.data
+    if instanceData.incidentCollection
+      instanceData.incidentCollection.update instance.incident._id,
+        $set:
+          accepted: false
+    else
+      Meteor.call 'updateIncidentReport', {
+        _id: instance.incident._id
+        accepted: false
+      }, (error, result) =>
+        if error
+          toastr.error "Error: " + error
     stageModals(instance, instance.modals)
 
   'click .cancel': (event, instance) ->
@@ -90,7 +102,18 @@ Template.suggestedIncidentModal.events
 
     return if not incident
     incident.suggestedFields = instance.incident.suggestedFields.get()
-    incident.userEventId = instanceData.userEventId
     incident.accepted = true
     incident = _.extend({}, instanceData.incident, incident)
-    instance.editIncident(incident)
+    if instanceData.incidentCollection
+      delete incident._id
+      instanceData.incidentCollection.update instance.incident._id,
+        $unset:
+          cases: true
+          deaths: true
+          specify: true
+        $set: incident
+      notify('success', 'Incident Accepted', 1200)
+      stageModals(instance, instance.modals)
+    else
+      incident = _.extend({}, instance.data.incident, incident)
+      instance.editIncident(incident, instanceData.userEventId)

@@ -32,10 +32,6 @@ Template.incidentForm.onCreated ->
     dateRange:
       type: 'day'
 
-  article = instanceData.articles[0]
-  if article
-    @incidentData.articleId = article._id
-
   if incident
     @incidentData = _.extend(@incidentData, incident)
     if incident.dateRange
@@ -121,16 +117,12 @@ Template.incidentForm.helpers
   typeIsNotSelected: ->
     not Template.instance().incidentType.get()
 
-  articleSourceUrl: ->
-    Template.instance().data.articles[0]?.url
-
   diseaseOptionsFn: -> diseaseOptionsFn
 
   documentUrl: ->
-    Articles.findOne(Template.instance().data.incident?.articleId)?.url
-
-  allowUrlInput: ->
-    not @edit and not @articleId
+    incident = Template.instance().data.incident
+    if incident
+      return Articles.findOne(incident.articleId)?.url
 
   incidentTypeClassNames: ->
     classNames = []
@@ -143,8 +135,9 @@ Template.incidentForm.helpers
 
   incidentSnippet: ->
     incident = @incident
-    if incident
-      articleContent = Articles.findOne(incident.articleId)?.enhancements?.source?.cleanContent.content
+    if incident?.annotations
+      article = Articles.findOne(@articleId)
+      articleContent = article?.enhancements?.source.cleanContent.content
       if articleContent
         Spacebars.SafeString(getIncidentSnippet(articleContent, incident))
 

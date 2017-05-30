@@ -6,9 +6,12 @@ UserEventSchema = require '/imports/schemas/userEvent.coffee'
 Meteor.methods
   upsertUserEvent: (userEvent) ->
     if not Roles.userIsInRole(@userId, ['admin'])
-      throw new Meteor.Error("auth", "Admin level permissions are required for this action.")
+      throw new Meteor.Error('auth', 'Admin level permissions are required for this action.')
     user = Meteor.user()
     now = new Date()
+    eventName = userEvent.eventName
+    if UserEvents.findOne(eventName: eventName)
+      throw new Meteor.Error('duplicate_entry', "#{eventName} already exists.")
     userEvent = _.extend userEvent,
       lastModifiedDate: now
       lastModifiedByUserId: user._id
@@ -21,7 +24,6 @@ Meteor.methods
         creationDate: now
         createdByUserId: user._id
         createdByUserName: user.profile.name
-        articleCount: 0
 
   deleteUserEvent: (id) ->
     if Roles.userIsInRole(Meteor.userId(), ['admin'])
@@ -44,22 +46,12 @@ Meteor.methods
           lastModifiedByUserId: user._id,
           lastModifiedByUserName: user.profile.name
 
-  updateUserEventArticleCount: (id) ->
-    event = UserEvents.findOne(id)
-    articleCount = Articles.find(userEventIds: id).count()
-    UserEvents.update(id,
-      $set:
-        articleCount: articleCount
-    )
-
   editUserEventLastIncidentDate: (id) ->
-    event = UserEvents.findOne(id)
-    latestEventIncident = Incidents.findOne({
-      userEventId: event._id
+    incidentIds = _.pluck(UserEvents.findOne(id).incidents, 'id')
+    latestEventIncident = Incidents.findOne
+      _id: $in: incidentIds
       deleted: $in: [null, false]
-    }, {
-      sort: 'dateRange.end': -1
-    })
+      {sort: 'dateRange.end': -1}
     if latestEventIncident
       UserEvents.update id,
         $set:
