@@ -63,10 +63,12 @@ Template.annotatedContent.events
         # shared with the incidentTable templates to the clicked annotation's ID
         instance.data.selectedAnnotationId.set(annotationId)
         data =
+          incidentId: annotationId
           source: instance.data.source
           scrolled: instance.scrolled
           showPopup: instance.showPopup
           popupDelay: POPUP_DELAY
+          selectedIncidents: instance.data.selectedIncidents
           view: 'annotationOptions'
 
         Blaze.renderWithData(

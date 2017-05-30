@@ -1,3 +1,5 @@
+{ notify } = require '/imports/ui/notification'
+
 module.exports =
   commonPostDeletionTasks: (error, objNameToDelete, modalName=null) ->
     if error
@@ -7,4 +9,4 @@ module.exports =
     $(modalId).modal('hide')
     $('body').removeClass('modal-open')
     $('.modal-backdrop').remove()
-    toastr.success("The #{objNameToDelete} has been deleted.")
+    notify('success', "The #{objNameToDelete} has been deleted.")
