@@ -64,28 +64,29 @@ Meteor.methods
       Meteor.call('editUserEventLastModified', userEventId)
       Meteor.call('editUserEventLastIncidentDate', userEventId)
 
-  removeIncidentFromEvent: (id) ->
+  removeIncidentFromEvent: (incidentId, userEventId) ->
     checkPermission(@userId)
-    incidents = UserEvents.findOne('incidents.id': id).incidents
-
-    _incidents = _.filter incidents, (incident) ->
-      incident.id != id
-
-    UserEvents.update 'incidents.id': id,
-      $set: incidents: _incidents
+    event = UserEvents.findOne(userEventId)
+    if event
+      _incidents = _.filter event.incidents, (incident) ->
+        incident.id != incidentId
+      UserEvents.update 'incidents.id': incidentId,
+        $set: incidents: _incidents
+      Meteor.call('editUserEventLastModified', userEventId)
+      Meteor.call('editUserEventLastIncidentDate', userEventId)
 
   addIncidentToEvent: (userEventId, incidentId) ->
-    userId = Meteor.user()._id
-    checkPermission(userId)
+    checkPermission(@userId)
     eventWithIncident = UserEvents.findOne
       _id: userEventId
       'incidents.id': incidentId
-    unless eventWithIncident
+    if not eventWithIncident
       UserEvents.update userEventId,
-        $addToSet: incidents:
-          id: incidentId
-          associationDate: new Date()
-          associationUserId: userId
+        $push:
+          incidents:
+            id: incidentId
+            associationDate: new Date()
+            associationUserId: @userId
       Meteor.call('editUserEventLastModified', userEventId)
       Meteor.call('editUserEventLastIncidentDate', userEventId)
 
