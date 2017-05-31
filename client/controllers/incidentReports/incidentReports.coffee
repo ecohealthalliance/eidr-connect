@@ -227,7 +227,7 @@ Template.incidentReports.events
     Modal.show 'incidentModal', incident
 
   'click .reactive-table tbody tr .delete': (event, instance) ->
-    Meteor.call 'removeIncidentFromEvent', @_id, (error, res) =>
+    Meteor.call 'removeIncidentFromEvent', @_id, instance.data.userEvent._id, (error, res) =>
       if error
         notify('error', error.reason)
         return

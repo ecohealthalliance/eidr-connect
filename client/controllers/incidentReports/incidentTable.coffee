@@ -142,6 +142,9 @@ Template.incidentTable.helpers
     if otherLocations?.length
       formatLocations(otherLocations)
 
+  incidentEvents: ->
+    if @_id
+      UserEvents.find('incidents.id': @_id).fetch()
 Template.incidentTable.events
   'click .incident-table tbody tr': (event, instance) ->
     event.stopPropagation()
@@ -164,6 +167,11 @@ Template.incidentTable.events
       incidentText: Spacebars.SafeString(snippetHtml)
       offCanvasStartPosition: 'top'
       showBackdrop: true
+
+  'click table.incident-table tr td.associations': (event, instance) ->
+    event.stopPropagation()
+    Modal.show 'associatedEventModal',
+      incidentId: @_id
 
   'click .action': (event, instance) ->
     accepted = instance.accepted

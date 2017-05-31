@@ -18,7 +18,7 @@ do ->
       @browser.waitForVisible('#at-field-email')
       @client.setValue('#at-field-email', 'chimp@testing1234.com')
       @client.setValue('#at-field-password', 'Pa55w0rd!')
-      @client.submitForm('#at-pwd-form')
+      @client.click('#at-pwd-form .submit')
       @client.waitForExist('#logOut')
 
     @When /^I open the settings dropdown$/, (relativePath) ->
