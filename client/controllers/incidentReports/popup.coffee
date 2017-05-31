@@ -1,6 +1,3 @@
-import { buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
-import { createIncidentReportsFromEnhancements } from '/imports/utils.coffee'
-
 POPUP_DELAY = 150
 POPUP_PADDING = 5
 POPUP_PADDING_TOP = 20
@@ -32,7 +29,12 @@ Template.popup.onCreated ->
   $('body').on 'mousedown', (event) =>
     # Allow event to propagate to 'add-incident-from-selection' button before
     # element is removed from DOM
-    @showPopup.set(false)
+    delay = 0
+    if event.target.parentElement.nodeName in ['BUTTON', 'LI', 'UL']
+      delay = POPUP_DELAY
+    Meteor.setTimeout =>
+      @showPopup.set(false)
+    , delay
 
   $(@data.relatedElements.sourceContainer).on 'scroll', _.throttle (event) =>
     unless @data.scrolled.get()

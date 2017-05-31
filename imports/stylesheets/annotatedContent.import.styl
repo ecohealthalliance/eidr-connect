@@ -58,6 +58,12 @@
       transform-origin center
       color $secondary
       transition .05s
+    &:active
+      transform scale(.9)
     &.delete
       &:hover
         color $danger
+    &.select
+      &.selected
+      &:hover
+        color $highlight

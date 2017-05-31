@@ -1,7 +1,5 @@
 import Incidents from '/imports/collections/incidentReports.coffee'
-import {
-  annotateContentWithIncidents,
-  buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
+import { buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
 
 Template.annotationOptions.onCreated ->
   data = @data
