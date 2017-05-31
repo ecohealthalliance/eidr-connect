@@ -1,14 +1,14 @@
 import { buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
 import { createIncidentReportsFromEnhancements } from '/imports/utils.coffee'
 
-POPUP_DELAY = 200
+POPUP_DELAY = 150
 POPUP_PADDING = 5
 POPUP_PADDING_TOP = 20
 POPUP_WINDOW_PADDING = 100
 
 Template.popup.onCreated ->
   @selection = window.getSelection()
-  @data.showPopup.set(true)
+  @showPopup = new ReactiveVar(true)
   @popupPosition = new ReactiveVar(null)
   @nearBottom = new ReactiveVar(false)
   @allowRepositioning = @data.allowRepositioning
@@ -29,13 +29,24 @@ Template.popup.onCreated ->
     bottom: bottomPosition
     left:  "#{Math.floor(left + width / 2)}px"
 
+  $('body').on 'mousedown', (event) =>
+    # Allow event to propagate to 'add-incident-from-selection' button before
+    # element is removed from DOM
+    @showPopup.set(false)
+
+  $(@data.relatedElements.sourceContainer).on 'scroll', _.throttle (event) =>
+    unless @data.scrolled.get()
+      @data.scrolled.set(true)
+  , 100
+
+
 Template.popup.onRendered ->
   Meteor.setTimeout =>
     @$('.popup').addClass('active')
-  , @data.popupDelay or POPUP_DELAY
+  , POPUP_DELAY
 
   @autorun =>
-    if not @data.showPopup.get()
+    if not @showPopup.get()
       @$('.popup').remove()
       @data.scrolled.set(false)
 
@@ -48,7 +59,7 @@ Template.popup.onRendered ->
           left: "auto"
           bottom: 'auto'
       else
-        @data.showPopup.set(false)
+        @showPopup.set(false)
 
 Template.popup.helpers
   position: ->
@@ -59,3 +70,6 @@ Template.popup.helpers
 
   nearBottom: ->
     Template.instance().nearBottom.get()
+
+Template.popup.onDestroyed ->
+  $('body').off('mousedown')
