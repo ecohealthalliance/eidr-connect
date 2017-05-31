@@ -31,8 +31,7 @@ Template.suggestedIncidentModal.onCreated ->
       method = 'editIncidentReport'
       action = 'updated'
 
-    incident.annotations = @data.incident?.annotations
-    incident = _.pick(incident, incidentReportSchema.objectKeys())
+    # incident.annotations = @data.incident?.annotations
     Meteor.call method, incident, userEventId, (error, result) =>
       if error
         return notify('error', error)
@@ -80,7 +79,7 @@ Template.suggestedIncidentModal.events
         $set:
           accepted: false
     else
-      incident = isntance.incident
+      incident = instance.incident
       incident.accepted = false
       Meteor.call 'editIncidentReport', instance, (error, result) =>
         if error
@@ -100,10 +99,11 @@ Template.suggestedIncidentModal.events
     incident = utils.incidentReportFormToIncident(instance.$("form")[0])
 
     return if not incident
-    incident.suggestedFields = instance.incident.suggestedFields.get()
     incident.accepted = true
-    incident = _.extend({}, instanceData.incident, incident)
+    incident._id = instanceData.incident._id
     if instanceData.incidentCollection
+      incident = _.extend({}, instanceData.incident, incident)
+      incident.suggestedFields = instance.incident.suggestedFields.get()
       delete incident._id
       instanceData.incidentCollection.update instance.incident._id,
         $unset:
@@ -114,5 +114,4 @@ Template.suggestedIncidentModal.events
       notify('success', 'Incident Accepted', 1200)
       stageModals(instance, instance.modals)
     else
-      incident = _.extend({}, instance.data.incident, incident)
       instance.editIncident(incident, instanceData.userEventId)

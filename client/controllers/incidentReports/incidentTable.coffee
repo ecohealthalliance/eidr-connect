@@ -158,10 +158,10 @@ Template.incidentTable.events
     source = instance.data.source
     snippetHtml = buildAnnotatedIncidentSnippet(source.enhancements.source.cleanContent.content, @, false)
     Modal.show 'suggestedIncidentModal',
-      articles: [source]
-      userEventId: null
       incident: @
       incidentText: Spacebars.SafeString(snippetHtml)
+      articleId: source._id
+      userEventId: null
       offCanvasStartPosition: 'top'
       showBackdrop: true
 
