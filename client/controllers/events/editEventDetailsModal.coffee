@@ -38,7 +38,7 @@ Template.editEventDetailsModal.events
     summary = event.target.eventSummary.value.trim()
     if name.length isnt 0
       Meteor.call 'upsertUserEvent',
-        _id: @_id
+        _id: @event._id
         eventName: name
         summary: summary
         displayOnPromed: event.target.promed.checked

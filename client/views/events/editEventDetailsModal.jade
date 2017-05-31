@@ -15,11 +15,11 @@ template(name="editEventDetailsModal")
             unless confirmingDeletion
               .form-group
                 label Event Name
-                input.form-control(type='text' name='eventName' value=eventName required)
+                input.form-control(type='text' name='eventName' value=event.eventName required)
                 .help-block.with-errors
               .form-group
                 label Event Summary
-                textarea.form-control(name="eventSummary" rows="15")= summary
+                textarea.form-control(name="eventSummary" rows="15")= event.summary
               .container-flex.check-buttons.type.no-break
                 .check-button
                   input(
@@ -32,8 +32,8 @@ template(name="editEventDetailsModal")
                   label(for="promed" tabindex="0") Display this event on promedmail.org?
             else
               +deleteConfirmationModalBody(
-                objId=_id
-                displayName=eventName
+                objId=event._id
+                displayName=event.eventName
                 objNameToDelete='event'
                 allowEdit=true)
 
