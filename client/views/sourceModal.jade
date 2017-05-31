@@ -92,11 +92,16 @@ template(name="sourceModal")
                             option(value=name selected=selected) #{name} (GMT#{offset})
             if unspecifiedPublishDate
               .form-group.add-publish-date
-                label.control-label
-                  i.fa.fa-plus-circle
-                  | Publication Date
+                if showEnhanceOption
+                  label.control-label
+                    | Publication Date
+                else
+                  button.btn.btn-primary
+                    i.fa.fa-plus-circle
+                    span Publication Date
             if showEnhanceOption
               .form-group.no-margin
+                i.fa.fa-times-circle.close-date-specification
                 .container-flex.check-buttons.options.no-break
                   .check-button
                     input(

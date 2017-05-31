@@ -81,7 +81,7 @@ Template.sourceModal.onCreated ->
 Template.sourceModal.onCreated ->
   @formValid = new ReactiveVar(false)
   @suggestedFields = new ReactiveVar([])
-  @unspecifiedPublishDate = new ReactiveVar(true)
+  @unspecifiedPublishDate = new ReactiveVar(not @data._id?)
 
 Template.sourceModal.onRendered ->
   publishDate = @timezoneFixedPublishDate
@@ -204,13 +204,14 @@ Template.sourceModal.events
     if source._id
       Meteor.call 'updateEventSource', source, (error, result) ->
         if error
-          toastr.error error.reason
+          notify('error', error.reason)
         else
+          notify('success', 'Source successfully updated')
           stageModals(instance, instance.modals)
     else
       Meteor.call 'addEventSource', source, instance.data.userEventId, (error, articleId) ->
         if error
-          toastr.error error.reason
+          notify('error', error.reason)
         else
           notify('success', 'Source successfully added')
           stageModals(instance, instance.modals)
@@ -261,5 +262,5 @@ Template.sourceModal.events
   'click .tabs li a': (event, instance) ->
     instance.articleOrigin.set($(event.currentTarget).attr('href').slice(1))
 
-  'click .add-publish-date': (event, instance)->
+  'click .add-publish-date button': (event, instance)->
     instance.unspecifiedPublishDate.set(false)
