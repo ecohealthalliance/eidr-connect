@@ -1,5 +1,5 @@
 SmartEvents = require '/imports/collections/smartEvents.coffee'
-import { formatLocation } from '/imports/ui/helpers'
+import { formatLocation } from '/imports/utils'
 
 Template.smartEventSummary.onCreated ->
   @copied = new ReactiveVar(false)

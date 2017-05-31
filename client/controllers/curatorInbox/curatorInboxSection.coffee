@@ -1,6 +1,5 @@
-Articles = require '/imports/collections/articles.coffee'
-import { keyboardSelect } from '/imports/utils'
-import { pluralize } from '/imports/ui/helpers'
+import Articles from '/imports/collections/articles.coffee'
+import { keyboardSelect, pluralize } from '/imports/utils'
 
 uniteReactiveTableFilters = (filters) ->
   reactiveFilters = []
@@ -30,6 +29,8 @@ Template.curatorInboxSection.onCreated ->
       description: 'The document\'s title.'
       label: 'Title'
       sortDirection: -1
+      fn: (value, object)->
+        object.title or object.url
     },
     {
       key: 'expand'

@@ -1,8 +1,10 @@
 UserEvents = require '/imports/collections/userEvents.coffee'
 Incidents = require '/imports/collections/incidentReports.coffee'
-import { buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
 { notify } = require '/imports/ui/notification'
-{ formatLocation, formatLocations } = require '/imports/ui/helpers'
+import { buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
+import {
+  formatLocation,
+  formatLocations } from '/imports/utils'
 SCROLL_WAIT_TIME = 350
 
 _updateAllIncidentsStatus = (instance, select, event) ->

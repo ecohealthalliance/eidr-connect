@@ -1,5 +1,4 @@
-import { formatLocation } from '/imports/ui/helpers'
-{ keyboardSelect } = require '/imports/utils'
+import { formatLocation, keyboardSelect } from '/imports/utils'
 
 Template.locationList.helpers
   incidentLocations: ->

@@ -1,5 +1,5 @@
 Articles = require '/imports/collections/articles.coffee'
-import { pluralize } from '/imports/ui/helpers'
+import { pluralize } from '/imports/utils'
 import { getIncidentSnippet } from '/imports/ui/snippets'
 
 Template.incidentReport.onCreated ->

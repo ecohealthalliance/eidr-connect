@@ -26,6 +26,7 @@ _checkForPublishDate = (url, instance) ->
     articleId = match[1]
     Meteor.call 'retrieveProMedArticle', articleId, (error, article) ->
       if article
+        instance.unspecifiedPublishDate.set(false)
         date = moment.utc(article.promedDate)
         # Aproximate DST for New York timezone
         daylightSavings = moment.utc("#{date.year()}-03-08") <= date
@@ -80,6 +81,7 @@ Template.sourceModal.onCreated ->
 Template.sourceModal.onCreated ->
   @formValid = new ReactiveVar(false)
   @suggestedFields = new ReactiveVar([])
+  @unspecifiedPublishDate = new ReactiveVar(true)
 
 Template.sourceModal.onRendered ->
   publishDate = @timezoneFixedPublishDate
@@ -117,12 +119,6 @@ Template.sourceModal.helpers
       else if tzKey is defaultTimezone
         timezones[timezones.length-1].selected = true
     timezones
-
-  saveButtonClass: ->
-    if @edit
-      'save-source-edit'
-    else
-      'save-source'
 
   title: ->
     article = Template.instance().selectedArticle.get()
@@ -172,83 +168,57 @@ Template.sourceModal.helpers
   showContent: ->
     not @url and @content
 
+  unspecifiedPublishDate: ->
+    Template.instance().unspecifiedPublishDate.get()
+
 Template.sourceModal.events
   'click .save-source': (event, instance) ->
     return unless _checkFormValidity(instance)
     form = instance.$('form')[0]
-    article = form.article.value
-    userEventId = instance.data.userEventId
-    validURL = form.article.checkValidity()
-    timePicker = instance.$('#publishTime').data('DateTimePicker')
-    date = instance.datePicker.startDate
-    time = timePicker.date()
-
-    source =
-      userEventIds: [userEventId]
-      url: cleanUrl(article)
-      content: form.content.value
-      publishDateTZ: form.publishDateTZ.value
-      title: form.title.value
-
-    if date
-      selectedDate = moment
-        year: date.year()
-        month: date.month()
-        date: date.date()
-      if form.publishTime.value.length
-        selectedDate.set({hour: time.get('hour'), minute: time.get('minute')})
-        selectedDate = convertDate(selectedDate,
-                                    UTCOffsets[source.publishDateTZ], 'local')
-      source.publishDate = selectedDate.toDate()
-
-    enhance = form.enhance?.checked
-    Meteor.call 'addEventSource', source, userEventId, (error, articleId) ->
-      if error
-        toastr.error error.reason
-      else
-        if enhance and instance.suggest
-          notify('success', 'Source successfully added')
-          instance.subscribe 'articleIncidents', articleId
-          Modal.show 'suggestedIncidentsModal',
-            userEventId: userEventId
-            article: Articles.findOne(articleId)
-          stageModals(instance, instance.modals)
+    source = {}
+    if @_id
+      source._id = @_id
+    if form.article.value
+      source.url = cleanUrl(form.article.value)
+    if form.content.value
+      source.content = form.content.value
+    if form.title.value
+      source.title = form.title.value
+    if not instance.unspecifiedPublishDate.get()
+      timePicker = instance.$('#publishTime').data('DateTimePicker')
+      date = instance.datePicker.startDate
+      time = timePicker.date()
+      source.publishDateTZ = form.publishDateTZ.value
+      if date
+        selectedDate = moment
+          year: date.year()
+          month: date.month()
+          date: date.date()
+        if form.publishTime.value.length
+          selectedDate.set
+            hour: time.get('hour')
+            minute: time.get('minute')
+          selectedDate = convertDate(selectedDate,
+                                      UTCOffsets[source.publishDateTZ], 'local')
+        source.publishDate = selectedDate.toDate()
+    if source._id
+      Meteor.call 'updateEventSource', source, (error, result) ->
+        if error
+          toastr.error error.reason
         else
+          stageModals(instance, instance.modals)
+    else
+      Meteor.call 'addEventSource', source, instance.data.userEventId, (error, articleId) ->
+        if error
+          toastr.error error.reason
+        else
+          notify('success', 'Source successfully added')
+          stageModals(instance, instance.modals)
           instance.data.selectedSourceId?.set(articleId)
-          Modal.hide(instance)
-
-  'click .save-source-edit': (event, instance) ->
-    return unless _checkFormValidity(instance)
-    form = instance.$('form')[0]
-    timePicker = instance.$('#publishTime').data('DateTimePicker')
-    date = instance.datePicker.startDate
-    time = timePicker.date()
-
-    source = @
-    source.publishDateTZ = form.publishDateTZ.value
-    source.title = form.title.value
-
-    if date
-      selectedDate = moment
-        year: date.year()
-        month: date.month()
-        date: date.date()
-      if form.publishTime.value.length
-        selectedDate.set
-          hour: time.get('hour')
-          minute: time.get('minute')
-        selectedDate = convertDate(selectedDate,
-                                    UTCOffsets[source.publishDateTZ], 'local')
-      source.publishDate = selectedDate.toDate()
-
-    Meteor.call 'updateEventSource', source, (error, result) ->
-      if error
-        toastr.error error.reason
-      else
-        stageModals(instance, instance.modals)
 
   'input #article': _.debounce (event, instance) ->
       $('#content').val('')
+      instance.unspecifiedPublishDate.set(true)
       url = event.target.value.trim()
       if url.length > 20 # Check if the length at url base length
         _checkForPublishDate(url, instance)
@@ -290,3 +260,6 @@ Template.sourceModal.events
 
   'click .tabs li a': (event, instance) ->
     instance.articleOrigin.set($(event.currentTarget).attr('href').slice(1))
+
+  'click .add-publish-date': (event, instance)->
+    instance.unspecifiedPublishDate.set(false)

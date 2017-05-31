@@ -4,8 +4,11 @@ import ScatterPlot from '/imports/charts/ScatterPlot.coffee'
 import Axes from '/imports/charts/Axes.coffee'
 import Group from '/imports/charts/Group.coffee'
 import SegmentMarker from '/imports/charts/SegmentMarker.coffee'
-import { pluralize, formatDateRange, formatLocations } from '/imports/ui/helpers'
-import { incidentTypeWithCountAndDisease } from '/imports/utils'
+import {
+  pluralize,
+  formatDateRange,
+  formatLocations,
+  incidentTypeWithCountAndDisease } from '/imports/utils'
 import Articles from '/imports/collections/articles.coffee'
 import Feeds from '/imports/collections/feeds.coffee'
 { notify } = require '/imports/ui/notification'
