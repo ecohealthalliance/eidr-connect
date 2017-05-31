@@ -1,25 +1,4 @@
 template(name="incidentTable")
-  .curator-source-details--sub-header
-    .curator-source-details--actions.container-flex.no-break
-      button.btn.btn-sm.action(
-        disabled="{{#unless incidentsSelected}} true {{/unless}}"
-        class="btn-{{#if acceptance}}success{{else}}danger{{/if}}") #{action}
-      if accepted
-        button.btn.btn-sm.btn-primary.show-addEvent(
-          disabled="{{#unless incidentsSelected}} true {{/unless}}") Add to Event
-      button.btn.btn-sm.btn-default.select.on-right(
-        disabled="{{#unless incidents.length}} true {{/unless}}"
-        class="{{#if allSelected}} deselect-all {{else}} select-all {{/if}}")
-        if allSelected
-          | Deselect All
-        else
-          | Select All
-  if addEvent
-    +addToEvent(
-      selectedIncidents=selectedIncidents
-      tableContentScrollable=tableContentScrollable
-      source=source
-      objNameToAssociate="Incident")
   if incidents.length
     .curator-source-details--table-wrapper
       table.table.incident-table(
