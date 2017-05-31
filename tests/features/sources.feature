@@ -7,7 +7,7 @@ Feature: Documentss
     And I toggle sorting on the "eventName" column
     And I toggle sorting on the "eventName" column
     And I navigate to the first event
-    
+
   Scenario: I add a custom document to an event
     When I click on the add document button
     And I create a document with a title of "Test Document", url of "http://www.promedmail.org/post/2579682", and datetime of now
@@ -21,7 +21,9 @@ Feature: Documentss
     Then I should see content "Updated Title"
 
   Scenario: I delete an existing document
-    When I select the existing document
-    Then I delete the existing document
+    When I view details of the first incident
+    Then I remove the first incident
+    And I select the existing document
+    And I delete the existing document
     And I "confirm" deletion
     Then I should see an empty documents table

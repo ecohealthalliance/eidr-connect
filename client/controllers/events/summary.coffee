@@ -24,12 +24,6 @@ Template.summary.helpers
   formatDate: (date) ->
     moment(date).format('MMM D, YYYY')
 
-  articleCount: ->
-    Template.instance().data.articleCount
-
-  caseCount: ->
-    Incidents.find(userEventId: @_id).count()
-
   copied: ->
     Template.instance().copied.get()
 

@@ -21,7 +21,7 @@ do ->
       @client.waitForVisible('#create-event-modal')
       @client.setValue('#eventName', name)
       @client.setValue('#eventSummary', summary)
-      @client.submitForm('#createEvent')
+      @client.click('#add-event-btn')
       @client.pause(100)
 
     @When /^I navigate to the first event$/, ->

@@ -1,6 +1,5 @@
 template(name="incidentTable")
   .curator-source-details--sub-header
-    h3(class=tableType)=tableType
     .curator-source-details--actions.container-flex.no-break
       button.btn.btn-sm.action(
         disabled="{{#unless incidentsSelected}} true {{/unless}}"
@@ -19,7 +18,8 @@ template(name="incidentTable")
     +addToEvent(
       selectedIncidents=selectedIncidents
       tableContentScrollable=tableContentScrollable
-      source=source)
+      source=source
+      objNameToAssociate="Incident")
   if incidents.length
     .curator-source-details--table-wrapper
       table.table.incident-table(
@@ -30,6 +30,7 @@ template(name="incidentTable")
           thead
             tr
               th
+              th.associations Events
               th.count-header Type
               th Dates
               th.locations-header Locations
@@ -37,6 +38,14 @@ template(name="incidentTable")
           each incidents
             tr(class="{{#if selected}} selected {{/if}} {{#if annotationSelected}} selected-annotation {{/if}}"
               data-incident-id=_id)
+              if incidentEvents
+                td.associations(
+                  title="This has associated events. Click to see them.")
+                  | #{incidentEvents.length}
+                  i.fa.fa-tags(
+                    aria-hidden="true")
+              else
+                td
               td
                 span.select
               td {{incidentCountAndDisease this}}

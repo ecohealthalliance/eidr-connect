@@ -5,6 +5,12 @@ import { getIncidentSnippet } from '/imports/ui/snippets'
 Template.incidentReport.onCreated ->
   @subscribe 'incidentArticle', @data.articleId
 
+Template.incidentReport.onCreated ->
+  Meteor.defer =>
+    @$('[data-toggle=tooltip]').tooltip
+      delay: show: '200'
+      container: 'body'
+
 Template.incidentReport.helpers
   caseCounts: ->
     @deaths or @cases
@@ -22,6 +28,8 @@ Template.incidentReport.helpers
     Articles.findOne(@articleId)?.url
 
   incidentContent: ->
-    articleContent = Articles.findOne(@articleId)?.enhancements?.source?.cleanContent.content
-    if articleContent
-      Spacebars.SafeString(getIncidentSnippet(articleContent, @))
+    if @annotations
+      article = Articles.findOne(@articleId)
+      articleContent = article?.enhancements?.source.cleanContent.content
+      if articleContent
+        Spacebars.SafeString(getIncidentSnippet(articleContent, @))

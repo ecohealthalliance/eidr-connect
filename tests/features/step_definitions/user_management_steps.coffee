@@ -13,4 +13,4 @@ do ->
     @When /^I submit a form that has email "([^']*)" and name "([^']*)"$/, (address, profileName) ->
       @client.setValue('input[name="email"]', address)
       @client.setValue('input[name="name"]', profileName)
-      @browser.submitForm('#add-account')
+      @browser.click('#add-account .btn-primary')

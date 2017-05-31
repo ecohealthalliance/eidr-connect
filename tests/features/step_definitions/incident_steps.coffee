@@ -24,7 +24,7 @@ do ->
     @When /^I add an incident with count "([^']*)"$/, (count) ->
       if not @client.waitForVisible(firstEvent)
         throw new Error('Event Incidents table is empty')
-      @client.click('button.open-incident-form')
+      @client.click('button.open-incident-form-in-details')
       # article URL
       @client.clickWhenVisible('span[aria-labelledby="select2-articleSource-container"]')
       @client.clickWhenVisible('#select2-articleSource-results li:first-child')
@@ -101,3 +101,35 @@ do ->
       catch
         throw new Error 'Cound not get actual number of incidents.'
       assert.equal(expectedNumber, actualNumber)
+
+    @Then 'I extract incidents from the url "$url"', (url) ->
+      @client.clickWhenVisible('[href="#web"]')
+      @client.waitForVisible(".submit-url")
+      @client.setValue('.submit-url', url)
+      @client.click('#submit-button')
+      @client.pause(5000)
+      @client.waitForVisible('.suggested-annotated-content')
+
+    @Then 'I open the first incident', ->
+      if client.isVisible('.incident-table-tab')
+        client.click('.incident-table-tab')
+      client.clickWhenVisible('.incident-report')
+      client.waitForVisible('[name="count"]')
+
+    @Then 'I set the count to "$count"', (count)->
+      @client.setValue('[name="count"]', count)
+
+    @Then 'I accept the incident', ->
+      @client.clickWhenVisible('.save-modal')
+      @client.pause(1000)
+
+    @Then 'the first incident should have a count of "$count"', (count)->
+      text = @client.getText('.incident-report')
+      assert.ok(text[0].indexOf(count) > 0)
+
+    @Then 'I view details of the first incident', ->
+      @client.clickWhenVisible('#event-incidents-table tbody tr:first-child')
+
+    @Then 'I remove the first incident', ->
+      @client.clickWhenVisible('.delete')
+      @client.pause(3000)

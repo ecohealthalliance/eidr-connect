@@ -2,7 +2,7 @@ template(name="incidentForm")
   form#add-incident(novalidate)
     .add-incident--wrapper
       if confirmation
-        input(type="hidden" name="articleSourceUrl" value=articleSourceUrl)
+        input(type="hidden" name="articleSourceUrl" value=documentUrl)
       else
         if documentUrl
           .form-group.form-group--full
@@ -10,7 +10,7 @@ template(name="incidentForm")
             input.form-control(readonly value=documentUrl name="articleSourceUrl")
         if incidentSnippet
           p.incident-snippet=incidentSnippet
-        if allowUrlInput
+        unless documentUrl
           .form-group.form-group--full
             +documentInputLabel
             +articleSelect2(

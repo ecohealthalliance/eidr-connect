@@ -109,7 +109,7 @@ Template.incidentTable.helpers
 
   action: ->
     if Template.instance().accepted
-      'Reject'
+      'Delete'
     else
       'Accept'
 
@@ -142,6 +142,9 @@ Template.incidentTable.helpers
     if otherLocations?.length
       formatLocations(otherLocations)
 
+  incidentEvents: ->
+    if @_id
+      UserEvents.find('incidents.id': @_id).fetch()
 Template.incidentTable.events
   'click .incident-table tbody tr': (event, instance) ->
     event.stopPropagation()
@@ -158,13 +161,17 @@ Template.incidentTable.events
     source = instance.data.source
     snippetHtml = buildAnnotatedIncidentSnippet(source.enhancements.source.cleanContent.content, @, false)
     Modal.show 'suggestedIncidentModal',
-      edit: true
       articles: [source]
       userEventId: null
       incident: @
       incidentText: Spacebars.SafeString(snippetHtml)
       offCanvasStartPosition: 'top'
       showBackdrop: true
+
+  'click table.incident-table tr td.associations': (event, instance) ->
+    event.stopPropagation()
+    Modal.show 'associatedEventModal',
+      incidentId: @_id
 
   'click .action': (event, instance) ->
     accepted = instance.accepted

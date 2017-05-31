@@ -37,7 +37,7 @@ showSuggestedIncidentModal = (event, instance)->
   Modal.show 'suggestedIncidentModal',
     articles: [instance.data.article]
     userEventId: instance.data.userEventId
-    incidentCollection: Incidents
+    incidentCollection: instance.collection()
     incident: incident
     incidentText: Spacebars.SafeString(snippetHtml)
 
@@ -69,7 +69,7 @@ Template.suggestedIncidentsModal.onCreated ->
 
   if @saveResults
     @autorun =>
-      @subscribe 'ArticleIncidentReports', @data.article._id
+      @subscribe 'articleIncidents', @data.article._id
   else
     @incidentsCollection = new Meteor.Collection(null)
 
@@ -194,7 +194,7 @@ Template.suggestedIncidentsModal.events
     if count <= 0
       notify('warning', 'No incidents have been confirmed')
       return
-    Meteor.call 'addIncidentReports', incidents, (err, result)->
+    Meteor.call 'addIncidentReports', incidents, instance.data.article._id, (err, result)->
       if err
         toastr.error err.reason
       else
@@ -208,7 +208,6 @@ Template.suggestedIncidentsModal.events
   'click #non-suggested-incident': (event, instance) ->
     sendModalOffStage(instance)
     Modal.show 'incidentModal',
-      articles: [instance.data.article]
       userEventId: instance.data.userEventId
       add: true
       incident:

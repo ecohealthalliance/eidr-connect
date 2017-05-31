@@ -41,8 +41,5 @@ Template.sourceIncidentReports.helpers
   hasAcceptedIncidents: ->
     findIncident(true)
 
-  hasRejectedIncidents: ->
-    findIncident(false)
-
   hasIncidents: ->
     findIncident()
