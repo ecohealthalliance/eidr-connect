@@ -1,5 +1,4 @@
 convertDate = require '/imports/convertDate.coffee'
-Articles = require '/imports/collections/articles.coffee'
 createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
 validator = require 'bootstrap-validator'
 { notify } = require '/imports/ui/notification'
@@ -11,7 +10,7 @@ import {
   removeSuggestedProperties } from '/imports/utils.coffee'
 
 _checkFormValidity = (instance) ->
-  $form = instance.$('form')
+  $form = instance.$('#add-source')
   $form.validator('validate')
   $form.submit()
   instance.formValid.get()
@@ -40,11 +39,14 @@ _checkForPublishDate = (url, instance) ->
         instance.selectedArticle.set(_article)
 
 Template.sourceModal.onCreated ->
-  @suggest = @data.suggest
-  @suggest ?= true
+  @formValid = new ReactiveVar(false)
+  @suggestedFields = new ReactiveVar([])
+  @unspecifiedPublishDate = new ReactiveVar(true)
+  @suggest = @data.suggest or true
+  @edit = false
   @tzIsSpecified = false
   @proMEDRegEx = /promedmail\.org\/post\/(\d+)/ig
-  @selectedArticle = new ReactiveVar(@data)
+  @selectedArticle = new ReactiveVar(@data.source)
   @articleOrigin = new ReactiveVar('url')
   @modals =
     currentModal:
@@ -63,10 +65,13 @@ Template.sourceModal.onCreated ->
     @$(input).val('')
     @selectedArticle.set({})
 
-  if @data.edit
-    if @data.publishDate
-      @timezoneFixedPublishDate = convertDate(@data.publishDate, 'local',
-                                                UTCOffsets[@data.publishDateTZ])
+  if @data.source
+    @edit = true
+    if @data.source.publishDate
+      @unspecifiedPublishDate.set(false)
+      @timezoneFixedPublishDate = convertDate(
+        @data.source.publishDate, 'local',
+        UTCOffsets[@data.source.publishDateTZ])
   else
     @loadingArticles = new ReactiveVar(true)
     @suggestedArticles = new Mongo.Collection(null)
@@ -77,11 +82,6 @@ Template.sourceModal.onCreated ->
           @suggestedArticles.insert
             url: "http://www.promedmail.org/post/#{suggestedArticle.promedId}"
             subject: suggestedArticle.subject.raw
-
-Template.sourceModal.onCreated ->
-  @formValid = new ReactiveVar(false)
-  @suggestedFields = new ReactiveVar([])
-  @unspecifiedPublishDate = new ReactiveVar(not @data._id?)
 
 Template.sourceModal.onRendered ->
   publishDate = @timezoneFixedPublishDate
@@ -100,8 +100,9 @@ Template.sourceModal.onRendered ->
   @$('#add-source').validator()
 
   @autorun =>
-    { tz, date } = @selectedArticle.get()
-    if date
+    selectedArticle = @selectedArticle.get()
+    if selectedArticle and selectedArticle.date
+      { tz, date } = selectedArticle
       @$('#publishDateTZ').val(tz)
       @$('#publishTime').data('DateTimePicker').date(date)
       _setDatePicker(@datePicker, date)
@@ -113,8 +114,8 @@ Template.sourceModal.helpers
     defaultTimezone = if moment().isDST() then 'EDT' else 'EST'
     for tzKey, tzOffset of UTCOffsets
       timezones.push({name: tzKey, offset: tzOffset})
-      if @publishDateTZ
-        if @publishDateTZ is tzKey
+      if @source?.publishDateTZ
+        if @source.publishDateTZ is tzKey
           timezones[timezones.length-1].selected = true
       else if tzKey is defaultTimezone
         timezones[timezones.length-1].selected = true
@@ -122,14 +123,14 @@ Template.sourceModal.helpers
 
   title: ->
     article = Template.instance().selectedArticle.get()
-    article.title or article.subject
+    article?.title or article?.subject
 
   url: ->
-    Template.instance().selectedArticle.get().url
+    Template.instance().selectedArticle.get()?.url
 
   presentUrl: ->
     instance = Template.instance()
-    instance.selectedArticle.get().url and instance.data.edit
+    instance.selectedArticle.get()?.url and instance.edit
 
   suggestedArticles: ->
     Template.instance().suggestedArticles.find()
@@ -138,14 +139,14 @@ Template.sourceModal.helpers
     Template.instance().loadingArticles.get()
 
   articleSelected: ->
-    @subject is Template.instance().selectedArticle.get().subject
+    @subject is Template.instance().selectedArticle.get()?.subject
 
   editing: ->
-    Template.instance().data.edit
+    Template.instance().edit
 
   showSuggestedDocuments: ->
     instance = Template.instance()
-    not instance.data.edit and instance.suggest
+    not instance.edit and instance.suggest
 
   suggested: (field) ->
     if field in Template.instance().suggestedFields.get()
@@ -163,10 +164,13 @@ Template.sourceModal.helpers
     false
 
   showArticleInputs: ->
-    not @edit and not @url
+    not Template.instance().edit
 
   showContent: ->
-    not @url and @content
+    @source?.content
+
+  specifiedPublishDate: ->
+    not Template.instance().unspecifiedPublishDate.get()
 
   unspecifiedPublishDate: ->
     Template.instance().unspecifiedPublishDate.get()
@@ -176,13 +180,13 @@ Template.sourceModal.events
     return unless _checkFormValidity(instance)
     form = instance.$('form')[0]
     source = {}
-    if @_id
-      source._id = @_id
-    if form.article.value
+    if @source?._id
+      source._id = @source._id
+    if form.article?.value
       source.url = cleanUrl(form.article.value)
-    if form.content.value
+    if form.content?.value
       source.content = form.content.value
-    if form.title.value
+    if form.title?.value
       source.title = form.title.value
     if not instance.unspecifiedPublishDate.get()
       timePicker = instance.$('#publishTime').data('DateTimePicker')
@@ -227,7 +231,7 @@ Template.sourceModal.events
 
   'input #content': (event, instance) ->
     $('#article').val('')
-    if instance.selectedArticle.get().suggested
+    if instance.selectedArticle.get()?.suggested
       instance.clearSelectedArticle(true)
       removeSuggestedProperties(instance, 'all')
 

@@ -28,10 +28,9 @@ do ->
       @client.waitForVisible('#add-source')
       @client.setValue('#title', title)
       @client.setValue('#article', url)
+      @client.clickIfVisible('.add-publish-date .btn')
       @client.setValue('input[name=daterangepicker_start]', formatDate(date))
       @client.setValue('#publishTime', getTime(date))
-      # Disable enhancement
-      # @client.click('[for="enhance"]')
       @browser.scroll(0, 1000)
       @client.click('#event-source .save-source')
 
@@ -48,6 +47,7 @@ do ->
       date = new Date()
       @client.waitForVisible('#add-source')
       @client.setValue('#title', title)
+      @client.clickIfVisible('.add-publish-date .btn')
       @client.setValue('input[name=daterangepicker_start]', formatDate(date))
       @client.setValue('#publishTime', getTime(date))
       @browser.scroll(0, 1000)

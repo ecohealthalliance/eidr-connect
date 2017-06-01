@@ -1,15 +1,15 @@
 Incidents = require '/imports/collections/incidentReports.coffee'
-Articles = require '/imports/collections/articles.coffee'
+EventArticles = require '/imports/collections/eventArticles.coffee'
 { keyboardSelect } = require '/imports/utils'
 
 Template.articles.onCreated ->
-  @selectedSource = new ReactiveVar(null)
+  @selectedSourceId = new ReactiveVar(null)
   @incidentsLoaded = new ReactiveVar(false)
 
 Template.articles.onRendered ->
   instance = @
   @autorun =>
-    sourceId = @selectedSource.get()?._id
+    sourceId = @selectedSourceId.get()
     if sourceId
       @incidentsLoaded.set(false)
       @subscribe 'articleIncidents', sourceId, =>
@@ -24,8 +24,7 @@ Template.articles.helpers
         key: 'title'
         label: 'Title'
         fn: (value, object, key) ->
-          # switching over to displaying the title in this column.  If that's not loaded in the DB show the URL.
-          return object.title || value
+          object.title or object.url
       },
       {
         key: 'addedDate'
@@ -61,10 +60,10 @@ Template.articles.helpers
     filters: ['sourceFilter']
 
   selectedSource: ->
-    Template.instance().selectedSource.get()
+    EventArticles.findOne(Template.instance().selectedSourceId.get())
 
   incidentsForSource: (source) ->
-    Incidents.find(articleId: Template.instance().selectedSource.get()._id)
+    Incidents.find(articleId: Template.instance().selectedSourceId.get())
 
   locationsForSource: (source) ->
     locations = {}
@@ -98,7 +97,7 @@ Template.articles.events
     , keyup #event-sources-table tbody tr': (event, instance) ->
     event.preventDefault()
     return if not keyboardSelect(event) and event.type is 'keyup'
-    instance.selectedSource.set(@)
+    instance.selectedSourceId.set(@_id)
     instance.$(event.currentTarget).parent().find('tr').removeClass 'open'
     instance.$(event.currentTarget).addClass('open').blur()
     instance.$('.event-sources-detail').focus()
@@ -107,23 +106,21 @@ Template.articles.events
     Modal.show 'sourceModal', userEventId: instance.data.userEvent._id
 
   'click .delete-source:not(.disabled)': (event, instance) ->
-    source = instance.selectedSource.get()
+    sourceId = instance.selectedSourceId.get()
     Modal.show 'deleteConfirmationModal',
       userEventId: instance.data.userEvent._id
-      source: source
       objNameToDelete: 'source'
-      objId: source._id
-      displayName: source.title
+      objId: sourceId
+      displayName: EventArticles.findOne(sourceId).title
     instance.$(event.currentTarget).tooltip('destroy')
 
   'click .edit-source': (event, instance) ->
-    source = instance.selectedSource.get()
-    source.edit = true
-    Modal.show 'sourceModal', source
+    Modal.show 'sourceModal',
+      source: EventArticles.findOne(instance.selectedSourceId.get())
     instance.$(event.currentTarget).tooltip('destroy')
 
   'click .show-document-text-modal': (event, instance) ->
-    article = instance.selectedSource.get()
+    article = EventArticles.findOne(instance.selectedSourceId.get())
     Modal.show 'documentTextModal',
       title: article.title
       text: article.enhancements.source.cleanContent.content

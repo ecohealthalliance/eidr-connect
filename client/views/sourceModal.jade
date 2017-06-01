@@ -80,7 +80,9 @@ template(name="sourceModal")
                         input#publishTime.timePicker.form-control(
                           type="text"
                           name="publishTime"
-                          placeholder="Time")
+                          placeholder="Time"
+                          required=specifiedPublishDate
+                          data-error="Please select a time.")
                       .help-block.with-errors
                   .col-sm-6
                     .form-group(class="{{suggested 'time'}}")
