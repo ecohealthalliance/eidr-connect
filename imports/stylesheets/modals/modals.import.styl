@@ -19,6 +19,7 @@ $modal-transition-time-opacity = .25s
     .modal-header
     .modal-footer
       flex 0 0 auto
+
   &.wide
     .modal-dialog
       width 95%
@@ -116,6 +117,8 @@ $modal-transition-time-opacity = .25s
   border-color $border-primary
 
 .modal-footer
+  display flex
+  justify-content flex-end
   white-space nowrap
   padding-top 1.25em
   padding-bottom 2em
