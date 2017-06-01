@@ -23,7 +23,6 @@
     "keymaster": "^1.6.2",
     "meteor-node-stubs": "^0.2.6",
     "pluralize": "^3.0.0",
-    "rickshaw": "^1.6.0",
     "rupture": "^0.6.1",
     "underscore": "^1.8.3"
   }

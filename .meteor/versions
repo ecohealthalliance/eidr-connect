@@ -30,12 +30,14 @@ ddp-rate-limiter@1.0.7
 ddp-server@1.3.14
 deps@1.0.12
 diff-sequence@1.0.7
+dynamic-import@0.1.0
 ecmascript@0.8.0
 ecmascript-runtime@0.4.1
 ecmascript-runtime-client@0.4.1
 ecmascript-runtime-server@0.4.1
 eha:nojs-banner@1.1.0
 eidr:fixtures@0.0.1
+eidr:rickshaw.min@0.0.1
 ejson@1.0.13
 email@1.2.1
 fastclick@1.0.13
@@ -63,7 +65,7 @@ localstorage@1.1.0
 logging@1.1.17
 mdg:validation-error@0.5.1
 meteor@1.6.1
-meteor-base@1.0.4
+meteor-base@1.1.0
 minifier-js@2.1.0
 minifiers@1.1.7
 minimongo@1.2.0

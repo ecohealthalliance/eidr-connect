@@ -1,5 +1,4 @@
-import 'rickshaw/rickshaw.css'
-import Rickshaw from 'rickshaw'
+import Rickshaw from 'meteor/eidr:rickshaw.min'
 import solverExport from 'javascript-lp-solver'
 import convertAllIncidentsToDifferentials from '/imports/incidentResolution/convertAllIncidentsToDifferentials.coffee'
 import {
@@ -66,7 +65,7 @@ Template.resolvedIncidentsPlot.onRendered ->
         stack: false
         interpolation: 'linear'
         dotSize: 5
-        strokeWidth: 1
+        strokeWidth: 2
         series: pairedLocs.map ([key, locSubIntervals], sIdx)->
           location = locationTree.getLocationById(key)
           groupedLocSubIntervals = _.groupBy(locSubIntervals, 'start')
