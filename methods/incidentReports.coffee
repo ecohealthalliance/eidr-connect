@@ -35,8 +35,11 @@ Meteor.methods
       fieldsToRemove = cases: true, specify: true
     else if incident.specify
       fieldsToRemove = cases: true, deaths: true
+    unless incident.status
+      fieldsToRemove.status = true
+
     existingIncident = Incidents.findOne(incident._id)
-    updatedIncident = _.extend(existingIncident, incident)
+    updatedIncident = _.extend({}, existingIncident, incident)
     updateOperators = {}
     if fieldsToRemove
       updateOperators = $unset: fieldsToRemove
