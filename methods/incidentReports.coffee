@@ -66,7 +66,7 @@ Meteor.methods
       $set:
         deleted: true,
         deletedDate: new Date()
-    userEventId = UserEvents.findOne('incidents.id': incidentId)._id
+    userEventId = UserEvents.findOne('incidents.id': id)?._id
     if userEventId
       Meteor.call('editUserEventLastModified', userEventId)
       Meteor.call('editUserEventLastIncidentDate', userEventId)

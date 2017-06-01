@@ -74,17 +74,19 @@ Template.suggestedIncidentModal.events
 
   'click .reject': (event, instance) ->
     instanceData = instance.data
+    incident = instance.incident
+    incidentId = incident._id
     if instanceData.incidentCollection
-      instanceData.incidentCollection.update instance.incident._id,
+      instanceData.incidentCollection.update incidentId,
         $set:
           accepted: false
     else
-      incident = instance.incident
-      incident.accepted = false
-      Meteor.call 'editIncidentReport', instance, (error, result) =>
-        if error
-          toastr.error "Error: " + error
-    stageModals(instance, instance.modals)
+      stageModals(instance, instance.modals)
+      console.log instance.incident
+      Modal.show 'deleteConfirmationModal',
+        objNameToDelete: 'incident'
+        objId: incidentId
+        displayName: incident.annotations.case[0].text
 
   'click .cancel': (event, instance) ->
     stageModals(instance, instance.modals)
