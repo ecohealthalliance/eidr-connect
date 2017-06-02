@@ -51,7 +51,7 @@ do ->
       @client.setValue('input[name=daterangepicker_start]', formatDate(date))
       @client.setValue('#publishTime', getTime(date))
       @browser.scroll(0, 1000)
-      @client.click('#event-source .save-source-edit')
+      @client.click('#event-source .save-source')
 
     @Then /^I see the new document in the document table$/, ->
       if getSourcesFromTable(@browser).value.length <= 1
