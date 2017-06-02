@@ -16,7 +16,7 @@ services:
     links:
       - mongodb
   mongodb:
-    image: mongo:latest
+    image: mongo:3.2
     container_name: eidrconnect_mongodb_1
     volumes:
       - /shared/eidr-connect/data/db:/data/db

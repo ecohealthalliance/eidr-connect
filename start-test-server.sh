@@ -83,7 +83,7 @@ trap signalCaught SIGQUIT # 3
 trap signalCaught SIGKILL # 9
 trap signalCaught SIGTERM # 15
 
-MONGO_URL=mongodb://${mongo_host}:${mongo_port}/${test_db} meteor test --full-app --driver-package tmeasday:acceptance-test-driver -p ${app_port} --settings settings-dev.json > ${log_file} &
+NODE_ENV=development MONGO_URL=mongodb://${mongo_host}:${mongo_port}/${test_db} meteor test --full-app --driver-package tmeasday:acceptance-test-driver -p ${app_port} --settings settings-dev.json > ${log_file} &
 APP_PID=$!
 echo $APP_PID > $pid_file
 echo "Starting server with PID: ${APP_PID}"
