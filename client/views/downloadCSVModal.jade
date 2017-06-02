@@ -20,5 +20,5 @@ template(name="downloadCSVModal")
                   each columns
                     td {{getField row name}}
         .modal-footer
-          button.btn.btn-default.confirm-close-modal(type="button" data-dismiss="modal") Close
+          button.btn.btn-default.confirm-close-modal.on-left(type="button" data-dismiss="modal") Close
           button.btn.btn-default.download-csv(type="button" data-type="csv") Download CSV

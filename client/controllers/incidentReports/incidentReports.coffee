@@ -223,7 +223,6 @@ Template.incidentReports.events
   'click .reactive-table tbody tr .edit': (event, instance) ->
     instanceData = instance.data
     incident =
-      articles: instanceData.articles
       userEventId: instanceData.userEvent._id
       edit: true
       incident: @

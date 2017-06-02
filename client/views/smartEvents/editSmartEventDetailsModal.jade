@@ -53,9 +53,10 @@ template(name="editSmartEventDetailsModal")
 
           unless confirmingDeletion
             .modal-footer
-              unless adding
-                button.btn.btn-danger.delete-event.pull-left(type="button") Delete Event
-              button.btn.btn-default(type="button" data-dismiss="modal") Cancel
+              .on-left
+                unless adding
+                  button.btn.btn-danger.delete-event(type="button") Delete Event
+                button.btn.btn-default(type="button" data-dismiss="modal") Cancel
               button.btn.btn-success.btn-wide.save-modal(type="submit")
                 if saveActionMessage
                   {{saveActionMessage}}

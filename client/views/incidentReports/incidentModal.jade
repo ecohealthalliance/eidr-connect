@@ -24,7 +24,7 @@ template(name="incidentModal")
             +incidentForm incident=incident articles=articles valid=valid
 
         .modal-footer
-          button.btn.btn-default(type="button" data-dismiss="modal") Close
+          button.btn.btn-default.on-left(type="button" data-dismiss="modal") Cancel
           if add
             button.btn.btn-primary.save-incident-duplicate(type="button"
             disabled="{{#if submitting}} true {{/if}}") Save then Duplicate
