@@ -81,6 +81,10 @@ Meteor.methods
       Meteor.call('editUserEventLastModified', userEventId)
       Meteor.call('editUserEventLastIncidentDate', userEventId)
 
+  removeIncidents: (incidentIds) ->
+    incidentIds.forEach (incidentId) ->
+      Meteor.call('removeIncident', incidentId)
+
   removeIncidentFromEvent: (incidentId, userEventId) ->
     checkPermission(@userId)
     event = UserEvents.findOne(userEventId)

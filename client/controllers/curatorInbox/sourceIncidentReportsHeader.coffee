@@ -1,4 +1,5 @@
 import Incidents from '/imports/collections/incidentReports'
+import { notify } from '/imports/ui/notification'
 
 Template.sourceIncidentReportsHeader.onCreated ->
   @selectedIncidents = @data.selectedIncidents
@@ -59,12 +60,13 @@ Template.sourceIncidentReportsHeader.events
 
   'click .delete': (event, instance) ->
     selectedIncidents = instance.selectedIncidents
-    Meteor.call 'rejectIncidentReports', selectedIncidents.find().map((x)->
-      x.id
+    Meteor.call 'removeIncidents', selectedIncidents.find().map((incident)->
+      incident.id
     ), (error, result) ->
       if error
-        notify('error', 'There was a problem updating your incidents.')
-    selectedIncidents.remove({})
+        notify('error', error.reason)
+      else
+        selectedIncidents.remove({})
     event.currentTarget.blur()
 
   'click .select-all': (event, instance) ->
