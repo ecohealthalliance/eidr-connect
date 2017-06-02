@@ -30,7 +30,7 @@ Template.curatorInboxSection.onCreated ->
       label: 'Title'
       sortDirection: -1
       fn: (value, object)->
-        object.title or object.url
+        object.title or object.url or (object.content?.slice(0,30) + "...")
     },
     {
       key: 'expand'

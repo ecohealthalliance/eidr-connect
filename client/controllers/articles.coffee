@@ -24,7 +24,7 @@ Template.articles.helpers
         key: 'title'
         label: 'Title'
         fn: (value, object, key) ->
-          object.title or object.url
+          object.title or object.url or (object.content?.slice(0,30) + "...")
       },
       {
         key: 'addedDate'
@@ -61,6 +61,10 @@ Template.articles.helpers
 
   selectedSource: ->
     EventArticles.findOne(Template.instance().selectedSourceId.get())
+
+  selectedSourceTitle: ->
+    source = EventArticles.findOne(Template.instance().selectedSourceId.get())
+    source.title or source.url or (source.content?.slice(0,30) + "...")
 
   incidentsForSource: (source) ->
     Incidents.find(articleId: Template.instance().selectedSourceId.get())
@@ -122,8 +126,8 @@ Template.articles.events
   'click .show-document-text-modal': (event, instance) ->
     article = EventArticles.findOne(instance.selectedSourceId.get())
     Modal.show 'documentTextModal',
-      title: article.title
-      text: article.enhancements.source.cleanContent.content
+      title: article.title or (article.content?.slice(0,30) + "...")
+      text: article.content
 
 Template.articleSelect2.onRendered ->
   $input = @$('select')
