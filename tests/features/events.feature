@@ -32,7 +32,7 @@ Feature: Events
     Then I navigate to "/events"
     And I delete the first item in the event list
     And I "confirm" deletion
-    Then I should see a "success" toast
+    Then I should see a "success" notification
     And I should not see content "A test"
 
   Scenario: Cancel deleting an existing event
