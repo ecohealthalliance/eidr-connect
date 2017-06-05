@@ -1,5 +1,5 @@
 template(name="suggestedIncidentModal")
-  .modal#suggestedIncidentModal(
+  .modal#suggestedIncidentModal.flex(
     role="dialog"
     data-backdrop=showBackdrop
     class="off-canvas--#{offCanvasStartPosition}")
@@ -18,7 +18,7 @@ template(name="suggestedIncidentModal")
         .modal-body
           .annotated-content.snippet.modal-block
             .snippet--title-legend
-              label.control-label.featured.container-flex.no-break
+              label.control-label.featured.container-flex
                 h5 Document Snippet
                 ul.color-legend.list-unstyled.container-flex.no-break
                   each type
