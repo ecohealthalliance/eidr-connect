@@ -67,7 +67,9 @@ Template.articles.helpers
     source.title or source.url or (source.content?.slice(0,30) + "...")
 
   incidentsForSource: (source) ->
-    Incidents.find(articleId: Template.instance().selectedSourceId.get())
+    Incidents.find
+      articleId: Template.instance().selectedSourceId.get()
+      accepted: true
 
   locationsForSource: (source) ->
     locations = {}
