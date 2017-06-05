@@ -40,6 +40,7 @@ do ->
         @client.waitForVisible('#content')
         @client.setValue('#content', DOCUMENT_TEXT)
       @client.setValue('#title', 'Test Article')
+      @client.clickIfVisible('.add-publish-date .btn')
       @client.setValue('#publishTime', '12:00 PM')
       @client.pause(3000)
       @client.click('.save-source')

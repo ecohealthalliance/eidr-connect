@@ -1,8 +1,7 @@
 Articles = require '/imports/collections/articles'
 Feeds = require '/imports/collections/feeds'
 createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
-import { formatDateRange } from '/imports/ui/helpers'
-import { keyboardSelect, debounceCheckTop } from '/imports/utils'
+import { formatDateRange, keyboardSelect, debounceCheckTop } from '/imports/utils'
 { updateCalendarSelection } = require('/imports/ui/setRange')
 
 CUSTOM_FEEDS = [

@@ -63,11 +63,11 @@ template(name="sourceModal")
               input#title.form-control.new-title(
                 type="text"
                 name="title"
-                value=title
-                required)
+                value=title)
               .help-block.with-errors
 
-            .form-group.form-group--full(class="{{#if editing}} date-editing {{/if}}")
+
+            .form-group.form-group--full(class="{{#if editing}} date-editing {{/if}}" hidden=unspecifiedPublishDate)
               label.control-label Publication Date
               .modal-block.full-width
                 #publishDate.datePicker.inlineRangePicker.centered(class="{{suggested 'date'}}")
@@ -81,7 +81,7 @@ template(name="sourceModal")
                           type="text"
                           name="publishTime"
                           placeholder="Time"
-                          required
+                          required=specifiedPublishDate
                           data-error="Please select a time.")
                       .help-block.with-errors
                   .col-sm-6
@@ -92,9 +92,18 @@ template(name="sourceModal")
                         select#publishDateTZ.form-control(name="publishDateTZ")
                           each timezones
                             option(value=name selected=selected) #{name} (GMT#{offset})
-
+            if unspecifiedPublishDate
+              .form-group.add-publish-date
+                if showEnhanceOption
+                  label.control-label
+                    | Publication Date
+                else
+                  button.btn.btn-primary
+                    i.fa.fa-plus-circle
+                    span Publication Date
             if showEnhanceOption
               .form-group.no-margin
+                i.fa.fa-times-circle.close-date-specification
                 .container-flex.check-buttons.options.no-break
                   .check-button
                     input(
@@ -108,4 +117,4 @@ template(name="sourceModal")
 
         .modal-footer
           button.btn.btn-default.on-left(type="button" data-dismiss="modal") Cancel
-          button.btn.btn-primary(type="button" class=saveButtonClass) Save
+          button.btn.btn-primary.save-source(type="button") Save

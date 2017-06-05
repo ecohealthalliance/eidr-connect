@@ -1,16 +1,14 @@
 template(name="incidentForm")
   form#add-incident(novalidate)
     .add-incident--wrapper
-      if confirmation
-        input(type="hidden" name="articleSourceUrl" value=documentUrl)
-      else
-        if documentUrl
+      if documentId
+        input(type="hidden" name="articleId" value=documentId)
+      unless confirmation
+        if documentId
           .form-group.form-group--full
             +documentInputLabel
-            input.form-control(readonly value=documentUrl name="articleSourceUrl")
-        if incidentSnippet
-          p.incident-snippet=incidentSnippet
-        unless documentUrl
+            input.form-control(readonly value=documentUrl)
+        else
           .form-group.form-group--full
             +documentInputLabel
             +articleSelect2(
@@ -18,6 +16,9 @@ template(name="incidentForm")
               articles=articles
               placeholder='Select a Document')
             .help-block.with-errors
+
+      if incidentSnippet
+        p.incident-snippet=incidentSnippet
 
       .incident-type-wrapper.form-groups(class=incidentTypeClassNames)
         .form-group.form-group--full.check-buttons

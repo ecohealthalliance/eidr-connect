@@ -1,8 +1,10 @@
 UserEvents = require '/imports/collections/userEvents.coffee'
 Incidents = require '/imports/collections/incidentReports.coffee'
-import { buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
 { notify } = require '/imports/ui/notification'
-{ formatLocation, formatLocations } = require '/imports/ui/helpers'
+import { buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
+import {
+  formatLocation,
+  formatLocations } from '/imports/utils'
 SCROLL_WAIT_TIME = 350
 
 Template.incidentTable.onCreated ->
@@ -174,18 +176,12 @@ Template.incidentTable.events
       incidentId: @_id
 
   'click .action': (event, instance) ->
-    accepted = instance.accepted
-    accept = true
-    if accepted
-      accept = false
     selectedIncidents = instance.selectedIncidents
-    selectedIncidents.find(instance.acceptedQuery()).forEach (incident) ->
-      incident = incident
-      incident.accepted = accept
-      Meteor.call 'editIncidentReport', incident, (error, result) ->
-        if error
-          notify('error', 'There was a problem updating your incidents.')
-          return
+    Meteor.call 'rejectIncidentReports', selectedIncidents.find().map((x)->
+      x.id
+    ), (error, result) ->
+      if error
+        notify('error', 'There was a problem updating your incidents.')
     selectedIncidents.remove({})
     event.currentTarget.blur()
 

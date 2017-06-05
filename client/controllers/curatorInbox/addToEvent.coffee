@@ -1,7 +1,7 @@
 UserEvents = require '/imports/collections/userEvents.coffee'
 Articles = require '/imports/collections/articles.coffee'
 { notify } = require '/imports/ui/notification'
-{ pluralize } = require '/imports/ui/helpers'
+import { pluralize } from '/imports/utils'
 
 Template.addToEvent.onCreated ->
   @subscribe('userEvents')

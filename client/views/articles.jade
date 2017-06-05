@@ -19,7 +19,7 @@ template(name="articles")
     .flex-col.event-sources-detail
       if selectedSource
         .event-sources-detail--header
-          h4= selectedSource.title
+          h4 {{selectedSourceTitle}}
         .container-flex.break-2
           ul.event-source-links.container-flex.list-unstyled.no-break
             if isInRole "admin"
@@ -47,7 +47,8 @@ template(name="articles")
                 title="View Original Document")
                 i.fa.fa-link(aria-hidden="true")
           ul.event-source-info.container-flex.list-unstyled.no-break
-            li Published on {{formatDate selectedSource.publishDate}}
+            if selectedSource.publishDate
+              li Published on {{formatDate selectedSource.publishDate}}
             li Submitted by {{selectedSource.addedByUserName}} on {{formatDate selectedSource.addedDate}}
         .event-source-summary.container-flex
           if incidentsLoaded
@@ -69,21 +70,6 @@ template(name="articles")
             +loading small=true
       else
         h4.make-selection Please select a document
-
-template(name="article")
-  li.list-group-item
-    .row
-      .col-sm-10
-        a.ref-link(href="{{url}}"
-          target="_blank"
-          rel="noopener noreferrer")=url
-          i.fa.fa-external-link(aria-hidden="true")
-        if publishDate
-          p
-            small=publishDate
-      .col-sm-2.col-xs-6
-        if isInRole "admin"
-          button.btn.btn-danger.btn-sm.btn-block.delete-article Delete
 
 template(name="articleSelect2")
   select.article-select2.form-control.select2(

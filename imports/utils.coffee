@@ -1,6 +1,5 @@
 Constants = require '/imports/constants.coffee'
 Articles = require '/imports/collections/articles.coffee'
-import { pluralize } from '/imports/ui/helpers'
 
 ###
 # cleanUrl - takes an existing url and removes the last match of the applied
@@ -80,18 +79,13 @@ export incidentReportFormToIncident = (form) ->
       toastr.error("Unknown incident type [#{incidentType}]")
       return
 
-  articleSourceUrl = form.articleSourceUrl?.value
+  articleId = form.articleId?.value
   sourceSelect2Data = $(form.articleSource)?.select2('data')
-  if articleSourceUrl
-    articleUrl = articleSourceUrl
-  else if sourceSelect2Data
+  if not articleId and sourceSelect2Data
     for child in sourceSelect2Data
       if child.selected
-        articleUrl = child.text.trim()
-
-  article = Articles.findOne(url: articleUrl)
-  if article
-    incident.articleId = article._id
+        articleId = child.id
+  incident.articleId = articleId
 
   for option in $(form).find('#incident-disease-select2').select2('data')
     incident.resolvedDisease =
@@ -422,3 +416,54 @@ export debounceCheckTop = _.debounce ($scrollableElement, $toTopButton) ->
     $toTopButton.removeClass('on-canvas')
     $toTopButton.addClass('off-canvas')
 , 50
+
+export pluralize = (word, count, showCount=true)->
+  if Number(count) isnt 1
+    word += "s"
+  if showCount then "#{count} #{word}" else word
+
+export formatDateRange = (dateRange, readable)->
+  dateRange ?= ''
+  start = moment.utc(dateRange.start)
+  end = moment.utc(dateRange.end)
+  dateFormatEnd = "MMM D, YYYY"
+  dateFormatStart = dateFormatEnd
+  inSameYear = start?.year() == end?.year()
+  inSameMonthAndYear = inSameYear and start?.month() == end?.month()
+  sameMonthAndYearDateRange =
+    start.format('MMM D') + ' - ' + end.format('D') + ', ' + end.format('YYYY')
+  if inSameYear
+    dateFormatStart = "MMM D"
+  startFormated = start.format(dateFormatStart)
+  startFormatedWithYear = start.format(dateFormatEnd)
+  endFormated = end.format(dateFormatEnd)
+
+  if dateRange.type is "day"
+    if dateRange.cumulative
+      "before " + endFormated
+    else
+      if readable
+        "on " + startFormatedWithYear
+      else
+        startFormatedWithYear
+  else if dateRange.type is "precise"
+    if readable
+      "between " + startFormated + " and " + endFormated
+    else if inSameMonthAndYear
+      sameMonthAndYearDateRange
+    else
+      startFormated + " - " + endFormated
+  else if inSameMonthAndYear
+    sameMonthAndYearDateRange
+  else
+    startFormated + " - " + endFormated
+
+export formatLocation = ({name, admin2Name, admin1Name, countryName}) ->
+  _.chain([name, admin2Name, admin1Name, countryName])
+    .compact()
+    .uniq()
+    .value()
+    .join(", ")
+
+export formatLocations = (locations) ->
+  locations.map(formatLocation).join('; ')

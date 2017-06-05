@@ -54,6 +54,16 @@ Meteor.methods
       Meteor.call("editUserEventLastIncidentDate", incident.userEventId)
     return incident._id
 
+  rejectIncidentReports: (incidentIds)->
+    checkPermission(@userId)
+    Incidents.update({
+      _id: $in: incidentIds
+    }, {
+      $set: accepted: false
+    }, {
+      multi: true
+    })
+
   addIncidentReports: (incidents, userEventId) ->
     checkPermission(@userId)
     incidents.map (incident)->
