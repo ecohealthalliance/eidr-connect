@@ -1,0 +1,7 @@
+template(name="annotationOptions")
+  ul.annotation-options.list-unstyled
+    li.select.fa(
+      class="fa-{{#if incidentSelected}}circle selected{{else}}circle-o{{/if}}"
+      title="Select Incident")
+    li.edit.fa.fa-pencil(title="Edit Incident")
+    li.delete.fa.fa-trash(title="Delete Incident")

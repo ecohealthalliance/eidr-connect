@@ -43,3 +43,6 @@ Template.sourceIncidentReports.helpers
 
   hasIncidents: ->
     findIncident()
+
+  selectedIncidents: ->
+    Template.instance().data.selectedIncidents

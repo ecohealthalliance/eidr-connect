@@ -3,29 +3,8 @@ import {
   buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
 import Incidents from '/imports/collections/incidentReports.coffee'
 
-POPUP_DELAY = 100
-
-_setSelectingState = (instance, state) ->
-  instance.selecting.set(state)
-
 Template.annotatedContent.onCreated ->
-  @selecting = new ReactiveVar(false)
   @scrolled = new ReactiveVar(false)
-
-Template.annotatedContent.onRendered ->
-  $('body').on 'mousedown', (event) =>
-    # Allow event to propagate to 'add-incident-from-selection' button before
-    # element is removed from DOM
-    setTimeout =>
-      _setSelectingState(@, false)
-    , POPUP_DELAY
-  $(@data.relatedElements.sourceContainer).on 'scroll', _.throttle (event) =>
-    unless @scrolled.get()
-      @scrolled.set(true)
-  , 100
-
-Template.annotatedContent.onDestroyed ->
-  $('body').off('mousedown')
 
 Template.annotatedContent.helpers
   annotatedContent: ->
@@ -37,20 +16,21 @@ Template.annotatedContent.helpers
     ), selectedAnnotationId)
 
 Template.annotatedContent.events
-  'mouseup .selectable-content': _.debounce (event, instance) ->
+  'mouseup .selectable-content': (event, instance) ->
+    instanceData = instance.data
     selection = window.getSelection()
     instance.scrolled.set(false)
     if not selection.isCollapsed and selection.toString().trim()
       data =
-        source: instance.data.source
+        source: instanceData.source
         scrolled: instance.scrolled
-        selecting: instance.selecting
-        popupDelay: POPUP_DELAY
+        view: 'newIncidentFromSelection'
+        relatedElements: instanceData.relatedElements
       Blaze.renderWithData(
-        Template.newIncidentFromSelection,
+        Template.popup,
         data,
-        $("#{instance.data.relatedElements.parent}")[0]
-        $("#{instance.data.relatedElements.sibling}")[0]
+        $("#{instanceData.relatedElements.parent}")[0]
+        $("#{instanceData.relatedElements.sibling}")[0]
       )
     else
       $currentTarget = $(event.currentTarget)
@@ -63,9 +43,24 @@ Template.annotatedContent.events
       if elementAtPoint.classList.contains('accepted')
         # Set reactive variable that's handed down from curatorSourceDetails and
         # shared with the incidentTable templates to the clicked annotation's ID
-        instance.data.selectedAnnotationId.set(annotationId)
+        instanceData.selectedAnnotationId.set(annotationId)
+        data =
+          incidentId: annotationId
+          source: instanceData.source
+          scrolled: instance.scrolled
+          selectedIncidents: instanceData.selectedIncidents
+          relatedElements: instanceData.relatedElements
+          allowRepositioning: false
+          view: 'annotationOptions'
+
+        Blaze.renderWithData(
+          Template.popup,
+          data,
+          $("#{instance.data.relatedElements.parent}")[0]
+          $("#{instance.data.relatedElements.sibling}")[0]
+        )
       else if elementAtPoint.classList.contains('uncertain')
-        source = instance.data.source
+        source = instanceData.source
         incident = Incidents.findOne(annotationId)
         snippetHtml = buildAnnotatedIncidentSnippet(
           source.enhancements.source.cleanContent.content, incident
@@ -78,4 +73,3 @@ Template.annotatedContent.events
           showBackdrop: true
       # Return selectable-content to top so user can make selection
       $currentTarget.css('z-index', 3)
-  , POPUP_DELAY
