@@ -79,7 +79,7 @@ Template.articles.helpers
   searchSettings: ->
     id: 'sourceFilter'
     placeholder: 'Search documents'
-    toggleable: true
+    toggleable: false
     props: ['title']
 
   incidentsLoaded: ->
