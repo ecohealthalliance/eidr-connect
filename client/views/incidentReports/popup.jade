@@ -1,0 +1,5 @@
+template(name="popup")
+  .popup(
+    class="{{#if scrolled}} positioned {{/if}} {{#if nearBottom}} near-bottom {{/if}}"
+    style="left: #{position.left}; top: #{position.top}; bottom: #{position.bottom}; width: #{position.width}; ")
+    +Template.dynamic template=view data=this

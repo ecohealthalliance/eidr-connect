@@ -34,11 +34,10 @@ Meteor.publish 'mapIncidents', (incidentIds) ->
 
 Meteor.publish 'articleIncidents', (articleId) ->
   check(articleId, Match.Maybe(String))
-  query =
+  Incidents.find
     articleId: articleId
     deleted: $in: [null, false]
-  Incidents.find query,
-    sort: 'annotations.case.0.textOffsets.0': 1
+    {sort: 'annotations.case.0.textOffsets.0': 1}
 
 # User Events
 ReactiveTable.publish 'userEvents', UserEvents,

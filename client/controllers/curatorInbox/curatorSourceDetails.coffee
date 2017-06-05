@@ -24,6 +24,7 @@ _markReviewed = (instance, showNext=true) ->
       , 1200
 
 Template.curatorSourceDetails.onCreated ->
+  @selectedIncidents = new Meteor.Collection(null)
   @notifying = new ReactiveVar(false)
   @source = new ReactiveVar(null)
   @reviewed = new ReactiveVar(false)
@@ -126,6 +127,9 @@ Template.curatorSourceDetails.helpers
 
   textContent: ->
     Template.instance().source.get().enhancements.source?.cleanContent?.content
+
+  selectedIncidents: ->
+    Template.instance().selectedIncidents
 
 Template.curatorSourceDetails.events
   'click .toggle-reviewed': (event, instance) ->

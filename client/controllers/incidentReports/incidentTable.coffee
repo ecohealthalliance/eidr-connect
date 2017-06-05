@@ -5,32 +5,12 @@ import { buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
 { formatLocation, formatLocations } = require '/imports/ui/helpers'
 SCROLL_WAIT_TIME = 350
 
-_updateAllIncidentsStatus = (instance, select, event) ->
-  selectedIncidents = instance.selectedIncidents
-  query = instance.acceptedQuery()
-  if select
-    Incidents.find(query).forEach (incident) ->
-      id = incident._id
-      selectedIncidents.upsert id: id,
-        id: id
-        accepted: incident.accepted
-  else
-    selectedIncidents.remove(query)
-  event.currentTarget.blur()
-
-_selectedIncidents = (instance) ->
-  query = instance.acceptedQuery()
-  instance.selectedIncidents.find(query)
-
-_incidentsSelected = (instance) ->
-  _selectedIncidents(instance).count()
-
 Template.incidentTable.onCreated ->
-  @selectedIncidents = new Meteor.Collection(null)
   @addingEvent = new ReactiveVar(false)
   @selectedEventId = new ReactiveVar(false)
   @tableContentScrollable = @data.tableContentScrollable
   @accepted = @data.accepted
+  @selectedIncidents = @data.selectedIncidents
   @scrollToAnnotation = (id) =>
     intervalTime = 0
     @interval = setInterval =>
@@ -68,12 +48,32 @@ Template.incidentTable.onCreated ->
       query.accepted = {$ne: true}
     query
 
+  @getSelectedIncidents = =>
+    query = @acceptedQuery()
+    @data.selectedIncidents.find(query)
+
+  @incidentsSelectedCount = =>
+    @getSelectedIncidents().count()
+
+  @updateAllIncidentsStatus = (select, event) =>
+    query = @acceptedQuery()
+    if select
+      Incidents.find(query).forEach (incident) ->
+        id = incident._id
+        @selectedIncidents.upsert id: id,
+          id: id
+          accepted: incident.accepted
+    else
+      @selectedIncidents.remove(query)
+    event.currentTarget.blur()
+
+
 Template.incidentTable.onRendered ->
   Meteor.defer =>
     @$('[data-toggle="tooltip"]').tooltip()
 
   @autorun =>
-    if not _incidentsSelected(@)
+    if not @incidentsSelectedCount()
       @addingEvent.set(false)
       @selectedEventId.set(null)
 
@@ -94,7 +94,7 @@ Template.incidentTable.helpers
 
   allSelected: ->
     instance = Template.instance()
-    selectedIncidentCount = _incidentsSelected(instance)
+    selectedIncidentCount = instance.incidentsSelectedCount()
     query = instance.acceptedQuery()
     Incidents.find(query).count() == selectedIncidentCount
 
@@ -102,7 +102,7 @@ Template.incidentTable.helpers
     Template.instance().selectedIncidents.findOne(id: @_id)
 
   incidentsSelected: ->
-    _incidentsSelected(Template.instance())
+    Template.instance().incidentsSelectedCount()
 
   acceptance: ->
     not Template.instance().accepted
@@ -117,7 +117,7 @@ Template.incidentTable.helpers
     Template.instance().addingEvent.get()
 
   selectedIncidents: ->
-    _selectedIncidents(Template.instance())
+    Template.instance().getSelectedIncidents()
 
   tableContentScrollable: ->
     Template.instance().tableContentScrollable

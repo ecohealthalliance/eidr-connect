@@ -82,7 +82,6 @@ Template.suggestedIncidentModal.events
           accepted: false
     else
       stageModals(instance, instance.modals)
-      console.log instance.incident
       Modal.show 'deleteConfirmationModal',
         objNameToDelete: 'incident'
         objId: incidentId
