@@ -1,9 +1,7 @@
-incidentReportSchema = require '/imports/schemas/incidentReport.coffee'
-Incidents = require '/imports/collections/incidentReports.coffee'
-UserEvents = require '/imports/collections/userEvents.coffee'
-Articles = require '/imports/collections/articles.coffee'
-Constants = require '/imports/constants.coffee'
-{ regexEscape } = require '/imports/utils'
+import incidentReportSchema from '/imports/schemas/incidentReport.coffee'
+import Incidents from '/imports/collections/incidentReports.coffee'
+import UserEvents from '/imports/collections/userEvents.coffee'
+import Articles from '/imports/collections/articles.coffee'
 
 checkPermission = (userId) ->
   if not Roles.userIsInRole(userId, ['admin'])

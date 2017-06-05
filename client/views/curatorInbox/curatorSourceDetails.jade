@@ -53,9 +53,20 @@ template(name="curatorSourceDetails")
               source=source)
           if notifying
             .veil
+        else if enhancements.error
+          .curator-inbox--warning
+            i.fa.fa-warning
+            h2=enhancements.error
+            .btn.retry Retry
+        else if enhancements.processingStartedAt
+          .curator-inbox--warning
+            i.fa.fa-warning
+            h2 The document has not finished being processed
+            .btn.retry Retry
         else
           .curator-inbox--warning
             i.fa.fa-warning
             h2 This document contains no text content
+            .btn.retry Retry
       else
         +loading message="Loading"
