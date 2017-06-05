@@ -213,7 +213,7 @@ Meteor.methods
     options.publishDate = source.publishDate
     incidents = createIncidentReportsFromEnhancements(enhancements, options)
     incidents = incidents.map (incident) ->
-      incident = _.pick(incident, incidentReportSchema.objectKeys())
+      incident = incidentReportSchema.clean(incident)
     # Remove prior unassociated incidents for the document
     Incidents.remove
       articleId: source._id

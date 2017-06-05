@@ -1,21 +1,25 @@
 import { buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
 import { createIncidentReportsFromEnhancements } from '/imports/utils.coffee'
 
+Template.newIncidentFromSelection.onCreated ->
+  @annotatedText = =>
+    selection = window.getSelection()
+    { startOffset, endOffset } = selection.getRangeAt(0)
+    selection.anchorNode.textContent.slice(startOffset, endOffset)
+
 Template.newIncidentFromSelection.helpers
   annotatedText: ->
-    selection = window.getSelection()
-    range = selection.getRangeAt(0)
-    textOffsets = [range.startOffset, range.endOffset]
-    content = selection.anchorNode.textContent
-    content.slice(textOffsets[0], textOffsets[1])
+    Template.instance().annotatedText()
 
 Template.newIncidentFromSelection.events
   'mousedown .add-incident-from-selection': (event, instance) ->
     source = instance.data.source
-    range = window.getSelection().getRangeAt(0)
+    selection = window.getSelection()
+    { startOffset, endOffset } = selection.getRangeAt(0)
     incident = createIncidentReportsFromEnhancements(source.enhancements,
       countAnnotations: [
-        textOffsets: [[range.startOffset, range.endOffset]]
+        textOffsets: [[startOffset, endOffset]]
+        text: instance.annotatedText()
       ]
       articleId: source._id
     )[0]
@@ -30,4 +34,4 @@ Template.newIncidentFromSelection.events
       offCanvasStartPosition: 'top'
       showBackdrop: true
 
-    window.getSelection().removeAllRanges()
+    selection.removeAllRanges()
