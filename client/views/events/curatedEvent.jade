@@ -25,8 +25,7 @@ template(name="curatedEvent")
             .tab-pane.active(role="tabpanel")
               +Template.dynamic template=view data=templateData
 
-      +resolvedIncidentsPlot incidents=incidents
-
+          +resolvedIncidentsPlot incidents=incidents
 
       if eventHasArticles
         section.event--articles
