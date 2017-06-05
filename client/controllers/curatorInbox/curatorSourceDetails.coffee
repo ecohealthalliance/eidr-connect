@@ -60,7 +60,6 @@ Template.curatorSourceDetails.onRendered ->
 
   @autorun =>
     source = Articles.findOne(@selectedSourceId.get())
-    console.log source
     if source
       @incidentsLoaded.set(false)
       title = source.title

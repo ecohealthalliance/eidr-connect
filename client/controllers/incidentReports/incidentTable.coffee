@@ -147,6 +147,7 @@ Template.incidentTable.helpers
   incidentEvents: ->
     if @_id
       UserEvents.find('incidents.id': @_id).fetch()
+
 Template.incidentTable.events
   'click .incident-table tbody tr': (event, instance) ->
     event.stopPropagation()
@@ -177,13 +178,21 @@ Template.incidentTable.events
 
   'click .action': (event, instance) ->
     selectedIncidents = instance.selectedIncidents
-    Meteor.call 'rejectIncidentReports', selectedIncidents.find().map((x)->
-      x.id
-    ), (error, result) ->
-      if error
-        notify('error', 'There was a problem updating your incidents.')
-    selectedIncidents.remove({})
-    event.currentTarget.blur()
+    selectedIncidentIds = selectedIncidents.find().map((x)->x.id)
+    deleteSelectedIncidents = ->
+      Meteor.call 'deleteIncidents', selectedIncidentIds, (error, result) ->
+        if error
+          notify('error', 'There was a problem updating your incidents.')
+      selectedIncidents.remove({})
+      event.currentTarget.blur()
+    if UserEvents.find('incidents.id': $in: selectedIncidentIds).count() > 0
+      Modal.show 'confirmationModal',
+        message: """There are events associated with these incidents.
+        If the incidents are deleted, the associations will be lost.
+        Are you sure you want to delete them?"""
+        onConfirm: deleteSelectedIncidents
+    else
+      deleteSelectedIncidents()
 
   'click .select-all': (event, instance) ->
     _updateAllIncidentsStatus(instance, true, event)

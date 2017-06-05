@@ -1,0 +1,16 @@
+template(name="confirmationModal")
+  .modal.fade(id="#confirmation-modal" role="dialog")
+    .modal-dialog
+      .modal-content
+        form#delete-obj
+          +modalCloseButton
+          .modal-header
+            .modal-header--title
+              h4 Confirmation
+          .modal-body.clearfix
+            .confirmation
+              p=message
+              .main-action
+                button.confirm.btn.btn-danger.btn-wide(type="button") Confirm
+              .other-actions
+                button.cancel.btn.btn-default.btn-sm(type="button" data-dismiss="modal") Cancel
