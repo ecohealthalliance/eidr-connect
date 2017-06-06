@@ -9,8 +9,11 @@ template(name="confirmationModal")
               h4 Confirmation
           .modal-body.clearfix
             .confirmation
-              p=message
-              .main-action
-                button.confirm.btn.btn-danger.btn-wide(type="button") Confirm
-              .other-actions
-                button.cancel.btn.btn-default.btn-sm(type="button" data-dismiss="modal") Cancel
+              if html
+                | {{html}}
+              else
+                p=message
+                .main-action
+                  button.confirm.btn.btn-danger.btn-wide(type="button") Confirm
+                .other-actions
+                  button.cancel.btn.btn-default.btn-sm(type="button" data-dismiss="modal") Cancel

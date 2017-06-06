@@ -130,7 +130,6 @@ Template.incidentTable.events
 
   'click td.associations': (event, instance) ->
     event.stopPropagation()
-    console.log @
     Modal.show 'associatedEventModal',
       incidentId: @_id
 

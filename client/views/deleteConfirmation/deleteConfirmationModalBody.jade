@@ -4,8 +4,6 @@ template(name="deleteConfirmationModalBody")
     p Are you sure you want to delete this #{objNameToDelete}?
     p=displayName
     .main-action
-      button.confirm-deletion.btn.btn-danger.btn-wide(type="button") Delete #{objNameToDelete}
+      button.confirm-deletion.confirm.btn.btn-danger.btn-wide(type="button") Delete #{objNameToDelete}
     .other-actions
-      if allowEdit
-        button.btn.btn-default.btn-sm.back-to-editing(type="button") Edit Event
       button.cancel.btn.btn-default.btn-sm(type="button" data-dismiss="modal") Cancel

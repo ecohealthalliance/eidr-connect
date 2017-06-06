@@ -1,5 +1,6 @@
 Feeds = require('/imports/collections/feeds.coffee')
 validator = require('bootstrap-validator')
+import { notify } from '/imports/ui/notification'
 
 Template.feeds.onCreated ->
   @subscribe('feeds')
@@ -26,7 +27,13 @@ Template.feeds.events
         event.target.reset()
 
   'click .delete': (event, instance) ->
-    Modal.show 'deleteConfirmationModal',
-      objId: @_id
-      objNameToDelete: 'feed'
-      displayName: @url
+    Modal.show 'confirmationModal',
+      html: Spacebars.SafeString(Blaze.toHTMLWithData(
+        Template.deleteConfirmationModalBody,
+        objNameToDelete: 'feed'
+        displayName: @url
+      ))
+      onConfirm: =>
+        Meteor.call 'removeFeed', @_id, (error) ->
+          if error
+            notify('error', 'There was a problem updating your incidents.')
