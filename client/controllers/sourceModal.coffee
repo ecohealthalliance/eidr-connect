@@ -1,5 +1,4 @@
 convertDate = require '/imports/convertDate.coffee'
-Articles = require '/imports/collections/articles.coffee'
 createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
 validator = require 'bootstrap-validator'
 { notify } = require '/imports/ui/notification'
@@ -11,7 +10,7 @@ import {
   removeSuggestedProperties } from '/imports/utils.coffee'
 
 _checkFormValidity = (instance) ->
-  $form = instance.$('form')
+  $form = instance.$('#add-source')
   $form.validator('validate')
   $form.submit()
   instance.formValid.get()
@@ -26,6 +25,7 @@ _checkForPublishDate = (url, instance) ->
     articleId = match[1]
     Meteor.call 'retrieveProMedArticle', articleId, (error, article) ->
       if article
+        instance.unspecifiedPublishDate.set(false)
         date = moment.utc(article.promedDate)
         # Aproximate DST for New York timezone
         daylightSavings = moment.utc("#{date.year()}-03-08") <= date
@@ -39,11 +39,14 @@ _checkForPublishDate = (url, instance) ->
         instance.selectedArticle.set(_article)
 
 Template.sourceModal.onCreated ->
-  @suggest = @data.suggest
-  @suggest ?= true
+  @formValid = new ReactiveVar(false)
+  @suggestedFields = new ReactiveVar([])
+  @unspecifiedPublishDate = new ReactiveVar(true)
+  @suggest = @data.suggest or true
+  @edit = false
   @tzIsSpecified = false
   @proMEDRegEx = /promedmail\.org\/post\/(\d+)/ig
-  @selectedArticle = new ReactiveVar(@data)
+  @selectedArticle = new ReactiveVar(@data.source)
   @articleOrigin = new ReactiveVar('url')
   @modals =
     currentModal:
@@ -62,10 +65,13 @@ Template.sourceModal.onCreated ->
     @$(input).val('')
     @selectedArticle.set({})
 
-  if @data.edit
-    if @data.publishDate
-      @timezoneFixedPublishDate = convertDate(@data.publishDate, 'local',
-                                                UTCOffsets[@data.publishDateTZ])
+  if @data.source
+    @edit = true
+    if @data.source.publishDate
+      @unspecifiedPublishDate.set(false)
+      @timezoneFixedPublishDate = convertDate(
+        @data.source.publishDate, 'local',
+        UTCOffsets[@data.source.publishDateTZ])
   else
     @loadingArticles = new ReactiveVar(true)
     @suggestedArticles = new Mongo.Collection(null)
@@ -76,10 +82,6 @@ Template.sourceModal.onCreated ->
           @suggestedArticles.insert
             url: "http://www.promedmail.org/post/#{suggestedArticle.promedId}"
             subject: suggestedArticle.subject.raw
-
-Template.sourceModal.onCreated ->
-  @formValid = new ReactiveVar(false)
-  @suggestedFields = new ReactiveVar([])
 
 Template.sourceModal.onRendered ->
   publishDate = @timezoneFixedPublishDate
@@ -98,8 +100,9 @@ Template.sourceModal.onRendered ->
   @$('#add-source').validator()
 
   @autorun =>
-    { tz, date } = @selectedArticle.get()
-    if date
+    selectedArticle = @selectedArticle.get()
+    if selectedArticle and selectedArticle.date
+      { tz, date } = selectedArticle
       @$('#publishDateTZ').val(tz)
       @$('#publishTime').data('DateTimePicker').date(date)
       _setDatePicker(@datePicker, date)
@@ -111,29 +114,23 @@ Template.sourceModal.helpers
     defaultTimezone = if moment().isDST() then 'EDT' else 'EST'
     for tzKey, tzOffset of UTCOffsets
       timezones.push({name: tzKey, offset: tzOffset})
-      if @publishDateTZ
-        if @publishDateTZ is tzKey
+      if @source?.publishDateTZ
+        if @source.publishDateTZ is tzKey
           timezones[timezones.length-1].selected = true
       else if tzKey is defaultTimezone
         timezones[timezones.length-1].selected = true
     timezones
 
-  saveButtonClass: ->
-    if @edit
-      'save-source-edit'
-    else
-      'save-source'
-
   title: ->
     article = Template.instance().selectedArticle.get()
-    article.title or article.subject
+    article?.title or article?.subject
 
   url: ->
-    Template.instance().selectedArticle.get().url
+    Template.instance().selectedArticle.get()?.url
 
   presentUrl: ->
     instance = Template.instance()
-    instance.selectedArticle.get().url and instance.data.edit
+    instance.selectedArticle.get()?.url and instance.edit
 
   suggestedArticles: ->
     Template.instance().suggestedArticles.find()
@@ -142,14 +139,14 @@ Template.sourceModal.helpers
     Template.instance().loadingArticles.get()
 
   articleSelected: ->
-    @subject is Template.instance().selectedArticle.get().subject
+    @subject is Template.instance().selectedArticle.get()?.subject
 
   editing: ->
-    Template.instance().data.edit
+    Template.instance().edit
 
   showSuggestedDocuments: ->
     instance = Template.instance()
-    not instance.data.edit and instance.suggest
+    not instance.edit and instance.suggest
 
   suggested: (field) ->
     if field in Template.instance().suggestedFields.get()
@@ -167,88 +164,66 @@ Template.sourceModal.helpers
     false
 
   showArticleInputs: ->
-    not @edit and not @url
+    not Template.instance().edit
 
   showContent: ->
-    not @url and @content
+    @source?.content
+
+  specifiedPublishDate: ->
+    not Template.instance().unspecifiedPublishDate.get()
+
+  unspecifiedPublishDate: ->
+    Template.instance().unspecifiedPublishDate.get()
 
 Template.sourceModal.events
   'click .save-source': (event, instance) ->
     return unless _checkFormValidity(instance)
     form = instance.$('form')[0]
-    article = form.article.value
-    userEventId = instance.data.userEventId
-    validURL = form.article.checkValidity()
-    timePicker = instance.$('#publishTime').data('DateTimePicker')
-    date = instance.datePicker.startDate
-    time = timePicker.date()
-
-    source =
-      userEventIds: [userEventId]
-      url: cleanUrl(article)
-      content: form.content.value
-      publishDateTZ: form.publishDateTZ.value
-      title: form.title.value
-
-    if date
-      selectedDate = moment
-        year: date.year()
-        month: date.month()
-        date: date.date()
-      if form.publishTime.value.length
-        selectedDate.set({hour: time.get('hour'), minute: time.get('minute')})
-        selectedDate = convertDate(selectedDate,
-                                    UTCOffsets[source.publishDateTZ], 'local')
-      source.publishDate = selectedDate.toDate()
-
-    enhance = form.enhance?.checked
-    Meteor.call 'addEventSource', source, userEventId, (error, articleId) ->
-      if error
-        toastr.error error.reason
-      else
-        if enhance and instance.suggest
-          notify('success', 'Source successfully added')
-          instance.subscribe 'articleIncidents', articleId
-          Modal.show 'suggestedIncidentsModal',
-            userEventId: userEventId
-            article: Articles.findOne(articleId)
-          stageModals(instance, instance.modals)
+    source = {}
+    if @source?._id
+      source._id = @source._id
+    if form.article?.value
+      source.url = cleanUrl(form.article.value)
+    if form.content?.value
+      source.content = form.content.value
+    if form.title?.value
+      source.title = form.title.value
+    if not instance.unspecifiedPublishDate.get()
+      timePicker = instance.$('#publishTime').data('DateTimePicker')
+      date = instance.datePicker.startDate
+      time = timePicker.date()
+      source.publishDateTZ = form.publishDateTZ.value
+      if date
+        selectedDate = moment
+          year: date.year()
+          month: date.month()
+          date: date.date()
+        if form.publishTime.value.length
+          selectedDate.set
+            hour: time.get('hour')
+            minute: time.get('minute')
+          selectedDate = convertDate(selectedDate,
+                                      UTCOffsets[source.publishDateTZ], 'local')
+        source.publishDate = selectedDate.toDate()
+    if source._id
+      Meteor.call 'updateEventSource', source, (error, result) ->
+        if error
+          notify('error', error.reason)
         else
+          notify('success', 'Source successfully updated')
+          stageModals(instance, instance.modals)
+    else
+      Meteor.call 'addEventSource', source, instance.data.userEventId, (error, articleId) ->
+        if error
+          notify('error', error.reason)
+        else
+          notify('success', 'Source successfully added')
+          stageModals(instance, instance.modals)
           instance.data.selectedSourceId?.set(articleId)
-          Modal.hide(instance)
-
-  'click .save-source-edit': (event, instance) ->
-    return unless _checkFormValidity(instance)
-    form = instance.$('form')[0]
-    timePicker = instance.$('#publishTime').data('DateTimePicker')
-    date = instance.datePicker.startDate
-    time = timePicker.date()
-
-    source = @
-    source.publishDateTZ = form.publishDateTZ.value
-    source.title = form.title.value
-
-    if date
-      selectedDate = moment
-        year: date.year()
-        month: date.month()
-        date: date.date()
-      if form.publishTime.value.length
-        selectedDate.set
-          hour: time.get('hour')
-          minute: time.get('minute')
-        selectedDate = convertDate(selectedDate,
-                                    UTCOffsets[source.publishDateTZ], 'local')
-      source.publishDate = selectedDate.toDate()
-
-    Meteor.call 'updateEventSource', source, (error, result) ->
-      if error
-        toastr.error error.reason
-      else
-        stageModals(instance, instance.modals)
 
   'input #article': _.debounce (event, instance) ->
       $('#content').val('')
+      instance.unspecifiedPublishDate.set(true)
       url = event.target.value.trim()
       if url.length > 20 # Check if the length at url base length
         _checkForPublishDate(url, instance)
@@ -256,7 +231,7 @@ Template.sourceModal.events
 
   'input #content': (event, instance) ->
     $('#article').val('')
-    if instance.selectedArticle.get().suggested
+    if instance.selectedArticle.get()?.suggested
       instance.clearSelectedArticle(true)
       removeSuggestedProperties(instance, 'all')
 
@@ -290,3 +265,6 @@ Template.sourceModal.events
 
   'click .tabs li a': (event, instance) ->
     instance.articleOrigin.set($(event.currentTarget).attr('href').slice(1))
+
+  'click .add-publish-date button': (event, instance)->
+    instance.unspecifiedPublishDate.set(false)

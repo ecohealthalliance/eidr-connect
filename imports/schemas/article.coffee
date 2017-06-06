@@ -12,11 +12,14 @@ articleSchema = new SimpleSchema
     type: Date
   publishDate:
     type: Date
+    optional: true
   # The timezone used to specify the publishDate in the document.
   publishDateTZ:
     type: String
+    optional: true
   title:
     type: String
+    optional: true
   url:
     type: String
     optional: true

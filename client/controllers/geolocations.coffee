@@ -1,4 +1,4 @@
-import { formatLocation } from '/imports/ui/helpers'
+import { formatLocation } from '/imports/utils'
 
 Template.location.helpers
   formatDate: (date) ->

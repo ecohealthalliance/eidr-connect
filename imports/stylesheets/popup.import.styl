@@ -1,0 +1,70 @@
+$arrow-height = 8px
+
+.popup
+  position fixed
+  z-index $top-layer
+  opacity 0
+  transform translate(-50%, -15px) scale(0)
+  backface-visibility hidden
+  &:not(.positioned)
+    transition .1s transform ease-in-out, .1s opacity ease-in-out
+    background $border-primary-light
+    box-shadow 0 5px 15px alpha($border-primary, 90%)
+    border 1px solid $border-primary
+    border-radius 3px
+    padding 1em
+  &::before
+    width 0
+    height 0
+    border-left $arrow-height solid transparent
+    border-right $arrow-height solid transparent
+    border-bottom $arrow-height solid $border-primary
+    content ''
+    position absolute
+    top -8px
+    left 50%
+    transform translate(-50%, 0)
+  &.near-bottom
+    box-shadow 0 -2px 15px alpha($border-primary, 90%)
+    &::before
+      border-left $arrow-height solid transparent
+      border-right $arrow-height solid transparent
+      border-top $arrow-height solid $border-primary
+      border-bottom 0
+      top 100%
+  &.active
+    opacity 1
+    transform translate(-50%, 0) scale(1)
+    transform-origin top
+    backface-visibility hidden
+  button
+    padding-left 3em
+    padding-right 3em
+    .text
+      display none
+  &.positioned
+    position absolute
+    transform translate(0,0) scale(1)
+    transition none
+    &::before
+      border 0
+      display none
+    button
+      width 100%
+      background alpha(lighten($warning, 50%), 90%)
+      border-radius 0
+      border-left 0
+      border-right 0
+      display flex
+      text-align left
+      span
+        display inline-block
+      .main-action
+        font-weight 600
+      .text
+        max-width 75%
+        overflow hidden
+        text-overflow ellipsis
+        display block
+        margin-left auto
+        font-style italic

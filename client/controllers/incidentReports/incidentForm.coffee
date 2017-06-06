@@ -124,6 +124,9 @@ Template.incidentForm.helpers
     if incident
       return Articles.findOne(incident.articleId)?.url
 
+  documentId: ->
+    Template.instance().data.incident?.articleId
+
   incidentTypeClassNames: ->
     classNames = []
     instance = Template.instance()

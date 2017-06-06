@@ -3,14 +3,17 @@ UserEvents = require '/imports/collections/userEvents.coffee'
 Articles = require '/imports/collections/articles.coffee'
 UserEventSchema = require '/imports/schemas/userEvent.coffee'
 
+checkPermission = (userId) ->
+  if not Roles.userIsInRole(userId, ['admin'])
+    throw new Meteor.Error('auth', 'User does not have permission to create incidents')
+
 Meteor.methods
   upsertUserEvent: (userEvent) ->
-    if not Roles.userIsInRole(@userId, ['admin'])
-      throw new Meteor.Error('auth', 'Admin level permissions are required for this action.')
     user = Meteor.user()
+    checkPermission(user._id)
     now = new Date()
     eventName = userEvent.eventName
-    if UserEvents.findOne(eventName: eventName)
+    if UserEvents.findOne(eventName: eventName, _id: $ne: userEvent._id)
       throw new Meteor.Error('duplicate_entry', "#{eventName} already exists.")
     userEvent = _.extend userEvent,
       lastModifiedDate: now
@@ -26,16 +29,16 @@ Meteor.methods
         createdByUserName: user.profile.name
 
   deleteUserEvent: (id) ->
-    if Roles.userIsInRole(Meteor.userId(), ['admin'])
-      updateOperator =
-        $set:
-          deleted: true
-          deletedDate: new Date()
-      UserEvents.update id, updateOperator
-      Incidents.update {
-        userEventId: id
-        deleted: $in: [ null, false ]
-      }, updateOperator, multi: true
+    checkPermission(@userId)
+    updateOperator =
+      $set:
+        deleted: true
+        deletedDate: new Date()
+    UserEvents.update id, updateOperator
+    Incidents.update {
+      userEventId: id
+      deleted: $in: [ null, false ]
+    }, updateOperator, multi: true
 
   editUserEventLastModified: (id) ->
     user = Meteor.user()

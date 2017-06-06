@@ -16,52 +16,53 @@
 .leaflet-popup-tip
   background alpha(white, 92%)
 
-.popup
-  h4
-    color $primary
-    margin 0
-  .popup--content
-  ul
-    padding 1em 1.25em
-    margin-bottom 0
-    background alpha(white, 92%)
-  li
-    margin-bottom .75em
-  a
-    flex 1
-    color $secondary-dark
-    &:hover
+.leaflet-popup-content
+  .map-popup
+    h4
       color $primary
-  p
-    margin 0
-    font-size .8em
-
-.popup--title
-  padding 1em
-  background alpha($border-primary-light, 92%)
-  border-bottom 1px solid $border-primary
-
-.popup--event
-  margin-bottom .2em
-
-.popup--event--content
-  max-width calc(100% - 30px)
-
-.popup--event--marker-color-spot
-  margin-right 10px
-  height 20px
-  width 20px
-
-.popup--incidents-text
-  color $m-gray
-  font-size .9em
-
-.popup--incidents-text--label
-  margin-right 2px
-
-.minimal-popup
-  .popup--title
-    text-align center
-  .popup--content
+      margin 0
+    .map-popup--content
+    ul
+      padding 1em 1.25em
+      margin-bottom 0
+      background alpha(white, 92%)
+    li
+      margin-bottom .75em
+    a
+      flex 1
+      color $secondary-dark
+      &:hover
+        color $primary
     p
+      margin 0
+      font-size .8em
+
+  .map-popup--title
+    padding 1em
+    background alpha($border-primary-light, 92%)
+    border-bottom 1px solid $border-primary
+
+  .map-popup--event
+    margin-bottom .2em
+
+  .map-popup--event--content
+    max-width calc(100% - 30px)
+
+  .map-popup--event--marker-color-spot
+    margin-right 10px
+    height 20px
+    width 20px
+
+  .map-popup--incidents-text
+    color $m-gray
+    font-size .9em
+
+  .map-popup--incidents-text--label
+    margin-right 2px
+
+  .minimal-popup
+    .map-popup--title
       text-align center
+    .map-popup--content
+      p
+        text-align center

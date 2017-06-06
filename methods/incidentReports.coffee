@@ -22,30 +22,47 @@ Meteor.methods
       Meteor.call('addIncidentToEvent', userEventId, newId)
     return newId
 
-  # similar to editIncidentReport, but allows you to set a single field without changing any other existing fields.
-  updateIncidentReport: (incident) ->
-    user = Meteor.user()
-    checkPermission(user._id)
-    _id = incident._id
-    delete incident._id
-    incident.modifiedByUserId = user._id
-    incident.modifiedByUserName = user.profile.name
-    res = Incidents.update({_id: _id}, {$set: incident})
-    return incident._id
-
   editIncidentReport: (incident) ->
     user = Meteor.user()
     checkPermission(user._id)
     incidentReportSchema.validate(incident)
-    incidentId = incident._id
-    incident.modifiedByUserId = user._id
-    incident.modifiedByUserName = user.profile.name
-    res = Incidents.update(incidentId, incident)
-    userEventId = UserEvents.findOne('incidents.id': incidentId)._id
-    if userEventId
-      Meteor.call('editUserEventLastModified', userEventId)
-      Meteor.call('editUserEventLastIncidentDate', userEventId)
-    return incidentId
+
+    # Remove existing type props if user changes incident type and merge incident
+    # from client with existing incident
+    if incident.cases
+      fieldsToRemove = deaths: true, specify: true
+    else if incident.deaths
+      fieldsToRemove = cases: true, specify: true
+    else if incident.specify
+      fieldsToRemove = cases: true, deaths: true
+    unless incident.status
+      fieldsToRemove.status = true
+
+    existingIncident = Incidents.findOne(incident._id)
+    updatedIncident = _.extend({}, existingIncident, incident)
+    updateOperators = {}
+    if fieldsToRemove
+      updateOperators = $unset: fieldsToRemove
+      for type of fieldsToRemove
+        delete updatedIncident[type]
+
+    updatedIncident.modifiedByUserId = user._id
+    updatedIncident.modifiedByUserName = user.profile.name
+    res = Incidents.update(updatedIncident._id, updatedIncident, updateOperators)
+    if incident.userEventId
+      Meteor.call("editUserEventLastModified", incident.userEventId)
+      Meteor.call("editUserEventLastIncidentDate", incident.userEventId)
+    return incident._id
+
+  rejectIncidentReports: (incidentIds)->
+    checkPermission(@userId)
+    Incidents.update({
+      _id: $in: incidentIds
+    }, {
+      $set: accepted: false
+    }, {
+      multi: true
+    })
 
   addIncidentReports: (incidents, userEventId) ->
     checkPermission(@userId)
@@ -59,10 +76,14 @@ Meteor.methods
       $set:
         deleted: true,
         deletedDate: new Date()
-    userEventId = UserEvents.findOne('incidents.id': incidentId)._id
+    userEventId = UserEvents.findOne('incidents.id': id)?._id
     if userEventId
       Meteor.call('editUserEventLastModified', userEventId)
       Meteor.call('editUserEventLastIncidentDate', userEventId)
+
+  removeIncidents: (incidentIds) ->
+    incidentIds.forEach (incidentId) ->
+      Meteor.call('removeIncident', incidentId)
 
   removeIncidentFromEvent: (incidentId, userEventId) ->
     checkPermission(@userId)

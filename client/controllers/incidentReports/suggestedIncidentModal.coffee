@@ -31,8 +31,7 @@ Template.suggestedIncidentModal.onCreated ->
       method = 'editIncidentReport'
       action = 'updated'
 
-    incident.annotations = @data.incident?.annotations
-    incident = _.pick(incident, incidentReportSchema.objectKeys())
+    # incident.annotations = @data.incident?.annotations
     Meteor.call method, incident, userEventId, (error, result) =>
       if error
         return notify('error', error)
@@ -75,18 +74,18 @@ Template.suggestedIncidentModal.events
 
   'click .reject': (event, instance) ->
     instanceData = instance.data
+    incident = instance.incident
+    incidentId = incident._id
     if instanceData.incidentCollection
-      instanceData.incidentCollection.update instance.incident._id,
+      instanceData.incidentCollection.update incidentId,
         $set:
           accepted: false
     else
-      Meteor.call 'updateIncidentReport', {
-        _id: instance.incident._id
-        accepted: false
-      }, (error, result) =>
-        if error
-          toastr.error "Error: " + error
-    stageModals(instance, instance.modals)
+      stageModals(instance, instance.modals)
+      Modal.show 'deleteConfirmationModal',
+        objNameToDelete: 'incident'
+        objId: incidentId
+        displayName: incident.annotations.case[0].text
 
   'click .cancel': (event, instance) ->
     stageModals(instance, instance.modals)
@@ -101,10 +100,11 @@ Template.suggestedIncidentModal.events
     incident = utils.incidentReportFormToIncident(instance.$("form")[0])
 
     return if not incident
-    incident.suggestedFields = instance.incident.suggestedFields.get()
     incident.accepted = true
-    incident = _.extend({}, instanceData.incident, incident)
+    incident._id = instanceData.incident._id
     if instanceData.incidentCollection
+      incident = _.extend({}, instanceData.incident, incident)
+      incident.suggestedFields = instance.incident.suggestedFields.get()
       delete incident._id
       instanceData.incidentCollection.update instance.incident._id,
         $unset:
@@ -115,5 +115,4 @@ Template.suggestedIncidentModal.events
       notify('success', 'Incident Accepted', 1200)
       stageModals(instance, instance.modals)
     else
-      incident = _.extend({}, instance.data.incident, incident)
       instance.editIncident(incident, instanceData.userEventId)

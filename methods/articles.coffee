@@ -53,14 +53,15 @@ Meteor.methods
         'User does not have permission to edit documents')
 
   removeEventSource: (id, userEventId) ->
-    if Roles.userIsInRole(Meteor.userId(), ['admin'])
-      removed = Articles.findOne(id)
-      removed.userEventIds = _.filter removed.userEventIds, (currentUserEventId) ->
-        currentUserEventId != userEventId
-      Articles.update id,
-        $set:
-          userEventIds: removed.userEventIds
-      Meteor.call("editUserEventLastModified", userEventId)
+    if Meteor.isServer
+      if Roles.userIsInRole(Meteor.userId(), ['admin'])
+        removed = Articles.findOne(id)
+        removed.userEventIds = _.filter removed.userEventIds, (currentUserEventId) ->
+          currentUserEventId != userEventId
+        Articles.update id,
+          $set:
+            userEventIds: removed.userEventIds
+        Meteor.call("editUserEventLastModified", userEventId)
 
   markSourceReviewed: (id, reviewed) ->
     if Roles.userIsInRole(Meteor.userId(), ['curator', 'admin'])

@@ -45,20 +45,23 @@
   display flex
   align-self stretch
   margin-left auto
+  &.full-width
+    justify-content flex-end
+    &
+    .search-wrapper
+      flex 1
   .option
     margin-right .75em
     display flex
     align-items center
     align-self stretch
     &:last-child
-      margin 0
+      margin-right 0
   .spacer
     width 1px
     align-self stretch
     background $border-primary-light
     margin 0 1.5em 0 0
-  input
-    min-width 250px
   a
     color $primary
     font-size 1.75em
