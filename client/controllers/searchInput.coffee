@@ -13,20 +13,20 @@
 ####
 { regexEscape } = require '/imports/utils'
 
-clearSearch = (instance) ->
-  instance.textFilter.set('')
-  instance.$('.search').val('')
-
-Template.searchInput.onRendered ->
-  clearSearch(@)
-
 Template.searchInput.onCreated ->
+  @clearSearch = (instance) =>
+    @textFilter.set('')
+    @$('.search').val('')
+
   instanceData = @data
   searching = true
   if instanceData.toggleable
     searching = false
   @searching = @data.searching or new ReactiveVar(searching)
   @textFilter = instanceData.textFilter or new ReactiveTable.Filter(instanceData.id, instanceData.props)
+
+Template.searchInput.onRendered ->
+  @clearSearch()
 
 Template.searchInput.helpers
   searchString: ->
@@ -44,21 +44,20 @@ Template.searchInput.helpers
 Template.searchInput.events
   'keyup .search, input .search': (event, instance) ->
     if event.type is 'keyup' and event.keyCode is 27
-      clearSearch(instance)
+      instance.clearSearch()
     else
       instance.textFilter.set
         $regex: regexEscape(instance.$(event.target).val())
         $options: 'i'
 
-  'focusin .search-icon.toggleable:not(.cancel)': (event, instance) ->
-    focus = event.type is 'focusin'
+  'click .search-icon.toggleable:not(.cancel)': (event, instance) ->
     searching = instance.searching
     searching.set(not searching.get())
     setTimeout ->
-      instance.$(".search").focus()
+      instance.$('.search').focus()
     , 200
     $(event.currentTarget).tooltip 'destroy'
 
   'click .cancel, keyup .search': (event, instance) ->
     return if event.type is 'keyup' and event.keyCode isnt 27
-    clearSearch(instance)
+    instance.clearSearch()

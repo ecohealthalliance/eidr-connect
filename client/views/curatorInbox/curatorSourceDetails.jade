@@ -43,9 +43,13 @@ template(name="curatorSourceDetails")
                 selectedIncidents=selectedIncidents
                 source=source)
           .curator-source-details--incidents-wrapper
-            .curator-source-details--header
-              h2 Incidents
-              button.btn.btn-default.btn-sm.add-incident.on-right Add New Incident
+            .curator-source-details--incidents-headers
+              .curator-source-details--header
+                h2 Incidents
+                button.btn.btn-default.btn-sm.add-incident.on-right Add New Incident
+              +sourceIncidentReportsHeader(
+                selectedIncidents=selectedIncidents
+                source=source)
             +sourceIncidentReports(
               selectedIncidentTab=selectedIncidentTab
               selectedAnnotationId=selectedAnnotationId

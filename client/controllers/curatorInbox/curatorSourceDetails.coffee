@@ -4,35 +4,35 @@ key = require 'keymaster'
 { notify } = require '/imports/ui/notification'
 Hammer = require 'hammerjs'
 
-_markReviewed = (instance, showNext=true) ->
-  new Promise (resolve) ->
-    reviewed = instance.reviewed
-    notifying = instance.notifying
-    reviewed.set(not reviewed.get())
-    Meteor.call('markSourceReviewed', instance.selectedSourceId.get(), reviewed.get())
-    if reviewed.get()
-      notifying.set(true)
-      setTimeout ->
-        if showNext
-          unReviewedQuery = $and: [ {reviewed: false}, instance.data.query.get()]
-          sort = sort: {}
-          sort.sort[instance.data.dateType] = -1
-          nextSource = Articles.findOne unReviewedQuery, sort
-          if nextSource
-            instance.selectedSourceId.set(nextSource._id)
-        notifying.set(false)
-        resolve()
-      , 1200
 
 Template.curatorSourceDetails.onCreated ->
   @selectedIncidents = new Meteor.Collection(null)
   @notifying = new ReactiveVar(false)
   @reviewed = new ReactiveVar(false)
   @incidentsLoaded = new ReactiveVar(false)
-  @selectedIncidentTab = new ReactiveVar(0)
   @addingSourceToEvent = new ReactiveVar(false)
   @selectedAnnotationId = new ReactiveVar(null)
   @selectedSourceId = @data.selectedSourceId
+
+  @markReviewed = (showNext=true) =>
+    new Promise (resolve) =>
+      instanceData = @data
+      reviewed = @reviewed
+      reviewed.set(not reviewed.get())
+      Meteor.call('markSourceReviewed', @selectedSourceId.get(), reviewed.get())
+      if reviewed.get()
+        @notifying.set(true)
+        setTimeout =>
+          if showNext
+            unReviewedQuery = $and: [ {reviewed: false}, instanceData.query.get()]
+            sort = sort: {}
+            sort.sort[instanceData.dateType] = -1
+            nextSource = Articles.findOne(unReviewedQuery, sort)
+            if nextSource
+              @selectedSourceId.set(nextSource._id)
+          @notifying.set(false)
+          resolve()
+        , 1200
 
 Template.curatorSourceDetails.onRendered ->
   instance = @
@@ -47,7 +47,7 @@ Template.curatorSourceDetails.onRendered ->
 
   # Create key binding which marks documents as reviewed.
   key 'ctrl + enter, command + enter', (event) =>
-    _markReviewed(@)
+    @markReviewed()
 
   @autorun =>
     # When document is selected in the curatorInbox template, `selectedSourceId`,
@@ -107,9 +107,6 @@ Template.curatorSourceDetails.helpers
   incidentsLoaded: ->
     Template.instance().incidentsLoaded.get()
 
-  selectedIncidentTab: ->
-    Template.instance().selectedIncidentTab
-
   addingSourceToEvent: ->
     Template.instance().addingSourceToEvent.get()
 
@@ -131,8 +128,12 @@ Template.curatorSourceDetails.helpers
 
 Template.curatorSourceDetails.events
   'click .toggle-reviewed': (event, instance) ->
-    _markReviewed(instance)
+    instance.markReviewed()
     event.currentTarget.blur()
+
+  'click .add-source-to-event': (event, instance) ->
+    addingSourceToEvent = instance.addingSourceToEvent
+    addingSourceToEvent.set(not addingSourceToEvent.get())
 
   'click .back-to-list': (event, instance) ->
     instanceData = instance.data
@@ -144,17 +145,6 @@ Template.curatorSourceDetails.events
 
   'click .tabs a': (event, instance) ->
     instance.selectedIncidentTab.set(instance.$(event.currentTarget).data('tab'))
-
-  'click .add-source-to-event': (event, instance) ->
-    addingSourceToEvent = instance.addingSourceToEvent
-    addingSourceToEvent.set(not addingSourceToEvent.get())
-
-  'click .add-incident': (event, instance) ->
-    Modal.show 'incidentModal',
-      incident:
-        articleId: instance.selectedSourceId.get()
-      add: true
-      accept: true
 
   'click .retry': (event, instance)->
     source = Articles.findOne(instance.selectedSourceId.get())

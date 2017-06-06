@@ -4,7 +4,7 @@ template(name="curatorInbox")
       class="{{#unless detailsInView }} on-canvas {{/unless}}")
       unless searching
         h2 Documents
-      .curator-inbox-options
+      .curator-inbox-options(class="{{#if searching}} full-width {{/if}}")
         if allowAddingNewDocument
           a.option.add-document.plain-focus(
             data-toggle="tooltip"

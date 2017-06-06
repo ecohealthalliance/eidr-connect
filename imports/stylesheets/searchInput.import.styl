@@ -1,14 +1,8 @@
 .search-icon
-  position absolute
-  top 50%
-  transform translate(0, -50%)
   color $border-primary
   cursor default
   &.toggleable
     cursor pointer
-  &.right
-    right 10px
-    left auto
   &.cancel
     color lighten($delete, 10%)
     font-size 1.25em
@@ -28,25 +22,24 @@
 .search-wrapper
   align-self center
   transition .3s
-  transform translate(0,0)
   margin-left auto
-  +above(4)
-    width 200px
-  .search-icon
-    display flex
-    align-items center
-    transition .1s ease-in-out
   input
+    display block
+    visibility visible
     opacity 1
     border-radius 3px
     border 1px solid $border-primary
-    +above(4)
-      transition .3s
     &:focus
       border-color $primary
+  &:not(.stagged)
+    .search-icon
+      position absolute
+      right 10px
+      top 50%
+      transform translate(0, -50%)
   &.stagged
-    width 35px
     input
+      display none
       visibility hidden
       opacity 0
     .search-icon
