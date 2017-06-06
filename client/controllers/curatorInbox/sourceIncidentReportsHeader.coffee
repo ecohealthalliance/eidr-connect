@@ -70,9 +70,11 @@ Template.sourceIncidentReportsHeader.events
       event.currentTarget.blur()
     if UserEvents.find('incidents.id': $in: selectedIncidentIds).count() > 0
       Modal.show 'confirmationModal',
-        message: """There are events associated with these incidents.
-        If the incidents are deleted, the associations will be lost.
-        Are you sure you want to delete them?"""
+        primaryMessage: 'There are events associated with this incident.'
+        secondaryMessage: """
+          If the incident is deleted, the associations will be lost.
+          Are you sure you want to delete it? """
+        icon: 'trash-o'
         onConfirm: deleteSelectedIncidents
     else
       deleteSelectedIncidents()

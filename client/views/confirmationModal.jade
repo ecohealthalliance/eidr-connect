@@ -9,10 +9,13 @@ template(name="confirmationModal")
               h4 Confirmation
           .modal-body.clearfix
             .confirmation
+              if icon
+                i.fa(class="fa-#{icon}")
               if html
                 | {{html}}
               else
-                p=message
+                h4=primaryMessage
+                p=secondaryMessage
                 .main-action
                   button.confirm.btn.btn-danger.btn-wide(type="button") Confirm
                 .other-actions
