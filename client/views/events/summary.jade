@@ -37,14 +37,14 @@ template(name="summary")
             | Created by
             span {{ getUserName 'createdByUserId' }}
             | on
-            span {{ formatDate creationDate }}
+            span {{ formatDate event.creationDate }}
 
         .secondary-content
           p
             | Last Modified by
             span {{ getUserName 'lastModifiedByUserId' }}
             | on
-            span {{formatDate lastModifiedDate}}
+            span {{formatDate event.lastModifiedDate}}
 
         .secondary-content
           button.copy-link.btn.btn-xs.btn-default(
