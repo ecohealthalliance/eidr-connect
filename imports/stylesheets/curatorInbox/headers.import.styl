@@ -281,8 +281,6 @@
   button
     margin-right .5em
     transition .1s ease-in-out
-    &:last-of-type
-      margin-right 0
     +at(1)
       margin 0 0 1em 0
       padding-top .75em
@@ -313,6 +311,8 @@
     max-width 50%
 
 .curator-source-details--incidents
+  display flex
+  flex-direction column
   &:not(:first-of-type)
     .curator-source-details--sub-header
       border-top-width 1px
@@ -339,6 +339,7 @@
     flex 1
 
 .curator-inbox--feed-selector-wrapper
+  display flex
   position relative
   padding 0
   height $curator-pane-head-height
