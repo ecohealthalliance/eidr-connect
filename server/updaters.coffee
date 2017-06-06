@@ -10,7 +10,7 @@ feedSchema = require '/imports/schemas/feed'
 Constants = require '/imports/constants.coffee'
 { regexEscape } = require '/imports/utils'
 
-DATA_VERSION = 3
+DATA_VERSION = 4
 AppMetadata = new Meteor.Collection('appMetadata')
 priorDataVersion = AppMetadata.findOne(property: "dataVersion")?.value
 
@@ -121,6 +121,10 @@ Meteor.startup ->
   UserEvents.update {},
     $unset: articleCount: ''
     {multi: true}
+
+  Articles.find().forEach (article) ->
+    Articles.update _id: article._id,
+      $unset: userEventId: ''
 
   AppMetadata.upsert({property: "dataVersion"}, $set: {value: DATA_VERSION})
   console.log "database update complete"
