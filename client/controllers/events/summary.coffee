@@ -4,6 +4,8 @@ UserEvents = require '/imports/collections/userEvents.coffee'
 Template.summary.onCreated ->
   @copied = new ReactiveVar(false)
   @collapsed = new ReactiveVar(false)
+  event = @data.event
+  @subscribe('users', [event.createdByUserId, event.lastModifiedByUserId])
 
 Template.summary.onRendered ->
   @autorun =>
@@ -29,6 +31,11 @@ Template.summary.helpers
 
   collapsed: ->
     Template.instance().collapsed.get()
+
+  getUserName: (prop) ->
+    Meteor.users.findOne(
+      Template.instance().data.event[prop]
+    )?.profile.name
 
 Template.summary.events
   'click .copy-link': (event, instance) ->

@@ -102,6 +102,10 @@ Meteor.publish 'incidentArticle', (articleId) ->
 Meteor.publish 'feeds', ->
   Feeds.find()
 
-# User status
+# Users
+Meteor.publish 'users', (userIds) ->
+  Meteor.users.find
+    _id: $in: userIds
+
 Meteor.publish 'userStatus', () ->
   Meteor.users.find({'status.online': true }, {fields: {'status': 1 }})
