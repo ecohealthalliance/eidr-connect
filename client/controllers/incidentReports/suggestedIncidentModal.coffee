@@ -89,9 +89,12 @@ Template.suggestedIncidentModal.events
           stageModals(instance, instance.modals)
       if UserEvents.find('incidents.id': $in: incidentIds).count() > 0
         Modal.show 'confirmationModal',
-          message: """There are events associated with this incident.
-          If the incident is deleted, the associations will be lost.
-          Are you sure you want to delete it?"""
+          primaryMessage: 'There are events associated with this incident.'
+          secondaryMessage: """
+            If the incident is deleted, the associations will be lost.
+            Are you sure you want to delete it?
+          """
+          icon: 'trash-o'
           onConfirm: deleteSelectedIncidents
       else
         deleteSelectedIncidents()
