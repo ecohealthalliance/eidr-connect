@@ -81,11 +81,12 @@ Template.suggestedIncidentModal.events
         $set:
           accepted: false
     else
-      stageModals(instance, instance.modals)
       Modal.show 'deleteConfirmationModal',
         objNameToDelete: 'incident'
         objId: incidentId
         displayName: incident.annotations.case[0].text
+
+    stageModals(instance, instance.modals)
 
   'click .cancel': (event, instance) ->
     stageModals(instance, instance.modals)

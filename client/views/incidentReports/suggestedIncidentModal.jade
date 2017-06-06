@@ -33,5 +33,9 @@ template(name="suggestedIncidentModal")
         .modal-footer
           .on-left
             button.btn.btn-default.cancel(type="button") Cancel
-            button.btn.btn-danger.reject(type="button") Delete
+            button.btn.btn-danger.reject(type="button")
+              if incidentCollection
+                | Reject
+              else
+                | Delete
           button.btn.btn-primary.save-modal(type="button")=saveButtonText
