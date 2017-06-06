@@ -114,7 +114,8 @@ Template.articles.events
     Modal.show 'confirmationModal',
       html: Spacebars.SafeString(Blaze.toHTMLWithData(
         Template.deleteConfirmationModalBody,
-        objNameToDelete: 'Document'
+        objNameToDelete: 'document'
+        displayName: EventArticles.findOne(instance.selectedSourceId.get())?.title
       ))
       onConfirm: ->
         Meteor.call 'removeEventSource', sourceId, instance.data.userEvent._id, (error) ->

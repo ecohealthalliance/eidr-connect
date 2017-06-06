@@ -56,12 +56,13 @@ Template.curatorSourceDetails.onRendered ->
     @reviewed.set Articles.findOne(sourceId)?.reviewed or false
 
   @autorun =>
-    @subscribe 'articleIncidents', @selectedSourceId.get()
+    @incidentsLoaded.set(false)
+    @subscribe 'articleIncidents', @selectedSourceId.get(), =>
+      @incidentsLoaded.set(true)
 
   @autorun =>
     source = Articles.findOne(@selectedSourceId.get())
     if source
-      @incidentsLoaded.set(false)
       title = source.title
       # Update the document title and its tooltip in the right pane
       Meteor.defer =>
@@ -74,10 +75,9 @@ Template.curatorSourceDetails.onRendered ->
           $title.attr('data-original-title', title)
       enhancements = source.enhancements
       if enhancements?.dateOfDiagnosis or enhancements?.error or enhancements?.processingStartedAt
-        instance.incidentsLoaded.set(true)
+        return
       else
-        Meteor.call 'getArticleEnhancementsAndUpdate', source, (error, enhancements) =>
-          instance.incidentsLoaded.set(true)
+        Meteor.call 'getArticleEnhancementsAndUpdate', source
 
 Template.curatorSourceDetails.onDestroyed ->
   $(window).off('resize')
