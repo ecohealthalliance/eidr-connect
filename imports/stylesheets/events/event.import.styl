@@ -183,6 +183,7 @@ $max-event-details-width = $max-ui-width+300
 
 .tab-form
   display flex
+  flex-direction column
   align-items center
   padding 15px 15px 15px $page-padding-small-screen
   border-bottom 2px solid $border-primary-light
@@ -206,9 +207,14 @@ $max-event-details-width = $max-ui-width+300
       padding-top .45em
       padding-bottom .45em
   > .flex-col
+  button
     width 100%
+    &:not(:last-of-type)
+      margin-bottom 1em
     +above(2)
       width auto
+      &:not(:last-of-type)
+        margin-bottom 0
   input
   .btn
     min-width 100%
