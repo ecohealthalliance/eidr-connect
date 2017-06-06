@@ -130,14 +130,14 @@
         padding-top .75em
         padding-bottom .75em
     &.active
-      background $block-BG
       border-color $border-primary
-      margin-bottom -1px
       &:hover
         background @background
         border-color @border-color
       > a
+        background lighten($border-primary, 30%)
         color $primary
+        disableLink()
 
 .tabs-modal-header
   > li

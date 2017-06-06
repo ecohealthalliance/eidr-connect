@@ -19,11 +19,13 @@ $warning-border = darken($warning-bg, 12%)
       autofillBG(false)
   &.full-width
     .tabs.tabs-secondary
-      border-bottom-color $warning-border
-      li.active
-        a
+      border-color $warning-border
+      li
+        > a
           border-color $warning-border
-          background $warning-bg
+        &.active
+          > a
+            background darken($warning-bg, 8%)
     .tab-content
       background $warning-bg !important
       border-bottom-color $warning-border !important
@@ -54,10 +56,23 @@ $warning-border = darken($warning-bg, 12%)
     color $primary-dark
 
 #suggestedIncidentModal
+  .modal-dialog
+    width 90%
   .check-buttons
     margin-bottom 0
   .form-group--full:last-of-type
     margin-bottom 1.5em
+  .control-label
+    &.featured
+      border-bottom 1px solid darken($border-primary-light, 5%)
+      align-items flex-start
+      +above(3)
+        align-items center
+      +between(3, 4)
+        flex-direction row
+  .tabs-traditional
+    margin-left 15px
+
   +above(4)
     .modal-dialog
       width calc(100% - 150px)
@@ -66,10 +81,12 @@ $warning-border = darken($warning-bg, 12%)
     .modal-body
       padding 0
       display flex
+      overflow hidden
     .annotated-content
     #add-incident
       flex 1 1 50%
       max-width 50%
+      overflow-x scroll
     #add-incident
       padding 0 20px
     .annotated-content
@@ -78,3 +95,14 @@ $warning-border = darken($warning-bg, 12%)
       border-right 1px solid $border-primary-m
     .snippet--text
       max-height none
+    .control-label
+      &.featured
+        min-height 45px
+        padding-top 0
+        padding-bottom 0
+        margin-top 0
+        border-top 0
+        display flex
+        align-items center
+        h5
+          margin 0

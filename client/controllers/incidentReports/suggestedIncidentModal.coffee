@@ -80,6 +80,7 @@ Template.suggestedIncidentModal.events
       instanceData.incidentCollection.update incidentId,
         $set:
           accepted: false
+      stageModals(instance, instance.modals)
     else
       incidentIds = [incidentId]
       deleteSelectedIncidents = ->

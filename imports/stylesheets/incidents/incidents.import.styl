@@ -101,21 +101,15 @@ viewingBG()
     position relative
     display flex
     flex-direction column
-    margin-left -20px
-    margin-right -20px
-    margin-top -11px
-    margin-bottom 1em
+    +above(4)
+      margin-top -11px
+      margin-left -20px
+      margin-right -20px
     &.modal-block
       padding 0
       label
         display flex
         border-top 0
-    label
-      padding 10px 20px
-      border-bottom 1px solid darken($border-primary-light, 5%)
-      margin-top 0
-      h5
-        margin 0
 
 .snippet--text
   flex 1
