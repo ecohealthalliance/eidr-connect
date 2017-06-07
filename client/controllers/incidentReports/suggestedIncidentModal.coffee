@@ -1,7 +1,8 @@
-utils = require '/imports/utils.coffee'
-incidentReportSchema = require '/imports/schemas/incidentReport.coffee'
-{ notify } = require '/imports/ui/notification'
-{ stageModals } = require '/imports/ui/modals'
+import UserEvents from'/imports/collections/userEvents.coffee'
+import incidentReportSchema from '/imports/schemas/incidentReport.coffee'
+import utils from '/imports/utils.coffee'
+import { notify } from '/imports/ui/notification'
+import { stageModals } from '/imports/ui/modals'
 
 Template.suggestedIncidentModal.onRendered ->
   Meteor.defer =>
@@ -73,19 +74,30 @@ Template.suggestedIncidentModal.events
 
   'click .reject': (event, instance) ->
     instanceData = instance.data
-    incident = instance.incident
-    incidentId = incident._id
+    incidentId = instance.incident._id
     if instanceData.incidentCollection
       instanceData.incidentCollection.update incidentId,
         $set:
           accepted: false
+      stageModals(instance, instance.modals)
     else
-      Modal.show 'deleteConfirmationModal',
-        objNameToDelete: 'incident'
-        objId: incidentId
-        displayName: incident.annotations.case[0].text
-
-    stageModals(instance, instance.modals)
+      incidentIds = [incidentId]
+      deleteSelectedIncidents = ->
+        Meteor.call 'deleteIncidents', incidentIds, (error, result) ->
+          if error
+            notify('error', 'There was a problem updating your incidents.')
+          stageModals(instance, instance.modals)
+      if UserEvents.find('incidents.id': $in: incidentIds).count() > 0
+        Modal.show 'confirmationModal',
+          primaryMessage: 'There are events associated with this incident.'
+          secondaryMessage: """
+            If the incident is deleted, the associations will be lost.
+            Are you sure you want to delete it?
+          """
+          icon: 'trash-o'
+          onConfirm: deleteSelectedIncidents
+      else
+        deleteSelectedIncidents()
 
   'click .cancel': (event, instance) ->
     stageModals(instance, instance.modals)

@@ -128,7 +128,7 @@ Template.incidentTable.events
       offCanvasStartPosition: 'top'
       showBackdrop: true
 
-  'click table.incident-table tr td.associations': (event, instance) ->
+  'click td.associations': (event, instance) ->
     event.stopPropagation()
     Modal.show 'associatedEventModal',
       incidentId: @_id

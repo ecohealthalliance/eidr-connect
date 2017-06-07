@@ -114,12 +114,15 @@ Template.articles.events
 
   'click .delete-source:not(.disabled)': (event, instance) ->
     sourceId = instance.selectedSourceId.get()
-    Modal.show 'deleteConfirmationModal',
-      userEventId: instance.data.userEvent._id
-      objNameToDelete: 'source'
-      objId: sourceId
-      displayName: EventArticles.findOne(sourceId).title
-    instance.$(event.currentTarget).tooltip('destroy')
+    Modal.show 'confirmationModal',
+      html: Spacebars.SafeString(Blaze.toHTMLWithData(
+        Template.deleteConfirmationModalBody,
+        objNameToDelete: 'document'
+        displayName: EventArticles.findOne(instance.selectedSourceId.get())?.title
+      ))
+      onConfirm: ->
+        Meteor.call 'removeEventSource', sourceId, instance.data.userEvent._id, (error) ->
+          instance.$(event.currentTarget).tooltip('destroy')
 
   'click .edit-source': (event, instance) ->
     Modal.show 'sourceModal',

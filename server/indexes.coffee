@@ -7,5 +7,10 @@ import { ensureIndexes} from './dbUtils.coffee'
 ###
 
 Meteor.startup ->
-  ensureIndexes(Articles, {url: 1, addedDate: 1, userEventIds: 1})
-  ensureIndexes(IncidentReports, {url: 1})
+  ensureIndexes(Articles, {
+    url: 1
+    addedDate: 1
+    userEventIds: 1
+    publishDate: 1
+  })
+  ensureIndexes(IncidentReports, {articleId: 1})

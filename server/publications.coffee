@@ -89,8 +89,13 @@ Meteor.publish 'smartEvents', () ->
 
 # Articles
 Meteor.publish 'articles', (query={}) ->
+  if not Roles.userIsInRole(@userId, ['admin', 'curator'])
+    throw new Meteor.Error('auth', 'User does not have permission to access articles')
   query.deleted = {$in: [null, false]}
-  Articles.find(query)
+  Articles.find(query, {
+    fields:
+      'enhancements.source.scrapedData': 0
+  })
 
 Meteor.publish 'article', (sourceId) ->
   Articles.find(url: $regex: new RegExp("#{sourceId}$"))

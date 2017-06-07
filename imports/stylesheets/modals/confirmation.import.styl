@@ -1,18 +1,21 @@
-.delete-confirmation
-.cancel-confirmation
+.confirmation
   text-align center
-  padding-top 2em
-  padding-bottom 3.5em
+  padding 2em 0 3.5em 0
   p
     &:first-of-type
       margin .5em 0 .2em 0
       font-size 125%
     &:last-of-type
       font-style italic
-      margin-bottom 2em
+      margin 0 auto 2em auto
+      width 65%
+    &:first-of-type:last-of-type
+      font-style normal
+      font-size 100%
   i
     color lighten($delete, 20%)
     font-size 5em
+    margin-bottom 15px
   .other-actions
     margin-top 1em
     .btn:first-of-type
