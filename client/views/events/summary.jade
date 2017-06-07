@@ -24,17 +24,28 @@ template(name="summary")
           h4 Incidents
           if isInRole "admin"
             +addIncidentReport class='-in-details'
+
         .count.flex-col
           span= documentCount
           h4 Documents
           if isInRole "admin"
             +sourceModalButton class='-in-details'
+
       .event--metadata--secondary-content.container-flex.no-break
         .secondary-content
-          p Created by: #{createdByUserName} on {{formatDate creationDate}}
+          p
+            | Created by
+            span {{ getUserName 'createdByUserId' }}
+            | on
+            span {{ formatDate event.creationDate }}
+
         .secondary-content
-          p Last Modified by: #{lastModifiedByUserName} on
-            | {{formatDate lastModifiedDate}}
+          p
+            | Last Modified by
+            span {{ getUserName 'lastModifiedByUserId' }}
+            | on
+            span {{formatDate event.lastModifiedDate}}
+
         .secondary-content
           button.copy-link.btn.btn-xs.btn-default(
             type="button"
