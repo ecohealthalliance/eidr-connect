@@ -5,7 +5,6 @@ Template.summary.onCreated ->
   @copied = new ReactiveVar(false)
   @collapsed = new ReactiveVar(false)
   event = @data.event
-  @subscribe('users', [event.createdByUserId, event.lastModifiedByUserId])
 
 Template.summary.onRendered ->
   @autorun =>
