@@ -53,16 +53,20 @@ template(name="articles")
         .event-source-summary.container-flex
           if incidentsLoaded
             .event-source-summary--item
-              h5 Locations
+              h5
+                | Locations
+                span.count (#{locationsForDocument.length})
               ul.list-unstyled
-                each locationsForSource selectedSource
+                each locationsForDocument
                   li=this
                 else
                   li No locations
             .event-source-summary--item
-              h5 Incidents
+              h5
+                | Incidents
+                span.count (#{incidentsForDocument.count})
               ul.list-unstyled
-                  each incidentsForSource selectedSource
+                  each incidentsForDocument
                     li(class="{{#if incidentAssociatedWithEvent}} associated {{/if}}") {{incidentToText this}}
                   else
                     li No cases

@@ -66,14 +66,17 @@ Template.articles.helpers
     source = EventArticles.findOne(Template.instance().selectedSourceId.get())
     source.title or source.url or (source.content?.slice(0,30) + "...")
 
-  incidentsForSource: (source) ->
-    Incidents.find(articleId: Template.instance().selectedSourceId.get())
+  incidentsForDocument: (source) ->
+    Incidents.find
+      articleId: Template.instance().selectedSourceId.get()
+      accepted: true
 
-  locationsForSource: (source) ->
+  locationsForDocument: ->
+    articleId = Template.instance().selectedSourceId.get()
     locations = {}
     Incidents
       .find
-        articleId: source._id
+        articleId: articleId
       .forEach (incident) ->
         for location in incident.locations
           locations[location.id] = location.name
