@@ -71,8 +71,7 @@ $warning-border = darken($warning-bg, 12%)
       +between(3, 4)
         flex-direction row
   .tabs-traditional
-    margin-left 15px
-
+    margin 0 20px
   +above(4)
     .modal-dialog
       width calc(100% - 150px)
@@ -86,13 +85,31 @@ $warning-border = darken($warning-bg, 12%)
     #add-incident
       flex 1 1 50%
       max-width 50%
-      overflow-x scroll
+      overflow-y scroll
     #add-incident
-      padding 0 20px
     .annotated-content
       margin 0
       border 0
       border-right 1px solid $border-primary-m
+    #add-incident
+      label.featured
+        margin 0
+      .tabs-traditional
+        margin-left -20px
+        margin-right -20px
+        width calc(100% + 40px)
+      .incident-type-wrapper
+        padding 10px 20px 15px 20px
+        .form-group:first-of-type
+          padding 0
+      .form-group
+        margin-left 0
+        margin-right 0
+        &:not(.form-groups)
+          padding 0 20px
+      .tab-content
+        margin-left -20px
+        margin-right -20px
     .snippet--text
       max-height none
     .control-label
