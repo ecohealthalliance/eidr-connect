@@ -189,7 +189,7 @@ Template.suggestedIncidentsModal.events
     incidents = Incidents.find(
       accepted: true
     ).map (incident)->
-      _.pick(incident, incidentReportSchema.objectKeys())
+      incidentReportSchema.clean(incident)
     count = incidents.length
     if count <= 0
       notify('warning', 'No incidents have been confirmed')

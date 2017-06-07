@@ -4,10 +4,9 @@ incidentReportSchema = require '/imports/schemas/incidentReport.coffee'
 { stageModals } = require '/imports/ui/modals'
 
 Template.suggestedIncidentModal.onRendered ->
-  instance = @
-  Meteor.defer ->
+  Meteor.defer =>
     # Add max-height to snippet if it is taller than form
-    formHeight = instance.$('.add-incident--wrapper').height()
+    formHeight = @$('.add-incident--wrapper').height()
     $snippet = $('.snippet--text')
     if $snippet.height() > formHeight
       $snippet.css('max-height', formHeight)
@@ -27,7 +26,7 @@ Template.suggestedIncidentModal.onCreated ->
   @editIncident = (incident, userEventId) =>
     method = 'addIncidentReport'
     action = 'added'
-    if @incident._id
+    if incident._id
       method = 'editIncidentReport'
       action = 'updated'
 
@@ -102,9 +101,10 @@ Template.suggestedIncidentModal.events
 
     return if not incident
     incident.accepted = true
-    incident._id = instanceData.incident._id
-    if instanceData.incidentCollection
+    incident._id = instance.incident._id
+    unless incident._id
       incident = _.extend({}, instanceData.incident, incident)
+    if instanceData.incidentCollection
       incident.suggestedFields = instance.incident.suggestedFields.get()
       delete incident._id
       instanceData.incidentCollection.update instance.incident._id,
@@ -116,4 +116,7 @@ Template.suggestedIncidentModal.events
       notify('success', 'Incident Accepted', 1200)
       stageModals(instance, instance.modals)
     else
-      instance.editIncident(incident, instanceData.userEventId)
+      instance.editIncident(
+        incidentReportSchema.clean(incident),
+        instanceData.userEventId
+      )
