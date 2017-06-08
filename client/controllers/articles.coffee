@@ -66,14 +66,17 @@ Template.articles.helpers
     source = EventArticles.findOne(Template.instance().selectedSourceId.get())
     source.title or source.url or (source.content?.slice(0,30) + "...")
 
-  incidentsForSource: (source) ->
-    Incidents.find(articleId: Template.instance().selectedSourceId.get())
+  incidentsForDocument: (source) ->
+    Incidents.find
+      articleId: Template.instance().selectedSourceId.get()
+      accepted: true
 
-  locationsForSource: (source) ->
+  locationsForDocument: ->
+    articleId = Template.instance().selectedSourceId.get()
     locations = {}
     Incidents
       .find
-        articleId: source._id
+        articleId: articleId
       .forEach (incident) ->
         for location in incident.locations
           locations[location.id] = location.name
@@ -111,12 +114,15 @@ Template.articles.events
 
   'click .delete-source:not(.disabled)': (event, instance) ->
     sourceId = instance.selectedSourceId.get()
-    Modal.show 'deleteConfirmationModal',
-      userEventId: instance.data.userEvent._id
-      objNameToDelete: 'source'
-      objId: sourceId
-      displayName: EventArticles.findOne(sourceId).title
-    instance.$(event.currentTarget).tooltip('destroy')
+    Modal.show 'confirmationModal',
+      html: Spacebars.SafeString(Blaze.toHTMLWithData(
+        Template.deleteConfirmationModalBody,
+        objNameToDelete: 'document'
+        displayName: EventArticles.findOne(instance.selectedSourceId.get())?.title
+      ))
+      onConfirm: ->
+        Meteor.call 'removeEventSource', sourceId, instance.data.userEvent._id, (error) ->
+          instance.$(event.currentTarget).tooltip('destroy')
 
   'click .edit-source': (event, instance) ->
     Modal.show 'sourceModal',

@@ -1,4 +1,5 @@
 import Incidents from '/imports/collections/incidentReports'
+UserEvents = require '/imports/collections/userEvents.coffee'
 import { notify } from '/imports/ui/notification'
 
 Template.sourceIncidentReportsHeader.onCreated ->
@@ -60,14 +61,23 @@ Template.sourceIncidentReportsHeader.events
 
   'click .delete': (event, instance) ->
     selectedIncidents = instance.selectedIncidents
-    Meteor.call 'removeIncidents', selectedIncidents.find().map((incident)->
-      incident.id
-    ), (error, result) ->
-      if error
-        notify('error', error.reason)
-      else
-        selectedIncidents.remove({})
-    event.currentTarget.blur()
+    selectedIncidentIds = selectedIncidents.find().map((x)->x.id)
+    deleteSelectedIncidents = ->
+      Meteor.call 'deleteIncidents', selectedIncidentIds, (error, result) ->
+        if error
+          notify('error', 'There was a problem updating your incidents.')
+      selectedIncidents.remove({})
+      event.currentTarget.blur()
+    if UserEvents.find('incidents.id': $in: selectedIncidentIds).count() > 0
+      Modal.show 'confirmationModal',
+        primaryMessage: 'There are events associated with this incident.'
+        secondaryMessage: """
+          If the incident is deleted, the associations will be lost.
+          Are you sure you want to delete it? """
+        icon: 'trash-o'
+        onConfirm: deleteSelectedIncidents
+    else
+      deleteSelectedIncidents()
 
   'click .select-all': (event, instance) ->
     instance.updateAllIncidentsStatus(true, event)

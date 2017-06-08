@@ -42,7 +42,8 @@ Template.sourceModal.onCreated ->
   @formValid = new ReactiveVar(false)
   @suggestedFields = new ReactiveVar([])
   @unspecifiedPublishDate = new ReactiveVar(true)
-  @suggest = @data.suggest or true
+  @suggest = @data.suggest
+  @suggest ?= true
   @edit = false
   @tzIsSpecified = false
   @proMEDRegEx = /promedmail\.org\/post\/(\d+)/ig
@@ -146,6 +147,7 @@ Template.sourceModal.helpers
 
   showSuggestedDocuments: ->
     instance = Template.instance()
+    console.log instance.edit, instance.suggest
     not instance.edit and instance.suggest
 
   suggested: (field) ->

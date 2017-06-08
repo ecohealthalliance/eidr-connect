@@ -1,13 +1,13 @@
-utils = require '/imports/utils.coffee'
-incidentReportSchema = require '/imports/schemas/incidentReport.coffee'
-{ notify } = require '/imports/ui/notification'
-{ stageModals } = require '/imports/ui/modals'
+import UserEvents from'/imports/collections/userEvents.coffee'
+import incidentReportSchema from '/imports/schemas/incidentReport.coffee'
+import utils from '/imports/utils.coffee'
+import { notify } from '/imports/ui/notification'
+import { stageModals } from '/imports/ui/modals'
 
 Template.suggestedIncidentModal.onRendered ->
-  instance = @
-  Meteor.defer ->
+  Meteor.defer =>
     # Add max-height to snippet if it is taller than form
-    formHeight = instance.$('.add-incident--wrapper').height()
+    formHeight = @$('.add-incident--wrapper').height()
     $snippet = $('.snippet--text')
     if $snippet.height() > formHeight
       $snippet.css('max-height', formHeight)
@@ -27,7 +27,7 @@ Template.suggestedIncidentModal.onCreated ->
   @editIncident = (incident, userEventId) =>
     method = 'addIncidentReport'
     action = 'added'
-    if @incident._id
+    if incident._id
       method = 'editIncidentReport'
       action = 'updated'
 
@@ -74,18 +74,30 @@ Template.suggestedIncidentModal.events
 
   'click .reject': (event, instance) ->
     instanceData = instance.data
-    incident = instance.incident
-    incidentId = incident._id
+    incidentId = instance.incident._id
     if instanceData.incidentCollection
       instanceData.incidentCollection.update incidentId,
         $set:
           accepted: false
-    else
       stageModals(instance, instance.modals)
-      Modal.show 'deleteConfirmationModal',
-        objNameToDelete: 'incident'
-        objId: incidentId
-        displayName: incident.annotations.case[0].text
+    else
+      incidentIds = [incidentId]
+      deleteSelectedIncidents = ->
+        Meteor.call 'deleteIncidents', incidentIds, (error, result) ->
+          if error
+            notify('error', 'There was a problem updating your incidents.')
+          stageModals(instance, instance.modals)
+      if UserEvents.find('incidents.id': $in: incidentIds).count() > 0
+        Modal.show 'confirmationModal',
+          primaryMessage: 'There are events associated with this incident.'
+          secondaryMessage: """
+            If the incident is deleted, the associations will be lost.
+            Are you sure you want to delete it?
+          """
+          icon: 'trash-o'
+          onConfirm: deleteSelectedIncidents
+      else
+        deleteSelectedIncidents()
 
   'click .cancel': (event, instance) ->
     stageModals(instance, instance.modals)
@@ -101,9 +113,10 @@ Template.suggestedIncidentModal.events
 
     return if not incident
     incident.accepted = true
-    incident._id = instanceData.incident._id
-    if instanceData.incidentCollection
+    incident._id = instance.incident._id
+    unless incident._id
       incident = _.extend({}, instanceData.incident, incident)
+    if instanceData.incidentCollection
       incident.suggestedFields = instance.incident.suggestedFields.get()
       delete incident._id
       instanceData.incidentCollection.update instance.incident._id,
@@ -115,4 +128,7 @@ Template.suggestedIncidentModal.events
       notify('success', 'Incident Accepted', 1200)
       stageModals(instance, instance.modals)
     else
-      instance.editIncident(incident, instanceData.userEventId)
+      instance.editIncident(
+        incidentReportSchema.clean(incident),
+        instanceData.userEventId
+      )

@@ -1,11 +1,14 @@
-UserEvents = require '/imports/collections/userEvents.coffee'
-Articles = require '/imports/collections/articles.coffee'
-PromedPosts = require '/imports/collections/promedPosts.coffee'
-Constants = require '/imports/constants.coffee'
-Incidents = require '/imports/collections/incidentReports'
-SmartEvents = require '/imports/collections/smartEvents'
-incidentReportSchema = require '/imports/schemas/incidentReport.coffee'
-import { formatUrl, cleanUrl, createIncidentReportsFromEnhancements, regexEscape } from '/imports/utils.coffee'
+import UserEvents from '/imports/collections/userEvents.coffee'
+import Articles from '/imports/collections/articles.coffee'
+import PromedPosts from '/imports/collections/promedPosts.coffee'
+import Incidents from '/imports/collections/incidentReports'
+import incidentReportSchema from '/imports/schemas/incidentReport.coffee'
+import {
+  formatUrl,
+  cleanUrl,
+  createIncidentReportsFromEnhancements,
+  regexEscape } from '/imports/utils.coffee'
+import Constants from '/imports/constants.coffee'
 
 DateRegEx = /<span class="blue">Published Date:<\/span> ([^<]+)/
 
@@ -34,6 +37,8 @@ Meteor.methods
     else
       Meteor.Error("InvalidArticle", "Content or a URL must be specified")
     result = HTTP.post(Constants.GRITS_URL + "/api/v1/public_diagnose", params: params)
+    if not result.data
+      throw new Meteor.Error("grits-error", "No response from GRITS server.")
     if result.data.error
       throw new Meteor.Error("grits-error", result.data.error)
     enhancements = result.data
@@ -213,7 +218,7 @@ Meteor.methods
     options.publishDate = source.publishDate
     incidents = createIncidentReportsFromEnhancements(enhancements, options)
     incidents = incidents.map (incident) ->
-      incident = _.pick(incident, incidentReportSchema.objectKeys())
+      incident = incidentReportSchema.clean(incident)
     # Remove prior unassociated incidents for the document
     Incidents.remove
       articleId: source._id

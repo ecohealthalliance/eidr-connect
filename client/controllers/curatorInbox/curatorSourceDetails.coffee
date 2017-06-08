@@ -1,23 +1,25 @@
-Articles = require '/imports/collections/articles.coffee'
-Incidents = require '/imports/collections/incidentReports.coffee'
+import Articles from '/imports/collections/articles.coffee'
+import Incidents from '/imports/collections/incidentReports.coffee'
 key = require 'keymaster'
 { notify } = require '/imports/ui/notification'
+Hammer = require 'hammerjs'
+
 
 Template.curatorSourceDetails.onCreated ->
   @selectedIncidents = new Meteor.Collection(null)
   @notifying = new ReactiveVar(false)
-  @source = new ReactiveVar(null)
   @reviewed = new ReactiveVar(false)
   @incidentsLoaded = new ReactiveVar(false)
   @addingSourceToEvent = new ReactiveVar(false)
   @selectedAnnotationId = new ReactiveVar(null)
+  @selectedSourceId = @data.selectedSourceId
 
   @markReviewed = (showNext=true) =>
     new Promise (resolve) =>
       instanceData = @data
       reviewed = @reviewed
       reviewed.set(not reviewed.get())
-      Meteor.call('markSourceReviewed', @source.get()._id, reviewed.get())
+      Meteor.call('markSourceReviewed', @selectedSourceId.get(), reviewed.get())
       if reviewed.get()
         @notifying.set(true)
         setTimeout =>
@@ -27,7 +29,7 @@ Template.curatorSourceDetails.onCreated ->
             sort.sort[instanceData.dateType] = -1
             nextSource = Articles.findOne(unReviewedQuery, sort)
             if nextSource
-              instanceData.selectedSourceId.set(nextSource._id)
+              @selectedSourceId.set(nextSource._id)
           @notifying.set(false)
           resolve()
         , 1200
@@ -39,7 +41,6 @@ Template.curatorSourceDetails.onRendered ->
       delay: show: '300'
       container: 'body'
     if window.innerWidth <= 1000
-      Hamer = require 'hammerjs'
       swippablePane = new Hammer($('#touch-stage')[0])
       swippablePane.on 'swiperight', (event) ->
         instance.data.currentPaneInView.set('')
@@ -51,15 +52,17 @@ Template.curatorSourceDetails.onRendered ->
   @autorun =>
     # When document is selected in the curatorInbox template, `selectedSourceId`,
     # which is handed down, is updated and triggers this autorun
-    sourceId = @data.selectedSourceId.get()
-    source = Articles.findOne(sourceId)
-    instance.reviewed.set source?.reviewed or false
-    instance.source.set source
+    sourceId = @selectedSourceId.get()
+    @reviewed.set Articles.findOne(sourceId)?.reviewed or false
 
   @autorun =>
-    source = @source.get()
+    @incidentsLoaded.set(false)
+    @subscribe 'articleIncidents', @selectedSourceId.get(), =>
+      @incidentsLoaded.set(true)
+
+  @autorun =>
+    source = Articles.findOne(@selectedSourceId.get())
     if source
-      @incidentsLoaded.set(false)
       title = source.title
       # Update the document title and its tooltip in the right pane
       Meteor.defer =>
@@ -70,16 +73,11 @@ Template.curatorSourceDetails.onRendered ->
           $title.tooltip('hide').attr('data-original-title', '')
         else
           $title.attr('data-original-title', title)
-      @subscribe 'articleIncidents', source._id
-      if source.enhancements?.dateOfDiagnosis
-        instance.incidentsLoaded.set(true)
+      enhancements = source.enhancements
+      if enhancements?.dateOfDiagnosis or enhancements?.error or enhancements?.processingStartedAt
+        return
       else
-        Meteor.call 'getArticleEnhancementsAndUpdate', source, (error, enhancements) =>
-          if error
-            notify('error', error.reason)
-          else
-            source.enhancements = enhancements
-            instance.incidentsLoaded.set(true)
+        Meteor.call 'getArticleEnhancementsAndUpdate', source
 
 Template.curatorSourceDetails.onDestroyed ->
   $(window).off('resize')
@@ -89,7 +87,7 @@ Template.curatorSourceDetails.helpers
     Incidents.find()
 
   source: ->
-    Template.instance().source.get()
+    Articles.findOne(Template.instance().selectedSourceId.get())
 
   formattedScrapeDate: ->
     moment(Template.instance().data.sourceDate).format('MMMM DD, YYYY')
@@ -98,13 +96,13 @@ Template.curatorSourceDetails.helpers
     moment(Template.instance().data.promedDate).format('MMMM DD, YYYY')
 
   isReviewed: ->
-    Template.instance().source.get().reviewed
+    Template.instance().reviewed.get()
 
   notifying: ->
     Template.instance().notifying.get()
 
   selectedSourceId: ->
-    Template.instance().data.selectedSourceId
+    Template.instance().selectedSourceId
 
   incidentsLoaded: ->
     Template.instance().incidentsLoaded.get()
@@ -122,7 +120,8 @@ Template.curatorSourceDetails.helpers
     Template.instance().selectedAnnotationId
 
   textContent: ->
-    Template.instance().source.get().enhancements.source?.cleanContent?.content
+    source = Articles.findOne(Template.instance().selectedSourceId.get())
+    source?.enhancements?.source?.cleanContent?.content
 
   selectedIncidents: ->
     Template.instance().selectedIncidents
@@ -146,3 +145,9 @@ Template.curatorSourceDetails.events
 
   'click .tabs a': (event, instance) ->
     instance.selectedIncidentTab.set(instance.$(event.currentTarget).data('tab'))
+
+  'click .retry': (event, instance)->
+    source = Articles.findOne(instance.selectedSourceId.get())
+    Meteor.call 'getArticleEnhancementsAndUpdate', source, (error, enhancements) =>
+      if error
+        notify('error', error.reason)

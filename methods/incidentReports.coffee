@@ -1,9 +1,7 @@
-incidentReportSchema = require '/imports/schemas/incidentReport.coffee'
-Incidents = require '/imports/collections/incidentReports.coffee'
-UserEvents = require '/imports/collections/userEvents.coffee'
-Articles = require '/imports/collections/articles.coffee'
-Constants = require '/imports/constants.coffee'
-{ regexEscape } = require '/imports/utils'
+import incidentReportSchema from '/imports/schemas/incidentReport.coffee'
+import Incidents from '/imports/collections/incidentReports.coffee'
+import UserEvents from '/imports/collections/userEvents.coffee'
+import Articles from '/imports/collections/articles.coffee'
 
 checkPermission = (userId) ->
   if not Roles.userIsInRole(userId, ['admin'])
@@ -54,7 +52,12 @@ Meteor.methods
       Meteor.call("editUserEventLastIncidentDate", incident.userEventId)
     return incident._id
 
-  rejectIncidentReports: (incidentIds)->
+  addIncidentReports: (incidents, userEventId) ->
+    checkPermission(@userId)
+    incidents.map (incident)->
+      Meteor.call('addIncidentReport', incident, userEventId)
+
+  deleteIncidents: (incidentIds)->
     checkPermission(@userId)
     Incidents.update({
       _id: $in: incidentIds
@@ -63,27 +66,22 @@ Meteor.methods
     }, {
       multi: true
     })
-
-  addIncidentReports: (incidents, userEventId) ->
-    checkPermission(@userId)
-    incidents.map (incident)->
-      Meteor.call('addIncidentReport', incident, userEventId)
-
-  removeIncident: (id) ->
-    checkPermission(@userId)
-    incident = Incidents.findOne(id)
-    Incidents.update id,
-      $set:
-        deleted: true,
-        deletedDate: new Date()
-    userEventId = UserEvents.findOne('incidents.id': id)?._id
-    if userEventId
+    userEventIds = UserEvents.find(
+      'incidents.id': $in: incidentIds
+    ).map((x)->x._id)
+    UserEvents.update({
+      'incidents.id': $in: incidentIds
+    }, {
+      $pull:
+        incidents:
+          id:
+            $in: incidentIds
+    }, {
+      multi: true
+    })
+    userEventIds.map (userEventId)->
       Meteor.call('editUserEventLastModified', userEventId)
       Meteor.call('editUserEventLastIncidentDate', userEventId)
-
-  removeIncidents: (incidentIds) ->
-    incidentIds.forEach (incidentId) ->
-      Meteor.call('removeIncident', incidentId)
 
   removeIncidentFromEvent: (incidentId, userEventId) ->
     checkPermission(@userId)

@@ -109,13 +109,17 @@
   .event-source-summary--item
     border-right 1px solid $border-primary-light
     padding 1.5em 1.25em
-    min-width 20%
+    min-width 175px
     +below(2)
       padding-bottom 0
-
     &:last-of-type
       margin 0
       border 0
+    .count
+      color darken($border-primary, 50%)
+      font-size 90%
+      font-weight 400
+      letter-spacing .03em
 
 #document-text-modal
   .modal-dialog

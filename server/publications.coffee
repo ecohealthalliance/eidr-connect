@@ -58,23 +58,31 @@ Meteor.publishComposite 'userEvent', (eventId) ->
     UserEvents.find(_id: eventId)
   children: [
     {
-    collectionName: 'eventIncidents'
-    find: (event) ->
-      incidentIds = _.pluck(event.incidents, 'id')
-      Incidents.find
-        _id: $in: incidentIds
-        deleted: $in: [null, false]
-    }
-    {
-    collectionName: 'eventArticles'
-    find: (event) ->
-      incidents = Incidents.find(_id: $in: _.pluck(event.incidents, 'id'))
-      Articles.find
-        $or: [
-          {_id: $in: _.pluck(incidents.fetch(), 'articleId')}
-          {userEventIds: event._id}
-        ]
-        deleted: {$in: [null, false]}
+      collectionName: 'users'
+      find: (event) ->
+        Meteor.users.find({
+          _id: $in: [event.createdByUserId, event.lastModifiedByUserId]
+        }, {
+          fields:
+            'profile.name': 1
+        })
+    }, {
+      collectionName: 'eventIncidents'
+      find: (event) ->
+        incidentIds = _.pluck(event.incidents, 'id')
+        Incidents.find
+          _id: $in: incidentIds
+          deleted: $in: [null, false]
+    }, {
+      collectionName: 'eventArticles'
+      find: (event) ->
+        incidents = Incidents.find(_id: $in: _.pluck(event.incidents, 'id'))
+        Articles.find
+          $or: [
+            {_id: $in: _.pluck(incidents.fetch(), 'articleId')}
+            {userEventIds: event._id}
+          ]
+          deleted: {$in: [null, false]}
     }
   ]
 
@@ -89,8 +97,13 @@ Meteor.publish 'smartEvents', () ->
 
 # Articles
 Meteor.publish 'articles', (query={}) ->
+  if not Roles.userIsInRole(@userId, ['admin', 'curator'])
+    throw new Meteor.Error('auth', 'User does not have permission to access articles')
   query.deleted = {$in: [null, false]}
-  Articles.find(query)
+  Articles.find(query, {
+    fields:
+      'enhancements.source.scrapedData': 0
+  })
 
 Meteor.publish 'article', (sourceId) ->
   Articles.find(url: $regex: new RegExp("#{sourceId}$"))
@@ -102,6 +115,13 @@ Meteor.publish 'incidentArticle', (articleId) ->
 Meteor.publish 'feeds', ->
   Feeds.find()
 
-# User status
+Meteor.publish "allUsers", ->
+  if not Roles.userIsInRole(@userId, ['admin'])
+    throw new Meteor.Error('auth', 'User does not have permission to access user data')
+  Meteor.users.find({}, {fields: {'_id': 1, 'roles': 1, 'profile.name': 1, 'emails': 1}})
+
+Meteor.publish "roles", () ->
+  Meteor.roles.find({})
+
 Meteor.publish 'userStatus', () ->
   Meteor.users.find({'status.online': true }, {fields: {'status': 1 }})

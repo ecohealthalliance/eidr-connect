@@ -48,7 +48,7 @@ Template.curatorInbox.onCreated ->
   today = new Date()
   @defaultDateRange =
     endDate: today
-    startDate: moment(today).subtract(1, 'weeks').toDate()
+    startDate: moment(today).subtract(7, 'days').toDate()
   @dateRange = new ReactiveVar(@defaultDateRange)
   @textFilter =
     new ReactiveTable.Filter('curator-inbox-article-filter', ['title'])

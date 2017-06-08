@@ -1,4 +1,9 @@
 #add-incident
+  margin-top 35px
+  overflow-x hidden
+  +above(4)
+    overflow-x visible
+    margin-top 0
   .tab-content
     clear both
     @extend .modal-block
@@ -22,6 +27,14 @@
     padding-top 1em
     padding-bottom 1em
 
+  .control-label
+    &.featured
+      border-top-width 2px
+      width 100%
+      +above(4)
+        border-top-width 0
+        margin-left -20px
+        margin-right -20px
 
 .other-metadata
   ul
@@ -35,3 +48,8 @@
   margin-left -35px
   margin-right -35px
   padding 0 15px
+
+.add-incident--wrapper
+  .form-group
+    &:first-of-type
+      border-top 0
