@@ -81,9 +81,12 @@ Template.resolvedIncidentsPlot.onRendered ->
               .map(([subInt, iNext])->
                 onClick = ->
                   concurrentIntervals = groupedLocSubIntervals[subInt.start] or []
+                  componentTree = LocationTree.from(concurrentIntervals.map (x)-> x.location)
+                  concurrentIntervals.forEach (x)->
+                    componentTree.getNodeById(x.location.id).associatedObject = x
                   Modal.show('intervalDetailsModal',
                     interval: subInt
-                    concurrentIntervals: concurrentIntervals
+                    componentTree: componentTree
                     incidents: subInt.incidentIds.map (id)->
                       differentials[id]
                   )

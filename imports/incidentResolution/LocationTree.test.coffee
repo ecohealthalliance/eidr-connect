@@ -3,6 +3,26 @@ import incidents from './incidents.coffee'
 import LocationTree from './LocationTree.coffee'
 
 describe 'LocationTree', ->
+  it 'deduplicates locations', ->
+    myTree = LocationTree.from([{
+      admin1Name: "Maritime"
+      countryName: "Togolese Republic"
+      featureClass: "P"
+      featureCode: "PPLC"
+      id: "2365267"
+      name: "Lomé"
+    }, {
+      admin1Name: "Maritime"
+      countryName: "Togolese Republic"
+      featureClass: "P"
+      featureCode: "PPLC"
+      id: "2365267"
+      name: "Lomé"
+    }])
+    chai.assert.equal(myTree.children.length, 1)
+    chai.assert.equal(myTree.children[0].value.id, "2365267")
+    chai.assert.equal(myTree.children[0].children.length, 0)
+
   it 'can build location trees from locations', ->
     myTree = LocationTree.from([{
       admin1Name: "Maritime"

@@ -41,6 +41,9 @@ do ->
         @client.setValue('#content', DOCUMENT_TEXT)
       @client.setValue('#title', 'Test Article')
       @client.clickIfVisible('.add-publish-date .btn')
+      # The publishTime element might be in an invalid state that
+      # prevents setValue from working if this pause is not used.
+      @client.pause(10000)
       @client.setValue('#publishTime', '12:00 PM')
       @client.pause(3000)
       @client.click('.save-source')

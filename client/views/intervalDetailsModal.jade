@@ -1,32 +1,41 @@
 template(name="intervalDetailsModal")
-  .modal.modal-skinny.fade(role="dialog")
+  .modal.fade.interval-details(role="dialog")
     .modal-dialog
       .modal-content
         .modal-header
-          .modal-header--title Interval Details
+          .modal-header--title
+            h4 Interval Details
           +modalCloseButton
-          
         .modal-body
-          div 
-            p Start: {{formatDate interval.start}}
-            p End: {{formatDate interval.end}}
-            p Total: {{interval.value}}
-          hr
-          h3 Components
-          each concurrentIntervals
-            .incident.panel.panel-default
-              .panel-body
-                p Location: {{formatLocation location}}
-                p Count: #{value}
-                h4 Source Incidents
-                ul
-                  each incidents
-                    li
-                      if cumulative
-                        | Difference between cumulative counts: #{count}
-                        ul
-                          each incident in originalIncidents
-                            li {{incidentToText incident}}
-                      else
-                        each incident in originalIncidents
-                          | {{incidentToText incident}}
+          h5 {{formatDate interval.start}} - {{formatDate interval.end}}
+          each componentTree.children
+            +componentTreeList
+
+template(name="componentTreeList")
+  with associatedObject
+    ul.list-unstyled
+      li
+        span Location:
+        | {{formatLocation location}}
+      li
+        span Count during interval:
+        | #{value}
+    if incidents
+      h6 Source Incidents
+      ul.interval-details--source-incidents
+        each incidents
+          li
+            if cumulative
+              | Difference between cumulative counts: #{count}
+              ul
+                each incident in originalIncidents
+                  li {{incidentToText incident}}
+            else
+              each incident in originalIncidents
+                | {{incidentToText incident}}
+  if children
+    h4 Subcomponents
+    each children
+      .incident.panel.panel-default
+        .panel-body
+          +componentTreeList

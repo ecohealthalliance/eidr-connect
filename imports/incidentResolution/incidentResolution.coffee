@@ -78,14 +78,21 @@ differentailIncidentsToSubIntervals = (incidents)->
       -1
     else
       0
+  locationTree = LocationTree.from(_.values(locationsById))
+  topLocations = locationTree.children.map (x)->x.value
   priorEndpoint = endpoints[0]
   console.assert priorEndpoint.isStart
   SELToIncidents = {}
   activeIntervals = [priorEndpoint.interval]
   _.zip(endpoints.slice(1), endpoints.slice(2)).forEach ([endpoint, nextEndpoint])->
+    # Ensure a subinterval is created for the top level locations between
+    # every endpoint.
+    for location in topLocations
+      key = "#{priorEndpoint.offset},#{endpoint.offset},#{location.id}"
+      SELToIncidents[key] = SELToIncidents[key] or []
     for interval in activeIntervals
       for location in interval.locations
-        key = priorEndpoint.offset + "," + endpoint.offset + "," + location.id
+        key = "#{priorEndpoint.offset},#{endpoint.offset},#{location.id}"
         SELToIncidents[key] = _.uniq((SELToIncidents[key] or []).concat(
           interval.id
         ))
@@ -132,7 +139,7 @@ subIntervalsToLP = (incidents, subIntervals)->
     if not incidentSubs
       console.log "Error: No subintervals for", incidentId
     for subInterval in incidentSubs
-      { id, start, end, locationId } = subInterval
+      { id, start, end } = subInterval
       itervalLengthDays = (end - start) / (1000 * 60 * 60 * 24)
       # The min/max incidentId variables are the minimum or maximum
       # rates in the incident interval. The objective function will
@@ -140,21 +147,22 @@ subIntervalsToLP = (incidents, subIntervals)->
       constraints.push("#{(1 / itervalLengthDays).toFixed(12)} s#{id} -1 min#{incidentId} >= 0")
       constraints.push("#{(1 / itervalLengthDays).toFixed(12)} s#{id} -1 max#{incidentId} <= 0")
       objective[id] += 1
-      locationTree = SEToLocationTree[start + "," + end]
       mainConstraintVars.push "1 s" + id
-      subLocConstraintVars = ["1 s" + id]
-      node = locationTree.getNodeById(locationId)
-      if node
-        for sublocation in node.children
-          sublocSELId = SELToId[start + "," + end + "," + sublocation.value.id]
-          subLocConstraintVars.push "-1 s" + sublocSELId
-      # The sublocations must have a count less than their parent over
-      # each sub interval
-      constraints.push(subLocConstraintVars.join(" ") + " >= 0")
     # The sum of the counts over over all subintervals must be greater than
     # the count over the incident interval.
     constraints.push(mainConstraintVars.join(" ") + " >= " + incident.count)
   )
+  subIntervals.forEach ({id, start, end, locationId})->
+    locationTree = SEToLocationTree[start + "," + end]
+    subLocConstraintVars = ["1 s" + id]
+    node = locationTree.getNodeById(locationId)
+    #if node
+    for sublocation in node.children
+      sublocSELId = SELToId[start + "," + end + "," + sublocation.value.id]
+      subLocConstraintVars.push "-1 s" + sublocSELId
+    # The sublocations must have a count less than their parent over
+    # each sub interval
+    constraints.push(subLocConstraintVars.join(" ") + " >= 0")
   # This can constrain the results to all be integers but it slows things
   # down by 5x or more.
   # constraints = constraints.concat(subIntervals.map (s)->"int s#{s.id}")
