@@ -1,4 +1,32 @@
 @font-face
-  src url('/fonts/icons.eot')
-  src url('/fonts/icons.eot?#iefix') format('embedded-opentype'), url('/fonts/icons.woff') format('woff'), url('/fonts/icons.ttf') format('truetype'), url('/fonts/icons.svg') format('svg')
-  font-family icons
+    font-family 'icons'
+    src url('../fonts/icons.eot?n241bt')
+    src url('../fonts/icons.eot?n241bt#iefix') format('embedded-opentype'),
+    url('../fonts/icons.ttf?n241bt') format('truetype'),
+    url('../fonts/icons.woff?n241bt') format('woff'),
+    url('../fonts/icons.svg?n241bt#icons') format('svg')
+    font-weight normal
+    font-style normal
+
+$icons = {
+  event: "\65"
+  doc: "\64"
+  incident: "\69"
+}
+
+[class^='i-']
+  &::before
+    font-family 'icons'
+    speak none
+    font-style normal
+    font-weight normal
+    font-variant normal
+    text-transform none
+    line-height 1
+    -webkit-font-smoothing antialiased
+    -moz-osx-font-smoothing grayscale
+
+for $className, $char in $icons
+  .i-{$className}
+    &::before
+      content '' + $char

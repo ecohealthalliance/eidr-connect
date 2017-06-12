@@ -1,6 +1,10 @@
 template(name="events")
   .events
     .container-fluid-padded.page-heading.container-flex.no-break
+      h1
+        span.text Events
+        span.icon
+          i.i-event
       ul.tabs
         li.tab(class="{{#if activeTab 'curated'}} active {{/if}}")
           a.curated-events(href="{{pathFor route='events' _view='curated'}}")

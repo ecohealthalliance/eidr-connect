@@ -3,7 +3,9 @@ template(name="curatorInbox")
     .curator-inbox-header.pane-head.pane-head-l(
       class="{{#unless detailsInView }} on-canvas {{/unless}}")
       unless searching
-        h2 Documents
+        h2
+          i.i-doc
+          span Documents
       .curator-inbox-options(class="{{#if searching}} full-width {{/if}}")
         if allowAddingNewDocument
           a.option.add-document.plain-focus(
