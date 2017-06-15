@@ -1,6 +1,7 @@
 import { formatLocation } from '/imports/utils'
 import Incidents from '/imports/collections/incidentReports.coffee'
 import Constants from '/imports/constants.coffee'
+import GeonameSchema from '/imports/schemas/geoname.coffee'
 
 incidentsToLocations = (incidents) ->
   locations = {}
@@ -40,7 +41,7 @@ Template.locationSelect2.onCreated ->
         hit._source.longitude = parseFloat(longitude)
         id: id
         text: formatLocation(hit._source)
-        item: hit._source
+        item: GeonameSchema.clean(hit._source)
 
 Template.locationSelect2.onRendered ->
   initialValues = []

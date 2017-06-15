@@ -71,7 +71,6 @@ Meteor.methods
           population: geoname.population
           featureClass: geoname.featureClass
           featureCode: geoname.featureCode
-          alternateNames: geoname.alternateNames
       locationAnnotations.forEach (loc)->
         geoname = geonamesById[loc.geoname.geonameid]
         if geoname
