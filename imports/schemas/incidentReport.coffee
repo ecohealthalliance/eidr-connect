@@ -85,6 +85,18 @@ IncidentReportSchema = new SimpleSchema
   "locations.$.admin2Name":
     type: String
     optional: true
+  "locations.$.admin1Code":
+    type: String
+    optional: true
+  "locations.$.admin2Code":
+    type: String
+    optional: true
+  "locations.$.admin3Code":
+    type: String
+    optional: true
+  "locations.$.admin4Code":
+    type: String
+    optional: true
   "locations.$.alternateNames":
     type: [String]
     optional: true

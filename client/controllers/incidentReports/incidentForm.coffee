@@ -1,7 +1,11 @@
-Articles = require '/imports/collections/articles.coffee'
-createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
-validator = require 'bootstrap-validator'
-{ keyboardSelect, removeSuggestedProperties, diseaseOptionsFn } = require '/imports/utils'
+import Articles from '/imports/collections/articles.coffee'
+import createInlineDateRangePicker from '/imports/ui/inlineDateRangePicker.coffee'
+import validator from 'bootstrap-validator'
+import {
+  keyboardSelect,
+  removeSuggestedProperties,
+  diseaseOptionsFn,
+  locationOptionsFn } from '/imports/utils'
 import { getIncidentSnippet } from '/imports/ui/snippets'
 
 _selectInput = (event, instance, prop, isCheckbox) ->

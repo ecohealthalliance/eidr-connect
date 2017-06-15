@@ -5,3 +5,8 @@ template(name="locationSelect2")
       name="location"
       multiple=multiple
       required=required)
+
+template(name="addLocationControl")
+  .select2-results__additional-options
+    button.btn.btn-default(type="button")
+      | Add Unlisted Geoname

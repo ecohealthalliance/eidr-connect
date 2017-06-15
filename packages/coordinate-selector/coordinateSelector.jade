@@ -1,0 +1,14 @@
+template(name='coordinateSelector')
+  .coordinate-selector
+    .location-details
+      .form-group
+        .row
+          .col-xs-6
+            label(for='lat') Latitude
+            input.lat.form-control(name='lat' value=latitude required=required)
+          .col-xs-6
+            label(for='lon') Longitude
+            input.lon.form-control(name='lon' value=longitude required=required)
+    #leaflet-canvas
+    .location-btns
+        button.leaflet-clear.btn.btn-default.btn-block Clear

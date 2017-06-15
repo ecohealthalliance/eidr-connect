@@ -1,0 +1,28 @@
+template(name="addGeonameModal")
+  form#addGeonameModal.modal.modal-skinny.fade(role="dialog")
+    .modal-dialog
+      .modal-content
+        .modal-header
+          .modal-header--title
+            h4 Add Geoname
+          +modalCloseButton
+        .modal-body
+          .form-group
+            label(for="name") Location Name
+            input.form-control(
+              name="name"
+              id="name"
+              required)
+          .form-group
+            label.control-label Most Specific Containing Location
+            +locationSelect2(
+              selectId="location-select2"
+              multiple=false
+              values=parentLocation
+              required=true)
+          .form-group
+            label.control-label Coordinates
+            +coordinateSelector(value=latLon required=true)
+        .modal-footer
+          button.btn.btn-default(type="button" data-dismiss="modal") Close
+          button.btn.btn-primary.save(type="submit") Save

@@ -35,6 +35,7 @@ ecmascript@0.8.0
 ecmascript-runtime@0.4.1
 ecmascript-runtime-client@0.4.1
 ecmascript-runtime-server@0.4.1
+eha:coordinate-selector@0.0.2
 eha:nojs-banner@1.1.0
 eidr:fixtures@0.0.1
 eidr:rickshaw.min@0.0.1
