@@ -1,0 +1,31 @@
+
+template(name="incidentSecondaryDetails")
+  .incident--secondary-details.container-flex.no-break(
+    class="{{#if detailsOpen}}details-open{{/if}} {{#unless hasAdditionalInfo}}disabled{{/unless}}")
+    i.fa.toggle-details(
+      class="fa-chevron-circle-{{#if detailsOpen}}down{{else}}right{{/if}}")
+    ul.container-flex.list-unstyled.no-break(
+      class="{{#if detailsOpen}}details-open{{/if}}")
+      if incidentEvents.length
+        li.events(title="Associated Events" data-toggle="tooltip")
+          i.i-event
+          if detailsOpen
+            ul.list-unstyled
+              each incidentEvents
+                li
+                  span= eventName
+                  i.fa.fa-times-circle.disassociate-event
+          else
+            span= incidentEvents.length
+      li.locations
+        if detailsOpen
+          i.fa.fa-globe
+          ul.list-unstyled
+            each locations
+              li {{formatLocation this}}
+        else
+          span= firstLocationName
+      li.date
+        if detailsOpen
+          i.fa.fa-calendar
+        span {{formatDateRange dateRange}}
