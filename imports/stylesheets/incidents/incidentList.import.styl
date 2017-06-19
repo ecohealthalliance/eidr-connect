@@ -6,13 +6,20 @@
   .incident
     border-bottom 1px solid $border-primary-light
     padding 10px $page-padding 10px 0
+    cursor pointer
+    &:hover
+      background lighten($border-primary-light, 20%)
+    &:hover
     &.selected
       h3
         font-weight 600
       .incident--selection-status
         &::before
-          content '\f111'
           color $primary-dark
+    &.selected
+      .incident--selection-status
+        &::before
+          content '\f111'
 
 .incident--select
   align-items flex-start
@@ -31,7 +38,7 @@
   &::before
     icon()
     content '\f1db'
-  font-size 1.5em
+  font-size 1.25em
   margin-right .5em
   color $border-primary
 
@@ -49,37 +56,88 @@
         color $primary
 
 .incident--secondary-details
-  align-items center
-  padding-left 3em
+  padding-left 2em
   color $m-gray
-  cursor pointer
-  &:hover
-    color $primary
-  li
-    display flex
+  &.details-open
+    background none
+    cursor default
+    &:hover
+      color $m-gray
+    .toggle-details
+      cursor pointer
+      color $primary-dark
+      &:hover
+        color $primary-dark
+  > i
+    margin-right 5px
+  > ul
     align-items center
-    font-size .85em
-    margin-right .4em
-    &:after
-      content ''
-      display block
-      align-self stretch
-      margin-left 10px
-      margin-right 10px
-      border-right 1px solid darken($l-gray, 20%)
-    &:last-of-type
-      margin 0
-      &::after
-        display none
-    i
-      line-height 0
-      padding-top 1px
-      font-size 120%
-      margin-right 5px
-    &.events
-      span
-        font-size 110%
+    > li
+      display flex
+      align-items flex-start
+      font-size .85em
+      margin-right .4em
+      li:not(:last-of-type)
+        margin-bottom 3px
+      &:after
+        content ''
+        display block
+        align-self stretch
+        margin-left 10px
+        margin-right 10px
+        border-right 1px solid darken($l-gray, 20%)
+      &:last-of-type
+        margin 0
+        &::after
+          display none
+      i
         padding-top 1px
+        font-size 120%
+        margin-right .5em
+      &.events
+        span
+          font-size 110%
+          padding-top 1px
+    &.details-open
+      justify-content flex-start
+      align-items flex-start
+      background none
+      font-size 1em
+      &
+      li
+        color $body-text
+      &:hover
+        color $body-text
+      +below(2000px)
+        flex-direction column
+        > li
+          &:not(:last-of-type)
+            margin-bottom 1em
+          i
+            line-height normal
+            margin-right .5em
+          &::after
+            display none
   .toggle-details
     font-size 1.15em
-    margin-right .5em
+    padding-left 1em
+    padding-right .5em
+    transition .1s
+    align-self flex-start
+    &:hover
+      color $primary-dark
+      transform scale(1.3)
+
+  .disassociate-event
+    margin-left 3px
+    cursor pointer
+    font-size 110%
+    &:hover
+      color $delete
+      transform scale(1.3)
+
+  &.disabled
+    cursor default
+    color $m-gray
+    .toggle-details
+      color $l-gray

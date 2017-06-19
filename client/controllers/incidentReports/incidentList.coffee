@@ -56,10 +56,6 @@ Template.incidentList.helpers
   annotationSelected: ->
     Template.instance().data.selectedAnnotationId.get() is @_id
 
-  firstLocationName: ->
-    firstLocation = @locations[0]
-    firstLocation?.countryName or firstLocation?.admin1Name
-
   otherLocations: ->
     return if @locations.length <= 1
     otherLocations = @locations.slice()
@@ -75,7 +71,7 @@ Template.incidentList.helpers
     Template.instance().selectedIncidents.findOne(id: @_id)
 
 Template.incidentList.events
-  'click .incident .incident--select': (event, instance) ->
+  'click .incident': (event, instance) ->
     event.stopPropagation()
     selectedIncidents = instance.data.selectedIncidents
     query = id: @_id
@@ -95,8 +91,34 @@ Template.incidentList.events
       userEventId: null
       offCanvasStartPosition: 'top'
       showBackdrop: true
-  #
-  # 'click td.associations': (event, instance) ->
-  #   event.stopPropagation()
-  #   Modal.show 'associatedEventModal',
-  #     incidentId: @_id
+
+Template.incidentSecondaryDetails.onCreated ->
+  @detailsOpen = new ReactiveVar(false)
+  Meteor.defer =>
+    @$('[data-toggle=tooltip]').tooltip delay: show: '400'
+
+Template.incidentSecondaryDetails.helpers
+  detailsOpen: ->
+    Template.instance().detailsOpen.get()
+
+  firstLocationName: ->
+    firstLocation = Template.instance().data.locations[0]
+    firstLocation?.countryName or
+      firstLocation?.admin1Name or
+      firstLocation?.admin2Name or
+      firstLocation?.name
+
+  hasAdditionalInfo: ->
+    @locations.length > 1 or formatLocation(@locations[0]).split(',').length > 1
+
+Template.incidentSecondaryDetails.events
+  'click .toggle-details': (event, instance) ->
+    event.stopPropagation()
+    detailsOpen = instance.detailsOpen
+    detailsOpen.set(not detailsOpen.get())
+
+  'click .disassociate-event': (event, instance) ->
+    event.stopPropagation()
+    instanceData = instance.data
+    Meteor.call 'removeIncidentFromEvent', instanceData.incidentId, @_id, (error, res) ->
+      $('.tooltip').remove()
