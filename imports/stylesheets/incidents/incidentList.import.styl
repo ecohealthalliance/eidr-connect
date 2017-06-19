@@ -1,0 +1,85 @@
+.incident-list
+  h3
+    padding-top 2px
+    text-transform none
+    color $primary-dark
+  .incident
+    border-bottom 1px solid $border-primary-light
+    padding 10px $page-padding 10px 0
+    &.selected
+      h3
+        font-weight 600
+      .incident--selection-status
+        &::before
+          content '\f111'
+          color $primary-dark
+
+.incident--select
+  align-items flex-start
+  cursor pointer
+  padding .4em $page-padding .5em
+  &:hover
+    color $primary-dark
+    h3
+      font-weight 600
+    .incident--selection-status
+      color $primary
+  span
+    line-height 1
+
+.incident--selection-status
+  &::before
+    icon()
+    content '\f1db'
+  font-size 1.5em
+  margin-right .5em
+  color $border-primary
+
+.incident--main-details
+  align-items flex-start
+  .actions
+    margin-left auto
+    li
+      margin-right .5em
+      cursor pointer
+      font-size 1.35em
+      color $border-primary
+      &:hover
+        transform scale(1.2)
+        color $primary
+
+.incident--secondary-details
+  align-items center
+  padding-left 3em
+  color $m-gray
+  cursor pointer
+  &:hover
+    color $primary
+  li
+    display flex
+    align-items center
+    font-size .85em
+    margin-right .4em
+    &:after
+      content ''
+      display block
+      align-self stretch
+      margin-left 10px
+      margin-right 10px
+      border-right 1px solid darken($l-gray, 20%)
+    &:last-of-type
+      margin 0
+      &::after
+        display none
+    i
+      line-height 0
+      padding-top 1px
+      font-size 120%
+      margin-right 5px
+    &.events
+      span
+        font-size 110%
+        padding-top 1px
+  .toggle-details
+    font-size 1.15em
+    margin-right .5em

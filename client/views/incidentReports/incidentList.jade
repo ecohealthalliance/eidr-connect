@@ -1,0 +1,21 @@
+template(name="incidentList")
+  ul.incident-list.list-unstyled
+    each incidents
+      li.incident(class="{{#if selected}} selected {{/if}}")
+        .incident--main-details.container-flex
+          .container-flex.incident--select
+            span.incident--selection-status
+            h3.incident--title {{incidentCountAndDisease this}}
+          ul.actions.container-flex.list-unstyled
+            li.edit
+              i.fa.fa-pencil
+        ul.incident--secondary-details.container-flex.list-unstyled
+          i.fa.fa-chevron-circle-right.toggle-details
+          unless incidentEvents.length
+            li.events
+              i.i-event
+              span= incidentEvents.length
+          li.locations
+            span= firstLocationName
+          li.date
+            span {{formatDateRange dateRange}}
