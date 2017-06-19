@@ -7,6 +7,8 @@ template(name="incidentList")
             span.incident--selection-status
             h3.incident--title {{incidentCountAndDisease this}}
           ul.actions.container-flex.list-unstyled.no-break
+            li.view(class="{{#if viewingIncident}}viewing{{/if}}")
+              i.fa.fa-eye
             li.edit
               i.fa.fa-pencil
         +incidentSecondaryDetails(

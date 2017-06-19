@@ -20,6 +20,13 @@
       .incident--selection-status
         &::before
           content '\f111'
+    .view
+      &.viewing
+        color $secondary
+    &:active
+      .incident--selection-status
+        transform scale(.8)
+        transform-origin center
 
 .incident--select
   align-items flex-start
@@ -41,26 +48,30 @@
   font-size 1.25em
   margin-right .5em
   color $border-primary
+  transition .1s ease-in-out
 
 .incident--main-details
   align-items flex-start
   .actions
     margin-left auto
     li
-      margin-right .5em
+      margin-right .65em
       cursor pointer
       font-size 1.35em
       color $border-primary
+      transition .05s ease-in-out
       &:hover
         transform scale(1.2)
         color $primary
+      &:active
+        transform scale(.9)
+        color $primary-dark
 
 .incident--secondary-details
   padding-left 2em
   color $m-gray
   &.details-open
     background none
-    cursor default
     &:hover
       color $m-gray
     .toggle-details
@@ -122,8 +133,8 @@
     font-size 1.15em
     padding-left 1em
     padding-right .5em
-    transition .1s
     align-self flex-start
+    transition .1s ease-in-out
     &:hover
       color $primary-dark
       transform scale(1.3)
@@ -132,9 +143,12 @@
     margin-left 3px
     cursor pointer
     font-size 110%
+    transition .1s ease-in-out
     &:hover
       color $delete
       transform scale(1.3)
+    &:active
+      transform scale(.9)
 
   &.disabled
     cursor default

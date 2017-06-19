@@ -10,6 +10,28 @@ Template.incidentList.onCreated ->
   @tableContentScrollable = @data.tableContentScrollable
   @accepted = @data.accepted
   @selectedIncidents = @data.selectedIncidents
+  @incidentViewing = new ReactiveVar(null)
+
+  @scrollToAnnotation = (id) =>
+    @incidentViewing.set(id)
+    $annotation = $("span[data-incident-id=#{id}]")
+    $sourceTextContainer = $('.curator-source-details--copy')
+    $sourceTextContainer.stop()
+    $("span[data-incident-id]").removeClass('viewing')
+    appHeaderHeight = $('header nav.navbar').outerHeight()
+    detailsHeaderHeight = $('.curator-source-details--header').outerHeight()
+    headerOffset = appHeaderHeight + detailsHeaderHeight
+    containerScrollTop = $sourceTextContainer.scrollTop()
+    annotationTopOffset = $annotation.offset().top
+    countainerVerticalMidpoint = $sourceTextContainer.height() / 2
+    totalOffset = annotationTopOffset - headerOffset
+    # Distance of scroll based on postition of text container, scroll position
+    # within the text container and the container's midpoint (to position the
+    # annotation in the center of the container)
+    scrollDistance =  totalOffset + containerScrollTop - countainerVerticalMidpoint
+    $sourceTextContainer.animate
+      scrollTop: scrollDistance
+    , 500, -> $annotation.addClass('viewing')
 
   @acceptedQuery = =>
     query = {}
@@ -70,7 +92,18 @@ Template.incidentList.helpers
   selected: ->
     Template.instance().selectedIncidents.findOne(id: @_id)
 
+  viewingIncident: ->
+    Template.instance().incidentViewing.get() is @_id
+
 Template.incidentList.events
+  'click .view': (event, instance) ->
+    event.stopPropagation()
+    incidentViewing = instance.incidentViewing
+    if incidentViewing.get() is @_id
+      incidentViewing.set(null)
+    else
+      instance.scrollToAnnotation(@_id)
+
   'click .incident': (event, instance) ->
     event.stopPropagation()
     selectedIncidents = instance.data.selectedIncidents
