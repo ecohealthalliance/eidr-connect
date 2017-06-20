@@ -1,3 +1,5 @@
+import { formatLocation } from '/imports/utils'
+
 Template.incidentSecondaryDetails.onCreated ->
   @detailsOpen = new ReactiveVar(false)
   Meteor.defer =>
