@@ -19,6 +19,9 @@ Template.incidentSecondaryDetails.helpers
   hasAdditionalInfo: ->
     @locations.length > 1 or formatLocation(@locations[0]).split(',').length > 1
 
+  associatedEventCount: ->
+    Template.instance().data.incidentEvents.length
+
 Template.incidentSecondaryDetails.events
   'click .toggle-details': (event, instance) ->
     event.stopPropagation()
