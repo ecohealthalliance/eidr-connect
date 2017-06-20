@@ -11,10 +11,7 @@ Template.incidentSecondaryDetails.helpers
 
   firstLocationName: ->
     firstLocation = Template.instance().data.locations[0]
-    firstLocation?.countryName or
-      firstLocation?.admin1Name or
-      firstLocation?.admin2Name or
-      firstLocation?.name
+    firstLocation?.countryName or firstLocation?.name
 
   hasAdditionalInfo: ->
     @locations.length > 1 or formatLocation(@locations[0]).split(',').length > 1
