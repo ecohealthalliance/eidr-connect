@@ -8,10 +8,9 @@ Template.incidentList.onCreated ->
   @tableContentScrollable = @data.tableContentScrollable
   @accepted = @data.accepted
   @selectedIncidents = @data.selectedIncidents
-  @incidentViewing = new ReactiveVar(null)
 
   @scrollToAnnotation = (id) =>
-    @incidentViewing.set(id)
+    @data.selectedAnnotationId.set(id)
     $annotation = $("span[data-incident-id=#{id}]")
     $sourceTextContainer = $('.curator-source-details--copy')
     $sourceTextContainer.stop()
@@ -90,15 +89,12 @@ Template.incidentList.helpers
   selected: ->
     Template.instance().selectedIncidents.findOne(id: @_id)
 
-  viewingIncident: ->
-    Template.instance().incidentViewing.get() is @_id
-
 Template.incidentList.events
   'click .view': (event, instance) ->
     event.stopPropagation()
-    incidentViewing = instance.incidentViewing
-    if incidentViewing.get() is @_id
-      incidentViewing.set(null)
+    selectedAnnotationId = instance.data.selectedAnnotationId
+    if selectedAnnotationId.get() is @_id
+      selectedAnnotationId.set(null)
     else
       instance.scrollToAnnotation(@_id)
 

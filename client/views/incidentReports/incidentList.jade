@@ -1,13 +1,13 @@
 template(name="incidentList")
   ul.incident-list.list-unstyled
     each incidents
-      li.incident(class="{{#if selected}} selected {{/if}}")
+      li.incident(class="{{#if selected}} selected {{/if}} {{#if annotationSelected}}viewing{{/if}}")
         .incident--main-details.container-flex.no-break
           .container-flex.incident--select.no-break
             span.incident--selection-status
             h3.incident--title {{incidentCountAndDisease this}}
           ul.actions.container-flex.list-unstyled.no-break
-            li.view(class="{{#if viewingIncident}}viewing{{/if}}")
+            li.view(class="{{#if annotationSelected}}viewing{{/if}}")
               i.fa.fa-eye
             li.edit
               i.fa.fa-pencil
