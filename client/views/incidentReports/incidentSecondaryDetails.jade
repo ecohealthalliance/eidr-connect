@@ -1,4 +1,3 @@
-
 template(name="incidentSecondaryDetails")
   .incident--secondary-details.container-flex.no-break(
     class="{{#if detailsOpen}}details-open{{/if}} {{#unless hasAdditionalInfo}}disabled{{/unless}}")
@@ -6,17 +5,21 @@ template(name="incidentSecondaryDetails")
       class="fa-chevron-circle-{{#if detailsOpen}}down{{else}}right{{/if}}")
     ul.container-flex.list-unstyled.no-break(
       class="{{#if detailsOpen}}details-open{{/if}}")
-      if incidentEvents.length
-        li.events(title="Associated Events" data-toggle="tooltip")
-          i.i-event
-          if detailsOpen
-            ul.list-unstyled
-              each incidentEvents
-                li
-                  span= eventName
-                  i.fa.fa-times-circle.disassociate-event
-          else
-            span= incidentEvents.length
+      li.events(
+          title="Associated Events"
+          data-toggle="tooltip"
+          class="{{#unless associatedEventCount}}disabled{{/unless}}")
+        i.i-event
+        if detailsOpen
+          ul.incident--events.list-unstyled
+            each incidentEvents
+              li
+                a(href="{{pathFor 'curated-event' _id=_id _view='incidents'}}" target='_blank')= eventName
+                i.fa.fa-times-circle.disassociate-event
+            else
+              span No associated events
+        else
+          span= associatedEventCount
       li.locations
         if detailsOpen
           i.fa.fa-globe
