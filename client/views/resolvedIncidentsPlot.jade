@@ -2,9 +2,14 @@ template(name="resolvedIncidentsPlot")
   .resolved-incidents-plot
     .controls
       .btn-group.incident-type-selector(role="group")
-        button.btn.btn-default.cases(type="button" class="{{casesActive}}") Case Rate
-        button.btn.btn-default.deaths(type="button" class="{{deathsActive}}") Death Rate
-      p Rates are derived from incident report data
+        button.btn.btn-default.case-rate(type="button" class="{{activeMode 'caseRate'}}") Case Rate
+        button.btn.btn-default.death-rate(type="button" class="{{activeMode 'deathRate'}}") Death Rate
+        button.btn.btn-default.cases(type="button" class="{{activeMode 'cases'}}") Cumulative Cases
+        button.btn.btn-default.deaths(type="button" class="{{activeMode 'deaths'}}") Cumulative Deaths
+      p
+        | The cases in this plot were inferred from incident report data.
+        | Incidents with overlapping locations and time intervals were combined
+        | using an algorithm that avoids double counting their cases.
     if isLoading
       +loading small=true
     .chart

@@ -10,6 +10,7 @@ import LocationTree from '/imports/incidentResolution/LocationTree.coffee'
 Template.resolvedIncidentsPlot.onCreated ->
   @incidents = @data.incidents
   @incidentType = new ReactiveVar("cases")
+  @plotType = new ReactiveVar("rate")
   @legend = new ReactiveVar([])
   @loading = new ReactiveVar(false)
 
@@ -18,6 +19,7 @@ Template.resolvedIncidentsPlot.onRendered ->
     @hoveredIntervalClickEvent = null
     allIncidents = @incidents.fetch()
     incidentType = @incidentType.get()
+    plotType = @plotType.get()
     @loading.set(true)
     _.delay =>
       allIncidents = allIncidents.filter (i)->
@@ -73,11 +75,8 @@ Template.resolvedIncidentsPlot.onRendered ->
           for group, subIntervalGroup of groupedLocSubIntervals
             maxSubintervals.push(_.max(subIntervalGroup, (x)-> x.value))
           maxSubintervals = _.sortBy(maxSubintervals, (x)-> x.start)
-          return {
-            name: location.name
-            color: palette.color(sIdx)
-            renderer: 'line'
-            data: _.chain(_.zip(maxSubintervals, maxSubintervals.slice(1)))
+          if plotType == 'rate'
+            formattedData = _.chain(_.zip(maxSubintervals, maxSubintervals.slice(1)))
               .map(([subInt, iNext])->
                 onClick = ->
                   concurrentIntervals = groupedLocSubIntervals[subInt.start] or []
@@ -110,6 +109,37 @@ Template.resolvedIncidentsPlot.onRendered ->
                   sofar.concat([cur])
               , [])
               .value()
+          else
+            total = 0
+            formattedData = _.chain(maxSubintervals)
+              .map((subInt)->
+                onClick = ->
+                  concurrentIntervals = groupedLocSubIntervals[subInt.start] or []
+                  componentTree = LocationTree.from(concurrentIntervals.map (x)-> x.location)
+                  concurrentIntervals.forEach (x)->
+                    componentTree.getNodeById(x.location.id).associatedObject = x
+                  Modal.show('intervalDetailsModal',
+                    interval: subInt
+                    componentTree: componentTree
+                    incidents: subInt.incidentIds.map (id)->
+                      differentials[id]
+                  )
+                rate = subInt.value / ((subInt.end - subInt.start) / 1000 / 60 / 60 / 24)
+                newTotal = total + subInt.value
+                result = [
+                  {x: subInt.start / 1000, y: total, onClick: onClick}
+                  {x: subInt.end / 1000, y: newTotal, onClick: onClick}
+                ]
+                total = newTotal
+                result
+              )
+              .flatten(true)
+              .value()
+          return {
+            name: location.name
+            color: palette.color(sIdx)
+            renderer: 'line'
+            data: formattedData
           }
       })
       slider = new Rickshaw.Graph.RangeSlider.Preview(
@@ -129,20 +159,31 @@ Template.resolvedIncidentsPlot.onRendered ->
         graph: graph
         formatter: (series, x, y, formattedX, formattedY, obj)=>
           @hoveredIntervalClickEvent = obj.value.onClick
-          "#{series.name}: #{y.toFixed(2)} cases per day"
+          if plotType == 'rate'
+            "#{series.name}: #{y.toFixed(2)} cases per day"
+          else
+            "#{series.name}: #{y.toFixed(0)} cases"
       )
       graph.render()
       @loading.set false
     , 300
 
 Template.resolvedIncidentsPlot.helpers
-  deathsActive: ->
+  activeMode: (value)->
     if Template.instance().incidentType.get() == "deaths"
-      "active"
-
-  casesActive: ->
-    if Template.instance().incidentType.get() == "cases"
-      "active"
+      if Template.instance().plotType.get() == "rate"
+        if value == "deathRate"
+          return "active"
+      else
+        if value == "deaths"
+          return "active"
+    else
+      if Template.instance().plotType.get() == "rate"
+        if value == "caseRate"
+          return "active"
+      else
+        if value == "cases"
+          return "active"
 
   labels: ->
     Template.instance().legend.get()
@@ -153,9 +194,19 @@ Template.resolvedIncidentsPlot.helpers
 Template.resolvedIncidentsPlot.events
   "click .incident-type-selector .cases": (e, instance)->
     instance.incidentType.set("cases")
+    instance.plotType.set("cumulative")
 
   "click .incident-type-selector .deaths": (e, instance)->
     instance.incidentType.set("deaths")
+    instance.plotType.set("cumulative")
+
+  "click .incident-type-selector .case-rate": (e, instance)->
+    instance.incidentType.set("cases")
+    instance.plotType.set("rate")
+
+  "click .incident-type-selector .death-rate": (e, instance)->
+    instance.incidentType.set("deaths")
+    instance.plotType.set("rate")
 
   "click .rickshaw_graph": (e, instance)->
     if instance.hoveredIntervalClickEvent
