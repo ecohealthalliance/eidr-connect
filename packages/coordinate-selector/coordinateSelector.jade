@@ -1,14 +1,12 @@
 template(name='coordinateSelector')
   .coordinate-selector
-    .location-details
+    .location-details.container-flex
       .form-group
-        .row
-          .col-xs-6
-            label(for='lat') Latitude
-            input.lat.form-control(name='lat' value=latitude required=required)
-          .col-xs-6
-            label(for='lon') Longitude
-            input.lon.form-control(name='lon' value=longitude required=required)
+        label.secondary-label(for='lat') Latitude
+        input.lat.form-control(name='lat' value=latitude required=required)
+      .form-group
+        label.secondary-label(for='lon') Longitude
+        input.lon.form-control(name='lon' value=longitude required=required)
+      .location-btns
+        button.leaflet-clear.btn.btn-default(type="button") Clear
     #leaflet-canvas
-    .location-btns
-        button.leaflet-clear.btn.btn-default.btn-block Clear

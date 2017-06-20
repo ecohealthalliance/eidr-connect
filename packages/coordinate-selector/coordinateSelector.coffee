@@ -52,7 +52,9 @@ Template.coordinateSelector.helpers
 
 Template.coordinateSelector.events
   'click .leaflet-clear': (event, t) ->
+    event.preventDefault()
     t.latLon.set(null)
+
   'change .lat, change .lon': (event, t) ->
     lon = parseFloat(t.$('.lon').val())
     lat = parseFloat(t.$('.lat').val())
