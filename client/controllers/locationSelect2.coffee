@@ -2,6 +2,7 @@ import { formatLocation } from '/imports/utils'
 import Incidents from '/imports/collections/incidentReports.coffee'
 import Constants from '/imports/constants.coffee'
 import GeonameSchema from '/imports/schemas/geoname.coffee'
+import { stageModals } from '/imports/ui/modals'
 
 incidentsToLocations = (incidents) ->
   locations = {}
@@ -107,18 +108,21 @@ Template.locationSelect2.events
     if instance.data.allowAdd
       unless $('.select2-results__additional-options').length
         $('.select2-dropdown').addClass('select2-dropdown--with-additional-options')
-        Blaze.renderWithData(Template.addLocationControl, {
+        Blaze.renderWithData Template.addLocationControl,
           onClick: ->
+            stageModals instance,
+              currentModal:
+                element: '#suggestedIncidentModal'
+                remove: 'off-canvas--top'
+                add: 'staged-left'
             instance.$('select').select2('close')
-            Modal.show('addGeonameModal',
+            Modal.show 'addGeonameModal',
               onAdded: (value)->
-                instance.values.set(instance.values.get().concat(
+                instance.values.set instance.values.get().concat
                   id: value.id
                   text: value.name
                   item: value
-                ))
-            )
-        }, document.querySelector('.select2-results'))
+        , document.querySelector('.select2-results')
 
 Template.addLocationControl.events
   'click button': (event, instance) ->

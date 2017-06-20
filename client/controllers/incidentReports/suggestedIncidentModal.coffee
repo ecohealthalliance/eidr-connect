@@ -21,7 +21,7 @@ Template.suggestedIncidentModal.onCreated ->
   @modals =
     currentModal: element: '#suggestedIncidentModal'
     previousModal:
-      element: '#suggestedIncidentsModal'
+      element: '#addGeonameModal'
       add: 'fade'
 
   @editIncident = (incident, userEventId) =>
@@ -31,7 +31,6 @@ Template.suggestedIncidentModal.onCreated ->
       method = 'editIncidentReport'
       action = 'updated'
 
-    # incident.annotations = @data.incident?.annotations
     Meteor.call method, incident, userEventId, (error, result) =>
       if error
         return notify('error', error)

@@ -22,20 +22,25 @@ module.exports =
   ###
   stageModals: (instance, modals, hideModal=true) ->
     { currentModal, previousModal } = modals
-    currentModal.remove += ' in'
-    currentModal.add += if hideModal then ' out' else ''
-    if previousModal
-      previousModal.remove += ' out'
-      previousModal.add += ' in'
+    new Promise (resolve) ->
+      currentModal.remove += ' in'
+      currentModal.add += if hideModal then ' out' else ''
+      if previousModal
+        previousModal.remove += ' out'
+        previousModal.add += ' in'
 
-    $(currentModal.element)
-      .removeClass(currentModal.remove)
-      .addClass(currentModal?.add)
-    if previousModal
-      $(previousModal.element)
-        .removeClass(previousModal.remove)
-        .addClass(previousModal.add)
-    if hideModal
-      setTimeout ->
-        Modal.hide(instance)
-      , 500
+      $(currentModal.element)
+        .removeClass(currentModal.remove)
+        .addClass(currentModal?.add)
+      if previousModal
+        $(previousModal.element)
+          .removeClass(previousModal.remove)
+          .addClass(previousModal.add)
+
+      if hideModal
+        setTimeout ->
+          Modal.hide(instance)
+          resolve()
+        , 500
+      else
+        resolve()

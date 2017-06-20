@@ -1,4 +1,5 @@
 import { notify } from '/imports/ui/notification'
+import { stageModals } from '/imports/ui/modals'
 
 Template.addGeonameModal.onCreated ->
   @latLon = new ReactiveVar()
@@ -6,6 +7,30 @@ Template.addGeonameModal.onCreated ->
   @onAdded = (x)-> x
   if @data.onAdded
     @onAdded = @data.onAdded
+  @modals =
+    currentModal:
+      element: '#addGeonameModal'
+    previousModal:
+      element: '#suggestedIncidentModal'
+      add: 'off-canvas--top'
+
+  @stageModals = =>
+    stageModals(@, @modals).then =>
+      # Remove Modal and slect2 dropdown if lingering
+      @$('#addGeonameModal').remove()
+      $('.select2-dropdown').remove()
+      # Remove staged class so modal exits vertically
+      setTimeout =>
+        $(@modals.previousModal.element).removeClass('staged-left')
+      , 500
+
+
+Template.addGeonameModal.onRendered ->
+  $('#addGeonameModal').on 'hide.bs.modal', (event) =>
+    event.preventDefault()
+    $modal = $(event.currentTarget)
+    if not $modal.hasClass('out')
+      @stageModals()
 
 Template.addGeonameModal.helpers
   latLon: ->
@@ -33,10 +58,9 @@ Template.addGeonameModal.events
       featureCode: 'PPL'
       latitude: latitude
       longitude: longitude
-    Meteor.call('addGeoname', geoname, (error)->
+    Meteor.call 'addGeoname', geoname, (error)->
       if error
         notify('error', 'There was a problem creating the geoname.')
         return
       instance.onAdded(geoname)
-      Modal.hide(instance)
-    )
+      instance.stageModals()
