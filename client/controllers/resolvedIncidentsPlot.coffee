@@ -192,22 +192,22 @@ Template.resolvedIncidentsPlot.helpers
     Template.instance().loading.get()
 
 Template.resolvedIncidentsPlot.events
-  "click .incident-type-selector .cases": (e, instance)->
+  "click .incident-type-selector .cases": (event, instance)->
     instance.incidentType.set("cases")
     instance.plotType.set("cumulative")
 
-  "click .incident-type-selector .deaths": (e, instance)->
+  "click .incident-type-selector .deaths": (event, instance)->
     instance.incidentType.set("deaths")
     instance.plotType.set("cumulative")
 
-  "click .incident-type-selector .case-rate": (e, instance)->
+  "click .incident-type-selector .case-rate": (event, instance)->
     instance.incidentType.set("cases")
     instance.plotType.set("rate")
 
-  "click .incident-type-selector .death-rate": (e, instance)->
+  "click .incident-type-selector .death-rate": (event, instance)->
     instance.incidentType.set("deaths")
     instance.plotType.set("rate")
 
-  "click .rickshaw_graph": (e, instance)->
+  "click .rickshaw_graph": (event, instance)->
     if instance.hoveredIntervalClickEvent
-      instance.hoveredIntervalClickEvent(e, instance)
+      instance.hoveredIntervalClickEvent(event, instance)
