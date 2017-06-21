@@ -21,7 +21,7 @@ Template.suggestedIncidentModal.onCreated ->
   @modals =
     currentModal: element: '#suggestedIncidentModal'
     previousModal:
-      element: '#addGeonameModal'
+      element: '#suggestedIncidentsModal'
       add: 'fade'
 
   @editIncident = (incident, userEventId) =>

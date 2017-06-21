@@ -4,8 +4,7 @@ import validator from 'bootstrap-validator'
 import {
   keyboardSelect,
   removeSuggestedProperties,
-  diseaseOptionsFn,
-  locationOptionsFn } from '/imports/utils'
+  diseaseOptionsFn } from '/imports/utils'
 import { getIncidentSnippet } from '/imports/ui/snippets'
 
 _selectInput = (event, instance, prop, isCheckbox) ->
