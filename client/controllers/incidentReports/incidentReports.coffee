@@ -21,6 +21,7 @@ Template.incidentReports.onDestroyed ->
 Template.incidentReports.onCreated ->
   @subscribe('feeds')
   @plotZoomed = new ReactiveVar(false)
+  @dataLoading = new ReactiveVar(false)
   # iron router returns an array and not a cursor for data.incidents,
   # therefore we will setup a reactive cursor to use with the plot as an
   # instance variable.
@@ -182,6 +183,9 @@ Template.incidentReports.helpers
   plotZoomed: ->
     Template.instance().plotZoomed.get()
 
+  preparingData: ->
+    Template.instance().dataLoading.get()
+
 Template.incidentReports.events
   'click #scatterPlot-toggleCumulative': (event, instance) ->
     $target = $(event.currentTarget)
@@ -244,37 +248,41 @@ Template.incidentReports.events
      instance.$('tr.details').remove()
 
   'click .open-download-csv': (event, instance)->
-    Modal.show 'downloadCSVModal',
-      columns: [
-        {name: 'Type'}
-        {name: 'Value'}
-        {name: 'Start Date'}
-        {name: 'End Date'}
-        {name: 'Locations', classNames: "wide"}
-        {name: 'Status'}
-        {name: 'Species'}
-        {name: 'Properties'}
-        {name: 'Disease'}
-        {name: 'Feed'}
-        {name: 'Document URL'}
-        {name: 'Document Title', classNames: "wide"}
-        {name: 'Document Publication Date'}
-      ],
-      rows: instance.incidents.map (incident)->
-        properties = []
-        if incident.travelRelated
-          properties.push "Travel Related"
-        if incident.dateRange?.cumulative
-          properties.push "Cumulative"
-        if incident.approximate
-          properties.push "Approximate"
-        startDate = null
-        if not incident.dateRange.cumulative
-          startDate = moment.utc(incident.dateRange.start).format("YYYY-MM-DD")
-        endDate = moment.utc(incident.dateRange.end).format("YYYY-MM-DD")
-        article = Articles.findOne(incident.articleId)
-        feed = Feeds.findOne(article?.feedId)
-        return {
+    dataLoading = instance.dataLoading
+    dataLoading.set(true)
+    # Delay so UI can respond to change in reactiveVar
+    setTimeout ->
+      Modal.show 'downloadCSVModal',
+        columns: [
+          {name: 'Type'}
+          {name: 'Value'}
+          {name: 'Start Date'}
+          {name: 'End Date'}
+          {name: 'Locations', classNames: "wide"}
+          {name: 'Status'}
+          {name: 'Species'}
+          {name: 'Properties'}
+          {name: 'Disease'}
+          {name: 'Feed'}
+          {name: 'Document URL'}
+          {name: 'Document Title', classNames: "wide"}
+          {name: 'Document Publication Date'}
+        ],
+        rows: instance.incidents.map (incident, i) =>
+          properties = []
+          if incident.travelRelated
+            properties.push "Travel Related"
+          if incident.dateRange?.cumulative
+            properties.push "Cumulative"
+          if incident.approximate
+            properties.push "Approximate"
+          startDate = null
+          if not incident.dateRange.cumulative
+            startDate = moment.utc(incident.dateRange.start).format("YYYY-MM-DD")
+          endDate = moment.utc(incident.dateRange.end).format("YYYY-MM-DD")
+          article = Articles.findOne(incident.articleId)
+          feed = Feeds.findOne(article?.feedId)
+
           'Type': _.keys(_.pick(incident, 'cases', 'deaths', 'specify'))[0]
           'Value': _.values(_.pick(incident, 'cases', 'deaths', 'specify'))[0]
           'Start Date': startDate
@@ -288,4 +296,6 @@ Template.incidentReports.events
           'Document URL': article?.url
           'Document Title': article?.title
           'Document Publication Date': moment(article?.publishDate).format("YYYY-MM-DD")
-        }
+        rendered: ->
+          dataLoading.set(false)
+    , 100

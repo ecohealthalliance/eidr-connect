@@ -6,6 +6,9 @@ Template.downloadCSVModal.onCreated ->
     if @prepared.get()
       @preparing.set(false)
 
+Template.downloadCSVModal.onRendered ->
+  @data.rendered()
+
 Template.downloadCSVModal.helpers
   getField: (row, field)->
     row[field]
