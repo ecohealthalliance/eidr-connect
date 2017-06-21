@@ -52,4 +52,4 @@ do ->
       @client.waitForExist('.selectable-content')
 
     @Then /^I should see accepted or rejected incidents$/, ->
-      @client.waitForExist('.incident-table tbody tr')
+      @client.waitForExist('.incident-list li')
