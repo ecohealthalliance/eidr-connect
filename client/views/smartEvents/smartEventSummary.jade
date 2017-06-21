@@ -20,7 +20,7 @@ template(name="smartEventSummary")
         else
           span.not-available No daterange selected.
           if isInRole "admin"
-            +editDetailsButton(target="#smart-event-modal" editing="")
+            +editDetailsButton(target="#smart-event-modal" editing="dateRange")
 
       p.locations
         if locations
@@ -28,7 +28,7 @@ template(name="smartEventSummary")
         else
           span.not-available No locations selected.
           if isInRole "admin"
-            +editDetailsButton(target="#smart-event-modal" editing="")
+            +editDetailsButton(target="#smart-event-modal" editing="locations")
 
       if summary
         p.summary(class="{{#if collapsed}}collapsed{{/if}}")

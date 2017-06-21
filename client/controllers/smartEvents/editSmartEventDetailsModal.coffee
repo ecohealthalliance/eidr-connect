@@ -12,6 +12,7 @@ Template.editSmartEventDetailsModal.onCreated ->
 Template.editSmartEventDetailsModal.onRendered ->
   if @data.dateRange
     @addDate.set(true)
+
   @autorun =>
     if @addDate.get()
       Meteor.defer =>
@@ -25,6 +26,22 @@ Template.editSmartEventDetailsModal.onRendered ->
             startDate: dateRange.start
             endDate: dateRange.end
           updateCalendarSelection(@calendar, range)
+
+  @$('#smart-event-modal').on 'show.bs.modal', (event) =>
+    fieldToEdit = $(event.relatedTarget).data('editing')
+    # Wait for the the modal to open
+    # then focus input based on which edit button the user clicks
+    Meteor.setTimeout () =>
+      field = switch fieldToEdit
+        when 'disease' then 'input[name=eventDisease]'
+        when 'summary' then 'textarea'
+        when 'dateRange' then 'dateRange'
+        else 'input:first'
+      if field is 'dateRange'
+        @addDate.set(true)
+      @$(field).focus()
+    , 500
+
   Meteor.defer =>
     @$('#editEvent').validator
       # Do not disable inputs since we don't in other areas of the app
