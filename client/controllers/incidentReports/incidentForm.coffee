@@ -72,13 +72,13 @@ Template.incidentForm.onRendered ->
   datePickerOptions.singleDatePicker = true
   createInlineDateRangePicker(@$('#singleDatePicker'), datePickerOptions)
 
-  @$('#add-incident').validator()
+  @$('#add-incident').parsley()
   #Update the validator when Blaze adds incident type related inputs
   @autorun =>
     @incidentType.get()
     @locations.get()
     Meteor.defer =>
-      @$('#add-incident').validator('update')
+      @$('#add-incident').parsley().reset()
 
 Template.incidentForm.helpers
   incidentData: ->
@@ -182,14 +182,11 @@ Template.incidentForm.events
     removeSuggestedProperties(instance, ['cumulative'])
 
   'submit form': (event, instance) ->
-    prevented = event.isDefaultPrevented()
-    instance.data.valid.set(not prevented)
-    if prevented
-      # Toggle focus on location input so 'has-error' class is applied
-      if not instance.$('.select2-selection__choice').length
-        instance.$('.select2-search__field').blur()
-        instance.$('.has-error:first-child').focus()
     event.preventDefault()
+    formValid = false
+    if $(event.target).parsley().isValid()
+      formValid = true
+    instance.data.valid.set(formValid)
 
   'click .tabs a': (event, instance) ->
     instance.$(event.currentTarget).parent().tooltip('hide')
