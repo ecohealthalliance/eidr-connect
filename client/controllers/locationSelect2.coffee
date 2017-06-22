@@ -59,7 +59,7 @@ Template.locationSelect2.onRendered ->
       CustomDataAdapter = ($element, options) ->
         CustomDataAdapter.__super__.constructor.call(@, $element, options)
       Utils.Extend(CustomDataAdapter, ArrayAdapter)
-      CustomDataAdapter.prototype.query = _.debounce (params, callback) =>
+      CustomDataAdapter.prototype.query = _.throttle (params, callback) =>
         term = params.term?.trim()
         if term # Query the remote server for any matching locations
           @ajax(term, callback)
