@@ -17,7 +17,8 @@ template(name="incidentModal")
           +incidentForm(
             articles=articles
             incident=incident
-            valid=valid)
+            valid=valid
+            parentModal=".incident-report")
 
         .modal-footer
           button.btn.btn-default.on-left(type="button" data-dismiss="modal") Cancel

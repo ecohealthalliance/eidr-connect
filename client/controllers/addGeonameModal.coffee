@@ -11,8 +11,8 @@ Template.addGeonameModal.onCreated ->
     currentModal:
       element: '#addGeonameModal'
     previousModal:
-      element: '#suggestedIncidentModal'
-      add: 'off-canvas--top'
+      element: @data.parentModal
+      add: 'off-canvas--top fade'
 
   @stageModals = =>
     stageModals(@, @modals).then =>

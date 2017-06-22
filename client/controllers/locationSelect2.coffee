@@ -105,6 +105,7 @@ Template.locationSelect2.events
       )
   , 300)
   'select2:open': (event, instance) ->
+    parentModal = instance.data.parentModal
     if instance.data.allowAdd
       unless $('.select2-results__additional-options').length
         $('.select2-dropdown').addClass('select2-dropdown--with-additional-options')
@@ -112,11 +113,12 @@ Template.locationSelect2.events
           onClick: ->
             stageModals instance,
               currentModal:
-                element: '#suggestedIncidentModal'
-                remove: 'off-canvas--top'
+                element: parentModal
+                remove: 'off-canvas--top fade'
                 add: 'staged-left'
             instance.$('select').select2('close')
             Modal.show 'addGeonameModal',
+              parentModal: parentModal
               onAdded: (value)->
                 instance.values.set instance.values.get().concat
                   id: value.id
