@@ -1,15 +1,13 @@
 template(name="sourceIncidentReports")
   .curator-source-details--incidents-container
     if hasAcceptedIncidents
-      .curator-source-details--incidents.accepted(
-        class="{{#unless tableContentIsScrollable}} no-scroll {{/unless}}")
-          +incidentTable(
-            source=source
-            scrollToAnnotations=true
-            accepted=true
-            hideTableHeader=true
-            selectedAnnotationId=selectedAnnotationId
-            selectedIncidents=selectedIncidents
-            tableContentScrollable=tableContentScrollable)
+      .curator-source-details--incidents.accepted
+        +incidentList(
+          source=source
+          accepted=true
+          hideTableHeader=true
+          selectedAnnotationId=selectedAnnotationId
+          selectedIncidents=selectedIncidents
+          tableContentScrollable=tableContentScrollable)
     else
       +noResults message='No Incidents Found'

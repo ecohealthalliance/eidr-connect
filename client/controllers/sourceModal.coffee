@@ -147,7 +147,6 @@ Template.sourceModal.helpers
 
   showSuggestedDocuments: ->
     instance = Template.instance()
-    console.log instance.edit, instance.suggest
     not instance.edit and instance.suggest
 
   suggested: (field) ->
