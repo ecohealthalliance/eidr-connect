@@ -59,7 +59,8 @@ Template.incidentForm.onCreated ->
       'suggested'
 
 Template.incidentForm.onRendered ->
-  @$('[data-toggle=tooltip]').tooltip()
+  @$('[data-toggle=tooltip]').tooltip
+    container: 'body'
   datePickerOptions = {}
   if @incidentData.dateRange.start and @incidentData.dateRange.end
     datePickerOptions.startDate = moment(moment.utc(@incidentData.dateRange.start).format("YYYY-MM-DD"))
