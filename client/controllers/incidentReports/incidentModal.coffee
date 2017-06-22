@@ -46,7 +46,10 @@ Template.incidentModal.events
     # button's default is prevented
     $('#add-incident').submit()
     if not instance.valid.get()
-      console.error "Invalid incident form"
+      console.error "Invalid incident form fields: " + _.map(
+        instance.$('#add-incident .has-error label:first-child'),
+        (x)-> $(x).text()
+      ).join(', ')
       return
     duplicate = $(event.target).hasClass('save-modal-duplicate')
     form = instance.$('form')[0]
