@@ -71,7 +71,7 @@ Template.locationSelect2.onRendered ->
   @autorun =>
     values = @values.get()
     $input = @$("select")
-    try
+    if $input.data('select2')
       $input.select2('close')
       $input.select2('destroy')
     queryDataAdapter = $.fn.select2.amd.require('select2/data/queryAdapter')

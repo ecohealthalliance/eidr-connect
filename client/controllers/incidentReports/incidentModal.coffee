@@ -45,8 +45,8 @@ Template.incidentModal.events
     # reactiveVar — its value is based on whether the form's hidden submit
     # button's default is prevented
     $('#add-incident').submit()
-    if instance.valid.get()
-      console.log "invalid"
+    if not instance.valid.get()
+      console.error "Invalid incident form"
       return
     duplicate = $(event.target).hasClass('save-modal-duplicate')
     form = instance.$('form')[0]

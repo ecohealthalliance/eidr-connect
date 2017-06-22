@@ -28,6 +28,7 @@ Template.incidentForm.onCreated ->
     @subscribe 'incidentArticle', articleId
   @incidentStatus = new ReactiveVar('')
   @incidentType = new ReactiveVar('')
+  @locations = new ReactiveVar([])
   @suggestedFields = incident?.suggestedFields or new ReactiveVar([])
 
   @incidentData =
@@ -55,7 +56,7 @@ Template.incidentForm.onCreated ->
 
     @incidentType.set(type)
 
-    @incidentStatus.set(incident.status or '')
+    @incidentStatus.set(@incidentData.status or '')
 
   @isSuggestedField = (fieldName) =>
     if fieldName in @suggestedFields?.get()
@@ -75,6 +76,7 @@ Template.incidentForm.onRendered ->
   #Update the validator when Blaze adds incident type related inputs
   @autorun =>
     @incidentType.get()
+    @locations.get()
     Meteor.defer =>
       @$('#add-incident').validator('update')
 
@@ -146,6 +148,8 @@ Template.incidentForm.helpers
       articleContent = article?.enhancements?.source.cleanContent.content
       if articleContent
         Spacebars.SafeString(getIncidentSnippet(articleContent, incident))
+
+  locations: -> Template.instance().locations
 
 Template.incidentForm.events
   'change input[name=daterangepicker_start]': (event, instance) ->
