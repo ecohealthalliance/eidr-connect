@@ -1,3 +1,5 @@
+import GeonameSchema from '/imports/schemas/geoname.coffee'
+
 AnnotationSchema = new SimpleSchema
   "text":
     type: String
@@ -38,7 +40,7 @@ IncidentReportSchema = new SimpleSchema
     type: String
     optional: true
   locations:
-    type: [Object]
+    type: [GeonameSchema]
     optional: true
   dateRange:
     type: Object
@@ -78,37 +80,6 @@ IncidentReportSchema = new SimpleSchema
     optional: true
   status:
     type: String
-    optional: true
-  "locations.$.admin1Name":
-    type: String
-    optional: true
-  "locations.$.admin2Name":
-    type: String
-    optional: true
-  "locations.$.alternateNames":
-    type: [String]
-    optional: true
-  "locations.$.countryName":
-    type: String
-    optional: true
-  "locations.$.featureClass":
-    type: String
-    optional: true
-  "locations.$.featureCode":
-    type: String
-    optional: true
-  "locations.$.id":
-    type: String
-  "locations.$.latitude":
-    type: Number
-    decimal: true
-  "locations.$.longitude":
-    type: Number
-    decimal: true
-  "locations.$.name":
-    type: String
-  "locations.$.population":
-    type: Number
     optional: true
   deleted:
     type: Boolean

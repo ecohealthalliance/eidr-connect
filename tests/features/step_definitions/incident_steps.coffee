@@ -31,6 +31,7 @@ do ->
       # Location
       @client.setValue('input.select2-search__field', 'f')
       @client.clickWhenVisible('.select2-results__option--highlighted')
+      @client.pause(1000)
       # Status
       @client.click('label[for="suspected"]')
       # Type
@@ -39,7 +40,7 @@ do ->
       @client.waitForVisible('input[name="count"]')
       @client.setValue('input[name="count"]', count)
       # Submit
-      @client.click('button.save-incident[type="button"]')
+      @client.click('button.save-incident')
 
     @When /^I click the first incident$/, ->
       @client.click('#event-incidents-table tbody tr:first-child')

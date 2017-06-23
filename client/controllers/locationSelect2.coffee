@@ -1,6 +1,8 @@
 import { formatLocation } from '/imports/utils'
-Incidents = require '/imports/collections/incidentReports.coffee'
-Constants = require '/imports/constants.coffee'
+import Incidents from '/imports/collections/incidentReports.coffee'
+import Constants from '/imports/constants.coffee'
+import GeonameSchema from '/imports/schemas/geoname.coffee'
+import { stageModals } from '/imports/ui/modals'
 
 incidentsToLocations = (incidents) ->
   locations = {}
@@ -15,6 +17,7 @@ incidentsToLocations = (incidents) ->
   _.values(locations)
 
 Template.locationSelect2.onCreated ->
+  @values = @data.values or new ReactiveVar([])
   @required = @data.required
   @required ?= false
   # Display locations relevant to this event
@@ -39,7 +42,7 @@ Template.locationSelect2.onCreated ->
         hit._source.longitude = parseFloat(longitude)
         id: id
         text: formatLocation(hit._source)
-        item: hit._source
+        item: GeonameSchema.clean(hit._source)
 
 Template.locationSelect2.onRendered ->
   initialValues = []
@@ -49,14 +52,14 @@ Template.locationSelect2.onRendered ->
       id: loc.id
       text: formatLocation(loc)
       item: loc
-  $input = @$("select")
+  @values.set(initialValues)
   $.fn.select2.amd.define 'select2/data/queryAdapter',
     [ 'select2/data/array', 'select2/utils' ],
     (ArrayAdapter, Utils) =>
       CustomDataAdapter = ($element, options) ->
         CustomDataAdapter.__super__.constructor.call(@, $element, options)
       Utils.Extend(CustomDataAdapter, ArrayAdapter)
-      CustomDataAdapter.prototype.query = _.debounce (params, callback) =>
+      CustomDataAdapter.prototype.query = _.throttle (params, callback) =>
         term = params.term?.trim()
         if term # Query the remote server for any matching locations
           @ajax(term, callback)
@@ -65,27 +68,64 @@ Template.locationSelect2.onRendered ->
       , 600
       CustomDataAdapter
 
-  queryDataAdapter = $.fn.select2.amd.require('select2/data/queryAdapter')
-  $input.select2
-    data: initialValues
-    multiple: @data.multiple
-    placeholder: 'Search for a location...'
-    minimumInputLength: 0
-    dataAdapter: queryDataAdapter
+  @autorun =>
+    values = @values.get()
+    $input = @$("select")
+    if $input.data('select2')
+      $input.select2('close')
+      $input.select2('destroy')
+    queryDataAdapter = $.fn.select2.amd.require('select2/data/queryAdapter')
+    $input.select2
+      data: values
+      multiple: @data.multiple
+      placeholder: 'Search for a location...'
+      minimumInputLength: 0
+      dataAdapter: queryDataAdapter
 
-  if required
-    if initialValues.length > 0
-      required = false
-    @$('.select2-search__field').attr
-      'required': required
-      'data-error': 'Please select a location.'
+    if required
+      if values.length > 0
+        required = false
+      @$('.select2-search__field').attr
+        'required': required
+        'data-error': 'Please select a location.'
 
-    # Remove required attr when location is selected and add it back when all
-    # locations are removed/unselected
-    $input.on 'change', =>
-      required = false
-      if @$('.select2-selection__rendered li').length is 1
-        required = true
-      @$('.select2-search__field').attr('required', required)
-      @$('select').attr('required', required)
-  $input.val(initialValues.map((x)->x.id)).trigger('change')
+    $input.val(values.map((x)->x.id)).trigger('change')
+
+Template.locationSelect2.events
+  'change select': _.debounce((event, instance) ->
+    selectedValues = instance.$("select").select2('data')
+    uniqueValues = _.uniq(_.pluck(instance.values.get(), 'id'))
+    uniqueSelectedValues = _.uniq(_.pluck(selectedValues, 'id'))
+    intersection = _.intersection(uniqueValues, uniqueSelectedValues)
+    if intersection.length != uniqueSelectedValues.length or uniqueValues.length != uniqueSelectedValues.length
+      instance.values.set(selectedValues.map (data)->
+        id: data.id
+        text: data.text
+        item: data.item
+      )
+  , 300)
+  'select2:open': (event, instance) ->
+    parentModal = instance.data.parentModal
+    if instance.data.allowAdd
+      unless $('.select2-results__additional-options').length
+        $('.select2-dropdown').addClass('select2-dropdown--with-additional-options')
+        Blaze.renderWithData Template.addLocationControl,
+          onClick: ->
+            stageModals instance,
+              currentModal:
+                element: parentModal
+                remove: 'off-canvas--top fade'
+                add: 'staged-left'
+            instance.$('select').select2('close')
+            Modal.show 'addGeonameModal',
+              parentModal: parentModal
+              onAdded: (value)->
+                instance.values.set instance.values.get().concat
+                  id: value.id
+                  text: value.name
+                  item: value
+        , document.querySelector('.select2-results')
+
+Template.addLocationControl.events
+  'click button': (event, instance) ->
+    instance.data.onClick()

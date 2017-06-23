@@ -52,7 +52,6 @@ describe 'LocationTree', ->
       name: "Tripura"
     }, {
       admin1Name: "Uttar Pradesh"
-      alternateNames: Array(70)
       countryName: "Republic of India"
       featureClass: "A"
       featureCode: "ADM1"
