@@ -21,4 +21,10 @@ template(name="downloadCSVModal")
                     td {{getField row name}}
         .modal-footer
           button.btn.btn-default.confirm-close-modal.on-left(type="button" data-dismiss="modal") Close
-          button.btn.btn-default.download-csv(type="button" data-type="csv") Download CSV
+          button.btn.btn-default.download-csv(
+            type="button"
+            data-type="csv"
+            disabled="{{#if preparing}}disabled{{/if}}")
+            if preparing
+              i.fa.fa-spin.fa-cog
+            | Download CSV
