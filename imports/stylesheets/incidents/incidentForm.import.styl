@@ -30,7 +30,10 @@
   .control-label
     &.featured
       border-top-width 2px
-      width 100%
+      min-width calc(100% + 40px)
+      margin-top 0
+      margin-bottom 10px
+      border-bottom 2px solid $border-primary
       +above(4)
         border-top-width 0
         margin-left -20px
@@ -48,8 +51,3 @@
   margin-left -35px
   margin-right -35px
   padding 0 15px
-
-.add-incident--wrapper
-  .form-group
-    &:first-of-type
-      border-top 0

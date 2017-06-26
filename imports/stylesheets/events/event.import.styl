@@ -291,8 +291,11 @@ $max-event-details-width = $max-ui-width+300
     margin-bottom 1em
 
 .resolved-incidents-plot
+  min-height 200px
+  position relative
   padding 3em 0
   .controls
+    margin-bottom 2em
     text-align center
     p
       color $m-gray
@@ -314,6 +317,24 @@ $max-event-details-width = $max-ui-width+300
     i
       font-size 2em
       margin-right .25em
+
+.interval-details
+  h5
+    font-size 1.5em
+  h6
+    font-size 1em
+    margin-top 1em
+    font-weight 600
+  li
+    margin-bottom 4px
+    span
+      font-weight 600
+
+.interval-details--source-incidents
+  padding-left 30px
+  li
+    span
+      font-weight normal
 
 .incident-type-selector
   margin-bottom 1em

@@ -31,7 +31,6 @@ Template.suggestedIncidentModal.onCreated ->
       method = 'editIncidentReport'
       action = 'updated'
 
-    # incident.annotations = @data.incident?.annotations
     Meteor.call method, incident, userEventId, (error, result) =>
       if error
         return notify('error', error)

@@ -1,6 +1,8 @@
 template(name="articles")
   .heading.container-fluid-padded
-    h2 Event Documents
+    h2
+      i.i-doc
+      span Event Documents
   .container-flex.no-gutter
     .flex-col.bordered
       if articles.count
@@ -81,7 +83,9 @@ template(name="articleSelect2")
     name="{{selectId}}"
     multiple="{{multiple}}"
     required
-    data-error="Please select a document.")
+    data-parsley-errors-container=errorContainer
+    data-parsley-class-handler=classHandler
+    data-parsley-error-message=errorMessage)
     unless multiple
       option(value="")
     each articles

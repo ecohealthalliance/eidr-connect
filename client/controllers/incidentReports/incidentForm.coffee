@@ -1,7 +1,10 @@
-Articles = require '/imports/collections/articles.coffee'
-createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
-validator = require 'bootstrap-validator'
-{ keyboardSelect, removeSuggestedProperties, diseaseOptionsFn } = require '/imports/utils'
+import Articles from '/imports/collections/articles.coffee'
+import createInlineDateRangePicker from '/imports/ui/inlineDateRangePicker.coffee'
+import validator from 'bootstrap-validator'
+import {
+  keyboardSelect,
+  removeSuggestedProperties,
+  diseaseOptionsFn } from '/imports/utils'
 import { getIncidentSnippet } from '/imports/ui/snippets'
 
 _selectInput = (event, instance, prop, isCheckbox) ->
@@ -25,6 +28,7 @@ Template.incidentForm.onCreated ->
     @subscribe 'incidentArticle', articleId
   @incidentStatus = new ReactiveVar('')
   @incidentType = new ReactiveVar('')
+  @locations = new ReactiveVar([])
   @suggestedFields = incident?.suggestedFields or new ReactiveVar([])
 
   @incidentData =
@@ -52,14 +56,15 @@ Template.incidentForm.onCreated ->
 
     @incidentType.set(type)
 
-    @incidentStatus.set(incident.status or '')
+    @incidentStatus.set(@incidentData.status or '')
 
   @isSuggestedField = (fieldName) =>
     if fieldName in @suggestedFields?.get()
       'suggested'
 
 Template.incidentForm.onRendered ->
-  @$('[data-toggle=tooltip]').tooltip()
+  @$('[data-toggle=tooltip]').tooltip
+    container: 'body'
   datePickerOptions = {}
   if @incidentData.dateRange.start and @incidentData.dateRange.end
     datePickerOptions.startDate = moment(moment.utc(@incidentData.dateRange.start).format("YYYY-MM-DD"))
@@ -68,12 +73,13 @@ Template.incidentForm.onRendered ->
   datePickerOptions.singleDatePicker = true
   createInlineDateRangePicker(@$('#singleDatePicker'), datePickerOptions)
 
-  @$('#add-incident').validator()
+  @$('#add-incident').parsley()
   #Update the validator when Blaze adds incident type related inputs
   @autorun =>
     @incidentType.get()
+    @locations.get()
     Meteor.defer =>
-      @$('#add-incident').validator('update')
+      @$('#add-incident').parsley().reset()
 
 Template.incidentForm.helpers
   incidentData: ->
@@ -144,6 +150,8 @@ Template.incidentForm.helpers
       if articleContent
         Spacebars.SafeString(getIncidentSnippet(articleContent, incident))
 
+  locations: -> Template.instance().locations
+
 Template.incidentForm.events
   'change input[name=daterangepicker_start]': (event, instance) ->
     instance.$('#singleDatePicker').data('daterangepicker').clickApply()
@@ -175,14 +183,11 @@ Template.incidentForm.events
     removeSuggestedProperties(instance, ['cumulative'])
 
   'submit form': (event, instance) ->
-    prevented = event.isDefaultPrevented()
-    instance.data.valid.set(not prevented)
-    if prevented
-      # Toggle focus on location input so 'has-error' class is applied
-      if not instance.$('.select2-selection__choice').length
-        instance.$('.select2-search__field').blur()
-        instance.$('.has-error:first-child').focus()
     event.preventDefault()
+    formValid = false
+    if $(event.target).parsley().isValid()
+      formValid = true
+    instance.data.valid.set(formValid)
 
   'click .tabs a': (event, instance) ->
     instance.$(event.currentTarget).parent().tooltip('hide')

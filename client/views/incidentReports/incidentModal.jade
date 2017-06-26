@@ -1,5 +1,5 @@
 template(name="incidentModal")
-  .incident-report.modal.modal-skinny(
+  .incident-report.modal.modal-skinny.flex(
     role="dialog"
     class=classNames)
     .modal-dialog
@@ -14,14 +14,11 @@ template(name="incidentModal")
                 | Add
               |  Incident
         .modal-body
-          if edit
-            +incidentForm(
-              articles=articles
-              incident=incident
-              edit=true
-              valid=valid)
-          else
-            +incidentForm incident=incident articles=articles valid=valid
+          +incidentForm(
+            articles=articles
+            incident=incident
+            valid=valid
+            parentModal=".incident-report")
 
         .modal-footer
           button.btn.btn-default.on-left(type="button" data-dismiss="modal") Cancel

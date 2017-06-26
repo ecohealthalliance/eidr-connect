@@ -11,14 +11,21 @@ template(name="header")
 template(name="navLinks")
   ul.nav.navbar-nav
     //- TODO: Replace with curator role
+    li(class="{{checkActive 'events'}}")
+      a(href="{{pathFor 'events' _view='curated'}}")
+       i.i-event
+       span Events
+
     if isCurator
       li(class="{{checkActive 'curator-inbox'}}")
-        a(href="{{pathFor 'curator-inbox'}}") Inbox
+        a(href="{{pathFor 'curator-inbox'}}")
+          i.i-doc
+          span Documents
 
-    li(class="{{checkActive 'events'}}")
-      a(href="{{pathFor 'events' _view='curated'}}") Events
     li(class="{{checkActive 'event-map'}}")
-      a(href="{{pathFor 'event-map'}}") Event Map
+      a(href="{{pathFor 'event-map'}}")
+        i.fa.fa-globe
+        span Event Map
 
     unless currentUser
       li

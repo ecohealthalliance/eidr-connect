@@ -1,0 +1,190 @@
+$disabled = darken($l-gray, 20%)
+
+.incident-list
+  h3
+    padding-top 2px
+    text-transform none
+    color $primary-dark
+  .incident
+    border-bottom 1px solid $border-primary-light
+    padding 10px $page-padding 10px 0
+    cursor pointer
+    &:hover
+      background lighten($border-primary-light, 20%)
+    &:hover
+    &.selected
+      h3
+        font-weight 600
+      .incident--selection-status
+        &::before
+          color $primary-dark
+    &.selected
+      .incident--selection-status
+        &::before
+          content '\f111'
+    .view
+      &.viewing
+        color $secondary
+    &:active
+      .incident--selection-status
+        transform scale(.8)
+        transform-origin center
+    &.viewing
+      background alpha($secondary, 8%)
+
+.incident--select
+  align-items flex-start
+  cursor pointer
+  padding .4em $page-padding .5em
+  &:hover
+    color $primary-dark
+    h3
+      font-weight 600
+    .incident--selection-status
+      color $primary
+  span
+    line-height 1
+
+.incident--selection-status
+  &::before
+    icon()
+    content '\f1db'
+  font-size 1.25em
+  margin-right .5em
+  color $border-primary
+  transition .1s ease-in-out
+
+.incident--main-details
+  align-items flex-start
+  .actions
+    margin-left auto
+    li
+      margin-right .65em
+      cursor pointer
+      font-size 1.35em
+      color $border-primary
+      transition .05s ease-in-out
+      &:hover
+        transform scale(1.2)
+        color $primary
+      &:active
+        transform scale(.9)
+        color $primary-dark
+
+.incident--secondary-details
+  padding-left 2em
+  color $m-gray
+  &.details-open
+    background none
+    &:hover
+      color $m-gray
+    .toggle-details
+      cursor pointer
+      color $primary-dark
+      &:hover
+        color $primary-dark
+  > i
+    margin-right 5px
+  > ul
+    align-items center
+    width 100%
+    > li
+      display flex
+      align-items flex-start
+      font-size .85em
+      margin-right .4em
+      li:not(:last-of-type)
+        margin-bottom 3px
+      &:after
+        content ''
+        display block
+        align-self stretch
+        margin-left 10px
+        margin-right 10px
+        border-right 1px solid darken($l-gray, 20%)
+      &:last-of-type
+        margin 0
+        &::after
+          display none
+      i
+        padding-top 1px
+        font-size 120%
+        margin-right .5em
+      &.events
+        span
+          font-size 110%
+          padding-top 1px
+      &.locations
+        max-width 45%
+        span
+          overflow hidden
+          text-overflow ellipsis
+          white-space nowrap
+      &.disabled
+        color $disabled
+
+    &.details-open
+      justify-content flex-start
+      align-items flex-start
+      background none
+      font-size 1em
+      &
+      li
+        color $body-text
+        &.disabled
+          &
+          .incident--events
+            color $disabled
+        &.locations
+          max-width 100%
+      &:hover
+        color $body-text
+      +below(2000px)
+        flex-direction column
+        > li
+          &:not(:last-of-type)
+            margin-bottom 1em
+          i
+            line-height normal
+            margin-right .5em
+          &::after
+            display none
+  .toggle-details
+    font-size 1.15em
+    padding-left 1em
+    padding-right .5em
+    align-self flex-start
+    transition .1s ease-in-out
+    &:hover
+      color $primary-dark
+      transform scale(1.3)
+
+  .disassociate-event
+    margin-left 5px
+    cursor pointer
+    font-size 135%
+    transition .1s ease-in-out
+    color $m-gray
+    &:hover
+      color $delete
+      transform scale(1.3)
+    &:active
+      transform scale(.9)
+
+  &.disabled
+    cursor default
+    color $disabled
+    .toggle-details
+      color $disabled
+      pointer-events none
+
+.incident--events
+  li
+    display flex
+    align-items center
+  span
+    font-weight 300
+  a
+    &:hover
+      color $primary-dark
+      text-decoration underline

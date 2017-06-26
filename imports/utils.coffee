@@ -287,8 +287,15 @@ export createIncidentReportsFromEnhancements = (enhancements, options)->
       start <= territoryEnd and start >= territoryStart
     diseaseTerritory = _.find diseaseTerritories, ({territoryStart, territoryEnd}) ->
       start <= territoryEnd and start >= territoryStart
+    # grouping is done to deduplicate geonames
+    locations = _.chain(locationTerritory.annotations)
+      .pluck('geoname')
+      .groupBy('id')
+      .values()
+      .map((x)-> x[0])
+      .value()
     incident =
-      locations: locationTerritory.annotations.map(({geoname}) -> geoname)
+      locations: locations
     maxPrecision = 0
     # Use the document's date as the default
     incident.dateRange =

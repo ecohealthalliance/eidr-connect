@@ -1,5 +1,5 @@
 template(name="incidentForm")
-  form#add-incident(novalidate)
+  form#add-incident(novalidate data-parsley-validate)
     label.control-label.featured.container-flex.no-break
       h5 Incident Details
     .add-incident--wrapper
@@ -11,19 +11,21 @@ template(name="incidentForm")
             +documentInputLabel
             input.form-control(readonly value=documentUrl)
         else
-          .form-group.form-group--full
+          .form-group.form-group--full.url-selector
             +documentInputLabel
             +articleSelect2(
               selectId="articleSource"
               articles=articles
-              placeholder='Select a Document')
-            .help-block.with-errors
+              placeholder='Select a Document'
+              errorContainer=".url-selector"
+              classHandler=".url-selector"
+              errorMessage="Please select a url.")
 
       if incidentSnippet
         p.incident-snippet=incidentSnippet
 
       .incident-type-wrapper.form-group.form-groups(class=incidentTypeClassNames)
-        .form-group.form-group--full.check-buttons
+        .form-group.form-group--full.incident-type
           label.control-label.with-info-tooltip(
             data-toggle="tooltip"
             data-placement="right"
@@ -38,6 +40,9 @@ template(name="incidentForm")
                 value="cases"
                 tabindex="-1"
                 checked="{{incidentTypeChecked 'cases'}}"
+                data-parsley-errors-container=".incident-type"
+                data-parsley-class-handler=".incident-type-wrapper"
+                data-parsley-error-message="Please select one of these options."
                 required)
               label(for="cases" tabindex="0") Cases
             .check-button
@@ -48,6 +53,9 @@ template(name="incidentForm")
                 value="deaths"
                 tabindex="-1"
                 checked="{{incidentTypeChecked 'deaths'}}"
+                data-parsley-errors-container=".incident-type"
+                data-parsley-class-handler=".incident-type-wrapper"
+                data-parsley-error-message="Please select one of these options."
                 required)
               label(for="deaths" tabindex="0") Deaths
             .check-button
@@ -58,9 +66,11 @@ template(name="incidentForm")
                 value="other"
                 tabindex="-1"
                 checked="{{incidentTypeChecked 'other'}}"
+                data-parsley-errors-container=".incident-type"
+                data-parsley-class-handler=".incident-type-wrapper"
+                data-parsley-error-message="Please select one of these options."
                 required)
               label(for="other" tabindex="0") Other
-          .help-block.with-errors
 
         if showCountForm
           .form-group.form-group--child
@@ -72,7 +82,6 @@ template(name="incidentForm")
               value=incidentData.value
               required
               tabindex="0")
-            .help-block.with-errors
 
         if showOtherForm
           .form-group.form-group--child
@@ -141,7 +150,7 @@ template(name="incidentForm")
           #preciseRange.tab-pane(role="tabpanel" class="{{rangeTabClass}}")
             #rangePicker.inlineRangePicker.centered
 
-      .form-group.form-group--full(class="{{suggestedField 'locations'}}")
+      .form-group.form-group--full.location-group(class="{{suggestedField 'locations'}}")
         label.control-label.with-info-tooltip(
           data-toggle="tooltip"
           data-placement="right"
@@ -151,8 +160,13 @@ template(name="incidentForm")
           selectId="incident-location-select2"
           multiple=true
           selected=incidentData.locations
-          required=true)
-        .help-block.with-errors
+          values=locations
+          required=true
+          errorContainer=".location-group"
+          classHandler=".location-group"
+          errorMessage="Please select a location."
+          allowAdd=true
+          parentModal=parentModal)
 
       .form-group.form-group--full(class="{{suggestedField 'resolvedDisease'}}")
         label.control-label.with-info-tooltip(
@@ -166,7 +180,6 @@ template(name="incidentForm")
           placeholder="Select a disease"
           optionsFn=diseaseOptionsFn
           selected=incidentData.resolvedDisease)
-        .help-block.with-errors
 
       .form-group.form-group--full(class="{{suggestedField 'species'}}")
         label.control-label.with-info-tooltip(

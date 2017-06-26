@@ -1,0 +1,26 @@
+$invalid = darken($danger, 10%)
+
+.parsley-errors-list
+  list-style-type none
+  color $invalid
+  margin 5px 0 0 3px
+  padding 0
+  li
+    font-size .9em
+    padding-bottom 2px
+
+.parsley-error
+  &
+  &:focus
+  .select2-selection
+  .select2-selection:focus
+    border-color $danger !important
+    background lighten($danger, 95%)
+
+  &.form-group
+  &.form-group--full
+    border-top 1px solid lighten($danger, 75%)
+    border-color lighten($danger, 75%) !important
+
+  > label
+    color $invalid

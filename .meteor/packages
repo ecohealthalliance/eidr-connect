@@ -57,3 +57,5 @@ eidr:fixtures
 practicalmeteor:mocha
 reywood:publish-composite
 dynamic-import
+eha:coordinate-selector
+eidr:parsley

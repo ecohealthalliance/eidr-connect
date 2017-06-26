@@ -17,9 +17,13 @@ template(name="curatedEvent")
           .tabs-wrapper
             ul.tabs.primary-tabs.container-fluid-padded(role="tablist")
               li(class="{{#if incidentView}}active{{/if}}" role="presentation")
-                a(href="{{pathFor route='curated-event' _id=userEvent._id _view='incidents'}}") Incident Reports
+                a(href="{{pathFor route='curated-event' _id=userEvent._id _view='incidents'}}")
+                  i.i-incident
+                  span Incident Reports
               li(class="{{#if locationView}}active{{/if}}" role="presentation")
-                a(href="{{pathFor route='curated-event' _id=userEvent._id _view='locations'}}") Locations
+                a(href="{{pathFor route='curated-event' _id=userEvent._id _view='locations'}}")
+                  i.fa.fa-globe
+                  span Locations
 
           .tab-content
             .tab-pane.active(role="tabpanel")

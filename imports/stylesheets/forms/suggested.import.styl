@@ -56,10 +56,16 @@ $warning-border = darken($warning-bg, 12%)
     color $primary-dark
 
 #suggestedIncidentModal
+  #add-incident
+    .control-label.featured
+      border-bottom-width 1px
+
   .modal-dialog
     width 90%
   .check-buttons
     margin-bottom 0
+  .form-group:first-of-type
+    border-top 0
   .form-group--full:last-of-type
     margin-bottom 1.5em
   .control-label
