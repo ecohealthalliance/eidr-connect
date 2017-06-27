@@ -10,11 +10,6 @@ template(name="curatorSourceDetails")
           class="{{#if url}} linked {{/if}}")
           .back-to-list
             i.fa.fa-chevron-circle-left(title="Return to document list")
-          if isUsersDocument
-            a.delete-document(
-              title="Delete document"
-              data-toggle="tooltip")
-              i.fa.fa-trash(aria-hidden="true")
           if url
             a(href="#{url}" target="_blank")= title
           else
@@ -38,6 +33,11 @@ template(name="curatorSourceDetails")
                 else
                   span Mark Reviewed
               button.btn.btn-default.btn-sm.add-source-to-event.on-right Add Document to Event
+              if isUsersDocument
+                a.delete-document(
+                  title="Delete document"
+                  data-toggle="tooltip")
+                  i.fa.fa-trash(aria-hidden="true")
             if addingSourceToEvent
               +addToEvent(source=source objNameToAssociate="Document")
             .curator-source-details--copy
