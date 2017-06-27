@@ -1,6 +1,8 @@
-Articles = require '/imports/collections/articles.coffee'
-ArticleSchema = require '/imports/schemas/article'
-{ regexEscape } = require '/imports/utils'
+import Articles from '/imports/collections/articles.coffee'
+import ArticleSchema from '/imports/schemas/article'
+import Incidents from '/imports/collections/incidentReports.coffee'
+import UserEvents from '/imports/collections/userEvents.coffee'
+import { regexEscape } from '/imports/utils'
 
 Meteor.methods
   addEventSource: (source, eventId) ->
@@ -62,6 +64,33 @@ Meteor.methods
           $set:
             userEventIds: removed.userEventIds
         Meteor.call("editUserEventLastModified", userEventId)
+
+  removeDocument: (id) ->
+    documentToRemove = Articles.findOne(id)
+    if (Roles.userIsInRole(Meteor.userId(), ['admin']) or
+      documentToRemove.addedByUserId == @userId
+    )
+      incidentIds = Incidents.find(articleId: id).map((x)-> x._id)
+      userEventIds = UserEvents.find(
+        'incidents.id': $in: incidentIds
+      ).map((x)-> x._id)
+      UserEvents.update({
+        'incidents.id': $in: incidentIds
+      }, {
+        $pull:
+          incidents:
+            id:
+              $in: incidentIds
+      }, {
+        multi: true
+      })
+      Incidents.remove(articleId: id)
+      Articles.remove(id)
+      userEventIds.map (userEventId)->
+        Meteor.call('editUserEventLastModified', userEventId)
+        Meteor.call('editUserEventLastIncidentDate', userEventId)
+    else
+      throw new Meteor.Error('auth', 'User does not have permission delete this document')
 
   markSourceReviewed: (id, reviewed) ->
     if Roles.userIsInRole(Meteor.userId(), ['curator', 'admin'])

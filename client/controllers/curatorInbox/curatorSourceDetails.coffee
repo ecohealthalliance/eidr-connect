@@ -83,6 +83,9 @@ Template.curatorSourceDetails.onDestroyed ->
   $(window).off('resize')
 
 Template.curatorSourceDetails.helpers
+  isUsersDocument: ->
+    @addedByUserId == Meteor.userId()
+
   incidents: ->
     Incidents.find()
 
@@ -127,6 +130,17 @@ Template.curatorSourceDetails.helpers
     Template.instance().selectedIncidents
 
 Template.curatorSourceDetails.events
+  'click .delete-document': (event, instance) ->
+    Modal.show 'confirmationModal',
+      html: Spacebars.SafeString(Blaze.toHTMLWithData(
+        Template.deleteConfirmationModalBody,
+        objNameToDelete: 'document'
+        displayName: @title
+      ))
+      onConfirm: =>
+        Meteor.call 'removeDocument', @_id, (error) ->
+          instance.$(event.currentTarget).tooltip('destroy')
+
   'click .toggle-reviewed': (event, instance) ->
     instance.markReviewed()
     event.currentTarget.blur()

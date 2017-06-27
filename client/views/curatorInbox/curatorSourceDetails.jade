@@ -10,10 +10,16 @@ template(name="curatorSourceDetails")
           class="{{#if url}} linked {{/if}}")
           .back-to-list
             i.fa.fa-chevron-circle-left(title="Return to document list")
+          if isUsersDocument
+            a.delete-document(
+              title="Delete document"
+              data-toggle="tooltip")
+              i.fa.fa-trash(aria-hidden="true")
           if url
             a(href="#{url}" target="_blank")= title
           else
            | #{title}
+
       if notifying
         .inbox-notification
           .checks
