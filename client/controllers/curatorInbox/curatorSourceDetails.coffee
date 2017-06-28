@@ -35,15 +35,11 @@ Template.curatorSourceDetails.onCreated ->
         , 1200
 
 Template.curatorSourceDetails.onRendered ->
-  instance = @
   Meteor.defer =>
-    instance.$('[data-toggle=tooltip]').tooltip
-      delay: show: '300'
-      container: 'body'
     if window.innerWidth <= 1000
       swippablePane = new Hammer($('#touch-stage')[0])
       swippablePane.on 'swiperight', (event) ->
-        instance.data.currentPaneInView.set('')
+        @data.currentPaneInView.set('')
 
   # Create key binding which marks documents as reviewed.
   key 'ctrl + enter, command + enter', (event) =>
@@ -59,6 +55,10 @@ Template.curatorSourceDetails.onRendered ->
     @incidentsLoaded.set(false)
     @subscribe 'articleIncidents', @selectedSourceId.get(), =>
       @incidentsLoaded.set(true)
+      Meteor.defer =>
+        @$('.curator-source-details--content [data-toggle=tooltip]').tooltip
+          delay: show: '300'
+          container: 'body'
 
   @autorun =>
     source = Articles.findOne(@selectedSourceId.get())
@@ -83,6 +83,9 @@ Template.curatorSourceDetails.onDestroyed ->
   $(window).off('resize')
 
 Template.curatorSourceDetails.helpers
+  isUsersDocument: ->
+    @addedByUserId == Meteor.userId()
+
   incidents: ->
     Incidents.find()
 
@@ -127,6 +130,17 @@ Template.curatorSourceDetails.helpers
     Template.instance().selectedIncidents
 
 Template.curatorSourceDetails.events
+  'click .delete-document': (event, instance) ->
+    Modal.show 'confirmationModal',
+      html: Spacebars.SafeString(Blaze.toHTMLWithData(
+        Template.deleteConfirmationModalBody,
+        objNameToDelete: 'document'
+        displayName: @title
+      ))
+      onConfirm: =>
+        Meteor.call 'removeDocument', @_id, (error) ->
+          instance.$(event.currentTarget).tooltip('destroy')
+
   'click .toggle-reviewed': (event, instance) ->
     instance.markReviewed()
     event.currentTarget.blur()

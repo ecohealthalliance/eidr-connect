@@ -53,6 +53,10 @@
     font-size 150%
     margin-left .5em
 
+  .delete-document
+    position absolute
+    right 15px
+
 .curator-inbox-header--back-to-list
   z-index $top-layer
 
@@ -94,7 +98,7 @@
   &:hover
     background lighten($header-BG, 20%)
     .toggle
-      color darken($border-primary, 40%)
+      color $header-link-color
   &:first-of-type
     border-top 0
   &:last-of-type
@@ -264,6 +268,14 @@
   i
     font-size 1.5em
     vertical-align middle
+  a
+    color $header-link-color
+    margin 0 5px
+    &:last-of-type
+      margin-right 0
+    &[class^='delete']
+      &:hover
+        color $delete
 
 .curator-source-details--header
   min-height $curator-pane-head-height
@@ -363,7 +375,7 @@
     transform translate(0, -50%)
     transition transform .1s ease-in-out
     font-size 1.5em
-    color darken($border-primary, 40%)
+    color $header-link-color
     pointer-events none
 
   &:hover
