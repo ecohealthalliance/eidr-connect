@@ -19,10 +19,14 @@ template(name="editSmartEventDetailsModal")
                 objNameToDelete='smartEvent'
                 allowEdit=true)
             else
-              .form-group
+              .form-group.name-group
                 label Name
-                input.form-control(type='text' name='eventName' value=eventName required)
-                .help-block.with-errors
+                input.form-control(
+                  type='text'
+                  name='eventName'
+                  value=eventName
+                  required
+                  data-parsley-class-handler=".name-group")
               .form-group
                 label Disease
                 +select2(
@@ -32,7 +36,6 @@ template(name="editSmartEventDetailsModal")
                   multiple=true
                   optionsFn=diseaseOptionsFn
                   selected=diseases)
-                .help-block.with-errors
               .form-group
                 label Locations
                 +locationSelect2(

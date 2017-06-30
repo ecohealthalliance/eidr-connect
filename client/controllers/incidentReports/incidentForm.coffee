@@ -1,6 +1,5 @@
 import Articles from '/imports/collections/articles.coffee'
 import createInlineDateRangePicker from '/imports/ui/inlineDateRangePicker.coffee'
-import validator from 'bootstrap-validator'
 import {
   keyboardSelect,
   removeSuggestedProperties,

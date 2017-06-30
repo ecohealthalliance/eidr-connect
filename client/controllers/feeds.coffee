@@ -1,12 +1,11 @@
 Feeds = require('/imports/collections/feeds.coffee')
-validator = require('bootstrap-validator')
 import { notify } from '/imports/ui/notification'
 
 Template.feeds.onCreated ->
   @subscribe('feeds')
 
 Template.feeds.onRendered ->
-  $('.add-feed').validator()
+  $('.add-feed').parsley()
 
 Template.feeds.helpers
   feeds: Feeds.find()

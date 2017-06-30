@@ -3,24 +3,45 @@ $invalid = darken($danger, 10%)
 .parsley-errors-list
   list-style-type none
   color $invalid
-  margin 5px 0 0 3px
+  margin 0 0 0 3px
   padding 0
   li
+    &:first-of-type:not(:empty)
+      margin-top 5px
     font-size .9em
     padding-bottom 2px
 
 .parsley-error
-  &
+  input
+  input:focus
+  textarea
+  textarea:focus
   &:focus
   .select2-selection
   .select2-selection:focus
+  .check-button label
     border-color $danger !important
     background lighten($danger, 95%)
 
-  &.form-group
   &.form-group--full
+    background lighten($danger, 95%)
     border-top 1px solid lighten($danger, 75%)
     border-color lighten($danger, 75%) !important
+    padding-top 10px !important
+    padding-bottom 10px !important
 
-  > label
+  .tab-content
+  &.form-group--full
+    input
+    textarea
+      background white
+
+  .tab-content
+  .tabs .active a
+  .tabs .active a:focus
+    border-color lighten($danger, 75%) !important
+    background lighten($danger, 95%)
+    color darken($danger, 10%)
+
+  label
     color $invalid
