@@ -32,7 +32,9 @@ template(name="curatorSourceDetails")
                   span Reviewed
                 else
                   span Mark Reviewed
-              button.btn.btn-default.btn-sm.add-source-to-event.on-right Add Document to Event
+              button.btn.btn-default.btn-sm.add-source-to-event.on-right(
+                class="{{#if addingSourceToEvent}}viewing{{/if}}")
+                | Add Document to Event
               if isUsersDocument
                 a.delete-document(
                   title="Delete document"
@@ -40,18 +42,14 @@ template(name="curatorSourceDetails")
                   i.fa.fa-trash(aria-hidden="true")
             if addingSourceToEvent
               +addToEvent(source=source objNameToAssociate="Document")
-              .curator-inbox--add-event-container
-                h5 Associated Events
-                .events(
-                  title="Associated Events"
-                  data-toggle="tooltip")
-                  ul.list-unstyled.incident--events
+              if articleEvents.count
+                .curator-inbox--add-event-container.curator-source-details--events
+                  h5 Associated Events
+                  ul.list-unstyled.document--events(title="Associated Events" data-toggle="tooltip")
                     each articleEvents
                       li
                         a(href="{{pathFor 'curated-event' _id=_id _view='incidents'}}" target='_blank')= eventName
                         i.fa.fa-times-circle.disassociate-event
-                    else
-                      span No associated events
             .curator-source-details--copy
               +annotatedContent(
                 content=textContent

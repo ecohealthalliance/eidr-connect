@@ -3,6 +3,7 @@ template(name="sourceIncidentReportsHeader")
     button.btn.btn-sm.btn-danger.delete(
       disabled="{{#unless incidentsSelectedCount}} true {{/unless}}") Delete
     button.btn.btn-sm.btn-primary.show-addEvent(
+      class="{{#if addEvent}}viewing{{/if}}"
       disabled="{{#unless incidentsSelectedCount}} true {{/unless}}") Add to Event
     button.btn.btn-sm.btn-default.select.on-right(
       disabled="{{#unless incidents.count}} true {{/unless}}"

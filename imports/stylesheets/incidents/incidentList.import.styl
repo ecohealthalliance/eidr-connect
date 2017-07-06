@@ -73,7 +73,6 @@ $disabled = darken($l-gray, 20%)
 
 .curator-inbox--add-event-container
 .incident--secondary-details
-  padding-left 2em
   color $m-gray
   &.details-open
     background none
@@ -179,6 +178,15 @@ $disabled = darken($l-gray, 20%)
       color $disabled
       pointer-events none
 
+.curator-inbox--add-event-container
+  > ul
+    > li
+      font-size .95em
+      margin-bottom 5px
+      &::after
+        display none
+
+.document--events
 .incident--events
   li
     display flex

@@ -153,6 +153,7 @@ Template.curatorSourceDetails.events
   'click .add-source-to-event': (event, instance) ->
     addingSourceToEvent = instance.addingSourceToEvent
     addingSourceToEvent.set(not addingSourceToEvent.get())
+    event.currentTarget.blur()
 
   'click .back-to-list': (event, instance) ->
     instanceData = instance.data
