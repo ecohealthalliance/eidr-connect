@@ -40,6 +40,18 @@ template(name="curatorSourceDetails")
                   i.fa.fa-trash(aria-hidden="true")
             if addingSourceToEvent
               +addToEvent(source=source objNameToAssociate="Document")
+              .curator-inbox--add-event-container
+                h5 Associated Events
+                .events(
+                  title="Associated Events"
+                  data-toggle="tooltip")
+                  ul.list-unstyled.incident--events
+                    each articleEvents
+                      li
+                        a(href="{{pathFor 'curated-event' _id=_id _view='incidents'}}" target='_blank')= eventName
+                        i.fa.fa-times-circle.disassociate-event
+                    else
+                      span No associated events
             .curator-source-details--copy
               +annotatedContent(
                 content=textContent

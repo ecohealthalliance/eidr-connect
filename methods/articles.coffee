@@ -55,15 +55,17 @@ Meteor.methods
         'User does not have permission to edit documents')
 
   removeEventSource: (id, userEventId) ->
-    if Meteor.isServer
-      if Roles.userIsInRole(Meteor.userId(), ['admin'])
-        removed = Articles.findOne(id)
-        removed.userEventIds = _.filter removed.userEventIds, (currentUserEventId) ->
-          currentUserEventId != userEventId
-        Articles.update id,
-          $set:
-            userEventIds: removed.userEventIds
-        Meteor.call("editUserEventLastModified", userEventId)
+    if Roles.userIsInRole(Meteor.userId(), ['admin'])
+      articleToRemove = Articles.findOne(id)
+      if not articleToRemove
+        # The Articles collection might not be populated on the client.
+        return
+      articleToRemove.userEventIds = _.filter articleToRemove.userEventIds, (currentUserEventId) ->
+        currentUserEventId != userEventId
+      Articles.update id,
+        $set:
+          userEventIds: articleToRemove.userEventIds
+      Meteor.call("editUserEventLastModified", userEventId)
 
   removeDocument: (id) ->
     documentToRemove = Articles.findOne(id)
