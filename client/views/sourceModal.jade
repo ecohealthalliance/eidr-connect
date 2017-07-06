@@ -63,10 +63,7 @@ template(name="sourceModal")
               input#title.form-control.new-title(
                 type="text"
                 name="title"
-                value=title
-                required
-                data-parsley-class-handler=".title-group")
-
+                value=title)
 
             .form-group.form-group--full(class="{{#if editing}} date-editing {{/if}}" hidden=unspecifiedPublishDate)
               label.control-label Publication Date
