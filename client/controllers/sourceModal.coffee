@@ -1,6 +1,5 @@
 convertDate = require '/imports/convertDate.coffee'
 createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
-validator = require 'bootstrap-validator'
 { notify } = require '/imports/ui/notification'
 { stageModals } = require '/imports/ui/modals'
 
@@ -8,12 +7,6 @@ import {
   UTCOffsets,
   cleanUrl,
   removeSuggestedProperties } from '/imports/utils.coffee'
-
-_checkFormValidity = (instance) ->
-  $form = instance.$('#add-source')
-  $form.validator('validate')
-  $form.submit()
-  instance.formValid.get()
 
 _setDatePicker = (picker, date) ->
   picker.setStartDate(date)
@@ -98,7 +91,7 @@ Template.sourceModal.onRendered ->
     defaultDate:  publishDate or false
   @$('.timePicker').datetimepicker(pickerOptions)
 
-  @$('#add-source').validator()
+  @$('#add-source').parsley()
 
   @autorun =>
     selectedArticle = @selectedArticle.get()
@@ -178,8 +171,10 @@ Template.sourceModal.helpers
 
 Template.sourceModal.events
   'click .save-source': (event, instance) ->
-    return unless _checkFormValidity(instance)
-    form = instance.$('form')[0]
+    $form = instance.$('form')
+    $form.submit()
+    return unless instance.formValid.get()
+    form = $form[0]
     source = {}
     if @source?._id
       source._id = @source._id
@@ -242,7 +237,7 @@ Template.sourceModal.events
     _checkForPublishDate(@url, instance)
 
   'submit form': (event, instance) ->
-    instance.formValid.set(not event.isDefaultPrevented())
+    instance.formValid.set($(event.target).parsley().isValid())
     event.preventDefault()
 
   'change #publishDateTZ': (e, instance) ->

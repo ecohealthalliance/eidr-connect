@@ -2,9 +2,13 @@ template(name="feeds")
   .feeds
     .container-fluid-padded.page-heading.container-flex
       h1 Feeds
-      form.add-feed.container-flex(novalidate)
+      form.add-feed.container-flex(novalidate data-parsley-errors-messages-disabled)
         .form-group
-          input.form-control(name="feedUrl" placeholder="Enter new feed URL" required)
+          input.form-control(
+            name="feedUrl"
+            placeholder="Enter new feed URL"
+            required
+            data-parsley-class-handler=".form-group")
         button.btn.btn-primary
           i.fa.fa-plus-circle(aria-hidden="true")
           | Add Feed

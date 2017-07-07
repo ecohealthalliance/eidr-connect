@@ -9,10 +9,14 @@ template(name="createEventModal")
               h4 Add Curated Event
 
           .modal-body
-            .form-group
+            .form-group.name-group
               label.control-label(for="eventName") Event Name
-              input#eventName.form-control(type='text', name='eventName' value=eventName required)
-              .help-block.with-errors
+              input#eventName.form-control(
+                type='text'
+                name='eventName'
+                value=eventName
+                required
+                data-parsley-class-handler=".name-group")
             .form-group
               label.control-label(for="eventSummary") Event Summary
               textarea#eventSummary.form-control(name='eventSummary', rows='15')

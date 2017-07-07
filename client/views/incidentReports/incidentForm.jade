@@ -24,8 +24,8 @@ template(name="incidentForm")
       if incidentSnippet
         p.incident-snippet=incidentSnippet
 
-      .incident-type-wrapper.form-group.form-groups(class=incidentTypeClassNames)
-        .form-group.form-group--full.incident-type
+      .incident-type-wrapper.form-group.form-group--full.form-groups(class=incidentTypeClassNames)
+        .form-group.incident-type
           label.control-label.with-info-tooltip(
             data-toggle="tooltip"
             data-placement="right"

@@ -35,37 +35,37 @@ template(name="sourceModal")
                 p=content
 
             if showArticleInputs
-              .form-group.full-width.with-tabs
+              .form-group.full-width
                 ul.tabs.tabs-secondary.tabs-traditional(role="tablist")
                   li(class="{{#if originIsUrl}}active{{/if}}")
                     a(href="#url" data-toggle="tab" role="tab") Via URL
                   li(class="{{#if originIsText}}active{{/if}}")
                     a(href="#text" data-toggle="tab" role="tab") Via Pasted Text
-                .tab-content.modal-block
+                .tab-content.modal-block(class="tab-content--#{articleOrigin}")
                   #url.tab-pane(class="{{#if originIsUrl}}active{{/if}}" role="tabpanel")
-                    .form-group(class="{{suggested 'url'}}")
+                    .form-group.url-group(class="{{suggested 'url'}}")
                       input#article.form-control.new-article(
                         type="url"
                         value=url
                         name="url"
                         placeholder='yourdocumenturl.com'
-                        required=originIsUrl)
-                      .help-block.with-errors
-                  #text.tab-pane(class="{{#if originIsText}}active{{/if}}" role="tabpanel")
+                        required=originIsUrl
+                        data-parsley-class-handler="#url"
+                        data-parsley-errors-container="#url")
+                  #text.tab-pane(role="tabpanel")
                     textarea.form-control.article-text#content(
                       placeholder="Paste text here"
                       name='content'
-                      require=originIsText)
-                    .help-block.with-errors
+                      required=originIsText
+                      data-parsley-class-handler="#text"
+                      data-parsley-errors-container="#text")
 
-            .form-group.form-group--full(class="{{suggested 'title'}}")
+            .form-group.form-group--full.title-group(class="{{suggested 'title'}}")
               label.control-label Title
               input#title.form-control.new-title(
                 type="text"
                 name="title"
                 value=title)
-              .help-block.with-errors
-
 
             .form-group.form-group--full(class="{{#if editing}} date-editing {{/if}}" hidden=unspecifiedPublishDate)
               label.control-label Publication Date
@@ -73,7 +73,7 @@ template(name="sourceModal")
                 #publishDate.datePicker.inlineRangePicker.centered(class="{{suggested 'date'}}")
                 .clearfix.time
                   .col-sm-6
-                    .form-group(class="{{suggested 'time'}}")
+                    .form-group.time-group(class="{{suggested 'time'}}")
                       .input-group
                         span.input-group-addon
                           i.fa.fa-clock-o
@@ -82,8 +82,9 @@ template(name="sourceModal")
                           name="publishTime"
                           placeholder="Time"
                           required=specifiedPublishDate
-                          data-error="Please select a time.")
-                      .help-block.with-errors
+                          data-parsley-errors-container=".time-group"
+                          data-parsley-class-handler=".time-group"
+                          data-parsley-error-message="Please select a time.")
                   .col-sm-6
                     .form-group(class="{{suggested 'time'}}")
                       .input-group.with-select

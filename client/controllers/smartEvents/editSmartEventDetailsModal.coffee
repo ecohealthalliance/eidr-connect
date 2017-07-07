@@ -2,7 +2,6 @@
 { notify } = require('/imports/ui/notification')
 createInlineDateRangePicker = require('/imports/ui/inlineDateRangePicker')
 { updateCalendarSelection } = require('/imports/ui/setRange')
-require('bootstrap-validator')
 { diseaseOptionsFn } = require '/imports/utils'
 
 Template.editSmartEventDetailsModal.onCreated ->
@@ -43,9 +42,7 @@ Template.editSmartEventDetailsModal.onRendered ->
     , 500
 
   Meteor.defer =>
-    @$('#editEvent').validator
-      # Do not disable inputs since we don't in other areas of the app
-      disable: false
+    @$('#editEvent').parsley()
 
 Template.editSmartEventDetailsModal.helpers
   confirmingDeletion: ->
@@ -65,7 +62,7 @@ Template.editSmartEventDetailsModal.helpers
 Template.editSmartEventDetailsModal.events
   'submit #editEvent': (event, instance) ->
     form = event.target
-    return if event.isDefaultPrevented() # Form is invalid
+    return unless $(form).parsley().isValid()
     event.preventDefault()
 
     diseases = $(form)

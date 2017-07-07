@@ -1,8 +1,5 @@
-validator = require('bootstrap-validator')
-
 Template.createAccount.onRendered ->
-  $.fn.validator.Constructor.FOCUS_OFFSET = 150
-  @$('#add-account').validator()
+  @$('#add-account').parsley()
 
 Template.createAccount.events
   'submit #add-account': (event) ->
