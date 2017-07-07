@@ -67,10 +67,6 @@
     font-size 150%
     margin-left .5em
 
-  .delete-document
-    position absolute
-    right 15px
-
 .curator-inbox-header--back-to-list
   z-index $top-layer
 
@@ -136,6 +132,7 @@
   border-right 0
   padding-right 2em
   overflow hidden
+  align-items center
   +below($break-point--curator-inbox)
     flex-direction column
     min-height $mobile-header-height
@@ -151,7 +148,6 @@
       color darken($positive, 40%)
   h2
     flex 1
-    width 100%
     display flex
     align-items center
     z-index 1
