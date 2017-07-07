@@ -14,7 +14,14 @@ Template.incidentSecondaryDetails.helpers
     firstLocation?.countryName or firstLocation?.name
 
   hasAdditionalInfo: ->
-    @locations.length > 1 or formatLocation(@locations[0]).split(',').length > 1
+    if @locations.length > 1
+      1
+    else if formatLocation(@locations[0])?.split(',').length > 1
+      1
+    else if @incidentEvents.length
+      1
+    else
+      0
 
   associatedEventCount: ->
     Template.instance().data.incidentEvents.length
