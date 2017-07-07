@@ -1,5 +1,6 @@
 import Articles from '/imports/collections/articles.coffee'
 import Incidents from '/imports/collections/incidentReports.coffee'
+import UserEvents from '/imports/collections/userEvents.coffee'
 key = require 'keymaster'
 { notify } = require '/imports/ui/notification'
 Hammer = require 'hammerjs'
@@ -129,6 +130,10 @@ Template.curatorSourceDetails.helpers
   selectedIncidents: ->
     Template.instance().selectedIncidents
 
+  articleEvents: ->
+    source = Articles.findOne(Template.instance().selectedSourceId.get())
+    UserEvents.find(_id: $in: source.userEventIds)
+
 Template.curatorSourceDetails.events
   'click .delete-document': (event, instance) ->
     Modal.show 'confirmationModal',
@@ -148,6 +153,7 @@ Template.curatorSourceDetails.events
   'click .add-source-to-event': (event, instance) ->
     addingSourceToEvent = instance.addingSourceToEvent
     addingSourceToEvent.set(not addingSourceToEvent.get())
+    event.currentTarget.blur()
 
   'click .back-to-list': (event, instance) ->
     instanceData = instance.data
@@ -165,3 +171,9 @@ Template.curatorSourceDetails.events
     Meteor.call 'getArticleEnhancementsAndUpdate', source, (error, enhancements) =>
       if error
         notify('error', error.reason)
+
+  'click .disassociate-event': (event, instance)->
+    event.stopPropagation()
+    instanceData = instance.data
+    Meteor.call 'removeEventSource', instance.selectedSourceId.get(), @_id, (error, res) ->
+      $('.tooltip').remove()

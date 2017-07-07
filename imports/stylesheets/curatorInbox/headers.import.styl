@@ -322,6 +322,10 @@
       margin 0 0 1em 0
       padding-top .75em
       padding-bottom .75em
+    &.viewing
+      background $secondary
+      color $primary-dark
+      border-color darken($secondary, 10%)
     &[disabled]
       &
       &:hover
@@ -342,6 +346,7 @@
   justify-content center
   border-top 1px solid $border-primary-light
   border-bottom 1px solid $border-primary-light
+  background lighten($border-primary-light, 80%)
   button
     margin-left 1em
   .select2-container
