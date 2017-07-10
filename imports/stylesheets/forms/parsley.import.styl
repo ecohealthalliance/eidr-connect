@@ -17,19 +17,23 @@ $invalid = darken($danger, 10%)
   textarea
   textarea:focus
   &:focus
-  .select2-selection
-  .select2-selection:focus
+  .select2 > .selection > .select2-selection
+  .select2 > .selection > .select2-selection:focus
   .check-button label
   .input-group-addon
-    border-color $danger !important
+    border-color $danger
     background lighten($danger, 95%)
+
+  .select2 > .selection > .select2-selection
+  .select2 > .selection > .select2-selection:focus
+    background white
 
   &.form-group--full
     background lighten($danger, 95%)
     border-top 1px solid lighten($danger, 75%)
-    border-color lighten($danger, 75%) !important
-    padding-top .75em !important
-    padding-bottom .75em !important
+    border-color lighten($danger, 75%)
+    padding-top .75em
+    padding-bottom .75em
 
   .tab-content
   &.form-group--full
@@ -40,7 +44,7 @@ $invalid = darken($danger, 10%)
   .tab-content
   .tabs .active a
   .tabs .active a:focus
-    border-color lighten($danger, 75%) !important
+    border-color lighten($danger, 75%)
     background lighten($danger, 95%)
     color darken($danger, 10%)
 
@@ -50,3 +54,7 @@ $invalid = darken($danger, 10%)
   .input-group-addon
     color darken($danger, 10%)
     background lighten($danger, 80%)
+
+  .select2-search
+    .parsley-errors-list
+      display none
