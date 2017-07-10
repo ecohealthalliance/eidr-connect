@@ -465,7 +465,9 @@ export formatDateRange = (dateRange, readable)->
   else
     startFormated + " - " + endFormated
 
-export formatLocation = ({name, admin2Name, admin1Name, countryName}) ->
+export formatLocation = (locations) ->
+  return unless locations
+  {name, admin2Name, admin1Name, countryName} = locations
   _.chain([name, admin2Name, admin1Name, countryName])
     .compact()
     .uniq()

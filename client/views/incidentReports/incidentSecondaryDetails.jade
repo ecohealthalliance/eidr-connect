@@ -20,14 +20,15 @@ template(name="incidentSecondaryDetails")
               span No associated events
         else
           span= associatedEventCount
-      li.locations
-        if detailsOpen
-          i.fa.fa-globe
-          ul.list-unstyled
-            each locations
-              li {{formatLocation this}}
-        else
-          span= firstLocationName
+      if locations
+        li.locations
+          if detailsOpen
+            i.fa.fa-globe
+            ul.list-unstyled
+              each locations
+                li {{formatLocation this}}
+          else
+            span= firstLocationName
       li.date
         if detailsOpen
           i.fa.fa-calendar
