@@ -9,10 +9,37 @@ import {
   createIncidentReportsFromEnhancements,
   regexEscape } from '/imports/utils.coffee'
 import Constants from '/imports/constants.coffee'
+import sqlite3 from 'sqlite3'
 
 DateRegEx = /<span class="blue">Published Date:<\/span> ([^<]+)/
 
+speciesDB = new sqlite3.Database('/itisSqlite/ITIS.sqlite')
+
 Meteor.methods
+  searchSpeciesNames: (term)->
+    # The data model for the itis database is available here:
+    # https://www.itis.gov/pdf/ITIS_ConceptualModelEntityDefinition.pdf
+    @unblock()
+    if term.length < 2
+      return []
+    wrappedFn = Meteor.wrapAsync (callback)->
+      speciesDB.all("""SELECT
+        tsn,
+        min(completename) AS completeName,
+        min(vernacular_name) AS vernacularName
+      FROM longnames
+      LEFT JOIN vernaculars USING (tsn)
+      WHERE UPPER(vernacular_name) LIKE $term OR UPPER(completename) LIKE $term
+      GROUP BY tsn
+      ORDER BY
+        CASE WHEN UPPER(vernacularName) LIKE $term
+          THEN length(vernacularName)
+          ELSE length(completeName) END
+      ASC
+      LIMIT 30;
+      """, $term: "%" + term.toUpperCase() + "%", callback)
+    wrappedFn()
+
   getArticleEnhancements: (article, options={}) ->
     @unblock()
     check article.url, Match.Maybe(String)

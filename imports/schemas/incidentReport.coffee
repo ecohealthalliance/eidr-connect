@@ -76,6 +76,12 @@ IncidentReportSchema = new SimpleSchema
     type: String
     optional: true
   species:
+    type: Object
+    optional: true
+  "species.id":
+    type: String
+    optional: true
+  "species.text":
     type: String
     optional: true
   status:

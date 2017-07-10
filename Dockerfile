@@ -5,8 +5,11 @@ RUN rm /bin/sh && ln -s /bin/bash /bin/sh
 
 # Install apt package dependencies
 RUN apt-get clean all && apt-get update && \
-    apt-get -y install wget curl python make g++ git supervisor && \
+    apt-get -y install wget curl python make g++ git supervisor unzip && \
     apt-get clean all
+
+# Add spcies data from ITIS
+RUN wget https://www.itis.gov/downloads/itisSqlite.zip
 
 # Install nodejs
 RUN wget https://nodejs.org/download/release/v4.4.7/node-v4.4.7-linux-x64.tar.gz && \
