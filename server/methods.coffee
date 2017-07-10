@@ -13,10 +13,18 @@ import sqlite3 from 'sqlite3'
 
 DateRegEx = /<span class="blue">Published Date:<\/span> ([^<]+)/
 
-speciesDB = new sqlite3.Database('/itisSqlite/ITIS.sqlite')
+speciesDB = new sqlite3.Database(
+  Constants.SQLITE_DB_PATH,
+  sqlite3.OPEN_READONLY,
+  (error)->
+    if error
+      console.log(error)
+)
 
 Meteor.methods
   searchSpeciesNames: (term)->
+    if not speciesDB.open
+      return []
     # The data model for the itis database is available here:
     # https://www.itis.gov/pdf/ITIS_ConceptualModelEntityDefinition.pdf
     @unblock()
