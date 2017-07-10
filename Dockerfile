@@ -9,7 +9,7 @@ RUN apt-get clean all && apt-get update && \
     apt-get clean all
 
 # Add spcies data from ITIS
-RUN wget https://www.itis.gov/downloads/itisSqlite.zip
+RUN wget https://s3.amazonaws.com/bsve-integration/itisSqlite.zip
 
 # Install nodejs
 RUN wget https://nodejs.org/download/release/v4.4.7/node-v4.4.7-linux-x64.tar.gz && \

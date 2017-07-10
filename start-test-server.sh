@@ -6,6 +6,10 @@
 # example:
 # ./start-test-server.sh --app_port=3001 --mongo_host=127.0.0.1 --mongo_port=27017 --prod_db=eidr-connect --test_db=eidr-connect-test
 
+# Extract ITIS data
+unzip itisSqlite.zip
+mv itisSqlite* itisSqlite
+
 for i in "$@"
 do
 case $i in
