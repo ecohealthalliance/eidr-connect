@@ -14,7 +14,8 @@ template(name="curatorSourceDetails")
             a(href="http://#{url}" target="_blank")= title
           else
            | #{title}
-
+        if isUsersDocument
+          button.btn.btn-sm.btn-danger.delete-document.on-right Delete Document
       if notifying
         .inbox-notification
           .checks
@@ -35,11 +36,6 @@ template(name="curatorSourceDetails")
               button.btn.btn-default.btn-sm.add-source-to-event.on-right(
                 class="{{#if addingSourceToEvent}}viewing{{/if}}")
                 | Add Document to Event
-              if isUsersDocument
-                a.delete-document(
-                  title="Delete document"
-                  data-toggle="tooltip")
-                  i.fa.fa-trash(aria-hidden="true")
             if addingSourceToEvent
               +addToEvent(source=source objNameToAssociate="Document")
               if articleEvents.count
@@ -80,16 +76,20 @@ template(name="curatorSourceDetails")
           .curator-inbox--warning
             i.fa.fa-warning
             h4=enhancements.error
-            button.btn.btn-default.retry Retry
+            .actions
+              button.btn.btn-default.retry Retry
+              button.btn.btn-sm.btn-danger.delete-document Delete Document
         else if enhancements.processingStartedAt
           .curator-inbox--warning
             i.fa.fa-warning
             h4 The document has not finished being processed
-            button.btn.btn-default.retry Retry
+            .actions
+              button.btn.btn-default.retry Retry
         else
           .curator-inbox--warning
             i.fa.fa-warning
             h4 This document contains no text content
-            button.btn.btn-default.retry Retry
+            .actions
+              button.btn.btn-default.retry Retry
       else
         +loading message="Loading"
