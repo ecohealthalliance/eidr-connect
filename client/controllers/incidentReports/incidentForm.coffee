@@ -43,10 +43,9 @@ Template.incidentForm.onCreated ->
     cases = @incidentData.cases
     deaths = @incidentData.deaths
     specify = @incidentData.specify
-    @incidentData.value = cases or deaths or specify
-    if cases
+    if cases >= 0
       type = 'cases'
-    else if deaths
+    else if deaths >= 0
       type = 'deaths'
     else if specify
       type = 'other'
@@ -154,6 +153,13 @@ Template.incidentForm.helpers
   addUrl: ->
     article = Articles.findOne(Template.instance().data.incident?.articleId)
     not article?.url and not article?.enhancements?.source
+
+  incidentTypeValue: ->
+    instance = Template.instance()
+    type = instance.incidentType.get()
+    if type is 'other'
+      type = 'specify'
+    instance.incidentData[type]
 
 Template.incidentForm.events
   'change input[name=daterangepicker_start]': (event, instance) ->

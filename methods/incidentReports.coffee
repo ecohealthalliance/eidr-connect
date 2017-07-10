@@ -34,6 +34,7 @@ Meteor.methods
     else if incident.specify
       fieldsToRemove = cases: true, deaths: true
     unless incident.status
+      fieldsToRemove ?= {}
       fieldsToRemove.status = true
 
     existingIncident = Incidents.findOne(incident._id)
