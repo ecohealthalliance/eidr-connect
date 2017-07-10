@@ -177,3 +177,10 @@ Template.curatorSourceDetails.events
     instanceData = instance.data
     Meteor.call 'removeEventSource', instance.selectedSourceId.get(), @_id, (error, res) ->
       $('.tooltip').remove()
+
+  'click .add-incident': (event, instance) ->
+    Modal.show 'incidentModal',
+      incident:
+        articleId: instance.selectedSourceId.get()
+      add: true
+      accept: true
