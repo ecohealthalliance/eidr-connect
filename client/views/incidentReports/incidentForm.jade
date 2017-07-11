@@ -6,17 +6,17 @@ template(name="incidentForm")
       if documentId
         input(type="hidden" name="articleId" value=documentId)
       unless confirmation
-        if documentId
+        if documentUrl
           .form-group.form-group--full
             +documentInputLabel
             input.form-control(readonly value=documentUrl)
-        else
+        if addUrl
           .form-group.form-group--full.url-selector
             +documentInputLabel
             +articleSelect2(
               selectId="articleSource"
               articles=articles
-              placeholder='Select a Document'
+              placeholder="Select a Document"
               errorContainer=".url-selector"
               classHandler=".url-selector"
               errorMessage="Please select a url.")
