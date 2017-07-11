@@ -36,7 +36,7 @@ do ->
       if sourceType is 'link'
         @client.setValue('#article', DOCUMENT_LINK)
       else
-        @client.click('[href="#text"]')
+        @client.clickWhenVisible('[href="#text"]')
         @client.waitForVisible('#content')
         @client.setValue('#content', DOCUMENT_TEXT)
       @client.setValue('#title', 'Test Article')
