@@ -27,9 +27,9 @@ Meteor.methods
 
     # Remove existing type props if user changes incident type and merge incident
     # from client with existing incident
-    if incident.cases
+    if incident.cases >= 0
       fieldsToRemove = deaths: true, specify: true
-    else if incident.deaths
+    else if incident.deaths >= 0
       fieldsToRemove = cases: true, specify: true
     else if incident.specify
       fieldsToRemove = cases: true, deaths: true
