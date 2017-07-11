@@ -83,6 +83,39 @@ describe 'Incident Resolution', ->
     chai.assert.sameMembers(subIntervals[2].incidentIds, [1])
     chai.assert.equal(subIntervals.length, 3)
 
+  it 'creates 1 subinterval for two overlapping incidents that share a start date', ->
+    overlappingIncidentsSharedStart = [{
+      cases: 40
+      dateRange:
+        start: new Date("Dec 31 2009")
+        end: new Date("Jan 1 2011")
+      locations: [
+        admin1Name: "Maritime"
+        countryName: "Togolese Republic"
+        featureClass: "P"
+        featureCode: "PPLC"
+        id: "2365267"
+        name: "Lomé"
+      ]
+    }, {
+      cases: 45
+      dateRange:
+        start: new Date("Dec 31 2009")
+        end: new Date("Jan 1 2011")
+      locations: [
+        admin1Name: "Maritime"
+        countryName: "Togolese Republic"
+        featureClass: "P"
+        featureCode: "PPLC"
+        id: "2365267"
+        name: "Lomé"
+      ]
+    }]
+    differentialIncidents = convertAllIncidentsToDifferentials(overlappingIncidentsSharedStart)
+    subIntervals = differentailIncidentsToSubIntervals(differentialIncidents)
+    chai.assert.sameMembers(subIntervals[0].incidentIds, [0, 1])
+    chai.assert.equal(subIntervals.length, 1)
+
   it 'allocates counts proportionately', ->
     differentialIncidents = convertAllIncidentsToDifferentials(overlappingIncidents)
     subIntervals = differentailIncidentsToSubIntervals(differentialIncidents)
