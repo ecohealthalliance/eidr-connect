@@ -1,5 +1,5 @@
 Template.select2.onCreated ->
-  defaultOptionFn = (params, callback)=>
+  defaultOptionFn = (params, callback) =>
     callback(results: @data.options or [])
   # A function that takes parameters for a term being typed calls a callback
   # with a list of corresponding options.
@@ -42,7 +42,7 @@ Template.select2.onRendered ->
         @$('.select2-search__field').attr
           'required': required
           'data-error': 'Please select a value.'
-      $input.val(values.map((x)->x.id)).trigger('change')
+      $input.val(values.map((x) -> x.id)).trigger('change')
 
 Template.select2.events
   'select2:open': (event, instance) ->

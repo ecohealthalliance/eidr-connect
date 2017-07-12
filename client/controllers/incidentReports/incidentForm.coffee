@@ -132,12 +132,11 @@ Template.incidentForm.helpers
       term = params.term?.trim()
       if not term
         return callback(results: [])
-      Meteor.call 'searchSpeciesNames', term, (error, results)->
+      Meteor.call 'searchSpeciesNames', term, (error, results) ->
         if error
           notify('error', error.reason)
-        console.log results
         callback(
-          results: results.map((item)->
+          results: results.map((item) ->
             text = item.completeName
             if (new RegExp(term, "i")).test(item.vernacularName)
               text = item.vernacularName + " | " + item.completeName
