@@ -151,6 +151,10 @@ Template.incidentForm.helpers
 
   locations: -> Template.instance().locations
 
+  addUrl: ->
+    article = Articles.findOne(Template.instance().data.incident?.articleId)
+    not article?.url and not article?.enhancements?.source
+
 Template.incidentForm.events
   'change input[name=daterangepicker_start]': (event, instance) ->
     instance.$('#singleDatePicker').data('daterangepicker').clickApply()
