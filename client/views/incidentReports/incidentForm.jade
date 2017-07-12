@@ -79,7 +79,7 @@ template(name="incidentForm")
               name="count"
               type="number"
               min="0"
-              value=incidentData.value
+              value=incidentTypeValue
               required
               tabindex="0")
 
@@ -91,7 +91,7 @@ template(name="incidentForm")
               id="specify"
               type="text"
               required
-              value=incidentData.value
+              value=incidentTypeValue
               tabindex="0")
 
         .form-group.form-group--child(hidden=typeIsNotSelected)

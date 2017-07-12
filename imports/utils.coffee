@@ -389,9 +389,9 @@ export incidentTypeWithCountAndDisease = (incident) ->
   deaths = incident.deaths
   specify = incident.specify
   disease = incident.resolvedDisease?.text
-  if cases
+  if cases >= 0
     text = "#{cases} #{pluralize('case', cases, false)}"
-  else if deaths
+  else if deaths >= 0
     text = "#{deaths} #{pluralize('death', deaths, false)}"
   else if specify
     text = specify
