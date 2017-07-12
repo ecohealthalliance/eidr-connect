@@ -1,5 +1,5 @@
 template(name="sourceModal")
-  #event-source.modal.modal-skinny.fade(role="dialog")
+  #event-source.modal.modal-skinny.fade.flex(role="dialog")
     .modal-dialog
       .modal-content
         .modal-header
@@ -14,7 +14,7 @@ template(name="sourceModal")
         .modal-body
           form#add-source(novalidate)
             if showSuggestedDocuments
-              .form-group.full-width
+              .form-group
                 label.control-label.featured Suggested Documents
                 #suggested-articles.modal-block
                   if loadingArticles
@@ -35,7 +35,7 @@ template(name="sourceModal")
                 p=content
 
             if showArticleInputs
-              .form-group.full-width
+              .form-group
                 ul.tabs.tabs-secondary.tabs-traditional(role="tablist")
                   li(class="{{#if originIsUrl}}active{{/if}}")
                     a(href="#url" data-toggle="tab" role="tab") Via URL
@@ -60,18 +60,18 @@ template(name="sourceModal")
                       data-parsley-class-handler="#text"
                       data-parsley-errors-container="#text")
 
-            .form-group.form-group--full.title-group(class="{{suggested 'title'}}")
+            .form-group.form-group--block.title-group(class="{{suggested 'title'}}")
               label.control-label Title
               input#title.form-control.new-title(
                 type="text"
                 name="title"
                 value=title)
 
-            .form-group.form-group--full(class="{{#if editing}} date-editing {{/if}}" hidden=unspecifiedPublishDate)
-              label.control-label Publication Date
+            .form-group.space-top-3(class="{{#if editing}} date-editing {{/if}}" hidden=unspecifiedPublishDate)
+              label.control-label.featured Publication Date
               .modal-block.full-width
                 #publishDate.datePicker.inlineRangePicker.centered(class="{{suggested 'date'}}")
-                .clearfix.time
+                .clearfix.time.form-group--full
                   .col-sm-6
                     .form-group.time-group(class="{{suggested 'time'}}")
                       .input-group
@@ -94,7 +94,7 @@ template(name="sourceModal")
                           each timezones
                             option(value=name selected=selected) #{name} (GMT#{offset})
             if unspecifiedPublishDate
-              .form-group.add-publish-date
+              .form-group.form-group--block.add-publish-date
                 if showEnhanceOption
                   label.control-label
                     | Publication Date
