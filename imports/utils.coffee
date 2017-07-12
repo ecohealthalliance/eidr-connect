@@ -57,11 +57,12 @@ export incidentReportFormToIncident = (form) ->
   incidentStatus = $form.find('input[name="incidentStatus"]:checked').val()
 
   incident =
-    species: form.species.value
     travelRelated: form.travelRelated.checked
     approximate: form.approximate.checked
     locations: []
     status: incidentStatus
+    species: null
+    resolvedDisease: null
     dateRange:
       type: rangeType
       start: moment.utc(picker.startDate.format("YYYY-MM-DD")).toDate()
@@ -91,6 +92,10 @@ export incidentReportFormToIncident = (form) ->
     incident.resolvedDisease =
       id: option.id
       text: option?.item?.label or option.text
+  for option in $(form).find('#incident-species-select2').select2('data')
+    incident.species =
+      id: option.id
+      text: option?.item?.completeName or option.text
   for option in $(form).find('#incident-location-select2').select2('data')
     item = option.item
     if typeof item.alternateNames is 'string'

@@ -21,7 +21,9 @@ if Meteor.isAppTest
     publishDateTZ: 'EST'
 
   testIncident =
-    species: 'Test Species'
+    species:
+      id: "tsn:180092"
+      text: "Homo sapiens"
     cases: 375
     locations: [
       id: '5165418'

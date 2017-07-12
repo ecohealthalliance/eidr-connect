@@ -185,11 +185,14 @@ template(name="incidentForm")
         label.control-label.with-info-tooltip(
           data-toggle="tooltip"
           data-placement="right"
-          title="Species to which the case or death count pertains.") Species
-        input.form-control(
-          type="text"
+          title="Species to which the case or death count pertains. This selector uses the taxonomy from http://www.itis.gov"
+          ) Species
+        +select2(
           name="species"
-          value=incidentData.species)
+          selectId="incident-species-select2"
+          multiple=false
+          optionsFn=speciesOptionsFn
+          selected=incidentData.species)
 
       .form-group.form-group--full.check-buttons(class="{{suggestedField 'status'}}")
         label.control-label.with-info-tooltip(

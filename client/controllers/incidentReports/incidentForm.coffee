@@ -5,6 +5,7 @@ import {
   removeSuggestedProperties,
   diseaseOptionsFn } from '/imports/utils'
 import { getIncidentSnippet } from '/imports/ui/snippets'
+import { notify } from '/imports/ui/notification'
 
 _selectInput = (event, instance, prop, isCheckbox) ->
   return if not keyboardSelect(event) and event.type is 'keyup'
@@ -31,7 +32,9 @@ Template.incidentForm.onCreated ->
   @suggestedFields = incident?.suggestedFields or new ReactiveVar([])
 
   @incidentData =
-    species: 'Human'
+    species:
+      id: "tsn:180092"
+      text: "Homo sapiens"
     dateRange:
       type: 'day'
 
@@ -122,6 +125,30 @@ Template.incidentForm.helpers
     not Template.instance().incidentType.get()
 
   diseaseOptionsFn: -> diseaseOptionsFn
+
+  speciesOptionsFn: ->
+    return (params, callback) ->
+      term = params.term?.trim()
+      if not term
+        return callback(results: [])
+      Meteor.call 'searchSpeciesNames', term, (error, results) ->
+        if error
+          notify('error', error.reason)
+        callback(
+          results: results.map((item) ->
+            text = item.completeName
+            if (new RegExp(term, "i")).test(item.vernacularName)
+              text = item.vernacularName + " | " + item.completeName
+            {
+              id: 'tsn:' + item.tsn
+              text: text
+              item: item
+            }
+          ).concat([
+            id: "userSpecifiedSpecies:#{term}"
+            text: "Other Species: #{term}"
+          ])
+        )
 
   documentUrl: ->
     incident = Template.instance().data.incident
