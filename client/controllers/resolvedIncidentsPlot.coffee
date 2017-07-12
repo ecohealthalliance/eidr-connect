@@ -27,17 +27,20 @@ Template.resolvedIncidentsPlot.onRendered ->
       differentials = convertAllIncidentsToDifferentials(allIncidents)
       differentials = _.where(differentials, type: incidentType)
       subIntervals = differentailIncidentsToSubIntervals(differentials)
-      subIntervals.forEach (s)->
-        s.value = 0
       model = subIntervalsToLP(differentials, subIntervals)
       solution = solver.Solve(solver.ReformatLP(model))
+      # set default values for subintervals
+      subIntervals.forEach (s)->
+        s.value = 0
       for key, value of solution
         if key.startsWith("s")
           subId = key.split("s")[1]
           subInterval = subIntervals[parseInt(subId)]
           subInterval.value = value
       for subInterval in subIntervals
-        subInterval.incidents = subInterval.incidentIds.map (id)-> differentials[id]
+        subInterval.incidents = subInterval.incidentIds.map (id)->
+          differentials[id]
+
       locationTree = LocationTree.from(subIntervals.map (x)->x.location)
       topLocations = locationTree.children.map (x)->x.value
       locToSubintervals = {}
