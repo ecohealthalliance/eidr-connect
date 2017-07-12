@@ -67,7 +67,6 @@ Template.incidentModal.events
         if not error
           $('.reactive-table tr').removeClass('open')
           $('.reactive-table tr.tr-details').remove()
-          form.reset()
           notify('success', 'Incident added.')
           if instance.data.offCanvas
             stageModals(instance, instance.modals)
