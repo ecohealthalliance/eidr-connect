@@ -45,7 +45,6 @@ Template.incidentModal.events
     # button's default is prevented
     $('#add-incident').submit()
     return if not instance.valid.get()
-    duplicate = $(event.target).hasClass('save-modal-duplicate')
     form = instance.$('form')[0]
     incident = utils.incidentReportFormToIncident(form)
     instanceData = instance.data
@@ -68,13 +67,12 @@ Template.incidentModal.events
         if not error
           $('.reactive-table tr').removeClass('open')
           $('.reactive-table tr.tr-details').remove()
-          if !duplicate
-            form.reset()
-            notify('success', 'Incident added.')
-            if instance.data.offCanvas
-              stageModals(instance, instance.modals)
-            else
-              Modal.hide('incidentModal')
+          form.reset()
+          notify('success', 'Incident added.')
+          if instance.data.offCanvas
+            stageModals(instance, instance.modals)
+          else
+            Modal.hide('incidentModal')
         else
           errorString = error.reason
           if error.details[0].name is 'locations' and error.details[0].type is 'minCount'
