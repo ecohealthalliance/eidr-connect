@@ -6,17 +6,17 @@ template(name="incidentForm")
       if documentId
         input(type="hidden" name="articleId" value=documentId)
       unless confirmation
-        if documentId
+        if documentUrl
           .form-group.form-group--full
             +documentInputLabel
             input.form-control(readonly value=documentUrl)
-        else
+        if addUrl
           .form-group.form-group--full.url-selector
             +documentInputLabel
             +articleSelect2(
               selectId="articleSource"
               articles=articles
-              placeholder='Select a Document'
+              placeholder="Select a Document"
               errorContainer=".url-selector"
               classHandler=".url-selector"
               errorMessage="Please select a url.")
@@ -24,8 +24,8 @@ template(name="incidentForm")
       if incidentSnippet
         p.incident-snippet=incidentSnippet
 
-      .incident-type-wrapper.form-group.form-groups(class=incidentTypeClassNames)
-        .form-group.form-group--full.incident-type
+      .incident-type-wrapper.form-group.form-group--full.form-groups(class=incidentTypeClassNames)
+        .form-group.incident-type
           label.control-label.with-info-tooltip(
             data-toggle="tooltip"
             data-placement="right"
@@ -79,7 +79,7 @@ template(name="incidentForm")
               name="count"
               type="number"
               min="0"
-              value=incidentData.value
+              value=incidentTypeValue
               required
               tabindex="0")
 
@@ -91,7 +91,7 @@ template(name="incidentForm")
               id="specify"
               type="text"
               required
-              value=incidentData.value
+              value=incidentTypeValue
               tabindex="0")
 
         .form-group.form-group--child(hidden=typeIsNotSelected)
@@ -185,11 +185,14 @@ template(name="incidentForm")
         label.control-label.with-info-tooltip(
           data-toggle="tooltip"
           data-placement="right"
-          title="Species to which the case or death count pertains.") Species
-        input.form-control(
-          type="text"
+          title="Species to which the case or death count pertains. This selector uses the taxonomy from http://www.itis.gov"
+          ) Species
+        +select2(
           name="species"
-          value=incidentData.species)
+          selectId="incident-species-select2"
+          multiple=false
+          optionsFn=speciesOptionsFn
+          selected=incidentData.species)
 
       .form-group.form-group--full.check-buttons(class="{{suggestedField 'status'}}")
         label.control-label.with-info-tooltip(

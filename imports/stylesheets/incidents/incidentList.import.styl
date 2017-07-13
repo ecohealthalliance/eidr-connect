@@ -2,7 +2,6 @@ $disabled = darken($l-gray, 20%)
 
 .incident-list
   h3
-    padding-top 2px
     text-transform none
     color $primary-dark
   .incident
@@ -33,9 +32,9 @@ $disabled = darken($l-gray, 20%)
       background alpha($secondary, 8%)
 
 .incident--select
-  align-items flex-start
+  align-items center
   cursor pointer
-  padding .4em $page-padding .5em
+  padding-left $page-padding
   &:hover
     color $primary-dark
     h3
@@ -55,7 +54,8 @@ $disabled = darken($l-gray, 20%)
   transition .1s ease-in-out
 
 .incident--main-details
-  align-items flex-start
+  align-items center
+  margin-bottom .5em
   .actions
     margin-left auto
     li
@@ -72,7 +72,11 @@ $disabled = darken($l-gray, 20%)
         color $primary-dark
 
 .incident--secondary-details
-  padding-left 2em
+  margin-left $page-padding + 10px
+  align-items center
+
+.curator-inbox--add-event-container
+.incident--secondary-details
   color $m-gray
   &.details-open
     background none
@@ -83,14 +87,13 @@ $disabled = darken($l-gray, 20%)
       color $primary-dark
       &:hover
         color $primary-dark
-  > i
-    margin-right 5px
   > ul
     align-items center
     width 100%
+    margin-left 8px
     > li
       display flex
-      align-items flex-start
+      align-items stretch
       font-size .85em
       margin-right .4em
       li:not(:last-of-type)
@@ -109,11 +112,14 @@ $disabled = darken($l-gray, 20%)
       i
         padding-top 1px
         font-size 120%
-        margin-right .5em
+      span
+        align-items center
       &.events
         span
           font-size 110%
           padding-top 1px
+        i
+          margin-right 5px
       &.locations
         max-width 45%
         span
@@ -151,8 +157,9 @@ $disabled = darken($l-gray, 20%)
             display none
   .toggle-details
     font-size 1.15em
-    padding-left 1em
-    padding-right .5em
+    padding-top 2px
+    padding-left 2px
+    padding-right 2px
     align-self flex-start
     transition .1s ease-in-out
     &:hover
@@ -175,9 +182,18 @@ $disabled = darken($l-gray, 20%)
     cursor default
     color $disabled
     .toggle-details
-      color $disabled
+      color lighten($disabled, 50%)
       pointer-events none
 
+.curator-inbox--add-event-container
+  > ul
+    > li
+      font-size .95em
+      margin-bottom 5px
+      &::after
+        display none
+
+.document--events
 .incident--events
   li
     display flex

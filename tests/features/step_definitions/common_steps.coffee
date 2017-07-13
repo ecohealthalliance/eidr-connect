@@ -63,7 +63,7 @@ do ->
         @client.clickWhenVisible('.confirm-deletion')
 
     @Then /^I should see an invalid form$/, ->
-      invalidInputCount = @client.elements('.form-group.has-error').value.length
+      invalidInputCount = @client.elements('.parsley-error').value.length
       if not invalidInputCount
         throw new Error('The form is invalid when required inputs are empty')
 

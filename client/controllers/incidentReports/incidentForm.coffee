@@ -1,11 +1,11 @@
 import Articles from '/imports/collections/articles.coffee'
 import createInlineDateRangePicker from '/imports/ui/inlineDateRangePicker.coffee'
-import validator from 'bootstrap-validator'
 import {
   keyboardSelect,
   removeSuggestedProperties,
   diseaseOptionsFn } from '/imports/utils'
 import { getIncidentSnippet } from '/imports/ui/snippets'
+import { notify } from '/imports/ui/notification'
 
 _selectInput = (event, instance, prop, isCheckbox) ->
   return if not keyboardSelect(event) and event.type is 'keyup'
@@ -32,7 +32,9 @@ Template.incidentForm.onCreated ->
   @suggestedFields = incident?.suggestedFields or new ReactiveVar([])
 
   @incidentData =
-    species: 'Human'
+    species:
+      id: "tsn:180092"
+      text: "Homo sapiens"
     dateRange:
       type: 'day'
 
@@ -44,10 +46,9 @@ Template.incidentForm.onCreated ->
     cases = @incidentData.cases
     deaths = @incidentData.deaths
     specify = @incidentData.specify
-    @incidentData.value = cases or deaths or specify
-    if cases
+    if cases >= 0
       type = 'cases'
-    else if deaths
+    else if deaths >= 0
       type = 'deaths'
     else if specify
       type = 'other'
@@ -125,6 +126,30 @@ Template.incidentForm.helpers
 
   diseaseOptionsFn: -> diseaseOptionsFn
 
+  speciesOptionsFn: ->
+    return (params, callback) ->
+      term = params.term?.trim()
+      if not term
+        return callback(results: [])
+      Meteor.call 'searchSpeciesNames', term, (error, results) ->
+        if error
+          notify('error', error.reason)
+        callback(
+          results: results.map((item) ->
+            text = item.completeName
+            if (new RegExp(term, "i")).test(item.vernacularName)
+              text = item.vernacularName + " | " + item.completeName
+            {
+              id: 'tsn:' + item.tsn
+              text: text
+              item: item
+            }
+          ).concat([
+            id: "userSpecifiedSpecies:#{term}"
+            text: "Other Species: #{term}"
+          ])
+        )
+
   documentUrl: ->
     incident = Template.instance().data.incident
     if incident
@@ -151,6 +176,17 @@ Template.incidentForm.helpers
         Spacebars.SafeString(getIncidentSnippet(articleContent, incident))
 
   locations: -> Template.instance().locations
+
+  addUrl: ->
+    article = Articles.findOne(Template.instance().data.incident?.articleId)
+    not article?.url and not article?.enhancements?.source
+
+  incidentTypeValue: ->
+    instance = Template.instance()
+    type = instance.incidentType.get()
+    if type is 'other'
+      type = 'specify'
+    instance.incidentData[type]
 
 Template.incidentForm.events
   'change input[name=daterangepicker_start]': (event, instance) ->

@@ -57,11 +57,12 @@ export incidentReportFormToIncident = (form) ->
   incidentStatus = $form.find('input[name="incidentStatus"]:checked').val()
 
   incident =
-    species: form.species.value
     travelRelated: form.travelRelated.checked
     approximate: form.approximate.checked
     locations: []
     status: incidentStatus
+    species: null
+    resolvedDisease: null
     dateRange:
       type: rangeType
       start: moment.utc(picker.startDate.format("YYYY-MM-DD")).toDate()
@@ -91,6 +92,10 @@ export incidentReportFormToIncident = (form) ->
     incident.resolvedDisease =
       id: option.id
       text: option?.item?.label or option.text
+  for option in $(form).find('#incident-species-select2').select2('data')
+    incident.species =
+      id: option.id
+      text: option?.item?.completeName or option.text
   for option in $(form).find('#incident-location-select2').select2('data')
     item = option.item
     if typeof item.alternateNames is 'string'
@@ -389,9 +394,9 @@ export incidentTypeWithCountAndDisease = (incident) ->
   deaths = incident.deaths
   specify = incident.specify
   disease = incident.resolvedDisease?.text
-  if cases
+  if cases >= 0
     text = "#{cases} #{pluralize('case', cases, false)}"
-  else if deaths
+  else if deaths >= 0
     text = "#{deaths} #{pluralize('death', deaths, false)}"
   else if specify
     text = specify
@@ -465,7 +470,9 @@ export formatDateRange = (dateRange, readable)->
   else
     startFormated + " - " + endFormated
 
-export formatLocation = ({name, admin2Name, admin1Name, countryName}) ->
+export formatLocation = (locations) ->
+  return unless locations
+  {name, admin2Name, admin1Name, countryName} = locations
   _.chain([name, admin2Name, admin1Name, countryName])
     .compact()
     .uniq()

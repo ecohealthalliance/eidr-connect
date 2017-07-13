@@ -14,6 +14,8 @@ $warning-border = darken($warning-bg, 12%)
   position relative
   &:not(.full-width)
     autofillBG()
+    padding-top .75em
+    padding-bottom .75em
   .tabs
     li.active
       autofillBG(false)
@@ -59,7 +61,8 @@ $warning-border = darken($warning-bg, 12%)
   #add-incident
     .control-label.featured
       border-bottom-width 1px
-
+  .modal-body
+    align-items stretch
   .modal-dialog
     width 90%
   .check-buttons
@@ -98,6 +101,7 @@ $warning-border = darken($warning-bg, 12%)
       border 0
       border-right 1px solid $border-primary-m
     #add-incident
+      will-change transform
       label.featured
         margin 0
       .tabs-traditional

@@ -41,13 +41,6 @@ Template.sourceIncidentReportsHeader.helpers
     Incidents.find()
 
 Template.sourceIncidentReportsHeader.events
-  'click .add-incident': (event, instance) ->
-    Modal.show 'incidentModal',
-      incident:
-        articleId: instance.source.get()._id
-      add: true
-      accept: true
-
   'click .show-addEvent': (event, instance) ->
     addingEvent = instance.addingEvent
     addingEvent.set(not addingEvent.get())

@@ -1,14 +1,10 @@
-validator = require 'bootstrap-validator'
-
 Template.editEventDetailsModal.onCreated ->
   @confirmingDeletion = new ReactiveVar false
 
 Template.editEventDetailsModal.onRendered ->
   instance = @
   Meteor.defer ->
-    @$('#editEvent').validator
-      # Do not disable inputs since we don't in other areas of the app
-      disable: false
+    @$('#editEvent').parsley()
 
   @$('#edit-event-modal').on 'show.bs.modal', (event) ->
     instance.confirmingDeletion.set false

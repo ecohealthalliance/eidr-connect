@@ -4,12 +4,12 @@
 #
 # Cases
 #   +
-#   |                     Country
+#   |                  I1 Country
 #   |   +------------------------------------+
 #   |   |      |               |     |       |
-#   |   |      |      B2       |     |   D2  |   State
+#   |   |      |      B2       |     |   D2  |I3 State
 #   |   |      |               |     +--------------------+
-#   |   |      |    State      |     |       |            |
+#   |   |      | I2 State      |     |       |            |
 #   |   |      +---------------+     |       |            |
 #   |   |      |               |     |       |            |
 #   |   |      |               |     |       |            |
@@ -28,14 +28,24 @@
 # subintervals an interval contains must sum to at least the number of cases in
 # the interval.
 # The objective function minimizes the following objectives
-# by weighting the objectives that should take priority higher.
-# 1. The sum of the maximum case rate in each interval.
-# 2. The sum of the sum of all the subintervals in each interval.
+# by weighting the objectives that should take priority higher:
+#
+# 1. The sum of the maximum case rates in each interval.
+# 2. The sum of the sum of all the subinterval counts in each interval.
 # 3. The negative minimum case rate.
-# I arrived at this function by first trying only using the second objective
-# to make the solution fit the incident reports as closely as possible.
-# That often lead to solutions where cases were not distributed evenly across
-# subintervals, so I introduced the first and third objectives.
+#
+# I arrived at this function by attempting to make the solution fit the
+# incident reports as closely as possible. At first I only used the second
+# objective. However, it often lead to solutions where cases were not
+# distributed evenly across subintervals.
+# To see an example of the uneven distribution problem, imagine minimizing the
+# subinterval counts of I1 and I3 from the plot above. Without an incentive
+# to evenly distribte their counts, an optimal soultion could allocate
+# zero cases to the D subintervals by overinflating the others or vice versa.
+# To remidy this, I introduced the first and third objectives.
+# They are designed to press the minimum and maximum rates of the intervals
+# together and prevent all the cases in an incident from being unevely allocated
+# to the maximum rate subintervals when they could be allocated to others.
 # The first objective was initially a secondary objective.
 # However, when inconsistent counts were used - for instance, 
 # an interval with 100 cases inside an interval with only 10 cases -
@@ -85,17 +95,18 @@ differentailIncidentsToSubIntervals = (incidents)->
   SELToIncidents = {}
   activeIntervals = [priorEndpoint.interval]
   _.zip(endpoints.slice(1), endpoints.slice(2)).forEach ([endpoint, nextEndpoint])->
-    # Ensure a subinterval is created for the top level locations between
-    # every endpoint.
-    for location in topLocations
-      key = "#{priorEndpoint.offset},#{endpoint.offset},#{location.id}"
-      SELToIncidents[key] = SELToIncidents[key] or []
-    for interval in activeIntervals
-      for location in interval.locations
+    if priorEndpoint.offset != endpoint.offset
+      # Ensure a subinterval is created for the top level locations between
+      # every endpoint.
+      for location in topLocations
         key = "#{priorEndpoint.offset},#{endpoint.offset},#{location.id}"
-        SELToIncidents[key] = _.uniq((SELToIncidents[key] or []).concat(
-          interval.id
-        ))
+        SELToIncidents[key] = SELToIncidents[key] or []
+      for interval in activeIntervals
+        for location in interval.locations
+          key = "#{priorEndpoint.offset},#{endpoint.offset},#{location.id}"
+          SELToIncidents[key] = _.uniq((SELToIncidents[key] or []).concat(
+            interval.id
+          ))
     if endpoint.isStart
       activeIntervals.push(endpoint.interval)
     else

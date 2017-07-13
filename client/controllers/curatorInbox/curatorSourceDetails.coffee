@@ -1,5 +1,6 @@
 import Articles from '/imports/collections/articles.coffee'
 import Incidents from '/imports/collections/incidentReports.coffee'
+import UserEvents from '/imports/collections/userEvents.coffee'
 key = require 'keymaster'
 { notify } = require '/imports/ui/notification'
 Hammer = require 'hammerjs'
@@ -35,15 +36,11 @@ Template.curatorSourceDetails.onCreated ->
         , 1200
 
 Template.curatorSourceDetails.onRendered ->
-  instance = @
   Meteor.defer =>
-    instance.$('[data-toggle=tooltip]').tooltip
-      delay: show: '300'
-      container: 'body'
     if window.innerWidth <= 1000
       swippablePane = new Hammer($('#touch-stage')[0])
       swippablePane.on 'swiperight', (event) ->
-        instance.data.currentPaneInView.set('')
+        @data.currentPaneInView.set('')
 
   # Create key binding which marks documents as reviewed.
   key 'ctrl + enter, command + enter', (event) =>
@@ -59,6 +56,10 @@ Template.curatorSourceDetails.onRendered ->
     @incidentsLoaded.set(false)
     @subscribe 'articleIncidents', @selectedSourceId.get(), =>
       @incidentsLoaded.set(true)
+      Meteor.defer =>
+        @$('.curator-source-details--content [data-toggle=tooltip]').tooltip
+          delay: show: '300'
+          container: 'body'
 
   @autorun =>
     source = Articles.findOne(@selectedSourceId.get())
@@ -83,6 +84,9 @@ Template.curatorSourceDetails.onDestroyed ->
   $(window).off('resize')
 
 Template.curatorSourceDetails.helpers
+  isUsersDocument: ->
+    @addedByUserId == Meteor.userId()
+
   incidents: ->
     Incidents.find()
 
@@ -126,7 +130,22 @@ Template.curatorSourceDetails.helpers
   selectedIncidents: ->
     Template.instance().selectedIncidents
 
+  articleEvents: ->
+    source = Articles.findOne(Template.instance().selectedSourceId.get())
+    UserEvents.find(_id: $in: source.userEventIds)
+
 Template.curatorSourceDetails.events
+  'click .delete-document': (event, instance) ->
+    Modal.show 'confirmationModal',
+      html: Spacebars.SafeString(Blaze.toHTMLWithData(
+        Template.deleteConfirmationModalBody,
+        objNameToDelete: 'document'
+        displayName: @title
+      ))
+      onConfirm: =>
+        Meteor.call 'removeDocument', @_id, (error) ->
+          instance.$(event.currentTarget).tooltip('destroy')
+
   'click .toggle-reviewed': (event, instance) ->
     instance.markReviewed()
     event.currentTarget.blur()
@@ -134,6 +153,7 @@ Template.curatorSourceDetails.events
   'click .add-source-to-event': (event, instance) ->
     addingSourceToEvent = instance.addingSourceToEvent
     addingSourceToEvent.set(not addingSourceToEvent.get())
+    event.currentTarget.blur()
 
   'click .back-to-list': (event, instance) ->
     instanceData = instance.data
@@ -151,3 +171,16 @@ Template.curatorSourceDetails.events
     Meteor.call 'getArticleEnhancementsAndUpdate', source, (error, enhancements) =>
       if error
         notify('error', error.reason)
+
+  'click .disassociate-event': (event, instance)->
+    event.stopPropagation()
+    instanceData = instance.data
+    Meteor.call 'removeEventSource', instance.selectedSourceId.get(), @_id, (error, res) ->
+      $('.tooltip').remove()
+
+  'click .add-incident': (event, instance) ->
+    Modal.show 'incidentModal',
+      incident:
+        articleId: instance.selectedSourceId.get()
+      add: true
+      accept: true

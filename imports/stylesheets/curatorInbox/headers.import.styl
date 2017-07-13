@@ -13,7 +13,7 @@
   width 100%
   min-height $curator-pane-head-height
   max-height $curator-pane-head-height
-  padding 0 $page-padding 0 1.5em
+  padding 0 $page-padding
   border-bottom 2px solid darken($border-primary, 10%)
   +below($break-point--curator-inbox)
     min-height $mobile-header-height
@@ -33,16 +33,30 @@
       width 25%
 
   h2
+    display flex
+    align-items center
+    flex 1 1 50%
     color $primary
     margin 0
     font-size 1.75em
     font-weight 600
     text-transform uppercase
+    padding-right .5em
+    &
+    span
+      overflow hidden
+      text-overflow ellipsis
+      white-space nowrap
     i
       font-size 1.3em
     i
     span
       vertical-align middle
+    span
+      margin-left .2em
+      font-size .9em
+      +above(5)
+        font-size 1em
   .controls
     margin-left 3em
     +above($break-point--curator-inbox)
@@ -94,7 +108,7 @@
   &:hover
     background lighten($header-BG, 20%)
     .toggle
-      color darken($border-primary, 40%)
+      color $header-link-color
   &:first-of-type
     border-top 0
   &:last-of-type
@@ -118,6 +132,7 @@
   border-right 0
   padding-right 2em
   overflow hidden
+  align-items center
   +below($break-point--curator-inbox)
     flex-direction column
     min-height $mobile-header-height
@@ -133,7 +148,6 @@
       color darken($positive, 40%)
   h2
     flex 1
-    width 100%
     display flex
     align-items center
     z-index 1
@@ -264,6 +278,14 @@
   i
     font-size 1.5em
     vertical-align middle
+  a
+    color $header-link-color
+    margin 0 5px
+    &:last-of-type
+      margin-right 0
+    &[class^='delete']
+      &:hover
+        color $delete
 
 .curator-source-details--header
   min-height $curator-pane-head-height
@@ -296,6 +318,10 @@
       margin 0 0 1em 0
       padding-top .75em
       padding-bottom .75em
+    &.viewing
+      background $secondary
+      color $primary-dark
+      border-color darken($secondary, 10%)
     &[disabled]
       &
       &:hover
@@ -316,6 +342,7 @@
   justify-content center
   border-top 1px solid $border-primary-light
   border-bottom 1px solid $border-primary-light
+  background lighten($border-primary-light, 80%)
   button
     margin-left 1em
   .select2-container
@@ -363,7 +390,7 @@
     transform translate(0, -50%)
     transition transform .1s ease-in-out
     font-size 1.5em
-    color darken($border-primary, 40%)
+    color $header-link-color
     pointer-events none
 
   &:hover
@@ -376,7 +403,7 @@
     font-weight 600
     font-size 1.25em
     color $primary
-    padding 0 0 0 25px
+    padding 0 0 0 $page-padding
     background none
     background-image none
     -webkit-appearance none

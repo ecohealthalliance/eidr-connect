@@ -11,9 +11,11 @@ template(name="curatorSourceDetails")
           .back-to-list
             i.fa.fa-chevron-circle-left(title="Return to document list")
           if url
-            a(href="#{url}" target="_blank")= title
+            a(href="http://#{url}" target="_blank")= title
           else
            | #{title}
+        if isUsersDocument
+          button.btn.btn-sm.btn-danger.delete-document.on-right Delete Document
       if notifying
         .inbox-notification
           .checks
@@ -31,9 +33,19 @@ template(name="curatorSourceDetails")
                   span Reviewed
                 else
                   span Mark Reviewed
-              button.btn.btn-default.btn-sm.add-source-to-event.on-right Add Document to Event
+              button.btn.btn-default.btn-sm.add-source-to-event.on-right(
+                class="{{#if addingSourceToEvent}}viewing{{/if}}")
+                | Add Document to Event
             if addingSourceToEvent
               +addToEvent(source=source objNameToAssociate="Document")
+              if articleEvents.count
+                .curator-inbox--add-event-container.curator-source-details--events
+                  h5 Associated Events
+                  ul.list-unstyled.document--events(title="Associated Events" data-toggle="tooltip")
+                    each articleEvents
+                      li
+                        a(href="{{pathFor 'curated-event' _id=_id _view='incidents'}}" target='_blank')= eventName
+                        i.fa.fa-times-circle.disassociate-event
             .curator-source-details--copy
               +annotatedContent(
                 content=textContent
@@ -64,16 +76,20 @@ template(name="curatorSourceDetails")
           .curator-inbox--warning
             i.fa.fa-warning
             h4=enhancements.error
-            button.btn.btn-default.retry Retry
+            .actions
+              button.btn.btn-default.retry Retry
+              button.btn.btn-sm.btn-danger.delete-document Delete Document
         else if enhancements.processingStartedAt
           .curator-inbox--warning
             i.fa.fa-warning
             h4 The document has not finished being processed
-            button.btn.btn-default.retry Retry
+            .actions
+              button.btn.btn-default.retry Retry
         else
           .curator-inbox--warning
             i.fa.fa-warning
             h4 This document contains no text content
-            button.btn.btn-default.retry Retry
+            .actions
+              button.btn.btn-default.retry Retry
       else
         +loading message="Loading"

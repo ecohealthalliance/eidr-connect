@@ -3,14 +3,20 @@ template(name="createAccount")
     .container.content-block
       h2 Create New Account
       form#add-account.space-top-2(novalidate)
-        .form-group
+        .form-group.admin-email
           label Email
-            input.form-control(type='text', name='email' required)
-          .help-block.with-errors
-        .form-group
+            input.form-control(
+              type='email'
+              name='email'
+              required
+              data-parsley-class-handler=".admin-email")
+        .form-group.admin-name
           label Name
-            input.form-control(type='text', name='name' required)
-          .help-block.with-errors
+            input.form-control(
+              type='text'
+              name='name'
+              required
+              data-parsley-class-handler=".admin-name")
         .form-group
           .checkbox
             label

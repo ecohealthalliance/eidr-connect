@@ -10,17 +10,14 @@ handleCompletion = (error, objNameToAssociate, modal) ->
 
 Template.createEventModal.onRendered ->
   Meteor.defer ->
-    @$('#createEvent').validator
-      # Do not disable inputs since we don't in other areas of the app
-      disable: false
-    .off('input.bs.validator change.bs.validator focusout.bs.validator')
+    @$('#createEvent').parsley()
 
 Template.createEventModal.events
   'submit #createEvent': (event, instance) ->
-    instanceData = instance.data
-    return if event.isDefaultPrevented() # Form is invalid
     event.preventDefault()
+    instanceData = instance.data
     target = event.target
+    return unless $(target).parsley().isValid()
     summary = target.eventSummary?.value.trim()
     eventName = target.eventName
     source = instanceData?.source

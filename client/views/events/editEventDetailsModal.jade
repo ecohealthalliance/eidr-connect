@@ -13,10 +13,14 @@ template(name="editEventDetailsModal")
                   | Edit Event Details
           .modal-body.clearfix
             unless confirmingDeletion
-              .form-group
+              .form-group.name-group
                 label Event Name
-                input.form-control(type='text' name='eventName' value=event.eventName required)
-                .help-block.with-errors
+                input.form-control(
+                  type='text'
+                  name='eventName'
+                  value=event.eventName
+                  required
+                  data-parsley-class-handler=".name-group")
               .form-group
                 label Event Summary
                 textarea.form-control(name="eventSummary" rows="15")= event.summary

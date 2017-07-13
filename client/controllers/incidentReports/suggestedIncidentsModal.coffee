@@ -173,6 +173,9 @@ Template.suggestedIncidentsModal.helpers
   saveResults: ->
     Template.instance().saveResults
 
+  hasType: (type) ->
+    @[type] >= 0
+
 Template.suggestedIncidentsModal.events
   'hide.bs.modal #suggestedIncidentsModal': (event, instance) ->
     proceed = confirmAbandonChanges(event, instance)

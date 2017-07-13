@@ -10,7 +10,7 @@ feedSchema = require '/imports/schemas/feed'
 Constants = require '/imports/constants.coffee'
 { regexEscape } = require '/imports/utils'
 
-DATA_VERSION = 4
+DATA_VERSION = 7
 AppMetadata = new Meteor.Collection('appMetadata')
 priorDataVersion = AppMetadata.findOne(property: "dataVersion")?.value
 
@@ -125,6 +125,27 @@ Meteor.startup ->
   Articles.find().forEach (article) ->
     Articles.update _id: article._id,
       $unset: userEventId: ''
+
+  console.log "Updating species field..."
+  Incidents.find(species: $exists: true).forEach (incident) ->
+    if incident.species?.id
+      return
+    else if /^human/i.test(incident.species)
+      Incidents.update _id: incident._id,
+        $set:
+          species:
+            id: "tsn:180092"
+            text: "Homo sapiens"
+    else if not incident.species
+      Incidents.update _id: incident._id,
+        $unset: species: ''
+    else
+      Incidents.update _id: incident._id,
+        $set:
+          species:
+            id: "userSpecifiedSpecies:#{incident.species}"
+            text: "Other Species: #{incident.species}"
+      console.log('Unknown species: ' + incident.species)
 
   AppMetadata.upsert({property: "dataVersion"}, $set: {value: DATA_VERSION})
   console.log "database update complete"
