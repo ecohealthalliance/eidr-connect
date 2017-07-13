@@ -16,9 +16,9 @@ UI.registerHelper 'formatDateRange', (dateRange)->
   formatDateRange(dateRange)
 
 UI.registerHelper 'incidentToText', (incident) ->
-  if incident.cases
+  if incident.cases >= 0
     incidentDescription = pluralize("case", incident.cases)
-  else if incident.deaths
+  else if incident.deaths >= 0
     incidentDescription = pluralize("death", incident.deaths)
   else if incident.specify
     incidentDescription = incident.specify
