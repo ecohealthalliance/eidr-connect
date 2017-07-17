@@ -11,7 +11,6 @@ eidr-connect.eha.io:
   ports:
     - "3000:3000"
   restart: always
-  command: supervisord --nodaemon --config /etc/supervisor/supervisord.conf
   volumes:
     - /shared:/shared
 
