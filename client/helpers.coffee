@@ -49,3 +49,7 @@ UI.registerHelper 'formatDateISO', (date=null) ->
 
 UI.registerHelper 'formatUrl', (url) ->
   formatUrl(url)
+
+UI.registerHelper 'checkActive', (routeName) ->
+  if Router.current().location.get().path.includes(routeName)
+    'active'

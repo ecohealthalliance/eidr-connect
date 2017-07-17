@@ -1,22 +1,26 @@
 template(name="eventDetails")
-  .container-flex
-    .event--details
-      if event.summary
-        p.summary
-          span= event.summary
-      else
-        p.summary.not-available
-          span No summary available.
-        .secondary-content
-          p
-            | Created by
-            span {{ getUserName 'createdByUserId' }}
-            | on
-            span {{ formatDate event.creationDate }}
+  section.event--details
+    if userEvent.summary
+      p.event--summary
+        span= userEvent.summary
+    else
+      p.event--summary.not-available
+        span No summary available.
 
-        .secondary-content
-          p
-            | Last Modified by
-            span {{ getUserName 'lastModifiedByUserId' }}
-            | on
-            span {{formatDate event.lastModifiedDate}}
+    .secondary-content
+      p
+        | Created by
+        span {{ getUserName 'createdByUserId' }}
+        | on
+        span {{ formatDate userEvent.creationDate }}
+
+    .secondary-content
+      p
+        | Last Modified by
+        span {{ getUserName 'lastModifiedByUserId' }}
+        | on
+        span {{formatDate user.lastModifiedDate}}
+
+    button.btn.btn-sm.btn-default.edit-event
+      i.fa.fa-pencil
+      | Edit Details

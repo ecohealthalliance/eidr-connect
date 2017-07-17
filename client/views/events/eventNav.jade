@@ -1,30 +1,30 @@
 template(name="eventNav")
   nav
     ul.list-unstyled
-      li
+      li(class="{{checkActive 'estimated-epi-curves'}}")
         a(href="{{pathFor route='curated-event' _id=userEventId _view='estimated-epi-curves'}}")
-          i.fa.fa-area-chart
-          | Estimated Epi Curves
-      li
+          span
+            i.fa.fa-area-chart
+            span Estimated Epi Curves
+      li(class="{{checkActive 'incidents'}}")
         a(href="{{pathFor route='curated-event' _id=userEventId _view='incidents'}}")
-           i.i-incident
-           | Incidents
-      li
+           span
+             i.i-incident
+             span Incidents
+      li(class="{{checkActive 'affected-areas'}}")
         a(href="{{pathFor route='curated-event' _id=userEventId _view='affected-areas'}}")
-          i.fa.fa-globe
-          | Affected Areas
+          span
+            i.fa.fa-globe
+            span Affected Areas
       li.on-right
         ul.list-unstyled
-          li
+          li(class="{{checkActive 'details'}}")
             a(href="{{pathFor route='curated-event' _id=userEventId _view='details'}}")
-              i.fa.fa-info-circle
-              | Details
-          li
+              span
+                i.fa.fa-info-circle
+                span Details
+          li(class="{{checkActive 'references'}}")
             a(href="{{pathFor route='curated-event' _id=userEventId _view='references'}}")
-              i.fa.fa-book
-              | References
-          if isInRole "admin"
-            li.actions
-              button.btn.btn-default.btn-sm.edit-event
-                i.fa.fa-pencil
-                | Edit Event
+              span
+                i.fa.fa-book
+                span References

@@ -77,18 +77,3 @@ Template.curatedEvent.helpers
 
   documentCount: ->
     EventArticles.find().count()
-
-
-Template.curatedEvent.events
-  # 'click .open-incident-form-in-details': (event, instance) ->
-  #   Modal.show 'incidentModal',
-  #     articles: EventArticles.find()
-  #     userEventId: instance.data.userEventId
-  #     add: true
-
-  # 'click .open-source-form-in-details': (event, instance) ->
-  #   Modal.show('sourceModal', userEventId: instance.data.userEventId)
-
-  # 'click nav li a': (event, instance) ->
-  #   instance.selectedView.set('resolvedIncidentsPlot')
-  #   event.currentTarget.blur()
