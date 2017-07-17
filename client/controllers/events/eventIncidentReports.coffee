@@ -13,12 +13,12 @@ import Articles from '/imports/collections/articles.coffee'
 import Feeds from '/imports/collections/feeds.coffee'
 { notify } = require '/imports/ui/notification'
 
-Template.incidentReports.onDestroyed ->
+Template.eventIncidentReports.onDestroyed ->
   if @plot
     @plot.destroy()
     @plot = null
 
-Template.incidentReports.onCreated ->
+Template.eventIncidentReports.onCreated ->
   @subscribe('feeds')
   @plotZoomed = new ReactiveVar(false)
   @dataLoading = new ReactiveVar(false)
@@ -51,7 +51,7 @@ Template.incidentReports.onCreated ->
     <% } %>
   """
 
-Template.incidentReports.onRendered ->
+Template.eventIncidentReports.onRendered ->
   @filters =
     notCumulative: (d) ->
       if typeof d.meta.cumulative == 'undefined' || d.meta.cumulative == false
@@ -131,7 +131,7 @@ Template.incidentReports.onRendered ->
       @updatePlot(groups)
       return
 
-Template.incidentReports.helpers
+Template.eventIncidentReports.helpers
   getSettings: ->
     tableName = 'event-incidents'
     fields = [
@@ -186,7 +186,7 @@ Template.incidentReports.helpers
   preparingData: ->
     Template.instance().dataLoading.get()
 
-Template.incidentReports.events
+Template.eventIncidentReports.events
   'click #scatterPlot-toggleCumulative': (event, instance) ->
     $target = $(event.currentTarget)
     $icon = $target.find('i.fa')

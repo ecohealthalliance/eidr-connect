@@ -1,0 +1,30 @@
+template(name="eventNav")
+  nav
+    ul.list-unstyled
+      li
+        a(href="{{pathFor route='curated-event' _id=userEventId _view='estimated-epi-curves'}}")
+          i.fa.fa-area-chart
+          | Estimated Epi Curves
+      li
+        a(href="{{pathFor route='curated-event' _id=userEventId _view='incidents'}}")
+           i.i-incident
+           | Incidents
+      li
+        a(href="{{pathFor route='curated-event' _id=userEventId _view='affected-areas'}}")
+          i.fa.fa-globe
+          | Affected Areas
+      li.on-right
+        ul.list-unstyled
+          li
+            a(href="{{pathFor route='curated-event' _id=userEventId _view='details'}}")
+              i.fa.fa-info-circle
+              | Details
+          li
+            a(href="{{pathFor route='curated-event' _id=userEventId _view='references'}}")
+              i.fa.fa-book
+              | References
+          if isInRole "admin"
+            li.actions
+              button.btn.btn-default.btn-sm.edit-event
+                i.fa.fa-pencil
+                | Edit Event
