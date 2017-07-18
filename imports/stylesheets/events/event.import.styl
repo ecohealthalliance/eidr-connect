@@ -1,6 +1,7 @@
 $max-event-details-width = $max-ui-width+300
 
 @import 'eventNav.import'
+@import 'eventContent.import'
 @import 'eventDetails.import'
 @import 'eventTables.import'
 @import 'sources.import'
@@ -18,27 +19,6 @@ $max-event-details-width = $max-ui-width+300
     color $primary
     padding .5em 0 .5em $page-padding
 
-  section
-    padding 1.5em $page-padding
-    margin-bottom 4em
-    border-bottom 1px solid $border-primary-light
-    &:first-of-type
-    &:last-of-type
-      border 0
-    &:nth-of-type(2)
-      margin-bottom 0
-      border-color $primary
-    &:empty
-      border-bottom 0
-    .heading
-      border-bottom 1px solid $border-primary
-      padding-bottom 1em
-      padding-top 1em
-      background $border-primary-light
-    h2
-      font-size 2em
-      font-weight 400
-      text-transform uppercase
   .reactive-table-options
     display none
 
