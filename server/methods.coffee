@@ -22,6 +22,12 @@ speciesDB = new sqlite3.Database(
 )
 
 Meteor.methods
+  geonameLookup: (term) ->
+    check term, String
+    HTTP.get Constants.GRITS_URL + "/api/v1/disease_ontology/lookup",
+      params:
+        q: term
+
   searchSpeciesNames: (term) ->
     if not speciesDB.open
       return []
