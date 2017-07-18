@@ -10,7 +10,7 @@ export getIncidentSnippet = (content, incident, paddingCharaters=100) ->
   startingIndex = textOffsets[0]
   startingIndex = Math.max(startingIndex - paddingCharaters, 0)
   endingIndex = textOffsets[1]
-  endingIndex = Math.min(endingIndex + paddingCharaters, content.length - 1)
+  endingIndex = Math.min(endingIndex + paddingCharaters, content.length)
   annotateContent content, annotation,
     startingIndex: startingIndex
     endingIndex: endingIndex

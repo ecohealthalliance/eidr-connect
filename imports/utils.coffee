@@ -147,10 +147,7 @@ export diseaseOptionsFn = (params, callback) ->
   term = params.term?.trim()
   if not term
     return callback(results: [])
-  HTTP.get Constants.GRITS_URL + "/api/v1/disease_ontology/lookup", {
-    params:
-      q: term
-  }, (error, response)->
+  Meteor.call 'geonameLookup', term, (error, response)->
     if error
       return callback(error)
     callback(
@@ -160,7 +157,7 @@ export diseaseOptionsFn = (params, callback) ->
         else
           text = d.label
         {
-          id: d.uri
+          id: d.id
           text: text
           item: d
         }
@@ -197,7 +194,10 @@ export parseSents = (text)->
 # A annotation's territory is the sentence containing it,
 # and all the following sentences until the next annotation.
 # Annotations in the same sentence are grouped.
-export getTerritories = (annotationsWithOffsets, sents) ->
+export getTerritories = (annotationsWithOffsets, sents, options={}) ->
+  # If the sentenceOnly option is turned on territories are limited
+  # to the sentence containing the term.
+  { sentenceOnly=false } = options
   # Split annotations with multiple offsets
   # and sort by offset.
   annotationsWithSingleOffsets = []
@@ -230,7 +230,13 @@ export getTerritories = (annotationsWithOffsets, sents) ->
         territoryStart: sentStart
         territoryEnd: sentEnd
     else
-      territories[territories.length - 1].territoryEnd = sentEnd
+      if sentenceOnly and territories[territories.length - 1].annotations.length > 0
+        territories.push
+          annotations: []
+          territoryStart: sentStart
+          territoryEnd: sentEnd
+      else
+        territories[territories.length - 1].territoryEnd = sentEnd
   return territories
 
 export createIncidentReportsFromEnhancements = (enhancements, options)->
@@ -243,8 +249,11 @@ export createIncidentReportsFromEnhancements = (enhancements, options)->
   datetimeAnnotations = features.filter (f) -> f.type == 'datetime'
   diseaseAnnotations = features.filter (f) ->
     f.type == 'resolvedKeyword' and f.resolutions.some((r)->
-      # resolution is from the disease ontology
-      r.uri.startsWith("http://purl.obolibrary.org/obo/DOID")
+      r.entity.type == 'disease'
+    )
+  speciesAnnotations = features.filter (f) ->
+    f.type == 'resolvedKeyword' and f.resolutions.some((r)->
+      r.entity.type == 'species'
     )
   if not countAnnotations
     countAnnotations = features.filter (f) -> f.type == 'count'
@@ -284,6 +293,10 @@ export createIncidentReportsFromEnhancements = (enhancements, options)->
     .filter (x) -> x
   dateTerritories = getTerritories(datetimeAnnotations, sents)
   diseaseTerritories = getTerritories(diseaseAnnotations, sents)
+  # Only include the sentence the word appears in for species territories since
+  # the species is implicitly human in most of the articles we're analyzing.
+  speciesTerritories = getTerritories(speciesAnnotations, sents, sentenceOnly: true)
+  console.log speciesTerritories
   countAnnotations.forEach (countAnnotation) =>
     [start, end] = countAnnotation.textOffsets[0]
     locationTerritory = _.find locTerritories, ({territoryStart, territoryEnd}) ->
@@ -291,6 +304,8 @@ export createIncidentReportsFromEnhancements = (enhancements, options)->
     dateTerritory = _.find dateTerritories, ({territoryStart, territoryEnd}) ->
       start <= territoryEnd and start >= territoryStart
     diseaseTerritory = _.find diseaseTerritories, ({territoryStart, territoryEnd}) ->
+      start <= territoryEnd and start >= territoryStart
+    speciesTerritory = _.find speciesTerritories, ({territoryStart, territoryEnd}) ->
       start <= territoryEnd and start >= territoryStart
     # grouping is done to deduplicate geonames
     locations = _.chain(locationTerritory.annotations)
@@ -325,6 +340,7 @@ export createIncidentReportsFromEnhancements = (enhancements, options)->
     incident.dateTerritory = dateTerritory
     incident.locationTerritory = locationTerritory
     incident.diseaseTerritory = diseaseTerritory
+    incident.speciesTerritory = speciesTerritory
     incident.countAnnotation = countAnnotation
     { count, attributes } = countAnnotation
     if count
@@ -353,12 +369,17 @@ export createIncidentReportsFromEnhancements = (enhancements, options)->
     # The disease field is set to the last disease mentioned.
     diseaseTerritory.annotations.forEach (annotation)->
       incident.resolvedDisease =
-        id: annotation.resolutions[0].uri
-        text: annotation.resolutions[0].label
+        id: annotation.resolutions[0].entity.id
+        text: annotation.resolutions[0].entity.label
+    speciesTerritory.annotations.forEach (annotation)->
+      incident.species =
+        id: annotation.resolutions[0].entity.id
+        text: annotation.resolutions[0].entity.label
     incident.suggestedFields = _.intersection(
       Object.keys(incident),
       [
         'resolvedDisease'
+        'species'
         'cases'
         'deaths'
         'dateRange'
