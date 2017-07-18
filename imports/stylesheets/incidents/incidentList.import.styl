@@ -114,18 +114,6 @@ $disabled = darken($l-gray, 20%)
         font-size 120%
       span
         align-items center
-      &.events
-        span
-          font-size 110%
-          padding-top 1px
-        i
-          margin-right 5px
-      &.locations
-        max-width 45%
-        span
-          overflow hidden
-          text-overflow ellipsis
-          white-space nowrap
       &.disabled
         color $disabled
 
@@ -184,6 +172,20 @@ $disabled = darken($l-gray, 20%)
     .toggle-details
       color lighten($disabled, 50%)
       pointer-events none
+
+.incident--events-list
+  span
+    font-size 110%
+    padding-top 1px
+  i
+    margin-right 5px
+.incident--locations
+  max-width 45%
+  span
+    overflow hidden
+    text-overflow ellipsis
+    white-space nowrap
+
 
 .curator-inbox--add-event-container
   > ul

@@ -131,8 +131,9 @@ i
   margin 0
 
 .content-wrapper
-  padding-top $header-height + 2px
-  padding-bottom $footer-height
+  flex 1
+  overflow-x scroll
+  display flex
   +below(3)
     padding-top $mobile-header-height
     padding-bottom $mobile-footer-height
@@ -144,6 +145,8 @@ i
 .page-wrapper
   position relative
   min-height 100%
+  display flex
+  flex-direction column
 
 .default-fullWidth
   background $ll-gray
