@@ -1,63 +1,44 @@
 template(name="smartEventSummary")
-  .container-flex
-    .event--details
-      .event-name-wrap
-        h1.event-name= eventName
-        if isInRole "admin"
-          +editDetailsButton(target="#smart-event-modal" editing="name" icon="edit")
-
-      p.disease-name
-        if diseases
-          span= disease.text
-        else
-          span.not-available No disease available.
-          if isInRole "admin"
-            +editDetailsButton(target="#smart-event-modal" editing="disease")
-
-      p.date-range
-        if dateRange
-          span {{formatDateRange dateRange}}
-        else
-          span.not-available No daterange selected.
-          if isInRole "admin"
-            +editDetailsButton(target="#smart-event-modal" editing="dateRange")
-
-      p.locations
-        if locations
-          span=locationNames
-        else
-          span.not-available No locations selected.
-          if isInRole "admin"
-            +editDetailsButton(target="#smart-event-modal" editing="locations")
-
-      if summary
-        p.summary(class="{{#if collapsed}}collapsed{{/if}}")
-          span= summary
-        if collapsed
-          a.expand(tabindex="0") Expand full event summary
+  section.event--details
+    p.disease-name
+      if smartEvent.diseases
+        span= smartEvent.disease.text
       else
-        p.summary.not-available
-          span No summary available.
-          if isInRole "admin"
-            +editDetailsButton(target="#smart-event-modal" editing="summary")
+        span.not-available No disease available.
+        if isInRole "admin"
+          +editDetailsButton(target="#smart-event-modal" editing="disease")
 
-    .event--metadata.container-flex
-      .event--metadata--secondary-content.container-flex.no-break
-        .secondary-content
-          p Created by: #{createdByUserName} on {{formatDate creationDate}}
-        .secondary-content
-          p Last Modified by: #{lastModifiedByUserName} on
-            | {{formatDate lastModifiedDate}}
-        .secondary-content
-          button.copy-link.btn.btn-xs.btn-default(
-            type="button"
-            data-clipboard-text="{{urlFor 'smart-event'}}"
-            class="{{#if copied}} copied {{/if}}")
-            if copied
-              i.fa.fa-check(aria-hidden="true")
-              span Coppied
-            else
-              i.fa.fa-share-alt(aria-hidden="true")
-              span Copy Event Link
+    p.date-range
+      if smartEvent.dateRange
+        span {{formatDateRange dateRange}}
+      else
+        span.not-available No daterange selected.
+        if isInRole "admin"
+          +editDetailsButton(target="#smart-event-modal" editing="dateRange")
 
-  +editSmartEventDetailsModal
+    p.locations
+      if smartEvent.locations
+        span=locationNames
+      else
+        span.not-available No locations selected.
+        if isInRole "admin"
+          +editDetailsButton(target="#smart-event-modal" editing="locations")
+
+    if smartEvent.summary
+      p.event--summary(class="{{#if collapsed}}collapsed{{/if}}")
+        span= smartEvent.summary
+    else
+      p.event--summary.not-available
+        span No summary available.
+        if isInRole "admin"
+          +editDetailsButton(target="#smart-event-modal" editing="summary")
+
+    .secondary-content
+      p Created by: #{createdByUserName} on {{formatDate smartEvent.creationDate}}
+    .secondary-content
+      p Last Modified by: #{lastModifiedByUserName} on
+        | {{formatDate smartEvent.lastModifiedDate}}
+
+    button.btn.btn-sm.btn-default.edit-event
+      i.fa.fa-pencil
+      | Edit Details

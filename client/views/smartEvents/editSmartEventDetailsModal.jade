@@ -14,8 +14,8 @@ template(name="editSmartEventDetailsModal")
           .modal-body.clearfix
             if confirmingDeletion
               +deleteConfirmationModalBody(
-                objId=_id
-                displayName=eventName
+                objId=event._id
+                displayName=event.eventName
                 objNameToDelete='smartEvent'
                 allowEdit=true)
             else
@@ -24,7 +24,7 @@ template(name="editSmartEventDetailsModal")
                 input.form-control(
                   type='text'
                   name='eventName'
-                  value=eventName
+                  value=event.eventName
                   required
                   data-parsley-class-handler=".name-group")
               .form-group
@@ -35,13 +35,13 @@ template(name="editSmartEventDetailsModal")
                   placeholder="Select a disease"
                   multiple=true
                   optionsFn=diseaseOptionsFn
-                  selected=diseases)
+                  selected=event.diseases)
               .form-group
                 label Locations
                 +locationSelect2(
                   selectId="event-locations"
                   multiple="true"
-                  selected=locations)
+                  selected=event.locations)
               if showAddDateButton
                 .form-group
                   button.btn.btn-primary.add-date(type="button") Add Daterange
@@ -52,7 +52,7 @@ template(name="editSmartEventDetailsModal")
                     #date-picker.inlineRangePicker
               .form-group
                 label Summary
-                textarea.form-control(name="eventSummary" rows="15")= summary
+                textarea.form-control(name="eventSummary" rows="15")= event.summary
 
           unless confirmingDeletion
             .modal-footer

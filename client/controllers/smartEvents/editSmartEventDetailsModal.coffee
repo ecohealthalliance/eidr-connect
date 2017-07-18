@@ -9,7 +9,7 @@ Template.editSmartEventDetailsModal.onCreated ->
   @addDate = new ReactiveVar(false)
 
 Template.editSmartEventDetailsModal.onRendered ->
-  if @data.dateRange
+  if @data.event.dateRange
     @addDate.set(true)
 
   @autorun =>
@@ -18,8 +18,7 @@ Template.editSmartEventDetailsModal.onRendered ->
         $pickerEl = $("#date-picker")
         createInlineDateRangePicker($pickerEl)
         @calendar = $pickerEl.data('daterangepicker')
-        instanceData = @data
-        dateRange = instanceData.dateRange
+        dateRange = @data.event.dateRange
         if dateRange
           range =
             startDate: dateRange.start
@@ -73,7 +72,7 @@ Template.editSmartEventDetailsModal.events
       text: option?.item?.label or option.text
 
     smartEvent =
-      _id: @_id
+      _id: @event._id
       eventName: form.eventName.value.trim()
       summary: form.eventSummary.value.trim()
       diseases: diseases
@@ -102,10 +101,10 @@ Template.editSmartEventDetailsModal.events
         adding = instance.data.action is 'add'
         action = 'updated'
         dismissModal(instance.$('#smart-event-modal')).then ->
-        if adding
-          action = 'added'
-          Router.go('smart-event', _id: insertedId)
-        notify('success', "Smart event #{action}")
+          if adding
+            action = 'added'
+            Router.go('smart-event', _id: insertedId)
+          notify('success', "Smart event #{action}")
 
   'click .delete-event': (event, instance) ->
     instance.confirmingDeletion.set true
