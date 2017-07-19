@@ -10,6 +10,7 @@ Template.curatedEvent.onCreated ->
   userEventId = @data.userEventId
   @selectedView = new ReactiveVar('resolvedIncidentsPlot')
   @filterQuery = new ReactiveVar({})
+  @selectedIncidentTypes = new ReactiveVar([])
 
   @subscribe 'userEvent', @data.userEventId, =>
     @loaded.set(true)
@@ -28,12 +29,6 @@ Template.curatedEvent.helpers
 
   eventHasArticles: ->
     EventArticles.find().count()
-
-  articleData: ->
-    instance = Template.instance()
-
-    articles: EventArticles.find()
-    userEvent: UserEvents.findOne(instance.data.userEventId)
 
   incidents: ->
     EventIncidents.find(Template.instance().filterQuery.get())
@@ -72,6 +67,7 @@ Template.curatedEvent.helpers
     data:
       userEvent: UserEvents.findOne(instance.data.userEventId)
       filterQuery: instance.filterQuery
+      selectedIncidentTypes: instance.selectedIncidentTypes
 
   loaded: ->
     Template.instance().loaded.get()
@@ -81,3 +77,6 @@ Template.curatedEvent.helpers
 
   filterQuery: ->
     Template.instance().filterQuery
+
+  selectedIncidentTypes: ->
+    Template.instance().selectedIncidentTypes

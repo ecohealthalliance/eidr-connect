@@ -47,8 +47,6 @@ Template.eventIncidentReports.onCreated ->
       <% }); %>
     <% } %>
   """
-  @autorun =>
-    @incidents = EventIncidents.find(@data.filterQuery.get())
 
 Template.eventIncidentReports.onRendered ->
   @filters =

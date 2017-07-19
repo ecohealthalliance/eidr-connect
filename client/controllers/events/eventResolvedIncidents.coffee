@@ -173,12 +173,12 @@ Template.eventResolvedIncidents.onRendered ->
     , 300
 
     @autorun =>
-      filterQuery = @data.filterQuery.get()
       # Update selected tab based on type filters
-      if filterQuery.cases and not filterQuery.deaths
-        @incidentType.set('deaths')
-      else if not filterQuery.cases and filterQuery.deaths
+      selectedIncidentTypes = @data.selectedIncidentTypes.get()
+      if 'cases' in selectedIncidentTypes and 'deaths' not in selectedIncidentTypes
         @incidentType.set('cases')
+      else if 'cases' not in selectedIncidentTypes and 'deaths' in selectedIncidentTypes
+        @incidentType.set('deaths')
 
 Template.eventResolvedIncidents.helpers
   activeMode: (value)->
@@ -205,10 +205,10 @@ Template.eventResolvedIncidents.helpers
     Template.instance().loading.get()
 
   disableCases: ->
-    Template.instance().data.filterQuery.get().cases
+    'cases' not in Template.instance().data.selectedIncidentTypes.get()
 
   disableDeaths: ->
-    Template.instance().data.filterQuery.get().deaths
+    'deaths' not in Template.instance().data.selectedIncidentTypes.get()
 
 Template.eventResolvedIncidents.events
   "click .incident-type-selector .cases": (event, instance)->

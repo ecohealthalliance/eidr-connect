@@ -12,8 +12,7 @@ template(name="eventFiltration")
             name=this
             id=this
             value=this
-            tabindex="-1"
-            checked)
+            tabindex="-1")
           label(for=this tabindex="0")=this
 
   section.filtration--property.status
@@ -23,9 +22,20 @@ template(name="eventFiltration")
         .check-button
           input(
             type="checkbox"
-            name="status"
+            name=this
             id=this
             value=this
-            tabindex="-1"
-            checked)
+            tabindex="-1")
           label(for=this tabindex="0")=this
+
+  section.filtration--property.other-properties
+    h3 Other Properties
+    .check-buttons.container-flex
+      .check-button
+        input(
+          type="checkbox"
+          name='travelRelated'
+          id='travelRelated'
+          value='travelRelated'
+          tabindex="-1")
+        label(for='travelRelated' tabindex="0") Travel Related
