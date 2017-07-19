@@ -1,0 +1,47 @@
+$event-nav-border = $border-primary
+.event
+  nav
+    border-bottom 1px solid $event-nav-border
+    border-top 1px solid $event-nav-border
+    ul
+      display flex
+      flex-direction row
+      align-items stretch
+      margin 0
+    li
+      border-right 1px solid $event-nav-border
+      display flex
+      align-items stretch
+      &:last-of-type
+        border 0
+      &.active
+        a
+          background $secondary-l-light
+          disableLink()
+      i
+        margin 0
+        font-size 150%
+      span
+        span
+          display none
+      +above(3)
+        span
+          span
+            display inline-block
+        i
+          margin-right 5px
+          font-size 135%
+      a
+        display flex
+        align-items center
+        padding .9em 1.5em
+        color $primary
+        &:hover
+          background $border-primary-light
+          color $primary-dark
+        > span
+          display flex
+          align-items center
+      ul
+        li:first-of-type
+          border-left 1px solid $event-nav-border

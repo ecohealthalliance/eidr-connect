@@ -1,38 +1,13 @@
 template(name="curatedEvent")
-  if loaded
-    .event
-      section.event--basic-info.container-fluid-padded
-        if deleted
-          h2
-            | This event has been deleted
-        else
-          with userEvent
-            +summary(
-              event=this
-              incidentCount=incidents.count
-              documentCount=documentCount)
-
-      section.event--detailed-info
-        if incidents.count
-          .tabs-wrapper
-            ul.tabs.primary-tabs.container-fluid-padded(role="tablist")
-              li(class="{{#if incidentView}}active{{/if}}" role="presentation")
-                a(href="{{pathFor route='curated-event' _id=userEvent._id _view='incidents'}}")
-                  i.i-incident
-                  span Incident Reports
-              li(class="{{#if locationView}}active{{/if}}" role="presentation")
-                a(href="{{pathFor route='curated-event' _id=userEvent._id _view='locations'}}")
-                  i.fa.fa-globe
-                  span Locations
-
-          .tab-content
-            .tab-pane.active(role="tabpanel")
-              +Template.dynamic template=view data=templateData
-
-          +resolvedIncidentsPlot incidents=incidents
-
-      if eventHasArticles
-        section.event--articles
-          +articles articleData
-  else
-    +loading
+  .event
+    if loaded
+      h1= userEvent.eventName
+      if deleted
+        .event--deleted
+          h2 This event has been deleted
+      else
+        +eventNav userEventId=userEvent._id
+        .event--content
+          +Template.dynamic template=template.name data=template.data
+    else
+      +loading

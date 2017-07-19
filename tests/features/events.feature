@@ -30,7 +30,10 @@ Feature: Events
     When I click on the create new event button
     And I create an event with name "A test" and summary "A summary"
     Then I navigate to "/events"
-    And I delete the first item in the event list
+    Then I navigate to the first event
+    Then I select the "details" tab
+    Then I should see content "summary"
+    Then I delete the event
     And I "confirm" deletion
     Then I should see a "success" notification
     And I should not see content "A test"
@@ -39,7 +42,9 @@ Feature: Events
     When I click on the create new event button
     And I create an event with name "A test" and summary "A summary"
     Then I navigate to "/events"
-    And I delete the first item in the event list
+    Then I navigate to the first event
+    Then I select the "details" tab
+    Then I delete the event
     And I "cancel" deletion
     Then I should not see content "EDIT EVENT DETAILS"
     And I should see content "A test"

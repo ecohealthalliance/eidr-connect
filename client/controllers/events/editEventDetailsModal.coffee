@@ -8,16 +8,6 @@ Template.editEventDetailsModal.onRendered ->
 
   @$('#edit-event-modal').on 'show.bs.modal', (event) ->
     instance.confirmingDeletion.set false
-    fieldToEdit = $(event.relatedTarget).data('editing')
-    # Wait for the the modal to open
-    # then focus input based on which edit button the user clicks
-    Meteor.setTimeout () ->
-      field = switch fieldToEdit
-        when 'disease' then 'input[name=eventDisease]'
-        when 'summary' then 'textarea'
-        else 'input:first'
-      instance.$(field).focus()
-    , 500
 
 Template.editEventDetailsModal.helpers
   confirmingDeletion: ->

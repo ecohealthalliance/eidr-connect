@@ -7,14 +7,14 @@ import {
 } from '/imports/incidentResolution/incidentResolution.coffee'
 import LocationTree from '/imports/incidentResolution/LocationTree.coffee'
 
-Template.resolvedIncidentsPlot.onCreated ->
+Template.eventResolvedIncidents.onCreated ->
   @incidents = @data.incidents
   @incidentType = new ReactiveVar("cases")
   @plotType = new ReactiveVar("rate")
   @legend = new ReactiveVar([])
   @loading = new ReactiveVar(false)
 
-Template.resolvedIncidentsPlot.onRendered ->
+Template.eventResolvedIncidents.onRendered ->
   @autorun =>
     @hoveredIntervalClickEvent = null
     allIncidents = @incidents.fetch()
@@ -171,7 +171,7 @@ Template.resolvedIncidentsPlot.onRendered ->
       @loading.set false
     , 300
 
-Template.resolvedIncidentsPlot.helpers
+Template.eventResolvedIncidents.helpers
   activeMode: (value)->
     if Template.instance().incidentType.get() == "deaths"
       if Template.instance().plotType.get() == "rate"
@@ -194,7 +194,7 @@ Template.resolvedIncidentsPlot.helpers
   isLoading: ->
     Template.instance().loading.get()
 
-Template.resolvedIncidentsPlot.events
+Template.eventResolvedIncidents.events
   "click .incident-type-selector .cases": (event, instance)->
     instance.incidentType.set("cases")
     instance.plotType.set("cumulative")

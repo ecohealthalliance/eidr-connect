@@ -6,9 +6,9 @@ UserEvents = require '/imports/collections/userEvents'
 Modal.allowMultiple = true
 
 Template.curatedEvent.onCreated ->
-  @editState = new ReactiveVar(false)
   @loaded = new ReactiveVar(false)
   userEventId = @data.userEventId
+  @selectedView = new ReactiveVar('resolvedIncidentsPlot')
 
   @subscribe 'userEvent', @data.userEventId, =>
     @loaded.set(true)
@@ -40,9 +40,6 @@ Template.curatedEvent.helpers
   incidentCount: ->
     EventIncidents.find().count()
 
-  isEditing: ->
-    Template.instance().editState.get()
-
   incidentView: ->
     viewParam = Router.current().getParams()._view
     typeof viewParam is 'undefined' or viewParam is 'incidents'
@@ -53,38 +50,30 @@ Template.curatedEvent.helpers
   deleted: ->
     UserEvents.findOne(Template.instance().data.userEventId)?.deleted
 
-  view: ->
+  template: ->
     currentView = Router.current().getParams()._view
-    if currentView is 'locations'
-      return 'locationList'
-    'incidentReports'
+    templateName = switch currentView
+      when 'estimated-epi-curves', undefined
+        'eventResolvedIncidents'
+      when 'affected-areas'
+        'eventAffectedAreas'
+      when 'incidents'
+        'eventIncidentReports'
+      when 'references'
+        'eventReferences'
+      when 'details'
+        'eventDetails'
+      else
+        currentView
 
-  templateData: ->
-    instance = Template.instance()
-
-    userEvent = UserEvents.findOne(instance.data.userEventId)
-    userEvent: userEvent
-    articles: EventArticles.find()
-    incidents: EventIncidents.find()
+    name: templateName
+    data:
+      userEvent: UserEvents.findOne(Template.instance().data.userEventId)
+      articles: EventArticles.find()
+      incidents: EventIncidents.find()
 
   loaded: ->
     Template.instance().loaded.get()
 
   documentCount: ->
     EventArticles.find().count()
-
-Template.curatedEvent.events
-  'click .edit-link, click #cancel-edit': (event, instance) ->
-    instance.editState.set(not instance.editState.get())
-
-  'click .open-incident-form-in-details': (event, instance) ->
-    Modal.show 'incidentModal',
-      articles: EventArticles.find()
-      userEventId: instance.data.userEventId
-      add: true
-
-  'click .open-source-form-in-details': (event, instance) ->
-    Modal.show('sourceModal', userEventId: instance.data.userEventId)
-
-  'click .tabs li a': (event) ->
-    event.currentTarget.blur()

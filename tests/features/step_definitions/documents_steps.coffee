@@ -39,7 +39,7 @@ do ->
         @client.clickWhenVisible('[href="#text"]')
         @client.waitForVisible('#content')
         @client.setValue('#content', DOCUMENT_TEXT)
-      @client.setValue('#title', 'Test Article')
+      @client.setValue('#title', 'Test Document')
       @client.clickIfVisible('.add-publish-date .btn')
       # The publishTime element might be in an invalid state that
       # prevents setValue from working if this pause is not used.
@@ -48,8 +48,17 @@ do ->
       @client.pause(3000)
       @client.click('.save-source')
 
+    @Then /^I select the first user added document$/, ->
+      @client.clickWhenVisible('.curator-inbox-source-list table:first-of-type tbody tr:first-of-type')
+
     @Then /^I should see the content of the document$/, ->
       @client.waitForExist('.selectable-content')
 
     @Then /^I should see accepted or rejected incidents$/, ->
       @client.waitForExist('.incident-list li')
+
+    @When /^I delete the user added document$/, ->
+      @client.clickWhenVisible('.delete-document')
+
+    @When /^I edit the existing document$/, ->
+      @client.clickWhenVisible('.edit-source')

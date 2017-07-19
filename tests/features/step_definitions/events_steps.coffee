@@ -27,7 +27,24 @@ do ->
     @When /^I navigate to the first event$/, ->
       selectFirstEvent(@client)
 
-    @When /^I delete the first item in the event list$/, ->
-      selectFirstEvent(@client)
-      @client.clickWhenVisible('i.edit-event-details')
+    # @When /^I delete the first item in the event list$/, ->
+    #   selectFirstEvent(@client)
+    #   @client.clickWhenVisible('i.edit-event-details')
+    #   @client.clickWhenVisible('.delete-event')
+
+    @When /^I select the "([^']*)" tab$/, (tab) ->
+      switch tab
+        when 'estimated epi curves'
+          @client.clickWhenVisible('.event nav ul li:nth-of-type(1) a')
+        when 'incidents'
+          @client.clickWhenVisible('.event nav ul li:nth-of-type(2) a')
+        when 'affected areas'
+          @client.clickWhenVisible('.event nav ul li:nth-of-type(3) a')
+        when 'details'
+          @client.clickWhenVisible('.event nav ul li:nth-of-type(4) ul li:first-of-type a')
+        when 'references'
+          @client.clickWhenVisible('.event nav ul li:nth-of-type(4) ul li:nth-of-type(2) a')
+
+    @When /^I delete the event$/, ->
+      @client.clickWhenVisible('.edit-event')
       @client.clickWhenVisible('.delete-event')

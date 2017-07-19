@@ -1,10 +1,10 @@
-template(name="incidentReports")
+template(name="eventIncidentReports")
   .container-flex.no-gutter
     .flex-col.bordered
       .tab-form.container-flex.break-2
         unless smartEvent
           +addIncidentReport
-        button.open-download-csv.right-action.btn.btn-primary(
+        button.open-download-csv.right-action.btn.btn-primary.btn-sm(
           disabled="{{#if preparingData}}disabled{{/if}}"
           type="button")
           i.fa(class="fa-{{#if preparingData}}cog fa-spin{{else}}download{{/if}}")

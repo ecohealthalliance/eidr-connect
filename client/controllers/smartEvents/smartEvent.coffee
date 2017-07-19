@@ -7,7 +7,7 @@ Modal.allowMultiple = true
 Template.smartEvent.onCreated ->
   @editState = new ReactiveVar(false)
   @eventId = new ReactiveVar()
-  @loading = new ReactiveVar(true)
+  @loaded = new ReactiveVar(false)
 
 Template.smartEvent.onRendered ->
   eventId = Router.current().getParams()._id
@@ -51,7 +51,7 @@ Template.smartEvent.onRendered ->
         query['$or'] = locationQueries
       @subscribe 'smartEventIncidents', query,
         onReady: =>
-          @loading.set(false)
+          @loaded.set(true)
 
 Template.smartEvent.onRendered ->
   new Clipboard '.copy-link'
@@ -66,12 +66,25 @@ Template.smartEvent.helpers
   deleted: ->
     SmartEvents.findOne(Template.instance().eventId.get())?.deleted
 
-  incidentReportsTemplateData: ->
-    incidents: Incidents.find({}, sort: 'dateRange.end': 1)
-    eventType: 'smart'
+  loaded: ->
+    Template.instance().loaded.get()
 
-  isLoading: ->
-    Template.instance().loading.get()
+  template: ->
+    currentView = Router.current().getParams()._view
+    templateName = switch currentView
+      when 'incidents', undefined
+        'eventIncidentReports'
+      when 'affected-areas'
+        'eventAffectedAreas'
+      when 'details'
+        'smartEventSummary'
+      else
+        currentView
+
+    name: templateName
+    data:
+      smartEvent: SmartEvents.findOne(Template.instance().eventId.get())
+      incidents: Incidents.find({}, sort: 'dateRange.end': 1)
 
 Template.smartEvent.events
   'click .edit-link, click #cancel-edit': (event, instance) ->
