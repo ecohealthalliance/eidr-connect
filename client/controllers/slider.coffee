@@ -24,3 +24,10 @@ Template.slider.onRendered ->
   , 500
 
   $('.noUi-draggable').append '<span class="noUI-adjustRange hidden"></span>'
+
+  @autorun =>
+    dateRange = @data.dateRange.get()
+    slider.set [
+      dateRange[0].getTime()
+      dateRange[1].getTime()
+    ]

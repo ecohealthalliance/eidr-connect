@@ -1,5 +1,8 @@
 import EventIncidents from '/imports/collections/eventIncidents'
 
+formatDateForInput = (date) ->
+  moment(date).format('YYYY-MM-DD')
+
 Template.eventFiltration.onCreated ->
   @PROP_PREFIX = 'filter-'
   @typeProps = ['cases', 'deaths']
@@ -25,6 +28,13 @@ Template.eventFiltration.onCreated ->
   @selectedLocations = new Meteor.Collection(null)
   @locations = new Meteor.Collection(null)
   @dateRange = new ReactiveVar([])
+
+  incidents = EventIncidents.find({}, fields: 'dateRange': 1)
+  @eventDateRange = [
+    _.min(incidents.map (i) -> i.dateRange.start)
+    _.max(incidents.map (i) -> i.dateRange.end)
+  ]
+  @dateRange = new ReactiveVar(@eventDateRange)
 
   @autorun =>
     filters = {}
@@ -134,11 +144,22 @@ Template.eventFiltration.helpers
     Template.instance().selectedLocations.find().count() == 0
 
   sliderData: ->
-    incidents = EventIncidents.find({}, fields: 'dateRange': 1)
     instance = Template.instance()
-    sliderMin: _.min(incidents.map (i) -> i.dateRange.start)
-    sliderMax: _.max(incidents.map (i) -> i.dateRange.end)
     dateRange: instance.dateRange
+    sliderMin: instance.eventDateRange[0]
+    sliderMax: instance.eventDateRange[1]
+
+  startDate: ->
+    formatDateForInput(Template.instance().dateRange.get()[0])
+
+  endDate: ->
+    formatDateForInput(Template.instance().dateRange.get()[1])
+
+  minDate: ->
+    formatDateForInput(Template.instance().eventDateRange[0])
+
+  maxDate: ->
+    formatDateForInput(Template.instance().eventDateRange[1])
 
 Template.eventFiltration.events
   'change .type input': (event, instance) ->
@@ -176,3 +197,9 @@ Template.eventFiltration.events
 
   'click .locations .deselect-all': (event, instance) ->
     instance.selectedLocations.remove({})
+
+  'change .dates input': (event, instance) ->
+    dates = []
+    instance.$('.dates input').each (i, input) ->
+      dates.push(new Date(input.value))
+    instance.dateRange.set(dates)
