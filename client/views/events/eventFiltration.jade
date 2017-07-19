@@ -4,21 +4,28 @@ template(name="eventFiltration")
 
   section.filtration--property.type
     h3 Types
-    .check-button
-      input(
-        type="checkbox"
-        name="deaths"
-        id="deaths"
-        value="deaths"
-        tabindex="-1"
-        checked)
-      label(for="deaths" tabindex="0") Deaths
-    .check-button
-      input(
-        type="checkbox"
-        name="cases"
-        id="cases"
-        value="cases"
-        tabindex="-1"
-        checked)
-      label(for="cases" tabindex="0") Cases
+    .check-buttons.container-flex
+      each typeProps
+        .check-button
+          input(
+            type="checkbox"
+            name=this
+            id=this
+            value=this
+            tabindex="-1"
+            checked)
+          label(for=this tabindex="0")=this
+
+  section.filtration--property.status
+    h3 Status
+    .check-buttons.container-flex
+      each statusProps
+        .check-button
+          input(
+            type="checkbox"
+            name="status"
+            id=this
+            value=this
+            tabindex="-1"
+            checked)
+          label(for=this tabindex="0")=this
