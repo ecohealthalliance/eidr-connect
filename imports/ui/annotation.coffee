@@ -13,7 +13,7 @@ export annotateContent = (content, annotations, options={}) ->
   if not startingIndex
     startingIndex = 0
   if not endingIndex
-    endingIndex = content.length - 1
+    endingIndex = content.length
   lastOffset = startingIndex
   html = ""
   if startingIndex isnt 0
@@ -67,7 +67,7 @@ export annotateContent = (content, annotations, options={}) ->
       html += "<span class='annotation annotation-text #{classNames.join(' ')}' #{attributeText}>"
     lastOffset = offset
   html += Handlebars._escape("#{content.slice(lastOffset, endingIndex)}")
-  if endingIndex < content.length - 1
+  if endingIndex < content.length
     html += "..."
   html
 
