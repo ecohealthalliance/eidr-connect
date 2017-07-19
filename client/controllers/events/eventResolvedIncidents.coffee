@@ -6,9 +6,9 @@ import {
   subIntervalsToLP
 } from '/imports/incidentResolution/incidentResolution.coffee'
 import LocationTree from '/imports/incidentResolution/LocationTree.coffee'
+import EventIncidents from '/imports/collections/eventIncidents'
 
 Template.eventResolvedIncidents.onCreated ->
-  @incidents = @data.incidents
   @incidentType = new ReactiveVar("cases")
   @plotType = new ReactiveVar("rate")
   @legend = new ReactiveVar([])
@@ -16,8 +16,9 @@ Template.eventResolvedIncidents.onCreated ->
 
 Template.eventResolvedIncidents.onRendered ->
   @autorun =>
-    @hoveredIntervalClickEvent = null
+    @incidents = EventIncidents.find(@data.filterQuery.get())
     allIncidents = @incidents.fetch()
+    @hoveredIntervalClickEvent = null
     incidentType = @incidentType.get()
     plotType = @plotType.get()
     @loading.set(true)
@@ -171,28 +172,43 @@ Template.eventResolvedIncidents.onRendered ->
       @loading.set false
     , 300
 
+    @autorun =>
+      filterQuery = @data.filterQuery.get()
+      # Update selected tab based on type filters
+      if filterQuery.cases and not filterQuery.deaths
+        @incidentType.set('deaths')
+      else if not filterQuery.cases and filterQuery.deaths
+        @incidentType.set('cases')
+
 Template.eventResolvedIncidents.helpers
   activeMode: (value)->
-    if Template.instance().incidentType.get() == "deaths"
-      if Template.instance().plotType.get() == "rate"
-        if value == "deathRate"
-          return "active"
+    instance = Template.instance()
+    if instance.incidentType.get() == 'deaths'
+      if instance.plotType.get() == 'rate'
+        if value == 'deathRate'
+          return 'active'
       else
-        if value == "deaths"
-          return "active"
+        if value == 'deaths'
+          return 'active'
     else
-      if Template.instance().plotType.get() == "rate"
-        if value == "caseRate"
-          return "active"
+      if instance.plotType.get() == 'rate'
+        if value == 'caseRate'
+          return 'active'
       else
-        if value == "cases"
-          return "active"
+        if value == 'cases'
+          return 'active'
 
   labels: ->
     Template.instance().legend.get()
 
   isLoading: ->
     Template.instance().loading.get()
+
+  disableCases: ->
+    Template.instance().data.filterQuery.get().cases
+
+  disableDeaths: ->
+    Template.instance().data.filterQuery.get().deaths
 
 Template.eventResolvedIncidents.events
   "click .incident-type-selector .cases": (event, instance)->

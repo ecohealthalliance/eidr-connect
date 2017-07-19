@@ -9,6 +9,7 @@ Template.curatedEvent.onCreated ->
   @loaded = new ReactiveVar(false)
   userEventId = @data.userEventId
   @selectedView = new ReactiveVar('resolvedIncidentsPlot')
+  @filterQuery = new ReactiveVar({})
 
   @subscribe 'userEvent', @data.userEventId, =>
     @loaded.set(true)
@@ -35,10 +36,10 @@ Template.curatedEvent.helpers
     userEvent: UserEvents.findOne(instance.data.userEventId)
 
   incidents: ->
-    EventIncidents.find()
+    EventIncidents.find(Template.instance().filterQuery.get())
 
   incidentCount: ->
-    EventIncidents.find().count()
+    EventIncidents.find(Template.instance().filterQuery.get()).count()
 
   incidentView: ->
     viewParam = Router.current().getParams()._view
@@ -51,6 +52,7 @@ Template.curatedEvent.helpers
     UserEvents.findOne(Template.instance().data.userEventId)?.deleted
 
   template: ->
+    instance = Template.instance()
     currentView = Router.current().getParams()._view
     templateName = switch currentView
       when 'estimated-epi-curves', undefined
@@ -68,12 +70,14 @@ Template.curatedEvent.helpers
 
     name: templateName
     data:
-      userEvent: UserEvents.findOne(Template.instance().data.userEventId)
-      articles: EventArticles.find()
-      incidents: EventIncidents.find()
+      userEvent: UserEvents.findOne(instance.data.userEventId)
+      filterQuery: instance.filterQuery
 
   loaded: ->
     Template.instance().loaded.get()
 
   documentCount: ->
     EventArticles.find().count()
+
+  filterQuery: ->
+    Template.instance().filterQuery

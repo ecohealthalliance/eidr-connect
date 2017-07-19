@@ -1,0 +1,24 @@
+template(name="eventFiltration")
+  .filtration--header
+    h2 Filter
+
+  section.filtration--property.type
+    h3 Types
+    .check-button
+      input(
+        type="checkbox"
+        name="deaths"
+        id="deaths"
+        value="deaths"
+        tabindex="-1"
+        checked)
+      label(for="deaths" tabindex="0") Deaths
+    .check-button
+      input(
+        type="checkbox"
+        name="cases"
+        id="cases"
+        value="cases"
+        tabindex="-1"
+        checked)
+      label(for="cases" tabindex="0") Cases

@@ -8,7 +8,7 @@ template(name="curatedEvent")
       else
         section.event--content-wrapper.container-flex
           aside.event--filtration
-            +eventFiltration
+            +eventFiltration filterQuery=filterQuery
           .event--content-container
             nav.event--navigation
               +eventNav userEventId=userEvent._id
