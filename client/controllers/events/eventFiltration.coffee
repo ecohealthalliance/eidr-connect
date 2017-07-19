@@ -24,9 +24,20 @@ Template.eventFiltration.onCreated ->
   @countryLevel = new ReactiveVar('countryName')
   @selectedLocations = new Meteor.Collection(null)
   @locations = new Meteor.Collection(null)
+  @dateRange = new ReactiveVar([])
 
   @autorun =>
     filters = {}
+
+    # Daterange
+    dateRange = @dateRange.get()
+    if dateRange.length
+      filters['dateRange.start'] =
+        $lte: dateRange[1]
+      filters['dateRange.end'] =
+        $gte: dateRange[0]
+
+    # Types
     types = @types.get()
     if types.length
       @data.selectedIncidentTypes.set(types)
@@ -38,6 +49,7 @@ Template.eventFiltration.onCreated ->
     else
       @data.selectedIncidentTypes.set(@typeProps)
 
+    # Status
     status = @status.get()
     if status.length
       filters.status =
@@ -55,6 +67,7 @@ Template.eventFiltration.onCreated ->
     if selectedLocations.length
       filters.$or = (filters.$or or []).concat selectedLocations
 
+    # Other Properties
     filters = _.extend(filters, @properties.get())
 
     # Set filterQuery used to filter EventIncidents collection
@@ -119,6 +132,13 @@ Template.eventFiltration.helpers
 
   noEventsSelected: ->
     Template.instance().selectedLocations.find().count() == 0
+
+  sliderData: ->
+    incidents = EventIncidents.find({}, fields: 'dateRange': 1)
+    instance = Template.instance()
+    sliderMin: _.min(incidents.map (i) -> i.dateRange.start)
+    sliderMax: _.max(incidents.map (i) -> i.dateRange.end)
+    dateRange: instance.dateRange
 
 Template.eventFiltration.events
   'change .type input': (event, instance) ->
