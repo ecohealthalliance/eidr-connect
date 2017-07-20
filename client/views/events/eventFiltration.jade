@@ -5,9 +5,13 @@ template(name="eventFiltration")
   section.filtration--property.type
     h3 Daterange
     +slider sliderData
-    .dates.form-group.space-top-2
-      input.form-control.start-date.space-btm-1(value=startDate type="date" min=minDate max=maxDate)
-      input.form-control.start-date(value=endDate type="date" min=minDate max=maxDate)
+    .dates.container-flex.form-group
+      .date
+        label Start Date
+        input.form-control.start-date(value=startDate type="date" min=minDate max=maxDate)
+      .date
+        label End Date
+        input.form-control.start-date(value=endDate type="date" min=minDate max=maxDate)
 
   section.filtration--property.type
     h3 Types

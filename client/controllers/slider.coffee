@@ -21,10 +21,19 @@ Template.slider.onRendered ->
       new Date(Math.ceil(values[0]))
       new Date(Math.ceil(values[1]))
     ]
-  , 500
+    # Show or hide the left/right slider icon
+    $adjustRangeEl = $('.noUI-adjustRange')
+    rangeWidth = $('.noUi-draggable').width() - $('.noUi-origin.noUi-background').width()
+    $adjustRangeEl.css 'left', rangeWidth / 2
+    if rangeWidth < $('.noUi-base').width() - 5
+      $adjustRangeEl.removeClass 'hidden'
+    else
+      $adjustRangeEl.addClass 'hidden'
+  , 250
 
   $('.noUi-draggable').append '<span class="noUI-adjustRange hidden"></span>'
 
+  # Update the slider handle position when dates from inputs change
   @autorun =>
     dateRange = @data.dateRange.get()
     slider.set [
