@@ -1,6 +1,6 @@
-EventIncidents = require '/imports/collections/eventIncidents'
-EventArticles = require '/imports/collections/eventArticles'
-UserEvents = require '/imports/collections/userEvents'
+import EventIncidents from '/imports/collections/eventIncidents'
+import EventArticles from '/imports/collections/eventArticles'
+import UserEvents from '/imports/collections/userEvents'
 
 #Allow multiple modals or the suggested locations list won't show after the loading modal is hidden
 Modal.allowMultiple = true
@@ -68,6 +68,7 @@ Template.curatedEvent.helpers
       userEvent: UserEvents.findOne(instance.data.userEventId)
       filterQuery: instance.filterQuery
       selectedIncidentTypes: instance.selectedIncidentTypes
+      articles: EventArticles.find()
 
   loaded: ->
     Template.instance().loaded.get()
