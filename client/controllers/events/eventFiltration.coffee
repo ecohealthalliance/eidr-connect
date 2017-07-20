@@ -1,4 +1,5 @@
 Template.eventFiltration.onCreated ->
+  @PROP_PREFIX = 'filter-'
   @typeProps = ['cases', 'deaths']
   @statusProps = ['suspected', 'confirmed', 'revoked']
   @types = new ReactiveVar([])
@@ -28,6 +29,9 @@ Template.eventFiltration.onCreated ->
     # in child templates.
     @data.filterQuery.set(filters)
 
+  @removePropPrefix = (prop) =>
+    prop.substr(@PROP_PREFIX.length)
+
 Template.eventFiltration.helpers
   typeProps: ->
     Template.instance().typeProps
@@ -35,21 +39,25 @@ Template.eventFiltration.helpers
   statusProps: ->
     Template.instance().statusProps
 
+  propPrex: ->
+    Template.instance().PROP_PREFIX
+
 Template.eventFiltration.events
   'change .type input': (event, instance) ->
     types = []
     instance.$('.type input:checked').each (i, input) ->
-      types.push input.id
+      types.push instance.removePropPrefix(input.id)
+    console.log types
     instance.types.set(types)
 
   'change .status input': (event, instance) ->
     status = []
     instance.$('.status input:checked').each (i, input) ->
-      status.push input.id
+      status.push instance.removePropPrefix(input.id)
     instance.status.set(status)
 
   'change .other-properties input': (event, instance) ->
     otherProps = {}
     instance.$('.other-properties input:checked').each (i, input) ->
-      otherProps[input.id] = true
+      otherProps[instance.removePropPrefix(input.id)] = true
     instance.properties.set(otherProps)
