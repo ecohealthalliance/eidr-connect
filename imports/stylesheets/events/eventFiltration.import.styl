@@ -1,5 +1,8 @@
 .event--filtration
-  min-width 300px
+  max-width 200px
+  +above(4)
+    min-width 300px
+    max-width auto
   border-right 1px solid $border-primary
 
 .filtration--property
@@ -9,6 +12,8 @@
     font-size 1em
   label
     text-transform capitalize
+  .check-buttons
+    flex-wrap wrap
 
 .filtration--header
   display flex

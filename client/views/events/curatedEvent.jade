@@ -6,7 +6,7 @@ template(name="curatedEvent")
         .event--deleted
           h2 This event has been deleted
       else
-        section.event--content-wrapper.container-flex
+        section.event--content-wrapper.container-flex.no-break
           aside.event--filtration
             +eventFiltration(
               filterQuery=filterQuery
