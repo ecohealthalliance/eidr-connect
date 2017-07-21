@@ -56,6 +56,7 @@ Template.eventAffectedAreas.onRendered ->
     layer = event.target
     layer.setStyle
       weight: 1
+      fillColor: '#2CBA74'
       color: '#2CBA74'
       dashArray: ''
       fillOpacity: 0.75
@@ -110,14 +111,16 @@ Template.eventAffectedAreas.onRendered ->
       ,
         style: (feature) =>
           count = countryCodeToCount[feature.properties.iso_a2]
-          return {
-            fillColor: getColor(count / maxCount)
-            weight: 1
-            opacity: 1
-            color: '#DDDDDD'
-            dashArray: '3'
-            fillOpacity: 0.75
-          }
+          fillColor = getColor(count / maxCount)
+          opacity = 0.75
+          unless fillColor
+            opacity = 0
+          fillColor: fillColor
+          weight: 1
+          opacity: 1
+          color: '#DDDDDD'
+          dashArray: '3'
+          fillOpacity: opacity
         onEachFeature: (feature, layer) ->
           layer.on
             mouseover: highlightFeature
