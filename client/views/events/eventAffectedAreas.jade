@@ -1,35 +1,32 @@
 template(name="eventAffectedAreas")
-  .affected-areas-container
-    #legend
-      h4 Choropleth Layers
-      input.cases-layer(
-        type="radio"
-        name="choroplethLayer"
-        checked="{{choroplethLayerIs 'cases'}}")
-      span Estimated Cases
-      br
-      input.deaths-layer(
-        type="radio"
-        name="choroplethLayer"
-        checked="{{choroplethLayerIs 'deaths'}}")
-      span Estimated Deaths
-      br
-      input.choropleth-layer-off(
-        type="radio"
-        name="choroplethLayer"
-        checked="{{choroplethLayerIs ''}}")
-      span None
-      hr
-      h4 Marker Layers
-      input.marker-layer(
-        type="radio"
-        name="markerLayer"
-        checked="{{markerLayerIs 'incidentLocations'}}")
-      span Incident Locations
-      br
-      input.marker-layer-off(
-        type="radio"
-        name="markerLayer"
-        checked="{{markerLayerIs ''}}")
-      span None
-    #map
+  .affected-areas--container
+    nav.event--sub-nav
+      ul#legend.list-unstyled
+        li
+          i.i-layers(title="Choropleth Layers" data-toggle="tooltip")
+          ul.list-unstyled
+            li.cases-layer(
+              class="{{choroplethLayerIs 'cases'}}"
+              title="Estimated Cases"
+              data-toggle='tooltip')
+              a Cases
+            li.deaths-layer(
+              class="{{choroplethLayerIs 'deaths'}}"
+              title="Estimated Cases"
+              data-toggle='tooltip')
+              a Deaths
+            li.choropleth-layer-off(class="{{choroplethLayerIs ''}}")
+              a None
+
+        li
+          i.fa.fa-map-marker(title="Marker Layers" data-toggle="tooltip")
+          ul.list-unstyled
+            li.marker-layer(class="{{markerLayerIs 'incidentLocations'}}")
+              a Incidents
+            li.marker-layer-off(class="{{markerLayerIs ''}}")
+              a None
+    .map-wrapper
+      #map
+      if isLoading
+        +loading small=true
+        .veil

@@ -49,9 +49,10 @@ $event-nav-border = $border-primary
         > span
           display flex
           align-items center
-      ul
-        li:first-of-type
-          border-left 1px solid $event-nav-border
+      &.on-right
+        ul
+          li:first-of-type
+            border-left 1px solid $event-nav-border
 
     &.event--sub-nav
       min-height auto

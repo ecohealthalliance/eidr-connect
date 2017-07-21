@@ -11,6 +11,7 @@ Template.eventAffectedAreas.onCreated ->
   @choroplethLayer = new ReactiveVar()
   @markerLayer = new ReactiveVar()
   @worldGeoJSONRV = new ReactiveVar()
+  @loading = new ReactiveVar(false)
   HTTP.get '/world.geo.json', (error, resp) =>
     if error
       console.error error
@@ -18,6 +19,10 @@ Template.eventAffectedAreas.onCreated ->
     @worldGeoJSONRV.set(resp.data)
 
 Template.eventAffectedAreas.onRendered ->
+  @$('[data-toggle=tooltip]').tooltip
+    placement: 'bottom'
+    delay: 300
+
   bounds = L.latLngBounds(L.latLng(-85, -180), L.latLng(85, 180))
   leMap = L.map('map', maxBounds: bounds).setView([10, -0], 3)
   L.tileLayer('https://cartodb-basemaps-{s}.global.ssl.fastly.net/light_all/{z}/{x}/{y}.png',
@@ -57,15 +62,12 @@ Template.eventAffectedAreas.onRendered ->
     if not L.Browser.ie and not L.Browser.opera
       layer.bringToFront()
 
-  resetHighlight = (event) =>
-    @geoJsonLayer.resetStyle(event.target)
-
-  @autorun =>
+  clearMap = =>
     if @geoJsonLayer
       leMap.removeLayer(@geoJsonLayer)
-    worldGeoJSON = @worldGeoJSONRV.get()
-    incidentType = @choroplethLayer.get()
-    incidents = EventIncidents.find(@data.filterQuery.get())
+
+  updateMap = (worldGeoJSON, incidentType, incidents) =>
+    clearMap()
     mapableIncidents = incidents.fetch().filter (i) ->
       i.locations.every (l) -> l.featureCode
     if incidentType and worldGeoJSON
@@ -123,31 +125,52 @@ Template.eventAffectedAreas.onRendered ->
             click: zoomToFeature
       ).addTo(leMap)
 
+  resetHighlight = (event) =>
+    @geoJsonLayer.resetStyle(event.target)
+
+  @autorun =>
+    worldGeoJSON = @worldGeoJSONRV.get()
+    incidentType = @choroplethLayer.get()
+    incidents = EventIncidents.find(@data.filterQuery.get())
+    if incidentType
+      @loading.set(true)
+      # Allow UI to update (loading indicator and clicked nav item)
+      # before updating map
+      setTimeout =>
+        updateMap(worldGeoJSON, incidentType, incidents)
+        @loading.set(false)
+      , 200
+    else
+      clearMap()
+
 Template.eventAffectedAreas.helpers
   choroplethLayerIs: (name) ->
     choroplethLayer = Template.instance().choroplethLayer.get()
-    if not choroplethLayer and name == ''
-      return true
-    return choroplethLayer == name
+    if (not choroplethLayer and name == '') or choroplethLayer == name
+      'active'
 
   markerLayerIs: (name) ->
     markerLayer = Template.instance().markerLayer.get()
-    if not markerLayer and name == ''
-      return true
-    return markerLayer == name
+    if (not markerLayer and name == '') or markerLayer == name
+      'active'
+
+  isLoading: ->
+    Template.instance().loading.get()
 
 Template.eventAffectedAreas.events
-  'click .cases-layer': (event, instance) ->
+  'click .cases-layer a': (event, instance) ->
+    $('.tooltip').remove()
     instance.choroplethLayer.set('cases')
 
-  'click .deaths-layer': (event, instance) ->
+  'click .deaths-layer a': (event, instance) ->
+    $('.tooltip').remove()
     instance.choroplethLayer.set('deaths')
 
-  'click .choropleth-layer-off': (event, instance) ->
+  'click .choropleth-layer-off a': (event, instance) ->
     instance.choroplethLayer.set(null)
 
-  'click .marker-layer': (event, instance) ->
+  'click .marker-layer a': (event, instance) ->
     instance.markerLayer.set('incidentLocations')
 
-  'click .marker-layer-off': (event, instance) ->
+  'click .marker-layer-off a': (event, instance) ->
     instance.markerLayer.set(null)
