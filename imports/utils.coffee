@@ -1,5 +1,5 @@
-Constants = require '/imports/constants.coffee'
-Articles = require '/imports/collections/articles.coffee'
+import Constants from '/imports/constants.coffee'
+import Articles from '/imports/collections/articles.coffee'
 
 ###
 # cleanUrl - takes an existing url and removes the last match of the applied

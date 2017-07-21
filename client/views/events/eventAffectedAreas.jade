@@ -1,2 +1,35 @@
 template(name="eventAffectedAreas")
-  #map
+  .affected-areas-container
+    #legend
+      h4 Choropleth Layers
+      input.cases-layer(
+        type="radio"
+        name="choroplethLayer"
+        checked="{{choroplethLayerIs 'cases'}}")
+      span Estimated Cases
+      br
+      input.deaths-layer(
+        type="radio"
+        name="choroplethLayer"
+        checked="{{choroplethLayerIs 'deaths'}}")
+      span Estimated Deaths
+      br
+      input.choropleth-layer-off(
+        type="radio"
+        name="choroplethLayer"
+        checked="{{choroplethLayerIs ''}}")
+      span None
+      hr
+      h4 Marker Layers
+      input.marker-layer(
+        type="radio"
+        name="markerLayer"
+        checked="{{markerLayerIs 'incidentLocations'}}")
+      span Incident Locations
+      br
+      input.marker-layer-off(
+        type="radio"
+        name="markerLayer"
+        checked="{{markerLayerIs ''}}")
+      span None
+    #map

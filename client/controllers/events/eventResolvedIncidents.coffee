@@ -1,9 +1,8 @@
 import Rickshaw from 'meteor/eidr:rickshaw.min'
-import solverExport from 'javascript-lp-solver'
 import convertAllIncidentsToDifferentials from '/imports/incidentResolution/convertAllIncidentsToDifferentials.coffee'
 import {
   differentailIncidentsToSubIntervals,
-  subIntervalsToLP
+  extendSubIntervalsWithValues
 } from '/imports/incidentResolution/incidentResolution.coffee'
 import LocationTree from '/imports/incidentResolution/LocationTree.coffee'
 import EventIncidents from '/imports/collections/eventIncidents'
@@ -28,16 +27,7 @@ Template.eventResolvedIncidents.onRendered ->
       differentials = convertAllIncidentsToDifferentials(allIncidents)
       differentials = _.where(differentials, type: incidentType)
       subIntervals = differentailIncidentsToSubIntervals(differentials)
-      model = subIntervalsToLP(differentials, subIntervals)
-      solution = solver.Solve(solver.ReformatLP(model))
-      # set default values for subintervals
-      subIntervals.forEach (s)->
-        s.value = 0
-      for key, value of solution
-        if key.startsWith("s")
-          subId = key.split("s")[1]
-          subInterval = subIntervals[parseInt(subId)]
-          subInterval.value = value
+      extendSubIntervalsWithValues(differentials, subIntervals)
       for subInterval in subIntervals
         subInterval.incidents = subInterval.incidentIds.map (id)->
           differentials[id]

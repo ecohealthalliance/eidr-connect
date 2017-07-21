@@ -23,6 +23,9 @@ module.exports = new SimpleSchema
   "countryName":
     type: String
     optional: true
+  "countryCode":
+    type: String
+    optional: true
   "featureClass":
     type: String
     optional: true
