@@ -143,6 +143,14 @@ Template.eventAffectedAreas.onRendered ->
     else
       clearMap()
 
+    @autorun =>
+      # Update selected tab based on type filters
+      selectedIncidentTypes = @data.selectedIncidentTypes.get()
+      if 'cases' in selectedIncidentTypes and 'deaths' not in selectedIncidentTypes
+        @choroplethLayer.set('cases')
+      else if 'cases' not in selectedIncidentTypes and 'deaths' in selectedIncidentTypes
+        @choroplethLayer.set('deaths')
+
 Template.eventAffectedAreas.helpers
   choroplethLayerIs: (name) ->
     choroplethLayer = Template.instance().choroplethLayer.get()
@@ -156,6 +164,12 @@ Template.eventAffectedAreas.helpers
 
   isLoading: ->
     Template.instance().loading.get()
+
+  disableCases: ->
+    'cases' not in Template.instance().data.selectedIncidentTypes.get()
+
+  disableDeaths: ->
+    'deaths' not in Template.instance().data.selectedIncidentTypes.get()
 
 Template.eventAffectedAreas.events
   'click .cases-layer a': (event, instance) ->

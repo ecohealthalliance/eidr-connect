@@ -47,7 +47,6 @@ Template.eventFiltration.events
     types = []
     instance.$('.type input:checked').each (i, input) ->
       types.push instance.removePropPrefix(input.id)
-    console.log types
     instance.types.set(types)
 
   'change .status input': (event, instance) ->

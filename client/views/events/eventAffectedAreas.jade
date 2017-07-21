@@ -6,13 +6,13 @@ template(name="eventAffectedAreas")
           i.i-layers(title="Choropleth Layers" data-toggle="tooltip")
           ul.list-unstyled
             li.cases-layer(
-              class="{{choroplethLayerIs 'cases'}}"
-              title="Estimated Cases"
+              class="{{choroplethLayerIs 'cases'}} {{#if disableCases}}disabled{{/if}}"
+              title="(Estimated)"
               data-toggle='tooltip')
               a Cases
             li.deaths-layer(
-              class="{{choroplethLayerIs 'deaths'}}"
-              title="Estimated Cases"
+              class="{{choroplethLayerIs 'deaths'}} {{#if disableDeaths}}disabled{{/if}}"
+              title="(Estimated)"
               data-toggle='tooltip')
               a Deaths
             li.choropleth-layer-off(class="{{choroplethLayerIs ''}}")
