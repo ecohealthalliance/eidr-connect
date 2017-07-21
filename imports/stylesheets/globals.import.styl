@@ -124,9 +124,6 @@ i
   margin-top 70px
   min-height 550px
 
-section
-  padding 30px 0
-
 .minor
   color #666
   font-size 20px
@@ -134,8 +131,12 @@ section
   margin 0
 
 .content-wrapper
-  padding-top $header-height + 2px
-  padding-bottom $footer-height
+  flex 1
+  overflow-x scroll
+  display flex
+  > div
+    &:first-of-type
+      width 100%
   +below(3)
     padding-top $mobile-header-height
     padding-bottom $mobile-footer-height
@@ -147,6 +148,8 @@ section
 .page-wrapper
   position relative
   min-height 100%
+  display flex
+  flex-direction column
 
 .default-fullWidth
   background $ll-gray

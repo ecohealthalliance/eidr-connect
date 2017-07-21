@@ -36,6 +36,15 @@
     margin-left 0
   &:hover
     background-color darken($primary-light, 3%)
+  &.disabled
+  &.disabled.active
+    > a
+      disableLink()
+      color $disabled
+      background none
+      border-color $border-primary
+    &:hover
+      background none
   > a
     flex 1
     display flex

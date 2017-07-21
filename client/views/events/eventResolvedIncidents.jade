@@ -2,14 +2,18 @@ template(name="eventResolvedIncidents")
   .resolved-incidents-plot
     .controls
       ul.tabs.tabs-grouped.incident-type-selector(role="group")
-        li
-          a.case-rate(type="button" class="{{activeMode 'caseRate'}}") Case Rate
-        li
-          a.death-rate(type="button" class="{{activeMode 'deathRate'}}") Death Rate
-        li
-          a.cases(type="button" class="{{activeMode 'cases'}}") Cumulative Cases
-        li
-          a.deaths(type="button" class="{{activeMode 'deaths'}}") Cumulative Deaths
+        li(class="{{activeMode 'caseRate'}} {{#if disableCases}}disabled{{/if}}")
+          a.case-rate(type="button")
+            | Case Rate
+        li(class="{{activeMode 'deathRate'}} {{#if disableDeaths}}disabled{{/if}}")
+          a.death-rate(type="button")
+            | Death Rate
+        li(class="{{activeMode 'cases'}} {{#if disableCases}}disabled{{/if}}")
+          a.cases(type="button")
+            | Cumulative Cases
+        li(class="{{activeMode 'deaths'}} {{#if disableDeaths}}disabled{{/if}}")
+          a.deaths(type="button")
+            | Cumulative Deaths
       p
         | The cases in this plot were inferred from incident report data.
         | Incidents with overlapping locations and time intervals were combined

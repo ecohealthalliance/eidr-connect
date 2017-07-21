@@ -1,6 +1,6 @@
-EventIncidents = require '/imports/collections/eventIncidents'
-EventArticles = require '/imports/collections/eventArticles'
-UserEvents = require '/imports/collections/userEvents'
+import EventIncidents from '/imports/collections/eventIncidents'
+import EventArticles from '/imports/collections/eventArticles'
+import UserEvents from '/imports/collections/userEvents'
 
 #Allow multiple modals or the suggested locations list won't show after the loading modal is hidden
 Modal.allowMultiple = true
@@ -9,6 +9,8 @@ Template.curatedEvent.onCreated ->
   @loaded = new ReactiveVar(false)
   userEventId = @data.userEventId
   @selectedView = new ReactiveVar('resolvedIncidentsPlot')
+  @filterQuery = new ReactiveVar({})
+  @selectedIncidentTypes = new ReactiveVar([])
 
   @subscribe 'userEvent', @data.userEventId, =>
     @loaded.set(true)
@@ -28,17 +30,11 @@ Template.curatedEvent.helpers
   eventHasArticles: ->
     EventArticles.find().count()
 
-  articleData: ->
-    instance = Template.instance()
-
-    articles: EventArticles.find()
-    userEvent: UserEvents.findOne(instance.data.userEventId)
-
   incidents: ->
-    EventIncidents.find()
+    EventIncidents.find(Template.instance().filterQuery.get())
 
   incidentCount: ->
-    EventIncidents.find().count()
+    EventIncidents.find(Template.instance().filterQuery.get()).count()
 
   incidentView: ->
     viewParam = Router.current().getParams()._view
@@ -51,6 +47,7 @@ Template.curatedEvent.helpers
     UserEvents.findOne(Template.instance().data.userEventId)?.deleted
 
   template: ->
+    instance = Template.instance()
     currentView = Router.current().getParams()._view
     templateName = switch currentView
       when 'estimated-epi-curves', undefined
@@ -68,12 +65,19 @@ Template.curatedEvent.helpers
 
     name: templateName
     data:
-      userEvent: UserEvents.findOne(Template.instance().data.userEventId)
+      userEvent: UserEvents.findOne(instance.data.userEventId)
+      filterQuery: instance.filterQuery
+      selectedIncidentTypes: instance.selectedIncidentTypes
       articles: EventArticles.find()
-      incidents: EventIncidents.find()
 
   loaded: ->
     Template.instance().loaded.get()
 
   documentCount: ->
     EventArticles.find().count()
+
+  filterQuery: ->
+    Template.instance().filterQuery
+
+  selectedIncidentTypes: ->
+    Template.instance().selectedIncidentTypes

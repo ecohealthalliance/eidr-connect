@@ -6,8 +6,15 @@ template(name="curatedEvent")
         .event--deleted
           h2 This event has been deleted
       else
-        +eventNav userEventId=userEvent._id
-        .event--content
-          +Template.dynamic template=template.name data=template.data
+        section.event--content-wrapper.container-flex.no-break
+          aside.event--filtration
+            +eventFiltration(
+              filterQuery=filterQuery
+              selectedIncidentTypes=selectedIncidentTypes)
+          .event--content-container
+            nav.event--navigation
+              +eventNav userEventId=userEvent._id
+            .event--content
+              +Template.dynamic template=template.name data=template.data
     else
       +loading

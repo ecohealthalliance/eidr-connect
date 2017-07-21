@@ -36,6 +36,7 @@ $border-secondary = lighten($secondary, 30%)
 $border-btn = #95989A
 
 $selected = $border-primary-light
+$disabled = desaturate(lighten($border-primary, 20%), 40%)
 $block-BG = lighten($border-primary-light, 50%)
 
 $tooltip-BG-color = alpha(lighten($primary, 80%), 98%)
@@ -71,7 +72,7 @@ $map-width-large = 100 - $map-menu-width-large
 $max-ui-width = 1000px
 
 $curator-pane-width = 50%
-$curator-pane-head-height = 50px
+$pane-head-height = $curator-pane-head-height = 50px
 
 // Z-index layers
 $cosmos-layer = 3000
@@ -96,4 +97,4 @@ $incident-type-colors.rejected = $incident-type-colors.case
 // Break points
 $break-point--curator-inbox = 1000px
 $break-point--medium-width = $break-point--BSVE = 1200px
-$break-point--curator-inbox--x-wide = 1500px
+$break-point--large-width = $break-point--curator-inbox--x-wide = 1500px

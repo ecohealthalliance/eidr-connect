@@ -1,0 +1,19 @@
+@import 'eventFiltration.import'
+
+.event--content-wrapper
+  border-top 1px solid $event-nav-border
+  flex 1
+
+.event--content-container
+  flex 1
+
+.event--content
+  section
+    padding 1em
+
+.event--incidents
+  flex-direction column
+  +above($break-point--large-width)
+    flex-direction row
+    > div
+      min-width 50%

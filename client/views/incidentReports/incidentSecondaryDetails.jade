@@ -5,7 +5,7 @@ template(name="incidentSecondaryDetails")
       class="fa-chevron-circle-{{#if detailsOpen}}down{{else}}right{{/if}}")
     ul.container-flex.list-unstyled.no-break(
       class="{{#if detailsOpen}}details-open{{/if}}")
-      li.events(
+      li.incident--events-list(
           title="Associated Events"
           data-toggle="tooltip"
           class="{{#unless associatedEventCount}}disabled{{/unless}}")
@@ -21,7 +21,7 @@ template(name="incidentSecondaryDetails")
         else
           span= associatedEventCount
       if locations
-        li.locations
+        li.incident--location-list
           if detailsOpen
             i.fa.fa-globe
             ul.list-unstyled
@@ -29,7 +29,7 @@ template(name="incidentSecondaryDetails")
                 li {{formatLocation this}}
           else
             span= firstLocationName
-      li.date
+      li.incident--date
         if detailsOpen
           i.fa.fa-calendar
         span {{formatDateRange dateRange}}

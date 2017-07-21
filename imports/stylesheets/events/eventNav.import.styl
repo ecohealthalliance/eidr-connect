@@ -1,8 +1,14 @@
 $event-nav-border = $border-primary
+
+.event--navigation
+  display flex
+  ul
+    flex 1
+
 .event
   nav
     border-bottom 1px solid $event-nav-border
-    border-top 1px solid $event-nav-border
+    min-height $pane-head-height
     ul
       display flex
       flex-direction row
@@ -33,8 +39,9 @@ $event-nav-border = $border-primary
           font-size 135%
       a
         display flex
+        align-self stretch
         align-items center
-        padding .9em 1.5em
+        padding 0 1.5em
         color $primary
         &:hover
           background $border-primary-light
