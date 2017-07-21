@@ -52,3 +52,36 @@ $event-nav-border = $border-primary
       ul
         li:first-of-type
           border-left 1px solid $event-nav-border
+
+    &.event--sub-nav
+      min-height auto
+      padding-top 5px
+      padding-bottom 4px
+      background lighten($border-primary-light, 50%)
+      ul
+        margin 0
+        li
+          position relative
+          border-color $border-primary
+          &:after
+            background transparent
+            position absolute
+            height 1px
+            bottom -5px
+            left 1.5em
+            right 1.5em
+            content ''
+          a
+            &:hover
+              color $primary-dark
+              background none
+          &.active
+            a
+              background none
+              font-weight 600
+            &:after
+              background $primary-dark
+          &.disabled
+            a
+              disableLink()
+              color $disabled
