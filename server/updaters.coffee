@@ -1,18 +1,33 @@
 # Code for updating the database on startup
-UserEvents = require '/imports/collections/userEvents.coffee'
-incidentReportSchema = require '/imports/schemas/incidentReport.coffee'
-Incidents = require '/imports/collections/incidentReports.coffee'
-articleSchema = require '/imports/schemas/article.coffee'
-Articles = require '/imports/collections/articles.coffee'
-CuratorSources = require '/imports/collections/curatorSources'
-Feeds = require '/imports/collections/feeds'
-feedSchema = require '/imports/schemas/feed'
-Constants = require '/imports/constants.coffee'
-{ regexEscape } = require '/imports/utils'
+import UserEvents from '/imports/collections/userEvents.coffee'
+import incidentReportSchema from '/imports/schemas/incidentReport.coffee'
+import Incidents from '/imports/collections/incidentReports.coffee'
+import GeonameSchema from '/imports/schemas/geoname.coffee'
+import articleSchema from '/imports/schemas/article.coffee'
+import Articles from '/imports/collections/articles.coffee'
+import CuratorSources from '/imports/collections/curatorSources'
+import Feeds from '/imports/collections/feeds'
+import feedSchema from '/imports/schemas/feed'
+import Constants from '/imports/constants.coffee'
+import { regexEscape } from '/imports/utils'
 
-DATA_VERSION = 7
+DATA_VERSION = 8
 AppMetadata = new Meteor.Collection('appMetadata')
 priorDataVersion = AppMetadata.findOne(property: "dataVersion")?.value
+
+geonamesById = {}
+getGeonameById = (id)->
+  if id of geonamesById
+    return geonamesById[id]
+  geonamesResult = HTTP.get Constants.GRITS_URL + '/api/geoname_lookup/api/geonames',
+    params:
+      ids: [id]
+  geoname = geonamesResult.data.docs[0]
+  if not geoname
+    geonamesById[id] = null
+    return
+  geonamesById[id] = GeonameSchema.clean(geoname)
+  return geonamesById[id]
 
 Meteor.startup ->
   if priorDataVersion and priorDataVersion >= DATA_VERSION
@@ -146,6 +161,12 @@ Meteor.startup ->
             id: "userSpecifiedSpecies:#{incident.species}"
             text: "Other Species: #{incident.species}"
       console.log('Unknown species: ' + incident.species)
+
+  console.log "Updating geonames..."
+  Incidents.find().map (incident) ->
+    Incidents.update _id: incident._id,
+      $set: locations: incident.locations.map (x)-> getGeonameById(x.id) or x
+  console.log "done"
 
   AppMetadata.upsert({property: "dataVersion"}, $set: {value: DATA_VERSION})
   console.log "database update complete"

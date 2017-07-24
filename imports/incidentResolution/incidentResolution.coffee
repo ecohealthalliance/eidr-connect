@@ -52,6 +52,7 @@
 # objective 2 would override the other objectives and cause problems
 # where counts were distributed unevenly.
 import LocationTree from './LocationTree.coffee'
+import solverExport from 'javascript-lp-solver'
 
 class Endpoint
   constructor: (@isStart, @offset, @interval) ->
@@ -182,6 +183,19 @@ subIntervalsToLP = (incidents, subIntervals)->
       incidents.map((i, idx)-> "10000 max#{idx} -0.001 min#{idx}").join(" ")
   ].concat(constraints)
 
+extendSubIntervalsWithValues = (incidents, subIntervals)->
+  model = subIntervalsToLP(incidents, subIntervals)
+  solution = solver.Solve(solver.ReformatLP(model))
+  # set default values for subintervals
+  subIntervals.forEach (s)->
+    s.value = 0
+  for key, value of solution
+    if key.startsWith("s")
+      subId = key.split("s")[1]
+      subInterval = subIntervals[parseInt(subId)]
+      subInterval.value = value
+
 export intervalToEndpoints = intervalToEndpoints
 export differentailIncidentsToSubIntervals = differentailIncidentsToSubIntervals
 export subIntervalsToLP = subIntervalsToLP
+export extendSubIntervalsWithValues = extendSubIntervalsWithValues

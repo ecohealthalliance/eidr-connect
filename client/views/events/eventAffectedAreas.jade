@@ -1,2 +1,32 @@
 template(name="eventAffectedAreas")
-  #map
+  .affected-areas--container
+    nav.event--sub-nav
+      ul#legend.list-unstyled
+        li
+          i.i-layers(title="Choropleth Layers" data-toggle="tooltip")
+          ul.list-unstyled
+            li.cases-layer(
+              class="{{choroplethLayerIs 'cases'}} {{#if disableCases}}disabled{{/if}}"
+              title="(Estimated)"
+              data-toggle='tooltip')
+              a Cases
+            li.deaths-layer(
+              class="{{choroplethLayerIs 'deaths'}} {{#if disableDeaths}}disabled{{/if}}"
+              title="(Estimated)"
+              data-toggle='tooltip')
+              a Deaths
+            li.choropleth-layer-off(class="{{choroplethLayerIs ''}}")
+              a None
+
+        li
+          i.fa.fa-map-marker(title="Marker Layers" data-toggle="tooltip")
+          ul.list-unstyled
+            li.marker-layer(class="{{markerLayerIs 'incidentLocations'}}")
+              a Incidents
+            li.marker-layer-off(class="{{markerLayerIs ''}}")
+              a None
+    .map-wrapper
+      #map
+      if isLoading
+        +loading small=true
+        .veil
