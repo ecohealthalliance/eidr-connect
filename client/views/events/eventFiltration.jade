@@ -2,7 +2,8 @@ template(name="eventFiltration")
   .filtration--header
     h2 Filter
 
-  section.filtration--property.type
+  section.filtration--property.type(
+    class="{{#unless hasDateRange}} disabled {{/unless}}")
     h3 Daterange
     +slider sliderData
     .dates.container-flex.form-group

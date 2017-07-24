@@ -23,7 +23,6 @@ do ->
       # Location
       @client.setValue('input.select2-search__field', 'f')
       @client.clickWhenVisible('.select2-results__option--highlighted')
-      @client.pause(40000)
       # Status
       @client.click('label[for="suspected"]')
       # Type

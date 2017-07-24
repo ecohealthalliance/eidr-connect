@@ -1,5 +1,11 @@
 import noUiSlider from 'nouislider'
 
+formatMinMax = (min, max) ->
+  # If max/min are dates, Convert to time (Number)
+  min = if min?.getTime then min.getTime() else min
+  max = if max?.getTime then max.getTime() else max
+  [ min, max ]
+
 Template.slider.onRendered ->
   slider = null
   sliderEl = @$('#slider')[0]
@@ -7,20 +13,18 @@ Template.slider.onRendered ->
   if slider
     slider.destroy()
 
-  dates = [ @data.sliderMin.getTime(), @data.sliderMax.getTime() ]
+  range = formatMinMax(@data.sliderMin, @data.sliderMax)
+
   slider = noUiSlider.create sliderEl,
-    start: dates
+    start: range
     behaviour: 'drag'
     connect: true
     range:
-      min: dates[0]
-      max: dates[1]
+      min: range[0]
+      max: range[1]
 
   sliderEl.noUiSlider.on 'change', _.debounce (values, handle) =>
-    @data.dateRange.set [
-      new Date(Math.ceil(values[0]))
-      new Date(Math.ceil(values[1]))
-    ]
+    @data.range.set values
     # Show or hide the left/right slider icon
     $adjustRangeEl = $('.noUI-adjustRange')
     rangeWidth = $('.noUi-draggable').width() - $('.noUi-origin.noUi-background').width()
@@ -33,10 +37,6 @@ Template.slider.onRendered ->
 
   $('.noUi-draggable').append '<span class="noUI-adjustRange hidden"></span>'
 
-  # Update the slider handle position when dates from inputs change
+  # Update the slider handle position when range from inputs change
   @autorun =>
-    dateRange = @data.dateRange.get()
-    slider.set [
-      dateRange[0].getTime()
-      dateRange[1].getTime()
-    ]
+    slider.set(formatMinMax(@data.range.get()))
