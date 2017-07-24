@@ -29,10 +29,11 @@ template(name="componentTreeList")
               | Difference between cumulative counts: #{count}
               ul
                 each incident in originalIncidents
-                  li {{incidentToText incident}}
+                  li
+                    a.view-incident(data-id="{{incident._id}}") {{incidentToText incident}}
             else
               each incident in originalIncidents
-                | {{incidentToText incident}}
+                a.view-incident(data-id="{{incident._id}}") {{incidentToText incident}}
   if children
     h4 Subcomponents
     each children

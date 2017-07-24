@@ -30,3 +30,11 @@ template(name="eventAffectedAreas")
       if isLoading
         +loading small=true
         .veil
+
+template(name="affectedAreasMarkerPopup")
+  .affected-areas-popup
+    h4 Incidents
+    .incidents
+      each incident in incidents
+        .incident
+          a.view-incident(data-id="{{incident._id}}") {{incidentToText incident}}
