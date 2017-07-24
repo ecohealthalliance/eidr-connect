@@ -15,6 +15,36 @@
   .check-buttons
     flex-wrap wrap
 
+  &.locations
+    .actions
+      display flex
+      justify-content flex-end
+      a
+        padding 0 .2em
+        font-size .9em
+        &:first-of-type
+          padding-right .5em
+          border-right 1px solid $border-primary
+        &:last-of-type
+          padding-left .5em
+
+  .location-list
+    padding 1em .5em
+    li
+      display flex
+      align-items baseline
+      padding-top .25em
+      padding-bottom .25em
+      cursor pointer
+      i
+        margin-right .35em
+      &:hover
+        color $primary-dark
+      &:active
+        i
+          transform scale(1.3)
+          transition .1s translate
+
 .filtration--header
   display flex
   align-items center

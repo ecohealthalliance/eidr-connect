@@ -97,6 +97,9 @@ a
   &:focus
     color $link-color
     noBootstrapFocus()
+  &.disabled
+    color $m-gray
+    disableLink()
 
 p a
 .focusable
@@ -156,3 +159,6 @@ i
 
 .no-scroll
   overflow hidden !important
+
+.emphasized
+  font-style italic

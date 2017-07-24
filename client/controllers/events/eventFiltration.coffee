@@ -1,10 +1,30 @@
+import EventIncidents from '/imports/collections/eventIncidents'
+
 Template.eventFiltration.onCreated ->
   @PROP_PREFIX = 'filter-'
   @typeProps = ['cases', 'deaths']
   @statusProps = ['suspected', 'confirmed', 'revoked']
+  @locationLevels = [
+    {
+      prop: 'countryName'
+      name: 'Country Name'
+    }
+    {
+      prop: 'admin1Name'
+      name: 'Admin Name 1'
+    }
+    {
+      prop: 'admin2Name'
+      name: 'Admin Name 2'
+    }
+  ]
   @types = new ReactiveVar([])
   @status = new ReactiveVar([])
   @properties = new ReactiveVar({})
+  @countryLevel = new ReactiveVar('countryName')
+  @selectedLocations = new Meteor.Collection(null)
+  @locations = new Meteor.Collection(null)
+
   @autorun =>
     filters = {}
     types = @types.get()
@@ -23,6 +43,12 @@ Template.eventFiltration.onCreated ->
       filters.status =
         $in: status
 
+    selectedLocations = @selectedLocations.find().map (location) ->
+      location.name
+    if selectedLocations.length
+      locationProjection = "locations.#{@countryLevel.get()}"
+      filters[locationProjection] = $in: selectedLocations
+
     filters = _.extend(filters, @properties.get())
 
     # Set filterQuery used to filter EventIncidents collection
@@ -31,6 +57,23 @@ Template.eventFiltration.onCreated ->
 
   @removePropPrefix = (prop) =>
     prop.substr(@PROP_PREFIX.length)
+
+Template.eventFiltration.onRendered ->
+  @autorun =>
+    @incidentLocations = _.uniq(
+      _.flatten(EventIncidents.find({}, field: locations: 1).map (incident) ->
+        incident.locations
+      )
+    )
+
+  @autorun =>
+    countryLevel = @countryLevel.get()
+    @locations.remove({})
+    @selectedLocations.remove({})
+    @incidentLocations.forEach (location) =>
+      return unless location[countryLevel]
+      @locations.upsert name: location[countryLevel],
+        name: location[countryLevel]
 
 Template.eventFiltration.helpers
   typeProps: ->
@@ -41,6 +84,22 @@ Template.eventFiltration.helpers
 
   propPrex: ->
     Template.instance().PROP_PREFIX
+
+  locationLevels: ->
+    Template.instance().locationLevels
+
+  locations: ->
+    Template.instance().locations.find()
+
+  locationSelected: ->
+    Template.instance().selectedLocations.findOne(id: @_id)
+
+  allLocationsSelected: ->
+    instance = Template.instance()
+    instance.selectedLocations.find().count() == instance.locations.find().count()
+
+  noEventsSelected: ->
+    Template.instance().selectedLocations.find().count() == 0
 
 Template.eventFiltration.events
   'change .type input': (event, instance) ->
@@ -60,3 +119,24 @@ Template.eventFiltration.events
     instance.$('.other-properties input:checked').each (i, input) ->
       otherProps[instance.removePropPrefix(input.id)] = true
     instance.properties.set(otherProps)
+
+  'change .locations select': (event, instance) ->
+    instance.countryLevel.set(event.target.value)
+
+  'click .location-list li': (event, instance) ->
+    selectedLocations = instance.selectedLocations
+    if selectedLocations.findOne(id: @_id)
+      selectedLocations.remove(id: @_id)
+    else
+      selectedLocations.insert
+        id: @_id
+        name: @name
+
+  'click .locations .select-all': (event, instance) ->
+    instance.locations.find().forEach (location) ->
+      instance.selectedLocations.insert
+        id: location._id
+        name: location.name
+
+  'click .locations .deselect-all': (event, instance) ->
+    instance.selectedLocations.remove({})
