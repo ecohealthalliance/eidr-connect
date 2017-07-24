@@ -13,7 +13,8 @@ Template.slider.onRendered ->
   if slider
     slider.destroy()
 
-  range = formatMinMax(@data.sliderMin, @data.sliderMax)
+  sliderRange = @data.sliderRange.get()
+  range = formatMinMax(sliderRange[0], sliderRange[1])
 
   slider = noUiSlider.create sliderEl,
     start: range
@@ -24,7 +25,7 @@ Template.slider.onRendered ->
       max: range[1]
 
   sliderEl.noUiSlider.on 'change', _.debounce (values, handle) =>
-    @data.range.set values
+    @data.selectedRange.set values
     # Show or hide the left/right slider icon
     $adjustRangeEl = $('.noUI-adjustRange')
     rangeWidth = $('.noUi-draggable').width() - $('.noUi-origin.noUi-background').width()
@@ -39,4 +40,14 @@ Template.slider.onRendered ->
 
   # Update the slider handle position when range from inputs change
   @autorun =>
-    slider.set(formatMinMax(@data.range.get()))
+    selectedRange = @data.selectedRange.get()
+    slider.set(formatMinMax(selectedRange[0], selectedRange[1]))
+
+  # Update the slider max and min if an incident is added
+  @autorun =>
+    sliderRange = @data.sliderRange.get()
+    newMaxMin = formatMinMax(sliderRange[0], sliderRange[1])
+    sliderEl.noUiSlider.updateOptions
+      range:
+        min: newMaxMin[0]
+        max: newMaxMin[1]

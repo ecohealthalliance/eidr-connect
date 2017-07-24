@@ -1,6 +1,7 @@
 import EventIncidents from '/imports/collections/eventIncidents'
 
 formatDateForInput = (date) ->
+  return unless date
   date = if date.getTime then date else new Date(Math.ceil(date))
   moment(date).format('YYYY-MM-DD')
 
@@ -29,24 +30,29 @@ Template.eventFiltration.onCreated ->
   @selectedLocations = new Meteor.Collection(null)
   @locations = new Meteor.Collection(null)
   @dateRange = new ReactiveVar([])
+  @selectedDateRange = new ReactiveVar([])
+  @eventDateRange = new ReactiveVar([])
+
   @autorun =>
     incidents = EventIncidents.find({}, fields: 'dateRange': 1).fetch()
-    @eventDateRange = [
-      _.min(incidents.map (i) -> i.dateRange.start)
-      _.max(incidents.map (i) -> i.dateRange.end)
-    ]
-    @dateRange.set(@eventDateRange)
+    if incidents.length
+      range = [
+        _.min(incidents.map (i) -> i.dateRange.start)
+        _.max(incidents.map (i) -> i.dateRange.end)
+      ]
+      @eventDateRange.set(range)
+      @selectedDateRange.set(range)
 
   @autorun =>
     filters = {}
 
     # Daterange
-    dateRange = @dateRange.get()
-    if dateRange.length
+    selectedDateRange = @selectedDateRange.get()
+    if selectedDateRange.length
       filters['dateRange.start'] =
-        $lte: new Date(Math.ceil(dateRange[1]))
+        $lte: new Date(Math.ceil(selectedDateRange[1]))
       filters['dateRange.end'] =
-        $gte: new Date(Math.ceil(dateRange[0]))
+        $gte: new Date(Math.ceil(selectedDateRange[0]))
 
     # Types
     types = @types.get()
@@ -146,33 +152,32 @@ Template.eventFiltration.helpers
 
   sliderData: ->
     instance = Template.instance()
-    eventDateRange = instance.eventDateRange
-    min = eventDateRange[0]
-    max = eventDateRange[1]
+    eventDateRange = instance.eventDateRange.get()
+    min = eventDateRange?[0]
+    max = eventDateRange?[1]
     # If min and max dates are equal change to 0,100 so slider renders
     # it will be disabled in UI
-    if min.getTime() == max.getTime()
+    if min?.getTime() == max?.getTime() or not min
       min = 0
       max = 100
-    sliderMin: min
-    sliderMax: max
-    range: instance.dateRange
+    sliderRange: instance.eventDateRange
+    selectedRange: instance.selectedDateRange
 
   startDate: ->
-    formatDateForInput(Template.instance().dateRange.get()[0])
+    formatDateForInput(Template.instance().selectedDateRange.get()?[0])
 
   endDate: ->
-    formatDateForInput(Template.instance().dateRange.get()[1])
+    formatDateForInput(Template.instance().selectedDateRange.get()?[1])
 
   minDate: ->
-    formatDateForInput(Template.instance().eventDateRange[0])
+    formatDateForInput(Template.instance().eventDateRange.get()?[0])
 
   maxDate: ->
-    formatDateForInput(Template.instance().eventDateRange[1])
+    formatDateForInput(Template.instance().eventDateRange.get()?[1])
 
   hasDateRange: ->
-    range = Template.instance().dateRange.get()
-    range[0] < range[1]
+    range = Template.instance().eventDateRange.get()
+    range?[0].getTime() < range?[1].getTime()
 
 Template.eventFiltration.events
   'change .type input': (event, instance) ->
@@ -215,4 +220,4 @@ Template.eventFiltration.events
     dates = []
     instance.$('.dates input').each (i, input) ->
       dates.push(new Date(input.value))
-    instance.dateRange.set(dates)
+    instance.selectedDateRange.set(dates)
