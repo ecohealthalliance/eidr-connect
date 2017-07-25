@@ -1,7 +1,8 @@
 import EventIncidents from '/imports/collections/eventIncidents'
 
 formatDateForInput = (date) ->
-  return unless date
+  unless date
+    return moment().format('YYYY-MM-DD')
   date = if date.getTime then date else new Date(Math.ceil(date))
   moment(date).format('YYYY-MM-DD')
 
@@ -31,7 +32,7 @@ Template.eventFiltration.onCreated ->
   @locations = new Meteor.Collection(null)
   @dateRange = new ReactiveVar([])
   @selectedDateRange = new ReactiveVar([])
-  @eventDateRange = new ReactiveVar([])
+  @eventDateRange = new ReactiveVar([ new Date(), new Date() ])
 
   @autorun =>
     incidents = EventIncidents.find({}, fields: 'dateRange': 1).fetch()
@@ -152,14 +153,6 @@ Template.eventFiltration.helpers
 
   sliderData: ->
     instance = Template.instance()
-    eventDateRange = instance.eventDateRange.get()
-    min = eventDateRange?[0]
-    max = eventDateRange?[1]
-    # If min and max dates are equal change to 0,100 so slider renders
-    # it will be disabled in UI
-    if min?.getTime() == max?.getTime() or not min
-      min = 0
-      max = 100
     sliderRange: instance.eventDateRange
     selectedRange: instance.selectedDateRange
 
