@@ -66,8 +66,7 @@ Template.eventFiltration.onCreated ->
     prop.substr(@PROP_PREFIX.length)
 
   @insertLocation = (location) =>
-    @selectedLocations.insert
-      id: location._id
+    @selectedLocations.upsert _id: location._id,
       countryName: location.countryName
       admin1Name: location.admin1Name
       admin2Name: location.admin2Name
@@ -113,7 +112,7 @@ Template.eventFiltration.helpers
     @[Template.instance().countryLevel.get()]
 
   locationSelected: ->
-    Template.instance().selectedLocations.findOne(id: @_id)
+    Template.instance().selectedLocations.findOne(@_id)
 
   allLocationsSelected: ->
     instance = Template.instance()
@@ -146,9 +145,8 @@ Template.eventFiltration.events
 
   'click .location-list li': (event, instance) ->
     selectedLocations = instance.selectedLocations
-    query = id: @_id
-    if selectedLocations.findOne(query)
-      selectedLocations.remove(query)
+    if selectedLocations.findOne(@_id)
+      selectedLocations.remove(@_id)
     else
       instance.insertLocation(@)
     selectedLocations.find().fetch()
