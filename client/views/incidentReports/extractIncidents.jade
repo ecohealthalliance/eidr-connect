@@ -3,11 +3,11 @@ template(name="extractIncidents")
     .tabs-wrapper
       ul.tabs.upload-menu
         li.active
-          a(href='#copy', data-toggle='tab' data-source='text')
+          a.text(href='#copy', data-toggle='tab')
             i.fa.fa-file-text-o
             | Copy &amp; Paste
         li
-          a(href='#web', data-toggle='tab' data-source='url')
+          a.url(href='#web', data-toggle='tab')
             i.fa.fa-link
             | From the web
     .submit-source.tab-content

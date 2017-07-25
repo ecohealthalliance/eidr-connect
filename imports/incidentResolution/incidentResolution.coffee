@@ -95,7 +95,7 @@ differentailIncidentsToSubIntervals = (incidents)->
   console.assert priorEndpoint.isStart
   SELToIncidents = {}
   activeIntervals = [priorEndpoint.interval]
-  _.zip(endpoints.slice(1), endpoints.slice(2)).forEach ([endpoint, nextEndpoint])->
+  endpoints.slice(1).forEach (endpoint)->
     if priorEndpoint.offset != endpoint.offset
       # Ensure a subinterval is created for the top level locations between
       # every endpoint.
@@ -112,8 +112,7 @@ differentailIncidentsToSubIntervals = (incidents)->
       activeIntervals.push(endpoint.interval)
     else
       activeIntervals = _.without(activeIntervals, endpoint.interval)
-    if endpoint.offset != nextEndpoint?.offset
-      priorEndpoint = endpoint
+    priorEndpoint = endpoint
   SELs = []
   idx = 0
   for key, incidentIds of SELToIncidents
@@ -143,7 +142,6 @@ subIntervalsToLP = (incidents, subIntervals)->
   for key, locations of SEToLocations
     SEToLocationTree[key] = LocationTree.from(locations)
   constraints = []
-  
   objective = subIntervals.map -> 0
   incidents.forEach((incident, incidentId)->
     mainConstraintVars = []
@@ -168,7 +166,6 @@ subIntervalsToLP = (incidents, subIntervals)->
     locationTree = SEToLocationTree[start + "," + end]
     subLocConstraintVars = ["1 s" + id]
     node = locationTree.getNodeById(locationId)
-    #if node
     for sublocation in node.children
       sublocSELId = SELToId[start + "," + end + "," + sublocation.value.id]
       subLocConstraintVars.push "-1 s" + sublocSELId

@@ -17,8 +17,12 @@ Template.extractIncidents.helpers
     Template.instance().submitDisabled.get()
 
 Template.extractIncidents.events
-  'click .upload-menu a': (event, instance) ->
-    instance.source.set($(event.target).data('source'))
+  'click .upload-menu .url': (event, instance) ->
+    instance.source.set('url')
+    instance.$(event.currentTarget).blur()
+
+  'click .upload-menu .text': (event, instance) ->
+    instance.source.set('text')
     instance.$(event.currentTarget).blur()
 
   'input textarea, input .submit-url': (event, instance) ->

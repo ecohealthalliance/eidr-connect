@@ -4,7 +4,9 @@ Template.intervalDetailsModal.events
   'click .view-incident': (event, instance) ->
     console.log event.target, event.currentTarget, $(event.currentTarget).data()
     incidentId = $(event.currentTarget).data('id')
-    Modal.hide()
+    Modal.hide('intervalDetailsModal')
     if incidentId
-      Modal.show 'incidentModal',
-        incident: EventIncidents.findOne(incidentId)
+      Meteor.setTimeout ->
+        Modal.show 'incidentModal',
+          incident: EventIncidents.findOne(incidentId)
+      , 300
