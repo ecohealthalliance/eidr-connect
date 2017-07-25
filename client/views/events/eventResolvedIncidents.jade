@@ -15,14 +15,16 @@ template(name="eventResolvedIncidents")
           | Cumulative Deaths
 
   .resolved-incidents-plot
-    if isLoading
-      +loading small=true
-    .chart
-    .legend
-      each labels
-        label
-          span=name
-          i.fa.fa-circle(style="color:{{color}};")
+    .chart-wrapper
+      if isLoading
+        +loading small=true
+        .veil
+      .chart
+      .legend
+        each labels
+          label
+            span=name
+            i.fa.fa-circle(style="color:{{color}};")
     p
       | The cases in this plot were inferred from incident report data.
       | Incidents with overlapping locations and time intervals were combined
