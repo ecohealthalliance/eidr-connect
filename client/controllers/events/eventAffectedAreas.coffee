@@ -6,6 +6,7 @@ import {
   extendSubIntervalsWithValues
 } from '/imports/incidentResolution/incidentResolution.coffee'
 import LocationTree from '/imports/incidentResolution/LocationTree.coffee'
+import MapHelpers from '/imports/ui/mapMarkers.coffee'
 
 Template.eventAffectedAreas.onCreated ->
   @choroplethLayer = new ReactiveVar()
@@ -154,12 +155,16 @@ Template.eventAffectedAreas.onRendered ->
     if @markerLayer.get()
       markerLayerGroup = L.layerGroup()
       for key, incidents of incidentsByLatLng
-        L.marker(key.split(',').map(parseFloat))
-          .bindPopup(Blaze.toHTMLWithData(
-            Template.affectedAreasMarkerPopup,
-            incidents: incidents
-          ))
-          .addTo(markerLayerGroup)
+        L.marker(key.split(',').map(parseFloat),
+          icon: L.divIcon
+            className: 'map-marker-container'
+            iconSize: null
+            html: MapHelpers.getMarkerHtml([ rgbColor: [ 240, 115, 129 ] ])
+        ).bindPopup(Blaze.toHTMLWithData(
+          Template.affectedAreasMarkerPopup,
+          incidents: incidents
+        ), closeButton: false)
+        .addTo(markerLayerGroup)
       markerLayerGroup.addTo(leMap)
 
   @autorun =>

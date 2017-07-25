@@ -36,13 +36,10 @@
     .loading
       z-index $modal-layer + 1
 
-  .affected-areas-popup
-    background-color white
-    padding 7px
+  .affected-areas--popup
+    .incidents-wrapper
+      position relative
+      gradientTopAndBottom(15px)
     .incidents
       overflow-y auto
       max-height 300px
-      .incident
-        margin 7px
-    h4
-      margin 7px

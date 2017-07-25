@@ -32,9 +32,11 @@ template(name="eventAffectedAreas")
         .veil
 
 template(name="affectedAreasMarkerPopup")
-  .affected-areas-popup
-    h4 Incidents
-    .incidents
-      each incident in incidents
-        .incident
-          a.view-incident(data-id="{{incident._id}}") {{incidentToText incident}}
+  .affected-areas--popup.map-popup
+    .map-popup--title
+      h4 Incidents
+    .incidents-wrapper
+      ul.incidents.list-unstyled
+        each incident in incidents
+          li.incident
+            a.view-incident(data-id="{{incident._id}}") {{incidentToText incident}}
