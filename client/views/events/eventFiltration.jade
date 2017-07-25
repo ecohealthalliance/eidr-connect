@@ -36,7 +36,7 @@ template(name="eventFiltration")
       each locations
         li
           i.fa(class="fa-{{#if locationSelected}}check-circle{{else}}circle-o{{/if}}")
-          span=name
+          span=locationName
       else
         p.emphasized No locations
 

@@ -44,10 +44,17 @@ Template.eventFiltration.onCreated ->
         $in: status
 
     selectedLocations = @selectedLocations.find().map (location) ->
-      location.name
+      query = {}
+      if location.countryName
+        query['locations.countryName'] = location.countryName
+      if location.admin1Name
+        query['locations.admin1Name'] = location.admin1Name
+      if location.admin2Name
+        query['locations.admin2Name'] = location.admin2Name
+      query
+
     if selectedLocations.length
-      locationProjection = "locations.#{@countryLevel.get()}"
-      filters[locationProjection] = $in: selectedLocations
+      filters.$or = selectedLocations
 
     filters = _.extend(filters, @properties.get())
 
@@ -57,6 +64,13 @@ Template.eventFiltration.onCreated ->
 
   @removePropPrefix = (prop) =>
     prop.substr(@PROP_PREFIX.length)
+
+  @insertLocation = (location) =>
+    @selectedLocations.insert
+      id: location._id
+      countryName: location.countryName
+      admin1Name: location.admin1Name
+      admin2Name: location.admin2Name
 
 Template.eventFiltration.onRendered ->
   @autorun =>
@@ -72,8 +86,12 @@ Template.eventFiltration.onRendered ->
     @selectedLocations.remove({})
     @incidentLocations.forEach (location) =>
       return unless location[countryLevel]
-      @locations.upsert name: location[countryLevel],
-        name: location[countryLevel]
+      query = {}
+      query[countryLevel] = location[countryLevel]
+      @locations.upsert query,
+        countryName: location.countryName
+        admin1Name: location.admin1Name
+        admin2Name: location.admin2Name
 
 Template.eventFiltration.helpers
   typeProps: ->
@@ -90,6 +108,9 @@ Template.eventFiltration.helpers
 
   locations: ->
     Template.instance().locations.find()
+
+  locationName: ->
+    @[Template.instance().countryLevel.get()]
 
   locationSelected: ->
     Template.instance().selectedLocations.findOne(id: @_id)
@@ -125,18 +146,16 @@ Template.eventFiltration.events
 
   'click .location-list li': (event, instance) ->
     selectedLocations = instance.selectedLocations
-    if selectedLocations.findOne(id: @_id)
-      selectedLocations.remove(id: @_id)
+    query = id: @_id
+    if selectedLocations.findOne(query)
+      selectedLocations.remove(query)
     else
-      selectedLocations.insert
-        id: @_id
-        name: @name
+      instance.insertLocation(@)
+    selectedLocations.find().fetch()
 
   'click .locations .select-all': (event, instance) ->
     instance.locations.find().forEach (location) ->
-      instance.selectedLocations.insert
-        id: location._id
-        name: location.name
+      instance.insertLocation(location)
 
   'click .locations .deselect-all': (event, instance) ->
     instance.selectedLocations.remove({})
