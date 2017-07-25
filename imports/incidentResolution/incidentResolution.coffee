@@ -27,30 +27,11 @@
 # The constraints are formed by the incident intervals. The number of cases in the 
 # subintervals an interval contains must sum to at least the number of cases in
 # the interval.
-# The objective function minimizes the following objectives
-# by weighting the objectives that should take priority higher:
-#
-# 1. The sum of the maximum case rates in each interval.
-# 2. The sum of the sum of all the subinterval counts in each interval.
-# 3. The negative minimum case rate.
-#
-# I arrived at this function by attempting to make the solution fit the
-# incident reports as closely as possible. At first I only used the second
-# objective. However, it often lead to solutions where cases were not
-# distributed evenly across subintervals.
-# To see an example of the uneven distribution problem, imagine minimizing the
-# subinterval counts of I1 and I3 from the plot above. Without an incentive
-# to evenly distribte their counts, an optimal soultion could allocate
-# zero cases to the D subintervals by overinflating the others or vice versa.
-# To remidy this, I introduced the first and third objectives.
-# They are designed to press the minimum and maximum rates of the intervals
-# together and prevent all the cases in an incident from being unevely allocated
-# to the maximum rate subintervals when they could be allocated to others.
-# The first objective was initially a secondary objective.
-# However, when inconsistent counts were used - for instance, 
-# an interval with 100 cases inside an interval with only 10 cases -
-# objective 2 would override the other objectives and cause problems
-# where counts were distributed unevenly.
+# The objective function minimizes the combined absolute values of the
+# difference between the subinterval case rates and their associated incident
+# case rates. Essentially, it tries to make the resolved rates fit the
+# rates in the incident reports as closly as possible.
+
 import LocationTree from './LocationTree.coffee'
 import solverExport from 'javascript-lp-solver'
 
@@ -142,21 +123,22 @@ subIntervalsToLP = (incidents, subIntervals)->
   for key, locations of SEToLocations
     SEToLocationTree[key] = LocationTree.from(locations)
   constraints = []
-  objective = subIntervals.map -> 0
   incidents.forEach((incident, incidentId)->
     mainConstraintVars = []
     incidentSubs = IncidentToSELs[incidentId]
     if not incidentSubs
       console.log "Error: No subintervals for", incidentId
+    MILLIS_PER_DAY = 1000 * 60 * 60 * 24
+    incidentLength = (Number(incident.endDate) - Number(incident.startDate)) / MILLIS_PER_DAY
+    incidentRate = incident.count / incidentLength
     for subInterval in incidentSubs
       { id, start, end } = subInterval
-      itervalLengthDays = (end - start) / (1000 * 60 * 60 * 24)
-      # The min/max incidentId variables are the minimum or maximum
-      # rates in the incident interval. The objective function will
-      # minimize/maximize these respectively.
-      constraints.push("#{(1 / itervalLengthDays).toFixed(12)} s#{id} -1 min#{incidentId} >= 0")
-      constraints.push("#{(1 / itervalLengthDays).toFixed(12)} s#{id} -1 max#{incidentId} <= 0")
-      objective[id] += 1
+      itervalLengthDays = (end - start) / MILLIS_PER_DAY
+      # The absIntervalId variables are the absolute value of the difference
+      # between the subinterval's rate and the source incident's overall rate.
+      # The objective function will attempt to minimize this quantity.
+      constraints.push("#{(1 / itervalLengthDays).toFixed(12)} s#{id} -1 abs#{id} <= #{incidentRate}")
+      constraints.push("#{(1 / itervalLengthDays).toFixed(12)} s#{id} 1 abs#{id} >= #{incidentRate}")
       mainConstraintVars.push "1 s" + id
     # The sum of the counts over over all subintervals must be greater than
     # the count over the incident interval.
@@ -176,8 +158,7 @@ subIntervalsToLP = (incidents, subIntervals)->
   # down by 5x or more.
   # constraints = constraints.concat(subIntervals.map (s)->"int s#{s.id}")
   return [
-    "min: " + objective.map((x, idx)-> "#{x} s#{idx}").join(" ") + " " +
-      incidents.map((i, idx)-> "10000 max#{idx} -0.001 min#{idx}").join(" ")
+    "min: " + incidents.map((i, idx)-> "1 abs#{idx}").join(" ")
   ].concat(constraints)
 
 extendSubIntervalsWithValues = (incidents, subIntervals)->
