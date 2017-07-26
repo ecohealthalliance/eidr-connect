@@ -9,8 +9,8 @@ checkPermission = (userId) ->
 
 Meteor.methods
   addIncidentReport: (incident, userEventId) ->
+    checkPermission(@userId)
     user = Meteor.user()
-    checkPermission(user._id)
     incidentReportSchema.validate(incident)
     incident.addedByUserId = user._id
     incident.addedByUserName = user.profile.name
@@ -21,8 +21,8 @@ Meteor.methods
     return newId
 
   editIncidentReport: (incident) ->
+    checkPermission(@userId)
     user = Meteor.user()
-    checkPermission(user._id)
     incidentReportSchema.validate(incident)
 
     # Remove existing type props if user changes incident type and merge incident

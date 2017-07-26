@@ -15,32 +15,26 @@ if _.isEmpty solverExport
 else
   Solver = solverExport
 
+lome =
+  admin1Name: "Maritime"
+  countryName: "Togolese Republic"
+  featureClass: "P"
+  featureCode: "PPLC"
+  id: "2365267"
+  name: "Lomé"
+
 overlappingIncidents = [{
   cases: 40
   dateRange:
     start: new Date("Dec 31 2009")
     end: new Date("Jan 1 2011")
-  locations: [
-    admin1Name: "Maritime"
-    countryName: "Togolese Republic"
-    featureClass: "P"
-    featureCode: "PPLC"
-    id: "2365267"
-    name: "Lomé"
-  ]
+  locations: [lome]
 }, {
   cases: 45
   dateRange:
     start: new Date("Dec 1 2010")
     end: new Date("Jan 1 2012")
-  locations: [
-    admin1Name: "Maritime"
-    countryName: "Togolese Republic"
-    featureClass: "P"
-    featureCode: "PPLC"
-    id: "2365267"
-    name: "Lomé"
-  ]
+  locations: [lome]
 }]
 
 describe 'Incident Resolution', ->
@@ -89,27 +83,13 @@ describe 'Incident Resolution', ->
       dateRange:
         start: new Date("Dec 31 2009")
         end: new Date("Jan 1 2011")
-      locations: [
-        admin1Name: "Maritime"
-        countryName: "Togolese Republic"
-        featureClass: "P"
-        featureCode: "PPLC"
-        id: "2365267"
-        name: "Lomé"
-      ]
+      locations: [lome]
     }, {
       cases: 45
       dateRange:
         start: new Date("Dec 31 2009")
         end: new Date("Jan 1 2011")
-      locations: [
-        admin1Name: "Maritime"
-        countryName: "Togolese Republic"
-        featureClass: "P"
-        featureCode: "PPLC"
-        id: "2365267"
-        name: "Lomé"
-      ]
+      locations: [lome]
     }]
     differentialIncidents = convertAllIncidentsToDifferentials(overlappingIncidentsSharedStart)
     subIntervals = differentailIncidentsToSubIntervals(differentialIncidents)
@@ -125,6 +105,42 @@ describe 'Incident Resolution', ->
     chai.assert(solution.s1 < 10)
     chai.assert(solution.s2 < 50)
 
+  # This tests an problem that occurs when using an incident min/max rate
+  # squeezing objective function. With such an objective function, it would
+  # cause the minimum and maximum values of the first incident to be constrained
+  # which would cause some of its subintervals to have unbalance counts.
+  # The current absolute value based objective function resolves this issue.
+  it 'allocates counts proportionately 2', ->
+    differentialIncidents = convertAllIncidentsToDifferentials([{
+      cases: 100
+      dateRange:
+        start: new Date("Jan 1 2009")
+        end: new Date("Jan 1 2012")
+      locations: [lome]
+    }, {
+      cases: 2
+      dateRange:
+        start: new Date("Jan 1 2010")
+        end: new Date("Jan 1 2011")
+      locations: [lome]
+    }, {
+      cases: 50
+      dateRange:
+        start: new Date("Dec 1 2011")
+        end: new Date("Jan 1 2012")
+      locations: [lome]
+    }])
+    subIntervals = differentailIncidentsToSubIntervals(differentialIncidents)
+    model = subIntervalsToLP(differentialIncidents, subIntervals)
+    solution = Solver.Solve(Solver.ReformatLP(model))
+    lomeIntervalIds = subIntervals
+      .filter (s) -> s.location.id == '2365267'
+      .map (s) -> s.id
+    chai.assert(solution["s#{lomeIntervalIds[0]}"] > 15)
+    chai.assert(solution["s#{lomeIntervalIds[1]}"] > 2)
+    chai.assert(solution["s#{lomeIntervalIds[2]}"] > 15)
+    chai.assert(solution["s#{lomeIntervalIds[3]}"] >= 50)
+
   it 'handles inconsistent counts', ->
     inconsistentIncidents = _.clone(overlappingIncidents)
     inconsistentIncidents.push
@@ -132,14 +148,7 @@ describe 'Incident Resolution', ->
       dateRange:
         start: new Date("Dec 1 2008")
         end: new Date("Jan 1 2013")
-      locations: [
-        admin1Name: "Maritime"
-        countryName: "Togolese Republic"
-        featureClass: "P"
-        featureCode: "PPLC"
-        id: "2365267"
-        name: "Lomé"
-      ]
+      locations: [lome]
     differentialIncidents = convertAllIncidentsToDifferentials(inconsistentIncidents)
     subIntervals = differentailIncidentsToSubIntervals(differentialIncidents)
     model = subIntervalsToLP(differentialIncidents, subIntervals)

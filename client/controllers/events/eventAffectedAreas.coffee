@@ -6,6 +6,7 @@ import {
   extendSubIntervalsWithValues
 } from '/imports/incidentResolution/incidentResolution.coffee'
 import LocationTree from '/imports/incidentResolution/LocationTree.coffee'
+import MapHelpers from '/imports/ui/mapMarkers.coffee'
 
 Template.eventAffectedAreas.onCreated ->
   @choroplethLayer = new ReactiveVar()
@@ -42,6 +43,8 @@ Template.eventAffectedAreas.onRendered ->
     maxZoom: 18
   ).addTo(leMap)
 
+  geoJsonLayer = null
+
   ramp = chroma.scale(["#345e7e", "#f07381"]).colors(10)
 
   getColor = (val) ->
@@ -63,12 +66,12 @@ Template.eventAffectedAreas.onRendered ->
     if not L.Browser.ie and not L.Browser.opera
       layer.bringToFront()
 
-  clearMap = =>
-    if @geoJsonLayer
-      leMap.removeLayer(@geoJsonLayer)
+  resetHighlight = (event) =>
+    geoJsonLayer.resetStyle(event.target)
 
-  updateMap = (worldGeoJSON, incidentType, incidents) =>
-    clearMap()
+  updateGeoJSONLayer = (worldGeoJSON, incidentType, incidents) =>
+    if geoJsonLayer
+      leMap.removeLayer(geoJsonLayer)
     mapableIncidents = incidents.fetch().filter (i) ->
       i.locations.every (l) -> l.featureCode
     if incidentType and worldGeoJSON
@@ -105,7 +108,7 @@ Template.eventAffectedAreas.onRendered ->
         prevTotal = countryCodeToCount[location.countryCode] or 0
         countryCodeToCount[location.countryCode] = prevTotal + total
       maxCount = _.max(_.values(countryCodeToCount))
-      @geoJsonLayer = L.geoJson(
+      geoJsonLayer = L.geoJson(
         features: worldGeoJSON.features
         type: "FeatureCollection"
       ,
@@ -128,31 +131,49 @@ Template.eventAffectedAreas.onRendered ->
             click: zoomToFeature
       ).addTo(leMap)
 
-  resetHighlight = (event) =>
-    @geoJsonLayer.resetStyle(event.target)
-
   @autorun =>
     worldGeoJSON = @worldGeoJSONRV.get()
     incidentType = @choroplethLayer.get()
     incidents = EventIncidents.find(@data.filterQuery.get())
-    if incidentType
-      @loading.set(true)
-      # Allow UI to update (loading indicator and clicked nav item)
-      # before updating map
-      setTimeout =>
-        updateMap(worldGeoJSON, incidentType, incidents)
-        @loading.set(false)
-      , 200
-    else
-      clearMap()
+    @loading.set(true)
+    # Allow UI to update (loading indicator and clicked nav item)
+    # before updating map
+    setTimeout =>
+      updateGeoJSONLayer(worldGeoJSON, incidentType, incidents)
+      @loading.set(false)
+    , 200
 
-    @autorun =>
-      # Update selected tab based on type filters
-      selectedIncidentTypes = @data.selectedIncidentTypes.get()
-      if 'cases' in selectedIncidentTypes and 'deaths' not in selectedIncidentTypes
-        @choroplethLayer.set('cases')
-      else if 'cases' not in selectedIncidentTypes and 'deaths' in selectedIncidentTypes
-        @choroplethLayer.set('deaths')
+  markerLayerGroup = null
+  @autorun =>
+    if markerLayerGroup
+      leMap.removeLayer(markerLayerGroup)
+    incidentsByLatLng = {}
+    EventIncidents.find(@data.filterQuery.get()).map (incident) ->
+      incident.locations.forEach (location) ->
+        key = "#{location.latitude},#{location.longitude}"
+        incidentsByLatLng[key] = (incidentsByLatLng[key] or []).concat(incident)
+    if @markerLayer.get()
+      markerLayerGroup = L.layerGroup()
+      for key, incidents of incidentsByLatLng
+        L.marker(key.split(',').map(parseFloat),
+          icon: L.divIcon
+            className: 'map-marker-container'
+            iconSize: null
+            html: MapHelpers.getMarkerHtml([ rgbColor: [ 240, 115, 129 ] ])
+        ).bindPopup(Blaze.toHTMLWithData(
+          Template.affectedAreasMarkerPopup,
+          incidents: incidents
+        ), closeButton: false)
+        .addTo(markerLayerGroup)
+      markerLayerGroup.addTo(leMap)
+
+  @autorun =>
+    # Update selected tab based on type filters
+    selectedIncidentTypes = @data.selectedIncidentTypes.get()
+    if 'cases' in selectedIncidentTypes and 'deaths' not in selectedIncidentTypes
+      @choroplethLayer.set('cases')
+    else if 'cases' not in selectedIncidentTypes and 'deaths' in selectedIncidentTypes
+      @choroplethLayer.set('deaths')
 
 Template.eventAffectedAreas.helpers
   choroplethLayerIs: (name) ->
@@ -191,3 +212,9 @@ Template.eventAffectedAreas.events
 
   'click .marker-layer-off a': (event, instance) ->
     instance.markerLayer.set(null)
+
+  'click .view-incident': (event, instance) ->
+    incidentId = $(event.currentTarget).data('id')
+    if incidentId
+      Modal.show 'incidentModal',
+        incident: EventIncidents.findOne(incidentId)

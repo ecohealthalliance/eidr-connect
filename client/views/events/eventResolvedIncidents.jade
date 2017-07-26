@@ -26,6 +26,8 @@ template(name="eventResolvedIncidents")
             span=name
             i.fa.fa-circle(style="color:{{color}};")
     p
-      | The cases in this plot were inferred from incident report data.
+      | The cases in this plot were inferred from the incident data.
       | Incidents with overlapping locations and time intervals were combined
       | using an algorithm that avoids double counting their cases.
+      | Clicking on an interval in the plot will display the incidents it was
+      | derived from.

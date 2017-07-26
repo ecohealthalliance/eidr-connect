@@ -79,7 +79,7 @@ Template.incidentModal.events
           notify('error', errorString)
         instance.submitting.set(false)
 
-    if @edit
+    else if @incident._id
       incident._id = @incident._id
       Meteor.call 'editIncidentReport', incident, (error, result) ->
         if not error
