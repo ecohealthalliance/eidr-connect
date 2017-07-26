@@ -43,18 +43,17 @@ Template.eventFiltration.onCreated ->
       filters.status =
         $in: status
 
+    countryLevel = @countryLevel.get()
     selectedLocations = @selectedLocations.find().map (location) ->
       query = {}
-      if location.countryName
-        query['locations.countryName'] = location.countryName
-      if location.admin1Name
-        query['locations.admin1Name'] = location.admin1Name
-      if location.admin2Name
-        query['locations.admin2Name'] = location.admin2Name
+      for level in ['countryName', 'admin1Name', 'admin2Name']
+        query["locations.#{level}"] = location[level]
+        if countryLevel == level
+          break
       query
 
     if selectedLocations.length
-      filters.$or = selectedLocations
+      filters.$or = (filters.$or or []).concat selectedLocations
 
     filters = _.extend(filters, @properties.get())
 
