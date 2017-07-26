@@ -4,13 +4,14 @@ Feature: Incidents
   Background:
     And I am logged in as an admin
 
+  @dev
   Scenario: Add incident report
     When I navigate to "/events"
     And I navigate to the first event
     And I select the "incidents" tab
     And I add an incident with count "100000001"
-    Then I should see a "success" notification
-    And I should see a scatter plot group with count "100000001"
+    Then I should see content "100000001"
+    Then I should see a scatter plot group with count "100000001"
 
   Scenario: Edit an incident report
     When I navigate to "/events"
