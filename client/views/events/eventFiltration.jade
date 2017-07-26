@@ -26,6 +26,24 @@ template(name="eventFiltration")
             tabindex="-1")
           label(for="#{propPrex}#{this}" tabindex="0")=this
 
+  section.filtration--property.locations
+    h3 Locations
+    select.form-control
+      each locationLevels
+        option(value=prop)=name
+
+    ul.list-unstyled.location-list
+      each locations
+        li
+          i.fa(class="fa-{{#if locationSelected}}check-circle{{else}}circle-o{{/if}}")
+          span=locationName
+      else
+        p.emphasized No locations
+
+    .actions
+      a.select-all(class="{{#if allLocationsSelected}}disabled{{/if}}") Select All
+      a.deselect-all(class="{{#if noEventsSelected}}disabled{{/if}}") Deselect All
+
   section.filtration--property.other-properties
     h3 Other Properties
     .check-buttons.container-flex
