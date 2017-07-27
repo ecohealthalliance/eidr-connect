@@ -1,0 +1,33 @@
+template(name="eventResolvedIncidents")
+  nav.event--sub-nav
+    ul.incident-type-selector.list-unstyled(role="group")
+      li(class="{{activeMode 'caseRate'}} {{#if disableCases}}disabled{{/if}}")
+        a.case-rate(type="button")
+          | Case Rate
+      li(class="{{activeMode 'deathRate'}} {{#if disableDeaths}}disabled{{/if}}")
+        a.death-rate(type="button")
+          | Death Rate
+      li(class="{{activeMode 'cases'}} {{#if disableCases}}disabled{{/if}}")
+        a.cases(type="button")
+          | Cumulative Cases
+      li(class="{{activeMode 'deaths'}} {{#if disableDeaths}}disabled{{/if}}")
+        a.deaths(type="button")
+          | Cumulative Deaths
+
+  .resolved-incidents-plot
+    .chart-wrapper
+      if isLoading
+        +loading small=true
+        .veil
+      .chart
+      .legend
+        each labels
+          label
+            span=name
+            i.fa.fa-circle(style="color:{{color}};")
+    p
+      | The cases in this plot were inferred from the incident data.
+      | Incidents with overlapping locations and time intervals were combined
+      | using an algorithm that avoids double counting their cases.
+      | Clicking on an interval in the plot will display the incidents it was
+      | derived from.

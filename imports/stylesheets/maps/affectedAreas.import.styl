@@ -1,0 +1,45 @@
+.affected-areas--container
+  nav
+    > ul
+      > li
+        margin-left 1.5em
+        border 0
+    ul
+      li
+        align-items center
+        &:last-of-type
+          border-right 0
+      i
+        color $primary-dark
+        &.i-layers
+          margin-top 2px
+          font-size .9em
+          &::before
+            line-height 0
+      a
+        cursor pointer
+
+  #legend
+    display flex
+    span
+      color $primary
+      margin-left 5px
+    h4
+      color $primary-dark
+    label
+      font-weight 400
+
+  .map-wrapper
+    position relative
+    .veil
+      z-index $modal-layer
+    .loading
+      z-index $modal-layer + 1
+
+  .affected-areas--popup
+    .incidents-wrapper
+      position relative
+      gradientTopAndBottom(15px)
+    .incidents
+      overflow-y auto
+      max-height 300px

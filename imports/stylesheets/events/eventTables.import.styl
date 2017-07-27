@@ -1,0 +1,114 @@
+.event
+  .table
+    border 0
+    thead
+    tbody
+      tr
+        th
+        td
+          &:first-of-type
+            padding-left $page-padding-small-screen
+            +above(3)
+              padding-left $page-padding
+    thead
+      tr
+        th
+          border-color $border-primary-light
+    tbody
+      tr
+        &:not(.details)
+          &:hover
+            background $border-primary-light
+        &.details
+          cursor default
+    td
+      &.title
+        max-width 200px
+        overflow hidden
+
+.details-open
+  background-color $selected
+  position relative
+
+.details-container
+  margin-bottom .75em
+  margin-top .75em
+  ul
+    margin-bottom 0
+  .sources
+    margin-bottom 1em
+  .detail-icon
+    margin-right .5em
+    &.fa
+      font-size 1.5em
+      color desaturate(darken($border-primary, 5%), 25%)
+  ul
+    font-size 1em
+  .metadata
+    li
+      line-height .9em
+      margin-bottom 1em
+      align-items flex-start
+      &:last-of-type
+        margin 0
+      li
+        margin-bottom .45em
+        &:last-of-type
+          margin-bottom 0
+    span
+      font-size .9em
+  .metadata--title
+    font-size .9em
+    min-width 80px
+    font-weight 600
+    margin 0
+  h5
+    font-size 1em
+    color lighten($primary, 20%)
+    margin-top 0
+    margin-bottom 1em
+
+.tab-form
+  display flex
+  flex-direction column
+  align-items center
+  padding 15px 15px 15px $page-padding-small-screen
+  border-bottom 2px solid $border-primary-light
+  +above(3)
+    padding 15px 15px 15px $page-padding
+  input
+    box-shadow none
+  input.form-control
+  select.form-control
+  .input-group-addon
+    border-color $border-primary
+  .table-filter
+    min-width 50%
+    margin-left auto
+  .btn
+    text-transform uppercase
+    font-weight 200
+    padding-top .6em
+    padding-bottom .6em
+    +above(2)
+      padding-top .45em
+      padding-bottom .45em
+  > .flex-col
+  button
+    width 100%
+    &:not(:last-of-type)
+      margin-bottom 1em
+    +above(2)
+      width auto
+      &:not(:last-of-type)
+        margin-bottom 0
+  input
+  .btn
+    min-width 100%
+    display block
+    +above(2)
+      margin-bottom 0
+      display inline
+      min-width auto
+  .right-action
+    margin-left auto

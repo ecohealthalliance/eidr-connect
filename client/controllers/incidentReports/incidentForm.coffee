@@ -1,6 +1,7 @@
 import Articles from '/imports/collections/articles.coffee'
 import createInlineDateRangePicker from '/imports/ui/inlineDateRangePicker.coffee'
 import {
+  formatLocation,
   keyboardSelect,
   removeSuggestedProperties,
   diseaseOptionsFn } from '/imports/utils'
@@ -58,6 +59,12 @@ Template.incidentForm.onCreated ->
     @incidentType.set(type)
 
     @incidentStatus.set(@incidentData.status or '')
+
+    @locations.set(@incidentData.locations.map (loc) ->
+      id: loc.id
+      text: formatLocation(loc)
+      item: loc
+    )
 
   @isSuggestedField = (fieldName) =>
     if fieldName in @suggestedFields?.get()

@@ -27,6 +27,9 @@ IncidentReportSchema = new SimpleSchema
   modifiedByUserId:
     type: String
     optional: true
+  modifiedDate:
+    type: Date
+    optional: true
   addedDate:
     type: Date
     optional: true

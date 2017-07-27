@@ -2,10 +2,6 @@ Template.navLinks.helpers
   isCurator: ->
     Roles.userIsInRole(Meteor.userId(), ["admin", "curator"])
 
-  checkActive: (routeName) ->
-    if Router.current().location.get().path.includes(routeName)
-      'active'
-
 Template.navLinks.events
   'mouseover li.dropdown': (event) ->
     $(event.currentTarget).addClass('open')

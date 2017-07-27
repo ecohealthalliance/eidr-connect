@@ -1,0 +1,88 @@
+$event-nav-border = $border-primary
+
+.event--navigation
+  display flex
+  ul
+    flex 1
+
+.event
+  nav
+    border-bottom 1px solid $event-nav-border
+    min-height $pane-head-height
+    ul
+      display flex
+      flex-direction row
+      align-items stretch
+      margin 0
+    li
+      border-right 1px solid $event-nav-border
+      display flex
+      align-items stretch
+      &:last-of-type
+        border 0
+      &.active
+        a
+          background $secondary-l-light
+          disableLink()
+      i
+        margin 0
+        font-size 150%
+      span
+        span
+          display none
+      +above(3)
+        span
+          span
+            display inline-block
+        i
+          margin-right 5px
+          font-size 135%
+      a
+        display flex
+        align-self stretch
+        align-items center
+        padding 0 1.5em
+        color $primary
+        &:hover
+          background $border-primary-light
+          color $primary-dark
+        > span
+          display flex
+          align-items center
+      &.on-right
+        ul
+          li:first-of-type
+            border-left 1px solid $event-nav-border
+
+    &.event--sub-nav
+      min-height auto
+      padding-top 5px
+      padding-bottom 4px
+      background lighten($border-primary-light, 50%)
+      ul
+        margin 0
+        li
+          position relative
+          border-color $border-primary
+          &:after
+            background transparent
+            position absolute
+            height 1px
+            bottom -5px
+            left 1.5em
+            right 1.5em
+            content ''
+          a
+            &:hover
+              color $primary-dark
+              background none
+          &.active
+            a
+              background none
+              font-weight 600
+            &:after
+              background $primary-dark
+          &.disabled
+            a
+              disableLink()
+              color $disabled

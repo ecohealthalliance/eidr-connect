@@ -1,0 +1,48 @@
+.noUi-target
+  background $border-primary-light
+  height 12px
+  border-radius 10px
+  border-color $border-primary
+  margin 2em 1em
+
+.noUi-horizontal
+  .noUi-handle
+    top -10px
+    width 30px
+    height 30px
+    border 2px solid white
+    background lighten($primary, 10%)
+    transition background .1s, transform .15s
+    border-radius 50%
+    box-shadow none
+    cursor pointer
+    &::before
+    &::after
+      display none
+    &:hover
+      transform scale(1.2)
+      transform-origin center
+    &:focus
+      outline 0
+      border-color darken($primary, 30%)
+      background darken($primary, 10%)
+    &:active
+      background $secondary
+      border-color white
+
+.noUi-connect
+  top -3px
+  bottom -3px
+  background $border-primary
+  border-color darken($border-primary, 50%)
+  box-shadow none
+  span
+    &::after
+      position absolute
+      top 50%
+      left 50%
+      transform translate(-50%, -50%)
+      content '\f07e'
+      icon()
+      color $primary
+      font-size 1.1em

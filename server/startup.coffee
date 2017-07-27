@@ -1,12 +1,16 @@
-incidentReportSchema = require '/imports/schemas/incidentReport.coffee'
-Incidents = require '/imports/collections/incidentReports.coffee'
-Articles = require '/imports/collections/articles.coffee'
+import incidentReportSchema from '/imports/schemas/incidentReport.coffee'
+import Incidents from '/imports/collections/incidentReports.coffee'
+import Articles from '/imports/collections/articles.coffee'
+import autoprocessArticles from '/server/autoprocess.coffee'
+import updateDatabase from '/server/updaters.coffee'
 
 Meteor.startup ->
   # Clean-up curatorInboxSourceId when user goes offline
   Meteor.users.find({'status.online': true}).observe
     removed: (user) ->
       Meteor.users.update(user._id, {$set : {'status.curatorInboxSourceId': null}})
+
+  updateDatabase()
 
   # Validate incidents
   if Meteor.isDevelopment
@@ -31,3 +35,6 @@ Meteor.startup ->
         console.log "incidents validated"
         Meteor.clearInterval(interval)
     interval = Meteor.setInterval(validateIncidents, 20000)
+
+  if not Meteor.isAppTest
+    Meteor.setInterval(autoprocessArticles, 100000)

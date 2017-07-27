@@ -4,7 +4,10 @@ template(name="select2")
       id=selectId
       name=name
       multiple=multiple
-      required=required)
+      required=required
+      data-parsley-errors-container=errorContainer
+      data-parsley-class-handler=classHandler
+      data-parsley-error-message=errorMessage)
 
 template(name="clearSelect2Control")
   .select2-results__additional-options

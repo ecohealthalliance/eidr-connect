@@ -1,0 +1,66 @@
+.resolved-incidents-plot
+  min-height 300px
+  position relative
+  padding 3em 0
+  p
+    margin 2em auto
+    display block
+    color $m-gray
+    font-size .85em
+    width 90%
+    max-width 800px
+    text-align center
+
+.chart
+  margin 0 5% 1em 5%
+  min-height 300px
+
+.legend
+  display flex
+  align-items center
+  justify-content center
+  flex-wrap wrap
+  label
+    display flex
+    align-items center
+    flex-direction row-reverse
+    margin 15px 15px 0 15px
+    i
+      font-size 2em
+      margin-right .25em
+
+.chart-wrapper
+  position relative
+  .loading
+    top 35%
+    z-index $modal-layer
+
+.interval-details
+  h5
+    font-size 1.5em
+  h6
+    font-size 1em
+    margin-top 1em
+    font-weight 600
+  li
+    margin-bottom 4px
+    span
+      font-weight 600
+
+.interval-details--source-incidents
+  padding-left 30px
+  li
+    span
+      font-weight normal
+
+.incident-type-selector
+  margin-bottom 1em
+  .btn
+    padding-left 5em
+    padding-right 5em
+
+.y-axis
+  position absolute
+  top 0
+  bottom 0
+  width 40px

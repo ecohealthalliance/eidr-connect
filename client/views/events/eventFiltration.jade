@@ -1,0 +1,69 @@
+template(name="eventFiltration")
+  .filtration--header
+    h2 Filter
+
+  section.filtration--property.type(
+    class="{{#unless hasDateRange}} disabled {{/unless}}")
+    h3 Date Range
+    if hasDateRange
+      +slider sliderData
+    .dates.container-flex.form-group
+      .date
+        label Start Date
+        input.form-control.start-date(value=startDate type="date" min=minDate max=maxDate)
+      .date
+        label End Date
+        input.form-control.start-date(value=endDate type="date" min=minDate max=maxDate)
+
+  section.filtration--property.type
+    h3 Types
+    .check-buttons.container-flex
+      each typeProps
+        .check-button
+          input(
+            type="checkbox"
+            name="#{propPrex}#{this}"
+            id="#{propPrex}#{this}"
+            tabindex="-1")
+          label(for="#{propPrex}#{this}" tabindex="0")=this
+
+  section.filtration--property.status
+    h3 Status
+    .check-buttons.container-flex
+      each statusProps
+        .check-button
+          input(
+            type="checkbox"
+            name="#{propPrex}#{this}"
+            id="#{propPrex}#{this}"
+            tabindex="-1")
+          label(for="#{propPrex}#{this}" tabindex="0")=this
+
+  section.filtration--property.locations
+    h3 Locations
+    select.form-control
+      each locationLevels
+        option(value=prop)=name
+
+    ul.list-unstyled.location-list
+      each locations
+        li
+          i.fa(class="fa-{{#if locationSelected}}check-circle{{else}}circle-o{{/if}}")
+          span=locationName
+      else
+        p.emphasized No locations
+
+    .actions
+      a.select-all(class="{{#if allLocationsSelected}}disabled{{/if}}") Select All
+      a.deselect-all(class="{{#if noEventsSelected}}disabled{{/if}}") Deselect All
+
+  section.filtration--property.other-properties
+    h3 Other Properties
+    .check-buttons.container-flex
+      .check-button
+        input(
+          type="checkbox"
+          name='#{propPrex}travelRelated'
+          id='#{propPrex}travelRelated'
+          tabindex="-1")
+        label(for='#{propPrex}travelRelated' tabindex="0") Travel Related

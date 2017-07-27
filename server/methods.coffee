@@ -10,6 +10,7 @@ import {
   regexEscape } from '/imports/utils.coffee'
 import Constants from '/imports/constants.coffee'
 import sqlite3 from 'sqlite3'
+import GeonameSchema from '/imports/schemas/geoname.coffee'
 
 DateRegEx = /<span class="blue">Published Date:<\/span> ([^<]+)/
 
@@ -22,9 +23,15 @@ speciesDB = new sqlite3.Database(
 )
 
 Meteor.methods
-  geonameLookup: (term) ->
+  searchDiseaseNames: (term) ->
     check term, String
     HTTP.get Constants.GRITS_URL + "/api/v1/disease_ontology/lookup",
+      params:
+        q: term
+
+  searchGeonames: (term) ->
+    check term, String
+    HTTP.get Constants.GRITS_URL + "/api/geoname_lookup/api/lookup",
       params:
         q: term
 
@@ -101,17 +108,7 @@ Meteor.methods
           # null geonames are returned when an id doesn't match a geoname
           # in the geoname lookup service's database.
           return
-        geonamesById[geoname.id] =
-          id: geoname.id
-          name: geoname.name
-          admin1Name: geoname.admin1Name
-          admin2Name: geoname.admin2Name
-          latitude: parseFloat(geoname.latitude)
-          longitude: parseFloat(geoname.longitude)
-          countryName: geoname.countryName
-          population: geoname.population
-          featureClass: geoname.featureClass
-          featureCode: geoname.featureCode
+        geonamesById[geoname.id] = GeonameSchema.clean(geoname)
       locationAnnotations.forEach (loc) ->
         geoname = geonamesById[loc.geoname.geonameid]
         if geoname

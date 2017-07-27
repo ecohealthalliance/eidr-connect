@@ -12,20 +12,17 @@ import {
 import Articles from '/imports/collections/articles.coffee'
 import Feeds from '/imports/collections/feeds.coffee'
 { notify } = require '/imports/ui/notification'
+import EventIncidents from '/imports/collections/eventIncidents'
 
-Template.incidentReports.onDestroyed ->
+Template.eventIncidentReports.onDestroyed ->
   if @plot
     @plot.destroy()
     @plot = null
 
-Template.incidentReports.onCreated ->
+Template.eventIncidentReports.onCreated ->
   @subscribe('feeds')
   @plotZoomed = new ReactiveVar(false)
   @dataLoading = new ReactiveVar(false)
-  # iron router returns an array and not a cursor for data.incidents,
-  # therefore we will setup a reactive cursor to use with the plot as an
-  # instance variable.
-  @incidents = @data.incidents
   # underscore template for the mouseover event of a group
   @tooltipTmpl = """
     <% if ('applyFilters' in obj) { %>
@@ -51,7 +48,7 @@ Template.incidentReports.onCreated ->
     <% } %>
   """
 
-Template.incidentReports.onRendered ->
+Template.eventIncidentReports.onRendered ->
   @filters =
     notCumulative: (d) ->
       if typeof d.meta.cumulative == 'undefined' || d.meta.cumulative == false
@@ -113,7 +110,7 @@ Template.incidentReports.onRendered ->
 
   @autorun =>
     # anytime the incidents cursor changes, refetch the data and format
-    segments = @incidents
+    segments = EventIncidents.find(@data.filterQuery.get())
       .fetch()
       .map (incident) =>
         SegmentMarker.createFromIncident(@plot, incident)
@@ -131,7 +128,7 @@ Template.incidentReports.onRendered ->
       @updatePlot(groups)
       return
 
-Template.incidentReports.helpers
+Template.eventIncidentReports.helpers
   getSettings: ->
     tableName = 'event-incidents'
     fields = [
@@ -175,7 +172,7 @@ Template.incidentReports.helpers
     rowClass: "#{tableName}"
 
   incidents: ->
-    Template.instance().incidents
+    EventIncidents.find(Template.instance().data.filterQuery.get())
 
   smartEvent: ->
     Template.instance().data.eventType is 'smart'
@@ -186,7 +183,7 @@ Template.incidentReports.helpers
   preparingData: ->
     Template.instance().dataLoading.get()
 
-Template.incidentReports.events
+Template.eventIncidentReports.events
   'click #scatterPlot-toggleCumulative': (event, instance) ->
     $target = $(event.currentTarget)
     $icon = $target.find('i.fa')

@@ -1,17 +1,13 @@
 template(name="smartEvent")
   .event
-    section.event--basic-info.container-fluid-padded
+    if loaded
+      h1= smartEvent.eventName
       if deleted
-        h2
-          | This event has been deleted
+        .event--deleted
+          h2 This event has been deleted
       else
-        with smartEvent
-          +smartEventSummary
-
-    section.event--detailed-info
-      .heading.container-fluid-padded
-        h2 Incidents
-      if isLoading
-        +loading static=true
-      else
-        +incidentReports incidentReportsTemplateData
+        +eventNav smartEventId=smartEvent._id
+        .event--content
+          +Template.dynamic template=template.name data=template.data
+    else
+      +loading

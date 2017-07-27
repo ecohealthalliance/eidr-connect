@@ -1,14 +1,16 @@
-EventIncidents = require '/imports/collections/eventIncidents'
-EventArticles = require '/imports/collections/eventArticles'
-UserEvents = require '/imports/collections/userEvents'
+import EventIncidents from '/imports/collections/eventIncidents'
+import EventArticles from '/imports/collections/eventArticles'
+import UserEvents from '/imports/collections/userEvents'
 
 #Allow multiple modals or the suggested locations list won't show after the loading modal is hidden
 Modal.allowMultiple = true
 
 Template.curatedEvent.onCreated ->
-  @editState = new ReactiveVar(false)
   @loaded = new ReactiveVar(false)
   userEventId = @data.userEventId
+  @selectedView = new ReactiveVar('resolvedIncidentsPlot')
+  @filterQuery = new ReactiveVar({})
+  @selectedIncidentTypes = new ReactiveVar([])
 
   @subscribe 'userEvent', @data.userEventId, =>
     @loaded.set(true)
@@ -25,66 +27,38 @@ Template.curatedEvent.helpers
   userEvent: ->
     UserEvents.findOne(Template.instance().data.userEventId)
 
-  eventHasArticles: ->
-    EventArticles.find().count()
-
-  articleData: ->
-    instance = Template.instance()
-
-    articles: EventArticles.find()
-    userEvent: UserEvents.findOne(instance.data.userEventId)
-
-  incidents: ->
-    EventIncidents.find()
-
-  incidentCount: ->
-    EventIncidents.find().count()
-
-  isEditing: ->
-    Template.instance().editState.get()
-
-  incidentView: ->
-    viewParam = Router.current().getParams()._view
-    typeof viewParam is 'undefined' or viewParam is 'incidents'
-
-  locationView: ->
-    Router.current().getParams()._view is 'locations'
-
   deleted: ->
     UserEvents.findOne(Template.instance().data.userEventId)?.deleted
 
-  view: ->
-    currentView = Router.current().getParams()._view
-    if currentView is 'locations'
-      return 'locationList'
-    'incidentReports'
-
-  templateData: ->
+  template: ->
     instance = Template.instance()
+    currentView = Router.current().getParams()._view
+    templateName = switch currentView
+      when 'estimated-epi-curves', undefined
+        'eventResolvedIncidents'
+      when 'affected-areas'
+        'eventAffectedAreas'
+      when 'incidents'
+        'eventIncidentReports'
+      when 'references'
+        'eventReferences'
+      when 'details'
+        'eventDetails'
+      else
+        currentView
 
-    userEvent = UserEvents.findOne(instance.data.userEventId)
-    userEvent: userEvent
-    articles: EventArticles.find()
-    incidents: EventIncidents.find()
+    name: templateName
+    data:
+      userEvent: UserEvents.findOne(instance.data.userEventId)
+      filterQuery: instance.filterQuery
+      selectedIncidentTypes: instance.selectedIncidentTypes
+      articles: EventArticles.find()
 
   loaded: ->
     Template.instance().loaded.get()
 
-  documentCount: ->
-    EventArticles.find().count()
+  filterQuery: ->
+    Template.instance().filterQuery
 
-Template.curatedEvent.events
-  'click .edit-link, click #cancel-edit': (event, instance) ->
-    instance.editState.set(not instance.editState.get())
-
-  'click .open-incident-form-in-details': (event, instance) ->
-    Modal.show 'incidentModal',
-      articles: EventArticles.find()
-      userEventId: instance.data.userEventId
-      add: true
-
-  'click .open-source-form-in-details': (event, instance) ->
-    Modal.show('sourceModal', userEventId: instance.data.userEventId)
-
-  'click .tabs li a': (event) ->
-    event.currentTarget.blur()
+  selectedIncidentTypes: ->
+    Template.instance().selectedIncidentTypes

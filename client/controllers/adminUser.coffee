@@ -5,9 +5,6 @@ Template.adminUser.helpers
   isCurator: ->
     Roles.userIsInRole(this._id, ["curator"])
 
-  isAdmin: ->
-    Roles.userIsInRole(this._id, ["admin"])
-
   name: ->
     this.profile.name
 

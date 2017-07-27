@@ -1,21 +1,22 @@
 template(name="extractIncidents")
-  .tabs-wrapper
-    ul.tabs.upload-menu
-      li.active
-        a(href='#copy', data-toggle='tab' data-source='text')
-          i.fa.fa-file-text-o
-          | Copy &amp; Paste
-      li
-        a(href='#web', data-toggle='tab' data-source='url')
-          i.fa.fa-link
-          | From the web
-  .submit-source.tab-content
-    #copy.tab-pane.fade.in.active
-      textarea.form-control.submit-text#submit-text(placeholder="Paste text here")
-    #web.tab-pane.fade
-      .input-group
-        .input-group-addon
-          | http://
-        input.form-control.submit-url#submit-url(type="text", placeholder="Paste URL here")
-    button.btn.btn-large.btn-primary.pull-right.btn-wide#submit-button(disabled=submitDisabled)
-      | Extract Incidents
+  .extracted-incidents
+    .tabs-wrapper
+      ul.tabs.upload-menu
+        li.active
+          a.text(href='#copy', data-toggle='tab')
+            i.fa.fa-file-text-o
+            | Copy &amp; Paste
+        li
+          a.url(href='#web', data-toggle='tab')
+            i.fa.fa-link
+            | From the web
+    .submit-source.tab-content
+      #copy.tab-pane.fade.in.active
+        textarea.form-control.submit-text#submit-text(placeholder="Paste text here")
+      #web.tab-pane.fade
+        .input-group
+          .input-group-addon
+            | http://
+          input.form-control.submit-url#submit-url(type="text", placeholder="Paste URL here")
+      button.btn.btn-large.btn-primary.pull-right.btn-wide#submit-button(disabled=submitDisabled)
+        | Extract Incidents

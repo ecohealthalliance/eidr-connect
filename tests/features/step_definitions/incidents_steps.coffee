@@ -15,23 +15,15 @@ do ->
         $(selector).css({height: "#{height}px"})
       , selector
 
-    firstEvent = '.reactive-table tbody tr:first-child'
-
-    @When /^I click the first item in the event list$/, ->
-      @client.clickWhenVisible(firstEvent)
-      @client.pause(1000)
-
     @When /^I add an incident with count "([^']*)"$/, (count) ->
-      if not @client.waitForVisible(firstEvent)
-        throw new Error('Event Incidents table is empty')
-      @client.click('button.open-incident-form-in-details')
+      @client.clickWhenVisible('button.open-incident-form')
       # article URL
       @client.clickWhenVisible('span[aria-labelledby="select2-articleSource-container"]')
       @client.clickWhenVisible('#select2-articleSource-results li:first-child')
       # Location
       @client.setValue('input.select2-search__field', 'f')
       @client.clickWhenVisible('.select2-results__option--highlighted')
-      @client.pause(1000)
+      @client.pause(2000)
       # Status
       @client.click('label[for="suspected"]')
       # Type
@@ -43,7 +35,7 @@ do ->
       @client.click('button.save-incident')
 
     @When /^I click the first incident$/, ->
-      @client.click('#event-incidents-table tbody tr:first-child')
+      @client.clickWhenVisible('#event-incidents-table tbody tr:first-child')
 
     @When /^I open the edit incident report modal$/, ->
       @client.clickWhenVisible('.incident-report--details--actions .edit i')
@@ -78,7 +70,7 @@ do ->
         throw new Error('ScatterPlot Group is empty')
 
     @When /^I add the first suggested event document$/, ->
-      @client.clickWhenVisible('.open-source-form-in-details')
+      @client.clickWhenVisible('.open-source-form')
       @client.waitForVisible('#event-source')
       @client.clickWhenVisible('#suggested-articles li:first-child')
       @client.setValue('input[name="publishTime"]', '12:00 PM')

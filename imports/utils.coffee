@@ -1,5 +1,5 @@
-Constants = require '/imports/constants.coffee'
-Articles = require '/imports/collections/articles.coffee'
+import Constants from '/imports/constants.coffee'
+import Articles from '/imports/collections/articles.coffee'
 
 ###
 # cleanUrl - takes an existing url and removes the last match of the applied
@@ -147,7 +147,7 @@ export diseaseOptionsFn = (params, callback) ->
   term = params.term?.trim()
   if not term
     return callback(results: [])
-  Meteor.call 'geonameLookup', term, (error, response) ->
+  Meteor.call 'searchDiseaseNames', term, (error, response) ->
     if error
       return callback(error)
     callback(

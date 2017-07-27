@@ -1,0 +1,70 @@
+.event--basic-info
+  margin 2em 0 0 0
+  padding-top 2em
+  +above(4)
+    padding-right 0
+
+.event--detailed-info
+  .no-results
+    min-height 300px
+    display flex
+    flex-direction column
+    align-items center
+    justify-content center
+
+.fact-sheet-wrap
+  padding 20px 0 0 0
+  background $secondary-light
+  padding-bottom 20px
+
+.event--details
+  position relative
+  .event-name-wrap
+    display flex
+    align-items flex-start
+    margin-bottom .25em
+  .edit-event-details
+    margin-left 10px
+    cursor pointer
+    font-size 1.25em
+    color $m-gray
+    &:hover
+      color $primary
+
+  .disease-name
+    span
+      font-size 1.5em
+      color $primary
+      &.not-available
+        color $m-gray
+        font-size 1em
+
+  .date-range
+    margin-bottom 0
+
+  .date-range
+  .locations
+    color $primary
+    font-size 1.2em
+
+  .event--summary
+    width 50%
+    max-width 800px
+    position relative
+    line-height 1.75em
+    span
+      white-space pre-wrap
+  .edit-event
+    position absolute
+    top 1.5em
+    right $page-padding
+
+.event--summary
+.disease-name
+  &.not-available
+    color $m-gray
+    margin-top -10px
+    &:first-of-type
+      margin-top 0
+  .fa
+    font-size 95%

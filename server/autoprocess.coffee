@@ -1,7 +1,7 @@
-Articles = require '/imports/collections/articles.coffee'
+import Articles from '/imports/collections/articles.coffee'
 
 busyProcessing = false
-autoprocessArticles = ->
+module.exports = ->
   if busyProcessing
     return
   else
@@ -41,7 +41,3 @@ autoprocessArticles = ->
     console.log "processed #{count} articles"
     busyProcessing = false
   )
-
-Meteor.startup ->
-  if not Meteor.isAppTest
-    Meteor.setInterval(autoprocessArticles, 100000)
