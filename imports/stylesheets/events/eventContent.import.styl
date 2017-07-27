@@ -13,7 +13,11 @@
 
 .event--incidents
   flex-direction column
+  .flex-col
+    border-right-width 0
   +above($break-point--large-width)
     flex-direction row
     > div
       min-width 50%
+    .flex-col
+      border-right-width 1px

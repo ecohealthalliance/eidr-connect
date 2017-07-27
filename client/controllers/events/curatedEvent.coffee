@@ -27,22 +27,6 @@ Template.curatedEvent.helpers
   userEvent: ->
     UserEvents.findOne(Template.instance().data.userEventId)
 
-  eventHasArticles: ->
-    EventArticles.find().count()
-
-  incidents: ->
-    EventIncidents.find(Template.instance().filterQuery.get())
-
-  incidentCount: ->
-    EventIncidents.find(Template.instance().filterQuery.get()).count()
-
-  incidentView: ->
-    viewParam = Router.current().getParams()._view
-    typeof viewParam is 'undefined' or viewParam is 'incidents'
-
-  locationView: ->
-    Router.current().getParams()._view is 'locations'
-
   deleted: ->
     UserEvents.findOne(Template.instance().data.userEventId)?.deleted
 
@@ -72,9 +56,6 @@ Template.curatedEvent.helpers
 
   loaded: ->
     Template.instance().loaded.get()
-
-  documentCount: ->
-    EventArticles.find().count()
 
   filterQuery: ->
     Template.instance().filterQuery

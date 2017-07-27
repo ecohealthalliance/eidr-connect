@@ -2,6 +2,19 @@ template(name="eventFiltration")
   .filtration--header
     h2 Filter
 
+  section.filtration--property.type(
+    class="{{#unless hasDateRange}} disabled {{/unless}}")
+    h3 Date Range
+    if hasDateRange
+      +slider sliderData
+    .dates.container-flex.form-group
+      .date
+        label Start Date
+        input.form-control.start-date(value=startDate type="date" min=minDate max=maxDate)
+      .date
+        label End Date
+        input.form-control.start-date(value=endDate type="date" min=minDate max=maxDate)
+
   section.filtration--property.type
     h3 Types
     .check-buttons.container-flex

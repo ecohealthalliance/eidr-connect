@@ -1,5 +1,11 @@
 import EventIncidents from '/imports/collections/eventIncidents'
 
+formatDateForInput = (date) ->
+  unless date
+    return moment().format('YYYY-MM-DD')
+  date = if date.getTime then date else new Date(Math.ceil(date))
+  moment(date).format('YYYY-MM-DD')
+
 Template.eventFiltration.onCreated ->
   @PROP_PREFIX = 'filter-'
   @typeProps = ['cases', 'deaths']
@@ -24,9 +30,32 @@ Template.eventFiltration.onCreated ->
   @countryLevel = new ReactiveVar('countryName')
   @selectedLocations = new Meteor.Collection(null)
   @locations = new Meteor.Collection(null)
+  @dateRange = new ReactiveVar([])
+  @selectedDateRange = new ReactiveVar([])
+  @eventDateRange = new ReactiveVar([ new Date(), new Date() ])
+
+  @autorun =>
+    incidents = EventIncidents.find({}, fields: 'dateRange': 1).fetch()
+    if incidents.length
+      range = [
+        _.min(incidents.map (i) -> i.dateRange.start)
+        _.max(incidents.map (i) -> i.dateRange.end)
+      ]
+      @eventDateRange.set(range)
+      @selectedDateRange.set(range)
 
   @autorun =>
     filters = {}
+
+    # Daterange
+    selectedDateRange = @selectedDateRange.get()
+    if selectedDateRange.length
+      filters['dateRange.start'] =
+        $lte: new Date(Math.ceil(selectedDateRange[1]))
+      filters['dateRange.end'] =
+        $gte: new Date(Math.ceil(selectedDateRange[0]))
+
+    # Types
     types = @types.get()
     if types.length
       @data.selectedIncidentTypes.set(types)
@@ -38,6 +67,7 @@ Template.eventFiltration.onCreated ->
     else
       @data.selectedIncidentTypes.set(@typeProps)
 
+    # Status
     status = @status.get()
     if status.length
       filters.status =
@@ -55,6 +85,7 @@ Template.eventFiltration.onCreated ->
     if selectedLocations.length
       filters.$or = (filters.$or or []).concat selectedLocations
 
+    # Other Properties
     filters = _.extend(filters, @properties.get())
 
     # Set filterQuery used to filter EventIncidents collection
@@ -120,6 +151,27 @@ Template.eventFiltration.helpers
   noEventsSelected: ->
     Template.instance().selectedLocations.find().count() == 0
 
+  sliderData: ->
+    instance = Template.instance()
+    sliderRange: instance.eventDateRange
+    selectedRange: instance.selectedDateRange
+
+  startDate: ->
+    formatDateForInput(Template.instance().selectedDateRange.get()?[0])
+
+  endDate: ->
+    formatDateForInput(Template.instance().selectedDateRange.get()?[1])
+
+  minDate: ->
+    formatDateForInput(Template.instance().eventDateRange.get()?[0])
+
+  maxDate: ->
+    formatDateForInput(Template.instance().eventDateRange.get()?[1])
+
+  hasDateRange: ->
+    range = Template.instance().eventDateRange.get()
+    range?[0].getTime() < range?[1].getTime()
+
 Template.eventFiltration.events
   'change .type input': (event, instance) ->
     types = []
@@ -156,3 +208,9 @@ Template.eventFiltration.events
 
   'click .locations .deselect-all': (event, instance) ->
     instance.selectedLocations.remove({})
+
+  'change .dates input': (event, instance) ->
+    dates = []
+    instance.$('.dates input').each (i, input) ->
+      dates.push(new Date(input.value))
+    instance.selectedDateRange.set(dates)

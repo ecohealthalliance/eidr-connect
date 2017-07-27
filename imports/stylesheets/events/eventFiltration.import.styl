@@ -1,19 +1,44 @@
 .event--filtration
-  max-width 200px
   +above(4)
     min-width 300px
-    max-width auto
   border-right 1px solid $border-primary
 
 .filtration--property
   padding 1em $page-padding
-  border-bottom 1px solid $border-primary
+  border-bottom 1px solid darken($border-primary-light, 1%)
+  &.disabled
+    opacity .5
+    pointer-events none
   h3
     font-size 1em
   label
     text-transform capitalize
   .check-buttons
+  .dates
     flex-wrap wrap
+  .dates
+    flex-direction column
+    margin-top 1em
+    margin-bottom 0
+    +above(4)
+      flex-direction row
+    .date
+      flex 1
+      display flex
+      flex-direction column
+      +above(4)
+        flex-direction column-reverse
+        margin-left .5em
+        margin-right .5em
+    label
+      font-size .9em
+      margin-top .25em
+      +above(4)
+        text-align center
+        font-weight 400
+        color lighten($primary, 20%)
+    input
+      margin-bottom .5em
 
   &.locations
     .actions
