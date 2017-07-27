@@ -60,7 +60,7 @@ Template.incidentForm.onCreated ->
 
     @incidentStatus.set(@incidentData.status or '')
 
-    @locations.set(@incidentData.locations.map (loc)->
+    @locations.set(@incidentData.locations.map (loc) ->
       id: loc.id
       text: formatLocation(loc)
       item: loc

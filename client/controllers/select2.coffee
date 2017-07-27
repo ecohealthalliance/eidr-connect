@@ -51,7 +51,7 @@ Template.select2.events
     uniqueSelectedValues = _.uniq(_.pluck(selectedValues, 'id'))
     intersection = _.intersection(uniqueValues, uniqueSelectedValues)
     if intersection.length != uniqueSelectedValues.length or uniqueValues.length != uniqueSelectedValues.length
-      instance.values.set(selectedValues.map (data)->
+      instance.values.set(selectedValues.map (data) ->
         id: data.id
         text: data.text
         item: data.item

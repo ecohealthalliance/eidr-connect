@@ -36,7 +36,7 @@ Template.addLocationControl.events
     parentInstance.$('select').select2('close')
     Modal.show 'addGeonameModal',
       parentModal: parentInstance.data.parentModal
-      onAdded: (value)->
+      onAdded: (value) ->
         parentInstance.values.set parentInstance.values.get().concat
           id: value.id
           text: value.name
