@@ -7,13 +7,13 @@ Template.select2.onCreated ->
   @values = @data.values or new ReactiveVar([])
 
 Template.select2.onRendered ->
-  initialValues = []
   if @data.selected
+    initialValues = []
     if _.isArray @data.selected
       initialValues = @data.selected
     else
       initialValues = [@data.selected]
-  @values.set(initialValues)
+    @values.set(initialValues)
   $.fn.select2.amd.require [
     'select2/data/array', 'select2/utils'
   ], (ArrayAdapter, Utils) =>
@@ -30,7 +30,7 @@ Template.select2.onRendered ->
         $input.select2('destroy')
   
       $input.select2
-        data: initialValues
+        data: values
         multiple: @data.multiple
         minimumInputLength: 0
         dataAdapter: CustomDataAdapter
@@ -45,15 +45,28 @@ Template.select2.onRendered ->
       $input.val(values.map((x) -> x.id)).trigger('change')
 
 Template.select2.events
+  'change select': (event, instance) ->
+    selectedValues = instance.$("select").select2('data')
+    uniqueValues = _.uniq(_.pluck(instance.values.get(), 'id'))
+    uniqueSelectedValues = _.uniq(_.pluck(selectedValues, 'id'))
+    intersection = _.intersection(uniqueValues, uniqueSelectedValues)
+    if intersection.length != uniqueSelectedValues.length or uniqueValues.length != uniqueSelectedValues.length
+      instance.values.set(selectedValues.map (data)->
+        id: data.id
+        text: data.text
+        item: data.item
+      )
+
   'select2:open': (event, instance) ->
+    controlTemplate = instance.data.controlTemplate or Template.clearSelect2Control
     unless $('.select2-results__additional-options').length
       $('.select2-dropdown').addClass('select2-dropdown--with-additional-options')
-      Blaze.renderWithData Template.clearSelect2Control,
-        onClick: ->
-          instance.values.set([])
-          instance.$('select').select2('close')
+      Blaze.renderWithData controlTemplate,
+        parentInstance: instance
       , document.querySelector('.select2-results')
 
 Template.clearSelect2Control.events
   'click button': (event, instance) ->
-    instance.data.onClick()
+    parentInstance = instance.data.parentInstance
+    parentInstance.values.set([])
+    parentInstance.$('select').select2('close')
