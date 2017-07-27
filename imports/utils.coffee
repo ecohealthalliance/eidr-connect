@@ -147,7 +147,7 @@ export diseaseOptionsFn = (params, callback) ->
   term = params.term?.trim()
   if not term
     return callback(results: [])
-  Meteor.call 'geonameLookup', term, (error, response) ->
+  Meteor.call 'searchDiseaseNames', term, (error, response) ->
     if error
       return callback(error)
     callback(

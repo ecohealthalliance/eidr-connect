@@ -1,13 +1,17 @@
 template(name="locationSelect2")
-  span
-    select.location-select2.form-control.select2(
-      id=selectId
-      name="location"
-      multiple=multiple
-      data-parsley-errors-container=errorContainer
-      data-parsley-class-handler=classHandler
-      data-parsley-error-message=errorMessage
-      required=required)
+  +select2(
+    name=name
+    values=values
+    selectId=selectId
+    multiple=multiple
+    placeholder='Search for a location...'
+    optionsFn=locationsOptionsFn
+    required=required
+    controlTemplate=controlTemplate
+    errorContainer=errorContainer
+    classHandler=classHandler
+    errorMessage=errorMessage
+    selected=selected)
 
 template(name="addLocationControl")
   .select2-results__additional-options

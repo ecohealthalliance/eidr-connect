@@ -3,7 +3,7 @@ import { stageModals } from '/imports/ui/modals'
 
 Template.addGeonameModal.onCreated ->
   @latLon = new ReactiveVar()
-  @parentLocation = new ReactiveVar()
+  @parentLocation = new ReactiveVar([])
   @onAdded = (x)-> x
   if @data.onAdded
     @onAdded = @data.onAdded
