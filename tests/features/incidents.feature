@@ -4,7 +4,6 @@ Feature: Incidents
   Background:
     And I am logged in as an admin
 
-  @dev
   Scenario: Add incident report
     When I navigate to "/events"
     And I navigate to the first event
