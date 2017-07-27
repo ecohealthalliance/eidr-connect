@@ -11,7 +11,7 @@ import feedSchema from '/imports/schemas/feed'
 import Constants from '/imports/constants.coffee'
 import { regexEscape } from '/imports/utils'
 
-DATA_VERSION = 8
+DATA_VERSION = 9
 AppMetadata = new Meteor.Collection('appMetadata')
 priorDataVersion = AppMetadata.findOne(property: "dataVersion")?.value
 
@@ -29,11 +29,7 @@ getGeonameById = (id)->
   geonamesById[id] = GeonameSchema.clean(geoname)
   return geonamesById[id]
 
-Meteor.startup ->
-  if priorDataVersion and priorDataVersion >= DATA_VERSION
-    return
-  console.log "Running database update code..."
-
+oldUpdaters = ->
   Incidents.find(disease: $exists: false).forEach (incident) ->
     disease = UserEvents.findOne(incident.userEventId)?.disease
     if disease
@@ -167,6 +163,33 @@ Meteor.startup ->
     Incidents.update _id: incident._id,
       $set: locations: incident.locations.map (x)-> getGeonameById(x.id) or x
   console.log "done"
+
+module.exports = ->
+  if priorDataVersion and priorDataVersion >= DATA_VERSION
+    return
+  console.log "Running database update code..."
+
+  if priorDataVersion < 8
+    oldUpdaters()
+
+  console.log "Updating events with unmarked cumulative counts..."
+  UserEvents.find(creationDate: $lte: new Date("Dec 1 2016")).map (event) ->
+    incidents = Incidents.find _id: $in: _.pluck(event.incidents, "id")
+    incidents.map (incident) ->
+      if incident.dateRange.cumulative
+        return
+      if incident.modifiedDate
+        return
+      lengthMillis = Number(new Date(incident.dateRange.end)) - Number(new Date(incident.dateRange.start))
+      lengthDays = lengthMillis / 1000 / 60 / 60 / 24
+      if lengthDays > 1.1
+        return
+      if incident.cases > 50 or incident.deaths > 50
+        incident.dateRange.cumulative = true
+        incident.modifiedByUserId = null
+        incident.modifiedByUserName = "database update script"
+        incident.modifiedDate = new Date()
+        Incidents.update(_id: incident._id, incident)
 
   AppMetadata.upsert({property: "dataVersion"}, $set: {value: DATA_VERSION})
   console.log "database update complete"

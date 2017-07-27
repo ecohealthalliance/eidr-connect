@@ -47,6 +47,7 @@ Meteor.methods
 
     updatedIncident.modifiedByUserId = user._id
     updatedIncident.modifiedByUserName = user.profile.name
+    updatedIncident.modifiedDate = new Date()
     res = Incidents.update(updatedIncident._id, updatedIncident, updateOperators)
     if incident.userEventId
       Meteor.call("editUserEventLastModified", incident.userEventId)
