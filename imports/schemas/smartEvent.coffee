@@ -1,3 +1,5 @@
+import GeonameSchema from '/imports/schemas/geoname.coffee'
+
 smartEventSchema = new SimpleSchema
   _id:
     type: String
@@ -47,38 +49,7 @@ smartEventSchema = new SimpleSchema
   "dateRange.end":
     type: Date
   locations:
-    type: [Object]
-    optional: true
-  "locations.$.admin1Name":
-    type: String
-    optional: true
-  "locations.$.admin2Name":
-    type: String
-    optional: true
-  "locations.$.alternateNames":
-    type: [String]
-    optional: true
-  "locations.$.countryName":
-    type: String
-    optional: true
-  "locations.$.featureClass":
-    type: String
-    optional: true
-  "locations.$.featureCode":
-    type: String
-    optional: true
-  "locations.$.id":
-    type: String
-  "locations.$.latitude":
-    type: Number
-    decimal: true
-  "locations.$.longitude":
-    type: Number
-    decimal: true
-  "locations.$.name":
-    type: String
-  "locations.$.population":
-    type: Number
+    type: [GeonameSchema]
     optional: true
 
 module.exports = smartEventSchema

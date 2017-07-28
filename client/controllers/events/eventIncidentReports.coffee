@@ -1,5 +1,4 @@
 import d3 from 'd3'
-import Incidents from '/imports/collections/incidentReports.coffee'
 import ScatterPlot from '/imports/charts/ScatterPlot.coffee'
 import Axes from '/imports/charts/Axes.coffee'
 import Group from '/imports/charts/Group.coffee'
@@ -11,7 +10,7 @@ import {
   incidentTypeWithCountAndDisease } from '/imports/utils'
 import Articles from '/imports/collections/articles.coffee'
 import Feeds from '/imports/collections/feeds.coffee'
-{ notify } = require '/imports/ui/notification'
+import { notify } from '/imports/ui/notification'
 import EventIncidents from '/imports/collections/eventIncidents'
 
 Template.eventIncidentReports.onDestroyed ->
@@ -219,18 +218,17 @@ Template.eventIncidentReports.events
       currentOpen.remove()
     if not closeRow
       $parentRow.addClass('open').after $('<tr>').addClass('details')
-      Blaze.renderWithData Template.incidentReport, @, $('tr.details')[0]
+      Blaze.renderWithData(
+        Template.incidentReport,
+        _.extend(isUserEvent: instance.data.isUserEvent, @),
+        $('tr.details')[0]
+      )
 
   'click .reactive-table tbody tr .edit': (event, instance) ->
-    instanceData = instance.data
-    incident =
-      userEventId: instanceData.userEvent._id
-      edit: true
-      incident: @
-    Modal.show 'incidentModal', incident
+    Modal.show 'incidentModal', incident: @
 
-  'click .reactive-table tbody tr .delete': (event, instance) ->
-    Meteor.call 'removeIncidentFromEvent', @_id, instance.data.userEvent._id, (error, res) =>
+  'click .reactive-table tbody tr .remove': (event, instance) ->
+    Meteor.call 'removeIncidentFromEvent', @_id, instance.data.event._id, (error, res) =>
       if error
         notify('error', error.reason)
         return
@@ -238,13 +236,34 @@ Template.eventIncidentReports.events
       $('.tooltip').remove()
       notify('success', 'Incident report removed from event')
 
+  'click .reactive-table tbody tr .delete': (event, instance) ->
+    deleteSelectedIncidents = =>
+      Meteor.call 'deleteIncidents', [@_id], (error, result) =>
+        if error
+          notify('error', error.reason)
+          return
+        instance.$('tr.details').remove()
+        @$('.tooltip').remove()
+        notify('success', 'Incidents Deleted')
+        Modal.hide('confirmationModal')
+    Modal.show 'confirmationModal',
+      primaryMessage: 'Are you sure you want to completely remove this incident?'
+      secondaryMessage: """
+        Deleting an incident removes it from all events in EIDR-Connect.
+        This action should only be taken if the incident contains incorrect data.
+        You can instead remove it from this event alone by unlinking it.
+        Are you sure you want to delete it?
+      """
+      icon: 'trash-o'
+      onConfirm: deleteSelectedIncidents
+
   # Remove any open incident details elements on pagination
   'click .next-page,
    click .prev-page,
    change .reactive-table-navigation .form-control': (event, instance) ->
      instance.$('tr.details').remove()
 
-  'click .open-download-csv': (event, instance)->
+  'click .open-download-csv': (event, instance) ->
     dataLoading = instance.dataLoading
     dataLoading.set(true)
     # Delay so UI can respond to change in reactiveVar

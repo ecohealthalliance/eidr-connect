@@ -1,8 +1,8 @@
 template(name="eventDetails")
   section.event--details
-    if userEvent.summary
+    if event.summary
       p.event--summary
-        span= userEvent.summary
+        span= event.summary
     else
       p.event--summary.not-available
         span No summary available.
@@ -10,14 +10,14 @@ template(name="eventDetails")
     .secondary-content
       p
         | Created by
-        span {{ getUserName 'createdByUserId' }}
+        span {{ getUserName event.createdByUserId }}
         | on
-        span {{ formatDate userEvent.creationDate }}
+        span {{ formatDate event.creationDate }}
 
     .secondary-content
       p
         | Last Modified by
-        span {{ getUserName 'lastModifiedByUserId' }}
+        span {{ getUserName event.lastModifiedByUserId }}
         | on
         span {{formatDate user.lastModifiedDate}}
 
