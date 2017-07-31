@@ -1,3 +1,5 @@
 template(name="eventReferences")
   section.event--references
-    h4 References
+    .tab-form.container-flex.break-2
+      h3.heading Documents
+    +reactiveTable collection=documents settings=settings
