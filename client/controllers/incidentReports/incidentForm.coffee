@@ -60,11 +60,12 @@ Template.incidentForm.onCreated ->
 
     @incidentStatus.set(@incidentData.status or '')
 
-    @locations.set(@incidentData.locations.map (loc) ->
-      id: loc.id
-      text: formatLocation(loc)
-      item: loc
-    )
+    if @incidentData.locations
+      @locations.set(@incidentData.locations.map (loc) ->
+        id: loc.id
+        text: formatLocation(loc)
+        item: loc
+      )
 
   @isSuggestedField = (fieldName) =>
     if fieldName in @suggestedFields?.get()
