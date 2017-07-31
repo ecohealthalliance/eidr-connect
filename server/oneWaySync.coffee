@@ -1,33 +1,33 @@
-serEvents = require '/imports/collections/userEvents.coffee'
-Incidents = require '/imports/collections/incidentReports.coffee'
-Articles = require '/imports/collections/articles.coffee'
+import UserEvents from '/imports/collections/userEvents.coffee'
+import Incidents from '/imports/collections/incidentReports.coffee'
+import Articles from '/imports/collections/articles.coffee'
 
-Meteor.startup ->
-  # If a remote EIDR-C instance url is provided, periodically pull data from it.
-  if process.env.ONE_WAY_SYNC_URL
-    syncCollection = (collection, url)->
-      console.log("syncing from: " + url)
-      skip = 0
-      limit = 100
-      loop
-        resp = HTTP.get(url,
-          params:
-            skip: skip
-            limit: limit
-        )
-        docs = EJSON.parse(resp.content)
-        skip += limit
-        if docs.length == 0 then break
-        for doc in docs
-          if not collection.findOne(doc._id)?.deleted
-            collection.upsert(doc._id, doc)
-      console.log("done")
-    pullRemoteInstanceData = ->
-      syncCollection(UserEvents, process.env.ONE_WAY_SYNC_URL + "/api/events")
-      syncCollection(Incidents, process.env.ONE_WAY_SYNC_URL + "/api/incidents")
-      syncCollection(Articles, process.env.ONE_WAY_SYNC_URL + "/api/articles")
+module.exports = (url)->
+  url = process.env.ONE_WAY_SYNC_URL + "/api/events-incidents-articles"
+  console.log("syncing from: " + url)
+  skip = 0
+  limit = 10
+  loop
+    resp = HTTP.get(url,
+      params:
+        skip: skip
+        limit: limit
+    )
+    docs = EJSON.parse(resp.content)
+    skip += limit
+    if docs.length == 0 then break
+    for doc in docs
+      incidents = doc._incidents
+      articles = doc._articles
+      delete doc._incidents
+      delete doc._articles
+      if not UserEvents.findOne(doc._id)?.deleted
+        UserEvents.upsert(doc._id, doc)
+      for incident in incidents
+        if not Incidents.findOne(incident._id)?.deleted
+          Incidents.upsert(incident._id, incidents)
+      for article in articles
+        if not Articles.findOne(article._id)?.deleted
+          Articles.upsert(article._id, article)
+  console.log("done")
 
-    # Do initial sync on startup
-    Meteor.setTimeout(pullRemoteInstanceData, 1000)
-    # Pull data every 6 hours
-    Meteor.setInterval(pullRemoteInstanceData, 6 * 60 * 60 * 1000)
