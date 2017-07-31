@@ -39,7 +39,6 @@
           > td::after
           > td::before
             color $primary-dark
-
       a
         &:not(.plain-focus)
           &:focus
@@ -51,10 +50,15 @@
 .table
 .reactive-table
   &.static-rows
-    tbody
-      tr
-        cursor default
-        background none
+    > tbody
+      > tr
+        &
+        &:hover
+        &:active
+        &:focus
+        > td
+          cursor default
+          background none
   tr
     cursor pointer
     &.tr-details

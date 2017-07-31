@@ -4,6 +4,7 @@ import { documentTitle } from '/imports/utils.coffee'
 Template.eventReferences.helpers
   documents: ->
     EventArticles.find()
+
   settings: ->
     fields = [
       {
@@ -15,14 +16,14 @@ Template.eventReferences.helpers
       {
         key: 'publishDate'
         label: 'Publish Date'
-        fn: (value, object, key) -> moment.utc(value).format("MMM D, YYYY")
+        fn: (value, object, key) -> moment.utc(value).format('MMM D, YYYY')
         sortFn: (value, object) ->
           +new Date(value)
       }
       {
         key: 'addedDate'
         label: 'Added Date'
-        fn: (value, object, key) -> moment.utc(value).format("MMM D, YYYY")
+        fn: (value, object, key) -> moment.utc(value).format('MMM D, YYYY')
         sortFn: (value, object) ->
           +new Date(value)
       }
@@ -35,5 +36,6 @@ Template.eventReferences.helpers
     showFilter: false
     showNavigationRowsPerPage: false
     showRowCount: false
-    class: "table documents"
-    rowClass: "document"
+    class: 'table documents static-rows'
+    rowClass: 'document'
+    keyboardFocus: false
