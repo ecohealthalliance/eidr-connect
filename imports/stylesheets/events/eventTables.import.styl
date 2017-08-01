@@ -14,17 +14,19 @@
       tr
         th
           border-color $border-primary-light
-    tbody
-      tr
-        &:not(.details)
-          &:hover
-            background $border-primary-light
-        &.details
-          cursor default
     td
       &.title
         max-width 200px
         overflow hidden
+
+.event-incidents
+  > tbody
+    > tr
+      &.details
+        &:hover
+          &
+          > td
+            background none
 
 .details-open
   background-color $selected

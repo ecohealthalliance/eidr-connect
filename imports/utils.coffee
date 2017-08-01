@@ -501,3 +501,6 @@ export formatLocation = (locations) ->
 
 export formatLocations = (locations) ->
   locations.map(formatLocation).join('; ')
+
+export documentTitle = (doc) ->
+  doc.title or doc.url or (doc.content?.slice(0,30) + "...")

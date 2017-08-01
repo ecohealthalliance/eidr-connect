@@ -4,7 +4,8 @@ import {
   pluralize,
   formatDateRange,
   formatLocation,
-  formatLocations } from '/imports/utils'
+  formatLocations,
+  documentTitle } from '/imports/utils'
 
 UI.registerHelper 'formatLocation', (location)->
   formatLocation(location)
@@ -53,3 +54,5 @@ UI.registerHelper 'formatUrl', (url) ->
 UI.registerHelper 'checkActive', (routeName) ->
   if Router.current().location.get().path.includes(routeName)
     'active'
+
+UI.registerHelper 'documentTitle', documentTitle
