@@ -56,7 +56,7 @@ Router.route("/api/events-incidents-articles", {where: "server"})
     ).fetch()
     event._articles = Articles.find(
       $or: [
-        {_id: $in: _.pluck(event._incidents.fetch(), 'articleId')}
+        {_id: $in: _.pluck(event._incidents, 'articleId')}
         {userEventIds: event._id}
       ]
     ).fetch()

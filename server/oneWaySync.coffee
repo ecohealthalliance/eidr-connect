@@ -25,9 +25,8 @@ module.exports = (url)->
         UserEvents.upsert(doc._id, doc)
       for incident in incidents
         if not Incidents.findOne(incident._id)?.deleted
-          Incidents.upsert(incident._id, incidents)
+          Incidents.upsert(incident._id, incident)
       for article in articles
         if not Articles.findOne(article._id)?.deleted
           Articles.upsert(article._id, article)
-  console.log("done")
-
+  console.log("sync complete")
