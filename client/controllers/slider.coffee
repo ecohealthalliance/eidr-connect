@@ -2,8 +2,8 @@ import noUiSlider from 'nouislider'
 
 formatMinMax = (min, max) ->
   # If max/min are dates, Convert to time (Number)
-  min = if min?.getTime then min.getTime() else min
-  max = if max?.getTime then max.getTime() else max
+  min = if min?.valueOf then min.valueOf() else min
+  max = if max?.valueOf then max.valueOf() else max
   [ min, max ]
 
 Template.slider.onRendered ->

@@ -2,9 +2,9 @@ import EventIncidents from '/imports/collections/eventIncidents'
 
 formatDateForInput = (date) ->
   unless date
-    return moment().format('YYYY-MM-DD')
+    return moment.utc().format('YYYY-MM-DD')
   date = if date.getTime then date else new Date(Math.ceil(date))
-  moment(date).format('YYYY-MM-DD')
+  moment.utc(date).format('YYYY-MM-DD')
 
 Template.eventFiltration.onCreated ->
   @PROP_PREFIX = 'filter-'
@@ -170,7 +170,7 @@ Template.eventFiltration.helpers
 
   hasDateRange: ->
     range = Template.instance().eventDateRange.get()
-    range?[0].getTime() < range?[1].getTime()
+    range?[0].valueOf() < range?[1].valueOf()
 
 Template.eventFiltration.events
   'change .type input': (event, instance) ->
