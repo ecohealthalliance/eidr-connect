@@ -17,6 +17,7 @@ Template.eventsTable.onCreated ->
       description: 'Number of incidents associated with event'
       displayName: 'Incident Count'
       sortable: false
+      sortOrder: 3
       displayFn: (value, object) ->
         value?.length or 0
     lastModifiedDate:

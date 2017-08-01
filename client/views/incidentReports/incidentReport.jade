@@ -36,7 +36,7 @@ template(name="incidentReport")
             if species
               li.container-flex.single.no-break
                 h6.metadata--title Species:
-                span=species
+                span=species.text
             if resolvedDisease
               li.container-flex.single.no-break
                 h6.metadata--title Disease:
@@ -71,7 +71,12 @@ template(name="incidentReport")
             title="Edit Incident"
             data-toggle="tooltip")
             i.fa.fa-edit(aria-hidden="true")
+          if isUserEvent
+            a.remove(
+              title="Remove Incident from Event"
+              data-toggle="tooltip")
+              i.fa.fa-unlink(aria-hidden="true")
           a.delete(
-            title="Remove Incident from Event"
+            title="Delete Incident"
             data-toggle="tooltip")
             i.fa.fa-trash(aria-hidden="true")

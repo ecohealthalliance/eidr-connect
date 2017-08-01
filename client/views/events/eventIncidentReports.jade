@@ -2,7 +2,7 @@ template(name="eventIncidentReports")
   .container-flex.no-gutter.event--incidents
     .flex-col.bordered
       .tab-form.container-flex.break-2
-        unless smartEvent
+        if isUserEvent
           +addIncidentReport
         button.open-download-csv.right-action.btn.btn-primary.btn-sm(
           disabled="{{#if preparingData}}disabled{{/if}}"

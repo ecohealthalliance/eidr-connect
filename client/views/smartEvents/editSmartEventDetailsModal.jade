@@ -41,7 +41,7 @@ template(name="editSmartEventDetailsModal")
                 +locationSelect2(
                   selectId="event-locations"
                   multiple="true"
-                  selected=event.locations)
+                  values=locations)
               if showAddDateButton
                 .form-group
                   button.btn.btn-primary.add-date(type="button") Add Daterange
