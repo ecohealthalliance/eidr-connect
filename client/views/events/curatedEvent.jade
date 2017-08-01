@@ -1,20 +1,23 @@
 template(name="curatedEvent")
   .event
-    if loaded
-      h1= userEvent.eventName
-      if deleted
-        .event--deleted
-          h2 This event has been deleted
-      else
-        section.event--content-wrapper.container-flex.no-break
-          aside.event--filtration
-            +eventFiltration(
-              filterQuery=filterQuery
-              selectedIncidentTypes=selectedIncidentTypes)
-          .event--content-container
-            nav.event--navigation
-              +eventNav userEventId=userEvent._id
-            .event--content
-              +Template.dynamic template=template.name data=template.data
-    else
+    unless loaded
+      .veil
       +loading
+    h1= userEvent.eventName
+    if deleted
+      .event--deleted
+        h2 This event has been deleted
+    else
+      section.event--content-wrapper.container-flex.no-break
+        aside.event--filtration
+          +eventFiltration(
+            filterQuery=filterQuery
+            selectedIncidentTypes=selectedIncidentTypes)
+        .event--content-container
+          unless results
+            .veil.modal-layer
+            +noResults message="No results" classNames="modal-layer"
+          nav.event--navigation
+            +eventNav userEventId=userEvent._id
+          .event--content
+            +Template.dynamic template=template.name data=template.data

@@ -54,6 +54,7 @@ Template.curatedEvent.helpers
       filterQuery: instance.filterQuery
       selectedIncidentTypes: instance.selectedIncidentTypes
       articles: EventArticles.find()
+      loaded: instance.loaded
 
   loaded: ->
     Template.instance().loaded.get()
@@ -63,3 +64,7 @@ Template.curatedEvent.helpers
 
   selectedIncidentTypes: ->
     Template.instance().selectedIncidentTypes
+
+  results: ->
+    instance = Template.instance()
+    not instance.loaded.get() or EventIncidents.find(instance.filterQuery.get()).count()

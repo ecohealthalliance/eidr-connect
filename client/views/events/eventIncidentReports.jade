@@ -9,12 +9,18 @@ template(name="eventIncidentReports")
           type="button")
           i.fa(class="fa-{{#if preparingData}}cog fa-spin{{else}}download{{/if}}")
           span Export
+      if isRendering
+        .veil
+        +loading small=true
       if incidents.count
         +reactiveTable collection=incidents settings=getSettings
       else
         p.center-position No incidents are associated with this event.
     .flex-col
       .chart
+        if isRendering
+          .veil
+          +loading small=true
         #scatterPlot-toolbar.container-flex.no-break
           .flex-col
             button#scatterPlot-toggleCumulative.btn.btn-xs.btn-default.scatterPlot-toolbar-button

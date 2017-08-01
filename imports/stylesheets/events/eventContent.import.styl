@@ -5,7 +5,20 @@
   flex 1
 
 .event--content-container
+  position relative
   flex 1
+  .no-results
+    font-size 135%
+    position absolute
+    top 3em
+    left 50%
+    transform translate(-50%, 0)
+    color $primary
+    &.modal-layer
+      z-index $modal-layer + 1
+  .veil
+    &.modal-layer
+      z-index $modal-layer
 
 .event--content
   section

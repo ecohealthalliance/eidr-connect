@@ -22,6 +22,7 @@ Template.eventIncidentReports.onCreated ->
   @subscribe('feeds')
   @plotZoomed = new ReactiveVar(false)
   @dataLoading = new ReactiveVar(false)
+  @rendering = new ReactiveVar(false)
   # underscore template for the mouseover event of a group
   @tooltipTmpl = """
     <% if ('applyFilters' in obj) { %>
@@ -46,6 +47,15 @@ Template.eventIncidentReports.onCreated ->
       <% }); %>
     <% } %>
   """
+
+  @autorun =>
+    data = @data
+    data.filterQuery.get()
+    if data.loaded.get()
+      @rendering.set(true)
+      setTimeout =>
+        @rendering.set(false)
+      , 350
 
 Template.eventIncidentReports.onRendered ->
   @filters =
@@ -181,6 +191,9 @@ Template.eventIncidentReports.helpers
 
   preparingData: ->
     Template.instance().dataLoading.get()
+
+  isRendering: ->
+    Template.instance().rendering?.get()
 
 Template.eventIncidentReports.events
   'click #scatterPlot-toggleCumulative': (event, instance) ->
