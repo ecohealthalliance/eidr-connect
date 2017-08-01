@@ -36,13 +36,16 @@ Template.eventFiltration.onCreated ->
 
   @autorun =>
     incidents = EventIncidents.find({}, fields: 'dateRange': 1).fetch()
-    if incidents.length
+    if incidents.length > 1
       range = [
         _.min(incidents.map (i) -> i.dateRange.start)
         _.max(incidents.map (i) -> i.dateRange.end)
       ]
       @eventDateRange.set(range)
       @selectedDateRange.set(range)
+    else
+      # Set range as Numbers so range slider will not error out and will appear
+      @eventDateRange.set([1, 100])
 
   @autorun =>
     filters = {}
@@ -170,6 +173,7 @@ Template.eventFiltration.helpers
 
   hasDateRange: ->
     range = Template.instance().eventDateRange.get()
+    return false if _.isNumber(range?[0])
     range?[0].valueOf() < range?[1].valueOf()
 
 Template.eventFiltration.events
