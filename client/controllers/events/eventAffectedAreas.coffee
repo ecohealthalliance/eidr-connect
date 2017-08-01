@@ -159,7 +159,7 @@ Template.eventAffectedAreas.onRendered ->
           icon: L.divIcon
             className: 'map-marker-container'
             iconSize: null
-            html: MapHelpers.getMarkerHtml([ rgbColor: [ 240, 115, 129 ] ])
+            html: MapHelpers.getMarkerHtml([ rgbColor: [ 244, 143, 103 ] ])
         ).bindPopup(Blaze.toHTMLWithData(
           Template.affectedAreasMarkerPopup,
           incidents: incidents
