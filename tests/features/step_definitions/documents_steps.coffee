@@ -39,13 +39,13 @@ do ->
         @client.clickWhenVisible('[href="#text"]')
         @client.waitForVisible('#content')
         @client.setValue('#content', DOCUMENT_TEXT)
-      @client.setValue('#title', 'Test Document')
-      @client.clickIfVisible('.add-publish-date .btn')
-      # The publishTime element might be in an invalid state that
-      # prevents setValue from working if this pause is not used.
-      @client.pause(10000)
-      @client.setValue('#publishTime', '12:00 PM')
-      @client.pause(3000)
+        @client.setValue('#title', 'Test Document')
+        @client.clickIfVisible('.add-publish-date .btn')
+        # The publishTime element might be in an invalid state that
+        # prevents setValue from working if this pause is not used.
+        @client.pause(10000)
+        @client.setValue('#publishTime', '12:00 PM')
+      @client.pause(5000)
       @client.click('.save-source')
 
     @Then /^I select the first user added document$/, ->

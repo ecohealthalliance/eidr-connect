@@ -1,11 +1,10 @@
 template(name="eventNav")
   ul.list-unstyled
-    if userEventId
-      li(class="{{checkActive 'estimated-epi-curves'}}")
-        a(href="{{pathFor route=route _id=id _view='estimated-epi-curves'}}")
-          span
-            i.fa.fa-area-chart
-            span Estimated Epi Curves
+    li(class="{{checkActive 'estimated-epi-curves'}}")
+      a(href="{{pathFor route=route _id=id _view='estimated-epi-curves'}}")
+        span
+          i.fa.fa-area-chart
+          span Estimated Epi Curves
     li(class="{{checkActive 'incidents'}}")
       a(href="{{pathFor route=route _id=id _view='incidents'}}")
          span

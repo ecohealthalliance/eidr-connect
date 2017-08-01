@@ -1,19 +1,13 @@
-Incidents = require '/imports/collections/incidentReports.coffee'
-UserEvents = require '/imports/collections/userEvents.coffee'
-SmartEvents = require '/imports/collections/smartEvents.coffee'
-Articles = require '/imports/collections/articles.coffee'
-Feeds = require '/imports/collections/feeds.coffee'
-{ regexEscape, cleanUrl } = require '/imports/utils'
+import Incidents from '/imports/collections/incidentReports.coffee'
+import UserEvents from '/imports/collections/userEvents.coffee'
+import SmartEvents from '/imports/collections/smartEvents.coffee'
+import Articles from '/imports/collections/articles.coffee'
+import Feeds from '/imports/collections/feeds.coffee'
+import { regexEscape, cleanUrl } from '/imports/utils'
 
 # Incidents
 ReactiveTable.publish 'curatorEventIncidents', Incidents,
   deleted: {$in: [null, false]}
-
-Meteor.publish 'smartEventIncidents', (query) ->
-  query = _.extend query,
-    accepted: $in: [null, true]
-    deleted: $in: [null, false]
-  Incidents.find(query)
 
 Meteor.publish 'mapIncidents', (incidentIds) ->
   Incidents.find
@@ -86,11 +80,61 @@ Meteor.publishComposite 'userEvent', (eventId) ->
     }
   ]
 
+Meteor.publishComposite 'smartEvent', (eventId) ->
+  find: ->
+    SmartEvents.find(_id: eventId)
+  children: [
+    {
+      collectionName: 'users'
+      find: (event) ->
+        Meteor.users.find({
+          _id: $in: [event.createdByUserId, event.lastModifiedByUserId]
+        }, {
+          fields:
+            'profile.name': 1
+        })
+    }, {
+      collectionName: 'eventIncidents'
+      find: (event) ->
+        query =
+          accepted: $in: [null, true]
+          deleted: $in: [null, false]
+        if event.diseases and event.diseases.length > 0
+          query['resolvedDisease.id'] = $in: event.diseases.map (x) -> x.id
+        eventDateRange = event.dateRange
+        if eventDateRange
+          query['dateRange.start'] = $lte: eventDateRange.end
+          query['dateRange.end'] = $gte: eventDateRange.start
+        locationQueries = []
+        for location in (event.locations or [])
+          locationQueries.push
+            id: location.id
+          locationQuery =
+            countryName: location.countryName
+          featureCode = location.featureCode
+          if featureCode.startsWith("PCL")
+            locationQueries.push(locationQuery)
+          else
+            locationQuery.admin1Name = location.admin1Name
+            if featureCode is 'ADM1'
+              locationQueries.push(locationQuery)
+            else
+              locationQuery.admin2Name = location.admin2Name
+              if featureCode is 'ADM2'
+                locationQueries.push(locationQuery)
+        locationQueries = locationQueries.map (locationQuery) ->
+          result = {}
+          for prop, value of locationQuery
+            result["locations.#{prop}"] = value
+          return result
+        if locationQueries.length > 0
+          query['$or'] = locationQueries
+        Incidents.find(query)
+    }
+  ]
+
 # Smart Events
 ReactiveTable.publish 'smartEvents', SmartEvents, deleted: $in: [null, false]
-
-Meteor.publish 'smartEvent', (eidID) ->
-  SmartEvents.find({_id: eidID})
 
 Meteor.publish 'smartEvents', () ->
   SmartEvents.find({deleted: {$in: [null, false]}})

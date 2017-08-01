@@ -1,29 +1,35 @@
-{ dismissModal } = require('/imports/ui/modals')
-{ notify } = require('/imports/ui/notification')
-createInlineDateRangePicker = require('/imports/ui/inlineDateRangePicker')
-{ updateCalendarSelection } = require('/imports/ui/setRange')
-{ diseaseOptionsFn } = require '/imports/utils'
+import { dismissModal } from '/imports/ui/modals'
+import { notify } from '/imports/ui/notification'
+import createInlineDateRangePicker from '/imports/ui/inlineDateRangePicker'
+import { updateCalendarSelection } from '/imports/ui/setRange'
+import { diseaseOptionsFn, formatLocation } from '/imports/utils'
 
 Template.editSmartEventDetailsModal.onCreated ->
   @confirmingDeletion = new ReactiveVar(false)
   @addDate = new ReactiveVar(false)
+  @locations = new ReactiveVar([])
 
 Template.editSmartEventDetailsModal.onRendered ->
-  if @data.event.dateRange
+  if @data.event?.dateRange
     @addDate.set(true)
+
+  if @data.event?.locations
+    @locations.set(@data.event.locations.map (loc) ->
+      id: loc.id
+      text: formatLocation(loc)
+      item: loc
+    )
 
   @autorun =>
     if @addDate.get()
       Meteor.defer =>
-        $pickerEl = $("#date-picker")
-        createInlineDateRangePicker($pickerEl)
-        @calendar = $pickerEl.data('daterangepicker')
-        dateRange = @data.event.dateRange
+        $pickerEl = @$("#date-picker")
+        dateRange = @data.event?.dateRange
+        options = {}
         if dateRange
-          range =
-            startDate: dateRange.start
-            endDate: dateRange.end
-          updateCalendarSelection(@calendar, range)
+          options.startDate = dateRange.start
+          options.endDate = dateRange.end
+        createInlineDateRangePicker($pickerEl, options)
 
   @$('#smart-event-modal').on 'show.bs.modal', (event) =>
     fieldToEdit = $(event.relatedTarget).data('editing')
@@ -58,6 +64,8 @@ Template.editSmartEventDetailsModal.helpers
 
   diseaseOptionsFn: -> diseaseOptionsFn
 
+  locations: -> Template.instance().locations
+
 Template.editSmartEventDetailsModal.events
   'submit #editEvent': (event, instance) ->
     form = event.target
@@ -72,10 +80,12 @@ Template.editSmartEventDetailsModal.events
       text: option?.item?.label or option.text
 
     smartEvent =
-      _id: @event._id
       eventName: form.eventName.value.trim()
       summary: form.eventSummary.value.trim()
       diseases: diseases
+
+    if @event?._id
+      smartEvent._id = @event?._id
 
     # Locations
     locations = []
@@ -88,7 +98,7 @@ Template.editSmartEventDetailsModal.events
     smartEvent.locations = locations
 
     # Daterange
-    calendar = instance.calendar
+    calendar = instance.$("#date-picker").data('daterangepicker')
     if calendar
       smartEvent.dateRange =
         start: calendar.startDate.toDate()

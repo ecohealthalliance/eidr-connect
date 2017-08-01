@@ -3,5 +3,5 @@ Template.addIncidentReport.events
     data = instance.data
     Modal.show 'incidentModal',
       articles: data.articles
-      userEventId: data.userEvent._id
+      userEventId: data.event._id
       add: true

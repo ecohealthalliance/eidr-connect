@@ -49,7 +49,8 @@ Template.curatedEvent.helpers
 
     name: templateName
     data:
-      userEvent: UserEvents.findOne(instance.data.userEventId)
+      isUserEvent: true
+      event: UserEvents.findOne(instance.data.userEventId)
       filterQuery: instance.filterQuery
       selectedIncidentTypes: instance.selectedIncidentTypes
       articles: EventArticles.find()
