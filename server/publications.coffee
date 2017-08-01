@@ -1,9 +1,9 @@
-Incidents = require '/imports/collections/incidentReports.coffee'
-UserEvents = require '/imports/collections/userEvents.coffee'
-SmartEvents = require '/imports/collections/smartEvents.coffee'
-Articles = require '/imports/collections/articles.coffee'
-Feeds = require '/imports/collections/feeds.coffee'
-{ regexEscape, cleanUrl } = require '/imports/utils'
+import Incidents from '/imports/collections/incidentReports.coffee'
+import UserEvents from '/imports/collections/userEvents.coffee'
+import SmartEvents from '/imports/collections/smartEvents.coffee'
+import Articles from '/imports/collections/articles.coffee'
+import Feeds from '/imports/collections/feeds.coffee'
+import { regexEscape, cleanUrl } from '/imports/utils'
 
 # Incidents
 ReactiveTable.publish 'curatorEventIncidents', Incidents,

@@ -1,7 +1,8 @@
-UserEvents = require '/imports/collections/userEvents.coffee'
-Articles = require '/imports/collections/articles.coffee'
-Incidents = require '/imports/collections/incidentReports.coffee'
-utils = require '/imports/utils.coffee'
+import UserEvents from '/imports/collections/userEvents.coffee'
+import Articles from '/imports/collections/articles.coffee'
+import Incidents from '/imports/collections/incidentReports.coffee'
+import utils from '/imports/utils.coffee'
+
 fs = Npm.require('fs')
 path = Npm.require('path')
 
@@ -40,6 +41,27 @@ Router.route("/api/articles", {where: "server"})
     skip: parseInt(@request.query.skip or 0)
     limit: parseInt(@request.query.limit or 100)
   }).fetch()))
+
+Router.route("/api/events-incidents-articles", {where: "server"})
+.get ->
+  @response.setHeader('Content-Type', 'application/ejson')
+  @response.statusCode = 200
+  @response.end(EJSON.stringify(UserEvents.find({}, {
+    skip: parseInt(@request.query.skip or 0)
+    limit: parseInt(@request.query.limit or 10)
+  }).map (event) ->
+    event._incidents = Incidents.find(
+      _id:
+        $in: _.pluck(event.incidents, 'id')
+    ).fetch()
+    event._articles = Articles.find(
+      $or: [
+        {_id: $in: _.pluck(event._incidents.fetch(), 'articleId')}
+        {userEventIds: event._id}
+      ]
+    ).fetch()
+    event
+  ))
 
 Router.route("/api/event-search/:name", {where: "server"})
 .get ->

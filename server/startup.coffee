@@ -3,6 +3,7 @@ import Incidents from '/imports/collections/incidentReports.coffee'
 import Articles from '/imports/collections/articles.coffee'
 import autoprocessArticles from '/server/autoprocess.coffee'
 import updateDatabase from '/server/updaters.coffee'
+import syncCollection from '/server/oneWaySync.coffee'
 
 Meteor.startup ->
   # Clean-up curatorInboxSourceId when user goes offline
@@ -38,3 +39,10 @@ Meteor.startup ->
 
   if not Meteor.isAppTest
     Meteor.setInterval(autoprocessArticles, 100000)
+
+  # If a remote EIDR-C instance url is provided, periodically pull data from it.
+  if process.env.ONE_WAY_SYNC_URL
+    # Do initial sync on startup
+    Meteor.setTimeout(syncCollection, 1000)
+    # Pull data every 6 hours
+    Meteor.setInterval(syncCollection, 6 * 60 * 60 * 1000)
