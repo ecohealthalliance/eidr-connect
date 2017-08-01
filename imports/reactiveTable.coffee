@@ -40,13 +40,15 @@ module.exports =
   tableFields: (fields, options) ->
     _fields = []
     for fieldName, field of fields
+      sortable = field.sortable
+      sortable ?= true
       tableField =
         key: fieldName
         label: field.displayName
         isVisible: options.fieldVisibility[fieldName].get()
         sortOrder: options.sortOrder[fieldName].get()
-        sortDirection: options.sortDirection[fieldName].get()
-        sortable: field.sortable
+        sortDirection: options.sortDirection[fieldName].get() or 1
+        sortable: sortable
 
       if field.displayFn
         tableField.fn = field.displayFn
