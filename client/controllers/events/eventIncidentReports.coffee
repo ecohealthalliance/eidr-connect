@@ -251,7 +251,12 @@ Template.eventIncidentReports.events
       secondaryMessage: """
         Deleting an incident removes it from all events in EIDR-Connect.
         This action should only be taken if the incident contains incorrect data.
-        You can instead remove it from this event alone by unlinking it.
+        #{
+          if @isUserEvent
+            "You can instead remove it from this event alone by unlinking it."
+          else
+            ""
+        }
         Are you sure you want to delete it?
       """
       icon: 'trash-o'
