@@ -49,6 +49,8 @@ Template.eventIncidentReports.onCreated ->
   """
 
   @autorun =>
+    # When user modifies query, set rendering to true which triggers a loading
+    # indicator to appear indicating filters have been considered in results.
     data = @data
     data.filterQuery.get()
     if data.loaded.get()
@@ -193,7 +195,7 @@ Template.eventIncidentReports.helpers
     Template.instance().dataLoading.get()
 
   isRendering: ->
-    Template.instance().rendering?.get()
+    Template.instance().rendering.get()
 
 Template.eventIncidentReports.events
   'click #scatterPlot-toggleCumulative': (event, instance) ->

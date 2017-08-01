@@ -16,7 +16,7 @@ template(name="curatedEvent")
         .event--content-container
           unless results
             .veil.modal-layer
-            +noResults message="No results" classNames="modal-layer"
+            +noResults message=noResultsMessage classNames=classNames
           nav.event--navigation
             +eventNav userEventId=userEvent._id
           .event--content

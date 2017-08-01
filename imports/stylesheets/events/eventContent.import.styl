@@ -10,7 +10,7 @@
   .no-results
     font-size 135%
     position absolute
-    top 3em
+    top 10%
     left 50%
     transform translate(-50%, 0)
     color $primary
@@ -19,6 +19,10 @@
   .veil
     &.modal-layer
       z-index $modal-layer
+  .no-results--incidents
+    &::before
+      content '\69'
+      font-family 'icons'
 
 .event--content
   section
