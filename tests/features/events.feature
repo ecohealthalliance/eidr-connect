@@ -48,3 +48,9 @@ Feature: Events
     And I "cancel" deletion
     Then I should not see content "EDIT EVENT DETAILS"
     And I should see content "A test"
+
+  @dev
+  Scenario: Filter event by daterange
+    When I navigate to the first event
+    And I select the "incidents" tab
+    And I add "4" incidents with dates in the past

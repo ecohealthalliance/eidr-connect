@@ -20,6 +20,12 @@ if Meteor.isAppTest
     publishDate: new Date()
     publishDateTZ: 'EST'
 
+  testSource2 =
+    title: 'Test Article 2',
+    url: 'http://promedmail.org/post/5220233'
+    publishDate: new Date()
+    publishDateTZ: 'EST'
+
   testIncident =
     species:
       id: "tsn:180092"
@@ -108,3 +114,17 @@ if Meteor.isAppTest
       catch error
         # this user shouldn't belong in the production database
         console.warn("TestingAdmin user '#{email}' exists")
+
+    addIncidents: (eventId, incidentCount) ->
+      Meteor.call 'addEventSource', testSource2, eventId, (error, articleId) ->
+        for num in [1...incidentCount + 1]
+          date = new Date()
+          date.setDate(date.getDate() - 14 * num)
+
+          incident = Object.assign({}, testIncident)
+          incident.dateRange.start = date
+          incident.dateRange.end = date
+          incident.cases = num * 100
+          incident.articleId = articleId
+          Meteor.call 'addIncidentReport', incident, (error, incidentId) ->
+            Meteor.call 'addIncidentToEvent', eventId, incidentId
