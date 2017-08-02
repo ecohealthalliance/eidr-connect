@@ -1,8 +1,10 @@
 template(name="eventFiltration")
   .filtration--header
     h2 Filter
+    button.btn.xs-btn.btn-default.clear-filters.on-right(
+      disabled="{{#unless filtering}}disabled{{/unless}}") Clear
 
-  section.filtration--property.type(
+  section.filtration--property.date-range(
     class="{{#unless hasDateRange}} disabled {{/unless}}")
     h3 Date Range
     +slider sliderData
@@ -12,7 +14,7 @@ template(name="eventFiltration")
         input.form-control.start-date(value=startDate type="date" min=minDate max=maxDate)
       .date
         label End Date
-        input.form-control.start-date(value=endDate type="date" min=minDate max=maxDate)
+        input.form-control.end-date(value=endDate type="date" min=minDate max=maxDate)
 
   section.filtration--property.type
     h3 Types

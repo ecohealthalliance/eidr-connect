@@ -48,3 +48,46 @@ do ->
     @When /^I delete the event$/, ->
       @client.clickWhenVisible('.edit-event')
       @client.clickWhenVisible('.delete-event')
+
+
+    @When /^I filter by a date range of two weeks ago to today$/, ->
+      startDate = new Date()
+      startDate.setDate(startDate.getDate() - 14)
+      endDate = new Date()
+      startDateFormatted = "#{startDate.getMonth() + 1}/#{startDate.getDate()}/#{startDate.getFullYear()}"
+      endDateFormatted = "#{endDate.getMonth() + 1}/#{endDate.getDate()}/#{endDate.getFullYear()}"
+
+      @client.click('.start-date')
+      @client.keys(startDateFormatted)
+      @client.click('.end-date')
+      @client.keys(endDateFormatted)
+      @client.pause(2000)
+
+    @When /^I filter by "([^']*)" counts$/, (type) ->
+      n = 1
+      if type == 'death'
+        n = 2
+      @client.click(".type .check-buttons .check-button:nth-of-type(#{n})")
+
+    @When /^I filter by "([^']*)" status$/, (type) ->
+      n = 1
+      if type == 'confirmed'
+        n = 2
+      else
+        n = 3
+      @client.click(".status .check-buttons .check-button:nth-of-type(#{n})")
+
+    @When /^I clear event filters$/, ->
+      @client.click('.clear-filters')
+      @client.pause(1000)
+
+    @When /^I filter by the first location in the list$/, ->
+      @client.click('.location-list li:first-child')
+
+    @When /^I filter by travel related$/, ->
+      @client.click(".other-properties .check-buttons .check-button:nth-of-type(1)")
+
+    @When /^I should see "([^']*)" incidents$/, (incidentCount) ->
+      incidentRows = @client.elements('#event-incidents-table tbody tr')
+      unless incidentRows.value.length == parseInt(incidentCount)
+        throw new Error("Event does not have #{incidentCount} incidents")

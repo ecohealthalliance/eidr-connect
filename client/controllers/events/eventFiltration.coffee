@@ -57,7 +57,10 @@ Template.eventFiltration.onCreated ->
 
     # Daterange
     selectedDateRange = @selectedDateRange.get()
-    if selectedDateRange.length
+    eventDateRange = @eventDateRange.get()
+    isDefaultRange = selectedDateRange[0] == eventDateRange[0] and
+      selectedDateRange[1] == eventDateRange[1]
+    if selectedDateRange.length and not isDefaultRange
       filters['dateRange.start'] =
         $lte: new Date(Math.ceil(selectedDateRange[1]))
       filters['dateRange.end'] =
@@ -192,6 +195,9 @@ Template.eventFiltration.helpers
     return false if _.isNumber(range?[0])
     range?[0].valueOf() < range?[1].valueOf()
 
+  filtering: ->
+    not _.isEmpty(Template.instance().data.filterQuery.get())
+
 Template.eventFiltration.events
   'change .type input': (event, instance) ->
     types = []
@@ -233,3 +239,12 @@ Template.eventFiltration.events
     instance.$('.dates input').each (i, input) ->
       dates.push(new Date(input.value))
     instance.selectedDateRange.set(dates)
+
+  'click .clear-filters': (event, instance) ->
+    instance.$('.check-buttons input:checked').attr('checked', false)
+    instance.types.set([])
+    instance.data.selectedIncidentTypes.set([])
+    instance.status.set([])
+    instance.properties.set({})
+    instance.selectedLocations.remove({})
+    instance.selectedDateRange.set(instance.eventDateRange.get())

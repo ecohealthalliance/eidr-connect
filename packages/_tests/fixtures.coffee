@@ -10,6 +10,39 @@ if Meteor.isAppTest
 
   syncExec = Meteor.wrapAsync(exec)
 
+  locations1 = [
+    id: '5165418'
+    name: 'Ohio'
+    admin1Name: 'Ohio'
+    admin2Name: null
+    latitude: 40.25034
+    longitude: -83.00018
+    countryName: 'United States'
+    population: 11467123
+    featureClass: 'A'
+    featureCode: 'ADM1'
+    alternateNames: [
+      '\'Ohaio'
+      'Buckeye State'
+    ]
+  ]
+
+  locations2 = [
+    id: '2419472'
+    name: 'Kissidougou'
+    admin1Name: 'Faranah Region'
+    admin2Name: 'Kissidougou'
+    latitude: 9.1848
+    longitude: -10.09987
+    countryName: 'Republic of Guinea'
+    population: 47099
+    featureClass: 'P'
+    featureCode: 'PPLA2'
+    alternateNames: [
+      'KSI'
+    ]
+  ]
+
   testEvent =
     eventName: 'Test Event 1'
     summary: 'Test summary'
@@ -31,22 +64,7 @@ if Meteor.isAppTest
       id: "tsn:180092"
       text: "Homo sapiens"
     cases: 375
-    locations: [
-      id: '5165418'
-      name: 'Ohio'
-      admin1Name: 'Ohio'
-      admin2Name: null
-      latitude: 40.25034
-      longitude: -83.00018
-      countryName: 'United States'
-      population: 11467123
-      featureClass: 'A'
-      featureCode: 'ADM1'
-      alternateNames: [
-        '\'Ohaio'
-        'Buckeye State'
-      ]
-    ]
+    locations: locations1
     dateRange:
       start: new Date()
       end: new Date()
@@ -118,13 +136,20 @@ if Meteor.isAppTest
     addIncidents: (eventId, incidentCount) ->
       Meteor.call 'addEventSource', testSource2, eventId, (error, articleId) ->
         for num in [1...incidentCount + 1]
-          date = new Date()
-          date.setDate(date.getDate() - 14 * num)
-
           incident = Object.assign({}, testIncident)
+          date = new Date()
+          if num > 1
+            date.setDate(date.getDate() - 14 * num)
+            incident.cases = num * 100
+          else
+            delete incident.cases
+            incident.deaths = 200
+            incident.travelRelated = true
+            incident.locations = locations2
+          if num > 2
+            incident.status = 'confirmed'
           incident.dateRange.start = date
           incident.dateRange.end = date
-          incident.cases = num * 100
           incident.articleId = articleId
           Meteor.call 'addIncidentReport', incident, (error, incidentId) ->
             Meteor.call 'addIncidentToEvent', eventId, incidentId
