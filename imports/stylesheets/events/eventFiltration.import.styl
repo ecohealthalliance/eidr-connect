@@ -53,8 +53,15 @@
         &:last-of-type
           padding-left .5em
 
+  .location-list--wrapper
+    gradientTopAndBottom()
+    position relative
+
   .location-list
-    padding 1em .5em
+    max-height 25vh
+    overflow-x scroll
+    padding .75em .5em 1em .5em
+    margin-bottom .25em
     li
       display flex
       align-items baseline
