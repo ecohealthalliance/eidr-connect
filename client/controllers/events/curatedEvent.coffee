@@ -68,9 +68,11 @@ Template.curatedEvent.helpers
   selectedIncidentTypes: ->
     Template.instance().selectedIncidentTypes
 
-  results: ->
+  showNoResults: ->
     instance = Template.instance()
-    not instance.loaded.get() or EventIncidents.find(instance.filterQuery.get()).count()
+    (instance.loaded.get() and not
+      EventIncidents.find(instance.filterQuery.get()).count()) and
+      Router.current().getParams()._view not in ['references', 'details']
 
   noResultsMessage: ->
     if Template.instance().hasNoIncidents()
