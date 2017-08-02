@@ -5,8 +5,7 @@ template(name="eventFiltration")
   section.filtration--property.type(
     class="{{#unless hasDateRange}} disabled {{/unless}}")
     h3 Date Range
-    if hasDateRange
-      +slider sliderData
+    +slider sliderData
     .dates.container-flex.form-group
       .date
         label Start Date
