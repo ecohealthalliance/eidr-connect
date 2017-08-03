@@ -53,7 +53,7 @@ Template.eventIncidentReports.onCreated ->
     # indicator to appear indicating filters have been considered in results.
     data = @data
     data.filterQuery.get()
-    if data.loaded.get()
+    if data.loaded and data.loaded.get()
       @rendering.set(true)
       setTimeout =>
         @rendering.set(false)
