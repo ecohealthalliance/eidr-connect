@@ -12,6 +12,7 @@ $max-event-details-width = $max-ui-width+300
 @import 'resolvedIncidents.import'
 
 .event
+  position relative
   display flex
   flex-direction column
   flex 1
@@ -24,6 +25,12 @@ $max-event-details-width = $max-ui-width+300
 
   .reactive-table-options
     display none
+  .loading
+    z-index $top-layer + 1
+  .veil
+    z-index $top-layer
+  .wrapper
+    position relative
 
 .disease
   h3
