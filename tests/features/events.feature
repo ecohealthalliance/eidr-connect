@@ -53,8 +53,9 @@ Feature: Events
     When I navigate to the first event
     And I select the "incidents" tab
     And I add "4" incidents with dates in the past
+    Then I should see "5" incidents
     Then I filter by a date range of two weeks ago to today
-    Then I should see "1" incidents
+    Then I should see "2" incidents
     Then I clear event filters
     Then I should see "5" incidents
     Then I filter by "case" counts

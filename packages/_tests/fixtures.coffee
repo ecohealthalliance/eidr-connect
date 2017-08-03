@@ -66,8 +66,6 @@ if Meteor.isAppTest
     cases: 375
     locations: locations1
     dateRange:
-      start: new Date()
-      end: new Date()
       cumulative: false
       type: 'day'
 
@@ -90,16 +88,18 @@ if Meteor.isAppTest
         # Loading test data into database
         Meteor.call 'createTestingAdmin'
         console.log "created admin"
-        Meteor.call 'upsertUserEvent', testEvent, (error, { insertedId }) ->
-          eventId = insertedId
-          console.log 'UserEvent created', eventId
-          testSource.userEventIds = [eventId]
-          Meteor.call 'addEventSource', testSource, eventId, (error, articleId) ->
-            console.log 'Article created', articleId
-            testIncident.articleId = articleId
-            Meteor.call 'addIncidentReport', testIncident, (error, incidentId) ->
-              console.log 'Incident created', incidentId
-              Meteor.call 'addIncidentToEvent', eventId, incidentId
+        { insertedId } = Meteor.call('upsertUserEvent', testEvent)
+        eventId = insertedId
+        console.log 'UserEvent created', eventId
+        testSource.userEventIds = [eventId]
+        articleId = Meteor.call('addEventSource', testSource, eventId)
+        console.log 'Article created', articleId
+        testIncident.dateRange.start = new Date()
+        testIncident.dateRange.end = new Date()
+        testIncident.articleId = articleId
+        incidentId = Meteor.call('addIncidentReport', testIncident)
+        console.log 'Incident created', incidentId
+        Meteor.call 'addIncidentToEvent', eventId, incidentId
 
       catch error
         console.log "error loading data", error
@@ -134,22 +134,22 @@ if Meteor.isAppTest
         console.warn("TestingAdmin user '#{email}' exists")
 
     addIncidents: (eventId, incidentCount) ->
-      Meteor.call 'addEventSource', testSource2, eventId, (error, articleId) ->
-        for num in [1...incidentCount + 1]
-          incident = Object.assign({}, testIncident)
-          date = new Date()
-          if num > 1
-            date.setDate(date.getDate() - 14 * num)
-            incident.cases = num * 100
-          else
-            delete incident.cases
-            incident.deaths = 200
-            incident.travelRelated = true
-            incident.locations = locations2
-          if num > 2
-            incident.status = 'confirmed'
-          incident.dateRange.start = date
-          incident.dateRange.end = date
-          incident.articleId = articleId
-          Meteor.call 'addIncidentReport', incident, (error, incidentId) ->
-            Meteor.call 'addIncidentToEvent', eventId, incidentId
+      articleId = Meteor.call('addEventSource', testSource2, eventId)
+      for num in [1...incidentCount + 1]
+        incident = Object.assign({}, testIncident)
+        date = new Date()
+        if num > 1
+          date.setDate(date.getDate() - 14 * num)
+          incident.cases = num * 100
+        else
+          delete incident.cases
+          incident.deaths = 200
+          incident.travelRelated = true
+          incident.locations = locations2
+        if num > 2
+          incident.status = 'confirmed'
+        incident.dateRange.start = date
+        incident.dateRange.end = date
+        incident.articleId = articleId
+        incidentId = Meteor.call('addIncidentReport', incident)
+        Meteor.call('addIncidentToEvent', eventId, incidentId)
