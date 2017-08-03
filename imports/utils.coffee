@@ -26,11 +26,12 @@ export cleanUrl = (existingUrl, regexps) ->
 # @returns {string} formattedUrl, an url that has 'http' added
 ###
 export formatUrl = (existingUrl) ->
-  regexp = new RegExp('^(https?:\/\/)', 'i')
-  if regexp.test existingUrl
-    return existingUrl
-  else
-    return 'http://' + existingUrl
+  if existingUrl
+    regexp = new RegExp('^(https?:\/\/)', 'i')
+    if regexp.test existingUrl
+      return existingUrl
+    else
+      return 'http://' + existingUrl
 
 checkIncidentTypeValue = (form, input) ->
   if not form[input].value.trim()
@@ -370,6 +371,10 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
       incident.resolvedDisease =
         id: annotation.resolutions[0].entity.id
         text: annotation.resolutions[0].entity.label
+    # Suggest humans as a default
+    incident.species =
+      id: "tsn:180092"
+      text: "Homo sapiens"
     speciesTerritory.annotations.forEach (annotation) ->
       incident.species =
         id: annotation.resolutions[0].entity.id

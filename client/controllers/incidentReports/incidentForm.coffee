@@ -33,9 +33,6 @@ Template.incidentForm.onCreated ->
   @suggestedFields = incident?.suggestedFields or new ReactiveVar([])
 
   @incidentData =
-    species:
-      id: "tsn:180092"
-      text: "Homo sapiens"
     dateRange:
       type: 'day'
 
@@ -158,10 +155,10 @@ Template.incidentForm.helpers
           ])
         )
 
-  documentUrl: ->
+  document: ->
     incident = Template.instance().data.incident
     if incident
-      return Articles.findOne(incident.articleId)?.url
+      return Articles.findOne(incident.articleId)
 
   documentId: ->
     Template.instance().data.incident?.articleId
