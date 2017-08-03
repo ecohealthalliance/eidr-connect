@@ -20,6 +20,9 @@ Template.curatedEvent.onCreated ->
     if userEvent
       document.title = "Eidr-Connect: #{userEvent.eventName}"
 
+  @hasNoIncidents = =>
+    _.isEmpty(@filterQuery.get()) and not EventIncidents.find().count()
+
 Template.curatedEvent.onRendered ->
   new Clipboard '.copy-link'
 
@@ -54,6 +57,7 @@ Template.curatedEvent.helpers
       filterQuery: instance.filterQuery
       selectedIncidentTypes: instance.selectedIncidentTypes
       articles: EventArticles.find()
+      loaded: instance.loaded
 
   loaded: ->
     Template.instance().loaded.get()
@@ -63,3 +67,24 @@ Template.curatedEvent.helpers
 
   selectedIncidentTypes: ->
     Template.instance().selectedIncidentTypes
+
+  showNoResults: ->
+    instance = Template.instance()
+    (instance.loaded.get() and not
+      EventIncidents.find(instance.filterQuery.get()).count()) and
+      Router.current().getParams()._view not in ['references', 'details']
+
+  noResultsMessage: ->
+    if Template.instance().hasNoIncidents()
+      'Event currently has no incidents.'
+    else
+      Spacebars.SafeString """
+        <span class="main-message">No Results</span>
+        Adjust filter criteria to view event information.
+      """
+
+  classNames: ->
+    classNames = 'modal-layer secondary'
+    if Template.instance().hasNoIncidents()
+      classNames += ' no-results--incidents'
+    classNames

@@ -6,8 +6,25 @@
 
 .event--content-container
   flex 1
+  .no-results
+    font-size 135%
+    position absolute
+    top 10%
+    left 50%
+    transform translate(-50%, 0)
+    color $primary
+    &.modal-layer
+      z-index $modal-layer + 1
+  .veil
+    &.modal-layer
+      z-index $modal-layer
+  .no-results--incidents
+    &::before
+      content '\69'
+      font-family 'icons'
 
 .event--content
+  position relative
   section
     padding 1em
 
