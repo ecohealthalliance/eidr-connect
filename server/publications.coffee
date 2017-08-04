@@ -99,6 +99,7 @@ Meteor.publishComposite 'smartEvent', (eventId) ->
         query =
           accepted: $in: [null, true]
           deleted: $in: [null, false]
+          locations: $not: $size: 0
         if event.diseases and event.diseases.length > 0
           query['resolvedDisease.id'] = $in: event.diseases.map (x) -> x.id
         eventDateRange = event.dateRange

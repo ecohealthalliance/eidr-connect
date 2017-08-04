@@ -88,8 +88,8 @@ template(name="articleSelect2")
     data-parsley-error-message=errorMessage)
     unless multiple
       option(value="")
-    each articles
-      option(value="{{_id}}") {{url}}
+    each article in articles
+      option(value=article._id) {{documentTitle article}}
 
 template(name="sourceModalButton")
   if isInRole "admin"
