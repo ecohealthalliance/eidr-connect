@@ -1,4 +1,6 @@
-locationContains = (locationA, locationB)->
+import regionToCountries from '/imports/regionToCountries.json'
+
+locationContains = (locationA, locationB) ->
   props = [
     'countryName',
     'admin1Name',
@@ -6,6 +8,10 @@ locationContains = (locationA, locationB)->
   ]
   if locationA.id == locationB.id
     return true
+  if locationA.id == "6295630" # Earth
+    return true
+  if locationA.id of regionToCountries
+    return locationB.countryCode in regionToCountries[locationA.id].countryISOs
   featureCode = locationA.featureCode
   if featureCode.startsWith("PCL")
     containmentLevel = 1
@@ -22,9 +28,9 @@ locationContains = (locationA, locationB)->
       return false
   return true
 
-locationsToLocationTree = (locations)->
+locationsToLocationTree = (locations) ->
   locationTree = new LocationTree("ROOT")
-  locations.forEach (location)->
+  locations.forEach (location) ->
     node = locationTree.search(location)
     if node.value?.id == location.id
       return
@@ -50,7 +56,7 @@ export default class LocationTree
       console.assert @value.featureCode
 
   # Return the location's node or the node that should be its parent.
-  search: (location)->
+  search: (location) ->
     if @value is "ROOT" or locationContains(@value, location)
       for subtree in @children
         containingNode = subtree.search(location)
@@ -61,7 +67,7 @@ export default class LocationTree
       return null
 
   # Return the node with the given id or null
-  getNodeById: (locationId)->
+  getNodeById: (locationId) ->
     if not locationId
       return null
     if @value.id == locationId
@@ -73,7 +79,7 @@ export default class LocationTree
           return result
     return null
 
-  getLocationById: (locationId)->
+  getLocationById: (locationId) ->
     @getNodeById(locationId)?.value
 
 LocationTree.from = locationsToLocationTree
