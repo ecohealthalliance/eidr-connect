@@ -49,6 +49,7 @@ Feature: Events
     Then I should not see content "EDIT EVENT DETAILS"
     And I should see content "A test"
 
+  @dev
   Scenario: Filter event properties individually
     When I navigate to the first event
     And I select the "incidents" tab

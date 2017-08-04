@@ -88,6 +88,8 @@ do ->
       @client.click(".other-properties .check-buttons .check-button:nth-of-type(1)")
 
     @When /^I should see "([^']*)" incidents$/, (incidentCount) ->
+      @client.pause(2000)
       incidentRows = @client.elements('#event-incidents-table tbody tr')
+      console.log incidentRows.length, incidentRows
       unless incidentRows.value.length == parseInt(incidentCount)
         throw new Error("Event does not have #{incidentCount} incidents")
