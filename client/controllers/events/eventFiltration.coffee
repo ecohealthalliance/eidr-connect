@@ -83,7 +83,6 @@ Template.eventFiltration.onCreated ->
       query = {}
       if countryLevel == 'region'
         regionInfo = _.findWhere(regionToCountries, name: location.region)
-        console.log location, regionToCountries
         query["locations.countryCode"] = $in: regionInfo.countryISOs
         return query
       for level in ['countryName', 'admin1Name', 'admin2Name']
