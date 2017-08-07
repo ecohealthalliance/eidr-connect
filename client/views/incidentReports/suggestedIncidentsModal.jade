@@ -63,7 +63,7 @@ template(name="suggestedIncidentsModal")
                         td {{formatDateISO dateRange.end}}
                         td {{formatLocations locations}}
                         td=status
-                        td=species
+                        td=species.text
                         td=incidentProperties
         .modal-footer
           button.btn.btn-default.confirm-close-modal.on-left(type="button" data-dismiss="modal") Close
