@@ -116,13 +116,11 @@ Template.eventFiltration.onCreated ->
 
 Template.eventFiltration.onRendered ->
   @autorun =>
-    @incidentLocations = _.uniq(
+    incidentLocations = _.uniq(
       _.flatten(EventIncidents.find({}, field: locations: 1).map (incident) ->
         incident.locations
       )
     )
-
-  @autorun =>
     countryLevel = @countryLevel.get()
     @locations.remove({})
     @selectedLocations.remove({})
@@ -131,7 +129,7 @@ Template.eventFiltration.onRendered ->
       if regionData.continentCode
         regionData.countryISOs.forEach (iso) ->
           countryToRegion[iso] = regionData
-    @incidentLocations.forEach (location) =>
+    incidentLocations.forEach (location) =>
       return unless location.countryCode
       location.region = countryToRegion[location.countryCode].name
       return unless location[countryLevel]
