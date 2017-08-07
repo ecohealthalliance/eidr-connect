@@ -11,7 +11,7 @@ import feedSchema from '/imports/schemas/feed'
 import Constants from '/imports/constants.coffee'
 import { regexEscape } from '/imports/utils'
 
-DATA_VERSION = 9
+DATA_VERSION = 11
 AppMetadata = new Meteor.Collection('appMetadata')
 priorDataVersion = AppMetadata.findOne(property: "dataVersion")?.value
 
@@ -191,5 +191,12 @@ module.exports = ->
         incident.modifiedDate = new Date()
         Incidents.update(_id: incident._id, incident)
 
+  console.log "Removing incidents with invalid dates..."
+  invalidDateIncidents = []
+  Incidents.find().map (incident) ->
+    if incident.dateRange.end < incident.dateRange.start
+      invalidDateIncidents.push(incident._id)
+  console.log "Removing #{invalidDateIncidents.length} incidents"
+  Incidents.remove(_id: $in: invalidDateIncidents)
   AppMetadata.upsert({property: "dataVersion"}, $set: {value: DATA_VERSION})
   console.log "database update complete"
