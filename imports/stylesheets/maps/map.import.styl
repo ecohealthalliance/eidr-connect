@@ -6,6 +6,7 @@
   height 100%
   min-height 500px
   font-size 1em
+  border-bottom 1px solid $border-primary
   .leaflet-control-scale
   .leaflet-control-attribution
     font-size .75em
@@ -16,25 +17,32 @@
       float none
 
 .map-legend
-  background-color white
-  padding 6px
   position absolute
   left 0
-  bottom 0
-  border 1px solid #eef0f4
+  bottom 1px
+  background-color alpha(white, 95%)
   h5
-    line-height 2em
+    padding .75em 1em .7em 1em
     margin 0
-    margin-bottom 5px
-    padding 0
-    color $primary
-    border-bottom 1px solid #eef0f4
+    background alpha($border-primary-light, 92%)
+    border-bottom 1px solid $border-primary
+  .values
+    display flex
+    flex-direction row
+    padding 1em
   .value
-    font-weight bold
-    margin auto
-    height 2em
-    width 4em
+    display flex
+    align-items center
+    justify-content center
+    min-width 4em
+    font-weight 600
     color white
-    text-align center
-    padding 3px
-    border-bottom 1px solid white
+    padding .65em 1em
+    text-shadow 1px 1px rgba(0,0,0,.2)
+    letter-spacing .04em
+    &:first-of-type
+      border-top-left-radius 2px
+      border-bottom-left-radius 2px
+    &:last-of-type
+      border-top-right-radius 2px
+      border-bottom-right-radius 2px

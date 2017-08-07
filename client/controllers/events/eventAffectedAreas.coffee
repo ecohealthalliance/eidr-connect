@@ -213,6 +213,7 @@ Template.eventAffectedAreas.events
     instance.choroplethLayer.set('deaths')
 
   'click .choropleth-layer-off a': (event, instance) ->
+    instance.maxCount.set(null)
     instance.choroplethLayer.set(null)
 
   'click .marker-layer a': (event, instance) ->
