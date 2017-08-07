@@ -3,9 +3,9 @@ import regionToCountries from '/imports/regionToCountries.json'
 
 formatDateForInput = (date) ->
   unless date
-    return moment.utc().format('YYYY-MM-DD')
+    return moment.utc().format('MM/DD/YYYY')
   date = if date.getTime then date else new Date(Math.ceil(date))
-  moment.utc(date).format('YYYY-MM-DD')
+  moment.utc(date).format('MM/DD/YYYY')
 
 Template.eventFiltration.onCreated ->
   @PROP_PREFIX = 'filter-'
@@ -37,8 +37,36 @@ Template.eventFiltration.onCreated ->
   @locations = new Meteor.Collection(null)
   @dateRange = new ReactiveVar([])
   @selectedDateRange = new ReactiveVar([])
-  @eventDateRange = new ReactiveVar([ new Date(), new Date() ])
+  @eventDateRange = new ReactiveVar([ 0, 100 ])
 
+  @removePropPrefix = (prop) =>
+    prop.substr(@PROP_PREFIX.length)
+
+  @insertLocation = (location) =>
+    @selectedLocations.upsert _id: location._id,
+      region: location.region
+      countryName: location.countryName
+      admin1Name: location.admin1Name
+      admin2Name: location.admin2Name
+
+  @setPickerDates = (defaultRange, selectedDateRange) =>
+    selectedDateRange ?= defaultRange
+    ['start', 'end'].forEach (input, i) =>
+      $input = @$(".#{input}-date").data("DateTimePicker")
+      if $input
+        $input.date(new Date(Math.ceil(selectedDateRange[i])))
+        $input.minDate(defaultRange[0])
+        $input.maxDate(defaultRange[1])
+
+Template.eventFiltration.onRendered ->
+  # Instatiate date pickers for start and end date
+  Meteor.defer =>
+    settings =
+      format: 'MM/DD/YYYY'
+    @$('.start-date').datetimepicker(settings)
+    @$('.end-date').datetimepicker(settings)
+
+  # Establish and update date ranges when incidents collection changes
   @autorun =>
     incidents = EventIncidents.find({}, fields: 'dateRange': 1).fetch()
     if incidents.length > 1
@@ -48,23 +76,55 @@ Template.eventFiltration.onCreated ->
       ]
       @eventDateRange.set(range)
       @selectedDateRange.set(range)
+      @setPickerDates(range)
     else
       # Set range as Numbers so range slider will not error out and will appear
       @eventDateRange.set([1, 100])
 
+  # Establish and update locations when incidents collection changes
+  @autorun =>
+    incidentLocations = _.uniq(
+      _.flatten(EventIncidents.find({}, field: locations: 1).map (incident) ->
+        incident.locations
+      )
+    )
+    countryLevel = @countryLevel.get()
+    @locations.remove({})
+    @selectedLocations.remove({})
+    countryToRegion = {}
+    for regionId, regionData of regionToCountries
+      if regionData.continentCode
+        regionData.countryISOs.forEach (iso) ->
+          countryToRegion[iso] = regionData
+    incidentLocations.forEach (location) =>
+      return unless location.countryCode
+      location.region = countryToRegion[location.countryCode].name
+      return unless location[countryLevel]
+      query = {}
+      query[countryLevel] = location[countryLevel]
+      @locations.upsert query,
+        region: location.region
+        countryName: location.countryName
+        admin1Name: location.admin1Name
+        admin2Name: location.admin2Name
+
+  # Update filter query
   @autorun =>
     filters = {}
 
     # Daterange
     selectedDateRange = @selectedDateRange.get()
     eventDateRange = @eventDateRange.get()
+    @setPickerDates(eventDateRange, selectedDateRange)
     isDefaultRange = selectedDateRange[0] == eventDateRange[0] and
       selectedDateRange[1] == eventDateRange[1]
     if selectedDateRange.length and not isDefaultRange
+      startDate = new Date(Math.ceil(selectedDateRange[1]))
+      endDate = new Date(Math.ceil(selectedDateRange[0]))
       filters['dateRange.start'] =
-        $lte: new Date(Math.ceil(selectedDateRange[1]))
+        $lte: startDate
       filters['dateRange.end'] =
-        $gte: new Date(Math.ceil(selectedDateRange[0]))
+        $gte: endDate
 
     # Types
     types = @types.get()
@@ -107,43 +167,6 @@ Template.eventFiltration.onCreated ->
     # in child templates.
     @data.filterQuery.set(filters)
 
-  @removePropPrefix = (prop) =>
-    prop.substr(@PROP_PREFIX.length)
-
-  @insertLocation = (location) =>
-    @selectedLocations.upsert _id: location._id,
-      region: location.region
-      countryName: location.countryName
-      admin1Name: location.admin1Name
-      admin2Name: location.admin2Name
-
-Template.eventFiltration.onRendered ->
-  @autorun =>
-    incidentLocations = _.uniq(
-      _.flatten(EventIncidents.find({}, field: locations: 1).map (incident) ->
-        incident.locations
-      )
-    )
-    countryLevel = @countryLevel.get()
-    @locations.remove({})
-    @selectedLocations.remove({})
-    countryToRegion = {}
-    for regionId, regionData of regionToCountries
-      if regionData.continentCode
-        regionData.countryISOs.forEach (iso) ->
-          countryToRegion[iso] = regionData
-    incidentLocations.forEach (location) =>
-      return unless location.countryCode
-      location.region = countryToRegion[location.countryCode].name
-      return unless location[countryLevel]
-      query = {}
-      query[countryLevel] = location[countryLevel]
-      @locations.upsert query,
-        region: location.region
-        countryName: location.countryName
-        admin1Name: location.admin1Name
-        admin2Name: location.admin2Name
-
 Template.eventFiltration.helpers
   typeProps: ->
     Template.instance().typeProps
@@ -183,12 +206,6 @@ Template.eventFiltration.helpers
 
   endDate: ->
     formatDateForInput(Template.instance().selectedDateRange.get()?[1])
-
-  minDate: ->
-    formatDateForInput(Template.instance().eventDateRange.get()?[0])
-
-  maxDate: ->
-    formatDateForInput(Template.instance().eventDateRange.get()?[1])
 
   hasDateRange: ->
     range = Template.instance().eventDateRange.get()
@@ -234,11 +251,12 @@ Template.eventFiltration.events
   'click .locations .deselect-all': (event, instance) ->
     instance.selectedLocations.remove({})
 
-  'change .dates input': (event, instance) ->
+  'dp.change': (event, instance) ->
     dates = []
     instance.$('.dates input').each (i, input) ->
       dates.push(new Date(input.value))
-    instance.selectedDateRange.set(dates)
+    if dates.length > 1
+      instance.selectedDateRange.set(dates)
 
   'click .clear-filters': (event, instance) ->
     instance.$('.check-buttons input:checked').attr('checked', false)
