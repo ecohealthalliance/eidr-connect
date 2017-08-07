@@ -180,7 +180,7 @@ Template.eventAffectedAreas.onRendered ->
 Template.eventAffectedAreas.helpers
   legendValues: ->
     maxCount = Template.instance().maxCount.get()
-    _.range(1, 1 + (maxCount or 0), maxCount / 5).reverse().map (value) ->
+    _.range(1, 1 + (maxCount or 0), maxCount / 5).map (value) ->
       value: value.toFixed(0)
       color: Template.instance().getColor(value / maxCount)
 
