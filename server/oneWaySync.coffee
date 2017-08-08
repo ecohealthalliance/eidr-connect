@@ -13,20 +13,43 @@ module.exports = (url)->
         skip: skip
         limit: limit
     )
-    docs = EJSON.parse(resp.content)
+    userEvents = EJSON.parse(resp.content)
     skip += limit
-    if docs.length == 0 then break
-    for doc in docs
-      incidents = doc._incidents
-      articles = doc._articles
-      delete doc._incidents
-      delete doc._articles
-      if not UserEvents.findOne(doc._id)?.deleted
-        UserEvents.upsert(doc._id, doc)
+    if userEvents.length == 0 then break
+    for userEvent in userEvents
+      priorEvent = UserEvents.findOne(userEvent._id)
+      if priorEvent?.deleted
+        continue
+      incidents = userEvent._incidents
+      articles = userEvent._articles
+      delete userEvent._incidents
+      delete userEvent._articles
+      newIncidents = []
       for incident in incidents
-        if not Incidents.findOne(incident._id)?.deleted
+        priorIncident = Incidents.findOne(incident._id)
+        if not priorIncident
+          newIncidents.push
+            id: incident._id
+            associationDate: new Date()
+        if not priorIncident?.deleted
           Incidents.upsert(incident._id, incident)
       for article in articles
-        if not Articles.findOne(article._id)?.deleted
+        priorArticle = Articles.findOne(article._id)
+        if not priorArticle
           Articles.upsert(article._id, article)
+      if priorEvent
+        # Only add the incidents that weren't in the incidents collection before.
+        # The others may have been intentionally removed from the event on this instance.
+        UserEvents.update(userEvent._id,
+          # Changes to properties like name/summary/disease are ignored so
+          # local edits are preserved
+          $set:
+            incidents: (priorEvent?.incidents or []).concat(newIncidents)
+            lastModifiedDate: new Date()
+            deleted: userEvent.deleted
+            lastModifiedByUserName: "Sync from " + process.env.ONE_WAY_SYNC_URL
+        )
+        Meteor.call('editUserEventLastIncidentDate', userEvent._id)
+      else
+        UserEvents.upsert(userEvent._id, userEvent)
   console.log("sync complete")

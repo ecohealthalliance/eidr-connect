@@ -9,6 +9,7 @@ import LocationTree from '/imports/incidentResolution/LocationTree.coffee'
 import MapHelpers from '/imports/ui/mapMarkers.coffee'
 
 Template.eventAffectedAreas.onCreated ->
+  @maxCount = new ReactiveVar()
   @choroplethLayer = new ReactiveVar()
   @markerLayer = new ReactiveVar()
   @worldGeoJSONRV = new ReactiveVar()
@@ -47,7 +48,7 @@ Template.eventAffectedAreas.onRendered ->
 
   ramp = chroma.scale(["#345e7e", "#f07381"]).colors(10)
 
-  getColor = (val) ->
+  @getColor = (val) ->
     # return a color from the ramp based on a 0 to 1 value.
     # If the value exceeds one the last stop is used.
     ramp[Math.floor(ramp.length * Math.max(0, Math.min(val, 0.99)))]
@@ -108,13 +109,14 @@ Template.eventAffectedAreas.onRendered ->
         prevTotal = countryCodeToCount[location.countryCode] or 0
         countryCodeToCount[location.countryCode] = prevTotal + total
       maxCount = _.max(_.values(countryCodeToCount))
+      @maxCount.set maxCount
       geoJsonLayer = L.geoJson(
         features: worldGeoJSON.features
         type: "FeatureCollection"
       ,
         style: (feature) =>
           count = countryCodeToCount[feature.properties.iso_a2]
-          fillColor = getColor(count / maxCount)
+          fillColor = @getColor(count / maxCount)
           opacity = 0.75
           unless fillColor
             opacity = 0
@@ -176,6 +178,12 @@ Template.eventAffectedAreas.onRendered ->
       @choroplethLayer.set('deaths')
 
 Template.eventAffectedAreas.helpers
+  legendValues: ->
+    maxCount = Template.instance().maxCount.get()
+    _.range(1, 1 + (maxCount or 0), maxCount / 5).map (value) ->
+      value: value.toFixed(0)
+      color: Template.instance().getColor(value / maxCount)
+
   choroplethLayerIs: (name) ->
     choroplethLayer = Template.instance().choroplethLayer.get()
     if (not choroplethLayer and name == '') or choroplethLayer == name
@@ -205,6 +213,7 @@ Template.eventAffectedAreas.events
     instance.choroplethLayer.set('deaths')
 
   'click .choropleth-layer-off a': (event, instance) ->
+    instance.maxCount.set(null)
     instance.choroplethLayer.set(null)
 
   'click .marker-layer a': (event, instance) ->

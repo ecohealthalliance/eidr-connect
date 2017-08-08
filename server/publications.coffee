@@ -3,7 +3,7 @@ import UserEvents from '/imports/collections/userEvents.coffee'
 import SmartEvents from '/imports/collections/smartEvents.coffee'
 import Articles from '/imports/collections/articles.coffee'
 import Feeds from '/imports/collections/feeds.coffee'
-import { regexEscape, cleanUrl } from '/imports/utils'
+import regionToCountries from '/imports/regionToCountries.json'
 
 # Incidents
 ReactiveTable.publish 'curatorEventIncidents', Incidents,
@@ -99,6 +99,7 @@ Meteor.publishComposite 'smartEvent', (eventId) ->
         query =
           accepted: $in: [null, true]
           deleted: $in: [null, false]
+          locations: $not: $size: 0
         if event.diseases and event.diseases.length > 0
           query['resolvedDisease.id'] = $in: event.diseases.map (x) -> x.id
         eventDateRange = event.dateRange
@@ -109,6 +110,10 @@ Meteor.publishComposite 'smartEvent', (eventId) ->
         for location in (event.locations or [])
           locationQueries.push
             id: location.id
+          if location.id of regionToCountries
+            locationQueries.push
+              countryCode: $in: regionToCountries[location.id].countryISOs
+            continue
           locationQuery =
             countryName: location.countryName
           featureCode = location.featureCode

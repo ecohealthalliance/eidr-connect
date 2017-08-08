@@ -1,4 +1,5 @@
 import EventIncidents from '/imports/collections/eventIncidents'
+import regionToCountries from '/imports/regionToCountries.json'
 
 formatDateForInput = (date) ->
   unless date
@@ -12,22 +13,26 @@ Template.eventFiltration.onCreated ->
   @statusProps = ['suspected', 'confirmed', 'revoked']
   @locationLevels = [
     {
+      prop: 'region'
+      name: 'Region'
+    }
+    {
       prop: 'countryName'
-      name: 'Country Name'
+      name: 'Country'
     }
     {
       prop: 'admin1Name'
-      name: 'Admin Name 1'
+      name: 'First-order Admin Division'
     }
     {
       prop: 'admin2Name'
-      name: 'Admin Name 2'
+      name: 'Second-order Admin Division'
     }
   ]
   @types = new ReactiveVar([])
   @status = new ReactiveVar([])
   @properties = new ReactiveVar({})
-  @countryLevel = new ReactiveVar('countryName')
+  @countryLevel = new ReactiveVar(@locationLevels[0].prop)
   @selectedLocations = new Meteor.Collection(null)
   @locations = new Meteor.Collection(null)
   @dateRange = new ReactiveVar([])
@@ -79,6 +84,10 @@ Template.eventFiltration.onCreated ->
     countryLevel = @countryLevel.get()
     selectedLocations = @selectedLocations.find().map (location) ->
       query = {}
+      if countryLevel == 'region'
+        regionInfo = _.findWhere(regionToCountries, name: location.region)
+        query["locations.countryCode"] = $in: regionInfo.countryISOs
+        return query
       for level in ['countryName', 'admin1Name', 'admin2Name']
         query["locations.#{level}"] = location[level]
         if countryLevel == level
@@ -100,27 +109,34 @@ Template.eventFiltration.onCreated ->
 
   @insertLocation = (location) =>
     @selectedLocations.upsert _id: location._id,
+      region: location.region
       countryName: location.countryName
       admin1Name: location.admin1Name
       admin2Name: location.admin2Name
 
 Template.eventFiltration.onRendered ->
   @autorun =>
-    @incidentLocations = _.uniq(
+    incidentLocations = _.uniq(
       _.flatten(EventIncidents.find({}, field: locations: 1).map (incident) ->
         incident.locations
       )
     )
-
-  @autorun =>
     countryLevel = @countryLevel.get()
     @locations.remove({})
     @selectedLocations.remove({})
-    @incidentLocations.forEach (location) =>
+    countryToRegion = {}
+    for regionId, regionData of regionToCountries
+      if regionData.continentCode
+        regionData.countryISOs.forEach (iso) ->
+          countryToRegion[iso] = regionData
+    incidentLocations.forEach (location) =>
+      return unless location.countryCode
+      location.region = countryToRegion[location.countryCode].name
       return unless location[countryLevel]
       query = {}
       query[countryLevel] = location[countryLevel]
       @locations.upsert query,
+        region: location.region
         countryName: location.countryName
         admin1Name: location.admin1Name
         admin2Name: location.admin2Name
@@ -204,7 +220,6 @@ Template.eventFiltration.events
       selectedLocations.remove(@_id)
     else
       instance.insertLocation(@)
-    selectedLocations.find().fetch()
 
   'click .locations .select-all': (event, instance) ->
     instance.locations.find().forEach (location) ->

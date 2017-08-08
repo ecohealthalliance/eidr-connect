@@ -30,6 +30,12 @@ template(name="eventAffectedAreas")
       if isLoading
         +loading small=true
         .veil
+      if legendValues
+        .map-legend
+          h5 Case/Death Count
+          .values
+            each legendValues
+              .value(style="background:#{color}") #{value}
 
 template(name="affectedAreasMarkerPopup")
   .affected-areas--popup.map-popup

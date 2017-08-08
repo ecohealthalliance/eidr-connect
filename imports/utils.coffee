@@ -26,11 +26,12 @@ export cleanUrl = (existingUrl, regexps) ->
 # @returns {string} formattedUrl, an url that has 'http' added
 ###
 export formatUrl = (existingUrl) ->
-  regexp = new RegExp('^(https?:\/\/)', 'i')
-  if regexp.test existingUrl
-    return existingUrl
-  else
-    return 'http://' + existingUrl
+  if existingUrl
+    regexp = new RegExp('^(https?:\/\/)', 'i')
+    if regexp.test existingUrl
+      return existingUrl
+    else
+      return 'http://' + existingUrl
 
 checkIncidentTypeValue = (form, input) ->
   if not form[input].value.trim()
@@ -271,10 +272,6 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
         timeAnnotation.timeRange.begin.month--
       if timeAnnotation.timeRange.end.month
         timeAnnotation.timeRange.end.month--
-      timeAnnotation.precision = (
-        Object.keys(timeAnnotation.timeRange.end).length +
-        Object.keys(timeAnnotation.timeRange.end).length
-      )
       timeAnnotation.beginMoment = moment.utc(
         timeAnnotation.timeRange.begin
       )
@@ -282,6 +279,9 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
       timeAnnotation.endMoment = moment.utc(
         timeAnnotation.timeRange.end
       ).endOf('day')
+      if timeAnnotation.beginMoment > timeAnnotation.endMoment
+        console.error("End date occurs before start date.")
+        return
       publishMoment = moment.utc(publishDate)
       if timeAnnotation.beginMoment.isAfter publishMoment, 'day'
         # Omit future dates
@@ -315,18 +315,21 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
       .value()
     incident =
       locations: locations
-    maxPrecision = 0
+    maxPrecision = Infinity
     # Use the document's date as the default
     incident.dateRange =
       start: publishDate
       end: moment(publishDate).add(1, 'day').toDate()
       type: 'day'
     dateTerritory.annotations.forEach (timeAnnotation) ->
-      if (timeAnnotation.precision > maxPrecision and
-        timeAnnotation.beginMoment.isValid() and
+      if (timeAnnotation.beginMoment.isValid() and
         timeAnnotation.endMoment.isValid()
       )
-        maxPrecision = timeAnnotation.precision
+        precision = timeAnnotation.endMoment - timeAnnotation.beginMoment
+        if precision < maxPrecision
+          maxPrecision = timeAnnotation.precision
+        else
+          return
         incident.dateRange =
           start: timeAnnotation.beginMoment.toDate()
           end: timeAnnotation.endMoment.toDate()
@@ -370,6 +373,10 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
       incident.resolvedDisease =
         id: annotation.resolutions[0].entity.id
         text: annotation.resolutions[0].entity.label
+    # Suggest humans as a default
+    incident.species =
+      id: "tsn:180092"
+      text: "Homo sapiens"
     speciesTerritory.annotations.forEach (annotation) ->
       incident.species =
         id: annotation.resolutions[0].entity.id
