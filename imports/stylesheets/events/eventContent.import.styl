@@ -13,11 +13,11 @@
     left 50%
     transform translate(-50%, 0)
     color $primary
-    &.modal-layer
-      z-index $modal-layer + 1
+    &.top-layer
+      z-index $top-layer - 1
   .veil
-    &.modal-layer
-      z-index $modal-layer
+    &.top-layer
+      z-index $top-layer - 2
   .no-results--incidents
     &::before
       content '\69'

@@ -3,7 +3,7 @@ template(name="eventIncidentReports")
     .flex-col.bordered
       .tab-form.container-flex.break-2
         if isUserEvent
-          +addIncidentReport
+          +addIncidentReport incidentReportData
         button.open-download-csv.right-action.btn.btn-primary.btn-sm(
           disabled="{{#if preparingData}}disabled{{/if}}"
           type="button")

@@ -197,6 +197,15 @@ Template.eventIncidentReports.helpers
   isRendering: ->
     Template.instance().rendering.get()
 
+  incidentReportData: ->
+    if not EventIncidents.find(Template.instance().data.filterQuery.get()).count()
+      classNames = 'levitating'
+
+    data = Template.instance().data
+    articles: data.articles
+    event: data.event
+    classNames: classNames
+
 Template.eventIncidentReports.events
   'click #scatterPlot-toggleCumulative': (event, instance) ->
     $target = $(event.currentTarget)

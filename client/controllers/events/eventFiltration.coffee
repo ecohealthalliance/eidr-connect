@@ -3,9 +3,9 @@ import regionToCountries from '/imports/regionToCountries.json'
 
 formatDateForInput = (date) ->
   unless date
-    return moment.utc().format('MM/DD/YYYY')
+    return moment()
   date = if date.getTime then date else new Date(Math.ceil(date))
-  moment.utc(date).format('MM/DD/YYYY')
+  moment.utc(date)
 
 Template.eventFiltration.onCreated ->
   @PROP_PREFIX = 'filter-'
@@ -49,22 +49,23 @@ Template.eventFiltration.onCreated ->
       admin1Name: location.admin1Name
       admin2Name: location.admin2Name
 
-  @setPickerDates = (defaultRange, selectedDateRange) =>
-    selectedDateRange ?= defaultRange
-    ['start', 'end'].forEach (input, i) =>
-      $input = @$(".#{input}-date").data("DateTimePicker")
-      if $input
-        $input.date(new Date(Math.ceil(selectedDateRange[i])))
-        $input.minDate(defaultRange[0])
-        $input.maxDate(defaultRange[1])
-
 Template.eventFiltration.onRendered ->
   # Instatiate date pickers for start and end date
-  Meteor.defer =>
-    settings =
-      format: 'MM/DD/YYYY'
-    @$('.start-date').datetimepicker(settings)
-    @$('.end-date').datetimepicker(settings)
+  settings =
+    format: 'MM/DD/YYYY'
+  @$('.start-date').datetimepicker(settings)
+  @$('.end-date').datetimepicker(settings)
+
+  # Update input picker values when slider changes
+  @autorun =>
+    selectedRange = @selectedDateRange.get()
+    defaultRange = @eventDateRange.get()
+    ['start', 'end'].forEach (input, i) =>
+      $input = @$(".#{input}-date").data("DateTimePicker")
+      $input.date(formatDateForInput(selectedRange[i]))
+      if defaultRange and (defaultRange[0] instanceof Date and defaultRange[1] instanceof Date)
+        $input.minDate(moment(defaultRange[0]).subtract(1, 'day'))
+        $input.maxDate(moment(defaultRange[1]).add(1, 'day'))
 
   # Establish and update date ranges when incidents collection changes
   @autorun =>
@@ -76,7 +77,6 @@ Template.eventFiltration.onRendered ->
       ]
       @eventDateRange.set(range)
       @selectedDateRange.set(range)
-      @setPickerDates(range)
     else
       # Set range as Numbers so range slider will not error out and will appear
       @eventDateRange.set([1, 100])
@@ -115,16 +115,12 @@ Template.eventFiltration.onRendered ->
     # Daterange
     selectedDateRange = @selectedDateRange.get()
     eventDateRange = @eventDateRange.get()
-    @setPickerDates(eventDateRange, selectedDateRange)
-    isDefaultRange = selectedDateRange[0] == eventDateRange[0] and
-      selectedDateRange[1] == eventDateRange[1]
-    if selectedDateRange.length and not isDefaultRange
-      startDate = new Date(Math.ceil(selectedDateRange[1]))
-      endDate = new Date(Math.ceil(selectedDateRange[0]))
-      filters['dateRange.start'] =
-        $lte: startDate
-      filters['dateRange.end'] =
-        $gte: endDate
+    startDate = new Date(Math.ceil(selectedDateRange[1]))
+    endDate = new Date(Math.ceil(selectedDateRange[0]))
+    filters['dateRange.start'] =
+      $lte: startDate
+    filters['dateRange.end'] =
+      $gte: endDate
 
     # Types
     types = @types.get()
@@ -252,11 +248,9 @@ Template.eventFiltration.events
     instance.selectedLocations.remove({})
 
   'dp.change': (event, instance) ->
-    dates = []
-    instance.$('.dates input').each (i, input) ->
-      dates.push(new Date(input.value))
-    if dates.length > 1
-      instance.selectedDateRange.set(dates)
+    start = $('.start-date').data('DateTimePicker').date()?.toDate()
+    end = $('.end-date').data('DateTimePicker').date()?.toDate()
+    instance.selectedDateRange.set([start, end])
 
   'click .clear-filters': (event, instance) ->
     instance.$('.check-buttons input:checked').attr('checked', false)

@@ -1,5 +1,6 @@
 do ->
   'use strict'
+  moment = require('moment')
 
   module.exports = ->
 
@@ -49,18 +50,10 @@ do ->
       @client.clickWhenVisible('.edit-event')
       @client.clickWhenVisible('.delete-event')
 
-
     @When /^I filter by a date range of two weeks ago to today$/, ->
-      startDate = new Date()
-      startDate.setDate(startDate.getDate() - 14)
-      endDate = new Date()
-      startDateFormatted = "#{startDate.getMonth() + 1}/#{startDate.getDate()}/#{startDate.getFullYear()}"
-      endDateFormatted = "#{endDate.getMonth() + 1}/#{endDate.getDate()}/#{endDate.getFullYear()}"
-
-      @client.click('.start-date')
-      @client.keys(startDateFormatted)
-      @client.click('.end-date')
-      @client.keys(endDateFormatted)
+      @client.pause(2000)
+      @client.setValue('.start-date', moment().subtract(4, 'weeks').format('MM/DD/YYYY'))
+      @client.setValue('.end-date', moment().format('MM/DD/YYYY'))
       @client.pause(2000)
 
     @When /^I filter by "([^']*)" counts$/, (type) ->
@@ -82,14 +75,12 @@ do ->
       @client.pause(1000)
 
     @When /^I filter by the first location in the list$/, ->
-      @client.click('.location-list li:first-child')
+      @client.clickWhenVisible('.location-list li:first-child')
 
     @When /^I filter by travel related$/, ->
       @client.click(".other-properties .check-buttons .check-button:nth-of-type(1)")
 
     @When /^I should see "([^']*)" incidents$/, (incidentCount) ->
-      @client.pause(2000)
       incidentRows = @client.elements('#event-incidents-table tbody tr')
-      console.log incidentRows.length, incidentRows
       unless incidentRows.value.length == parseInt(incidentCount)
         throw new Error("Event does not have #{incidentCount} incidents")

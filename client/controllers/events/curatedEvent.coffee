@@ -84,7 +84,7 @@ Template.curatedEvent.helpers
       """
 
   classNames: ->
-    classNames = 'modal-layer secondary'
+    classNames = 'top-layer secondary'
     if Template.instance().hasNoIncidents()
       classNames += ' no-results--incidents'
     classNames

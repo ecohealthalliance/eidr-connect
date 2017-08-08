@@ -18,6 +18,7 @@ if Meteor.isAppTest
     latitude: 40.25034
     longitude: -83.00018
     countryName: 'United States'
+    countryCode: 'US'
     population: 11467123
     featureClass: 'A'
     featureCode: 'ADM1'
@@ -35,6 +36,7 @@ if Meteor.isAppTest
     latitude: 9.1848
     longitude: -10.09987
     countryName: 'Republic of Guinea'
+    countryCode: 'GN'
     population: 47099
     featureClass: 'P'
     featureCode: 'PPLA2'
@@ -151,5 +153,7 @@ if Meteor.isAppTest
         incident.dateRange.start = date
         incident.dateRange.end = date
         incident.articleId = articleId
+        console.log incident
         incidentId = Meteor.call('addIncidentReport', incident)
+        console.log incidentId
         Meteor.call('addIncidentToEvent', eventId, incidentId)
