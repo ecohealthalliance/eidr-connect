@@ -1,7 +1,8 @@
-{ manageTableSorting,
+import {
+  manageTableSorting,
   tableFields,
   gotoEvent,
-  scrollToTop } = require('/imports/reactiveTable')
+  scrollToTop } from '/imports/reactiveTable'
 
 Template.eventsTable.onCreated ->
   eventType = @data.eventType.get()
