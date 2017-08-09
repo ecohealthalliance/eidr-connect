@@ -8,32 +8,33 @@ template(name="eventDetails")
         span No summary available.
 
     unless isUserEvent
-      .secondary-content
+      .event--criteria.secondary-content
         p This Smart Event includes all manually curated and
           | automatically extracted incidents stored in EIDR-Connect which
           | match the following properties:
         if event.locations
-          h4 Containing Location(s):
-          each location in event.locations
-            p {{ formatLocation location }}
+          .criteria
+            h4 Containing Location(s):
+            ul
+              each location in event.locations
+                li {{ formatLocation location }}
         if event.diseases
-          h4 Disease(s):
-          each event.diseases
-            p=text
+          .criteria
+            h4 Disease(s):
+            ul
+              each event.diseases
+                li=text
         if event.dateRange
-          h4 Date Range:
-          p {{ formatDateRange event.dateRange }}
+          .criteria
+            h4 Date Range:
+            p {{ formatDateRange event.dateRange }}
 
-    hr
-
-    .secondary-content
+    .event--dates.secondary-content
       p
         | Created by
         span {{ getUserName event.createdByUserId }}
         | on
         span {{ formatDate event.creationDate }}
-
-    .secondary-content
       p
         | Last Modified by
         span {{ getUserName event.lastModifiedByUserId }}
