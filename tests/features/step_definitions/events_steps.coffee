@@ -51,10 +51,7 @@ do ->
       @client.clickWhenVisible('.delete-event')
 
     @When /^I filter by a date range of two weeks ago to today$/, ->
-      @client.pause(2000)
-      @client.setValue('.start-date', moment().subtract(4, 'weeks').format('MM/DD/YYYY'))
-      @client.setValue('.end-date', moment().format('MM/DD/YYYY'))
-      @client.pause(2000)
+      @client.setValue('.start-date', moment().subtract(2, 'weeks').format('MM/DD/YYYY'))
 
     @When /^I filter by "([^']*)" counts$/, (type) ->
       n = 1

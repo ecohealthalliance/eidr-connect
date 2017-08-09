@@ -5,7 +5,7 @@ formatDateForInput = (date) ->
   unless date
     return moment()
   date = if date.getTime then date else new Date(Math.ceil(date))
-  moment(date)
+  moment.utc(date)
 
 Template.eventFiltration.onCreated ->
   @PROP_PREFIX = 'filter-'
@@ -62,10 +62,11 @@ Template.eventFiltration.onRendered ->
     defaultRange = @eventDateRange.get()
     ['start', 'end'].forEach (input, i) =>
       $input = @$(".#{input}-date").data("DateTimePicker")
-      if defaultRange and (defaultRange[0] instanceof Date and defaultRange[1] instanceof Date)
-        $input.minDate(moment(defaultRange[0]).subtract(1, 'day'))
-        $input.maxDate(moment(defaultRange[1]).add(1, 'day'))
+      if defaultRange and not _.isNumber(defaultRange[0])
+        $input.minDate(moment(defaultRange[0]))
+        $input.maxDate(moment(defaultRange[1]))
       $input.date(formatDateForInput(selectedRange[i]))
+
   # Establish and update date ranges when incidents collection changes
   @autorun =>
     incidents = EventIncidents.find({}, fields: 'dateRange': 1).fetch()
@@ -114,12 +115,12 @@ Template.eventFiltration.onRendered ->
     # Daterange
     selectedDateRange = @selectedDateRange.get()
     eventDateRange = @eventDateRange.get()
-    startDate = new Date(Math.ceil(selectedDateRange[1]))
-    endDate = new Date(Math.ceil(selectedDateRange[0]))
+    startDate = new Date(Math.ceil(selectedDateRange[0]))
+    endDate = new Date(Math.ceil(selectedDateRange[1]))
     filters['dateRange.start'] =
-      $lte: startDate
+      $lte: endDate
     filters['dateRange.end'] =
-      $gte: endDate
+      $gte: startDate
 
     # Types
     types = @types.get()
@@ -241,14 +242,17 @@ Template.eventFiltration.events
     instance.selectedLocations.remove({})
 
   'dp.change': (event, instance) ->
-    startStr = $('.start-date').data('DateTimePicker').date()?.format("YYYY-MM-DD")
-    endStr = $('.end-date').data('DateTimePicker').date()?.format("YYYY-MM-DD")
+    startStr = $('.start-date').data('DateTimePicker').date()?.utc().format('YYYY-MM-DD')
+    endStr = $('.end-date').data('DateTimePicker').date()?.utc().format('YYYY-MM-DD')
+    prevSelection = instance.selectedDateRange.get()
+    prevSelectedStart = moment(Math.ceil(prevSelection[0])).format('YYYY-MM-DD')
+    prevSelectedEnd = moment(Math.ceil(prevSelection[1])).format('YYYY-MM-DD')
     if startStr and endStr
-      prevDateRange = instance.selectedDateRange.get()
-      start = moment.utc(startStr).toDate()
-      end = moment.utc(endStr).toDate()
-      if not (moment(prevDateRange[0]).isSame(start) and moment(prevDateRange[1]).isSame(end))
-        instance.selectedDateRange.set([start, end])
+      if startStr != prevSelectedStart and endStr != prevSelectedEnd
+        instance.selectedDateRange.set([
+          moment.utc(startStr).toDate()
+          moment.utc(endStr).toDate()
+        ])
 
   'click .clear-filters': (event, instance) ->
     instance.$('.check-buttons input:checked').attr('checked', false)
