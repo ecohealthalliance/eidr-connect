@@ -5,7 +5,7 @@ formatDateForInput = (date) ->
   unless date
     return moment()
   date = if date.getTime then date else new Date(Math.ceil(date))
-  moment.utc(date)
+  moment(date)
 
 Template.eventFiltration.onCreated ->
   @PROP_PREFIX = 'filter-'
@@ -62,11 +62,10 @@ Template.eventFiltration.onRendered ->
     defaultRange = @eventDateRange.get()
     ['start', 'end'].forEach (input, i) =>
       $input = @$(".#{input}-date").data("DateTimePicker")
-      $input.date(formatDateForInput(selectedRange[i]))
       if defaultRange and (defaultRange[0] instanceof Date and defaultRange[1] instanceof Date)
         $input.minDate(moment(defaultRange[0]).subtract(1, 'day'))
         $input.maxDate(moment(defaultRange[1]).add(1, 'day'))
-
+      $input.date(formatDateForInput(selectedRange[i]))
   # Establish and update date ranges when incidents collection changes
   @autorun =>
     incidents = EventIncidents.find({}, fields: 'dateRange': 1).fetch()
@@ -197,12 +196,6 @@ Template.eventFiltration.helpers
     sliderRange: instance.eventDateRange
     selectedRange: instance.selectedDateRange
 
-  startDate: ->
-    formatDateForInput(Template.instance().selectedDateRange.get()?[0])
-
-  endDate: ->
-    formatDateForInput(Template.instance().selectedDateRange.get()?[1])
-
   hasDateRange: ->
     range = Template.instance().eventDateRange.get()
     return false if _.isNumber(range?[0])
@@ -248,9 +241,14 @@ Template.eventFiltration.events
     instance.selectedLocations.remove({})
 
   'dp.change': (event, instance) ->
-    start = $('.start-date').data('DateTimePicker').date()?.toDate()
-    end = $('.end-date').data('DateTimePicker').date()?.toDate()
-    instance.selectedDateRange.set([start, end])
+    startStr = $('.start-date').data('DateTimePicker').date()?.format("YYYY-MM-DD")
+    endStr = $('.end-date').data('DateTimePicker').date()?.format("YYYY-MM-DD")
+    if startStr and endStr
+      prevDateRange = instance.selectedDateRange.get()
+      start = moment.utc(startStr).toDate()
+      end = moment.utc(endStr).toDate()
+      if not (moment(prevDateRange[0]).isSame(start) and moment(prevDateRange[1]).isSame(end))
+        instance.selectedDateRange.set([start, end])
 
   'click .clear-filters': (event, instance) ->
     instance.$('.check-buttons input:checked').attr('checked', false)
