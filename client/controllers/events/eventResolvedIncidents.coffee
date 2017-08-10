@@ -162,7 +162,6 @@ Template.eventResolvedIncidents.onRendered ->
     incidentType = @incidentType.get()
     differentialIncidents = @differentialIncidents.get()
     # Toggle the incident type if there are no matching incidents
-    console.log differentialIncidents
     if not _.findWhere(differentialIncidents, type: incidentType)
       if differentialIncidents.length >= 1
         if incidentType == 'cases'
