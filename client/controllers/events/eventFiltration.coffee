@@ -5,7 +5,7 @@ formatDateForInput = (date) ->
   unless date
     return moment()
   date = if date.getTime then date else new Date(Math.ceil(date))
-  moment.utc(date)
+  moment(date)
 
 Template.eventFiltration.onCreated ->
   @PROP_PREFIX = 'filter-'
@@ -242,17 +242,14 @@ Template.eventFiltration.events
     instance.selectedLocations.remove({})
 
   'dp.change': (event, instance) ->
-    startStr = $('.start-date').data('DateTimePicker').date()?.utc().format('YYYY-MM-DD')
-    endStr = $('.end-date').data('DateTimePicker').date()?.utc().format('YYYY-MM-DD')
-    prevSelection = instance.selectedDateRange.get()
-    prevSelectedStart = moment(Math.ceil(prevSelection[0])).format('YYYY-MM-DD')
-    prevSelectedEnd = moment(Math.ceil(prevSelection[1])).format('YYYY-MM-DD')
+    startStr = $('.start-date').data('DateTimePicker').date()?.format("YYYY-MM-DD")
+    endStr = $('.end-date').data('DateTimePicker').date()?.format("YYYY-MM-DD")
     if startStr and endStr
-      if startStr != prevSelectedStart and endStr != prevSelectedEnd
-        instance.selectedDateRange.set([
-          moment.utc(startStr).toDate()
-          moment.utc(endStr).toDate()
-        ])
+      prevDateRange = instance.selectedDateRange.get()
+      start = moment.utc(startStr).toDate()
+      end = moment.utc(endStr).toDate()
+      if not (moment(prevDateRange[0]).isSame(start) and moment(prevDateRange[1]).isSame(end))
+        instance.selectedDateRange.set([start, end])
 
   'click .clear-filters': (event, instance) ->
     instance.$('.check-buttons input:checked').attr('checked', false)

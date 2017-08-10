@@ -32,14 +32,6 @@ Template.slider.onRendered ->
 
     sliderEl.noUiSlider.on 'change', _.debounce (values, handle) =>
       @data.selectedRange.set values
-      # Show or hide the left/right slider icon
-      $adjustRangeEl = $('.noUI-adjustRange')
-      rangeWidth = $('.noUi-draggable').width() - $('.noUi-origin.noUi-background').width()
-      $adjustRangeEl.css 'left', rangeWidth / 2
-      if rangeWidth < $('.noUi-base').width() - 5
-        $adjustRangeEl.removeClass 'hidden'
-      else
-        $adjustRangeEl.addClass 'hidden'
     , 250
 
     hidden = "hidden"
