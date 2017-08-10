@@ -139,6 +139,10 @@ Template.eventIncidentReports.onRendered ->
       @updatePlot(groups)
       return
 
+  @autorun =>
+    EventIncidents.find(Template.instance().data.filterQuery.get())
+    $('tr.details').remove()
+
 Template.eventIncidentReports.helpers
   getSettings: ->
     tableName = 'event-incidents'
@@ -247,7 +251,6 @@ Template.eventIncidentReports.events
       if error
         notify('error', error.reason)
         return
-      instance.$('tr.details').remove()
       $('.tooltip').remove()
       notify('success', 'Incident report removed from event')
 
@@ -257,8 +260,6 @@ Template.eventIncidentReports.events
         if error
           notify('error', error.reason)
           return
-        instance.$('tr.details').remove()
-        @$('.tooltip').remove()
         notify('success', 'Incidents Deleted')
         Modal.hide('confirmationModal')
     Modal.show 'confirmationModal',
