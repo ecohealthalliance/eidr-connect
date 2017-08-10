@@ -7,6 +7,15 @@ import {
   formatLocations,
   documentTitle } from '/imports/utils'
 
+incidentCount = (incident) ->
+  if incident.cases >= 0
+    incidentDescription = pluralize("case", incident.cases)
+  else if incident.deaths >= 0
+    incidentDescription = pluralize("death", incident.deaths)
+  else if incident.specify
+    incidentDescription = incident.specify
+  incidentDescription
+
 UI.registerHelper 'formatLocation', (location)->
   formatLocation(location)
 
@@ -16,13 +25,12 @@ UI.registerHelper 'formatLocations', (locations)->
 UI.registerHelper 'formatDateRange', (dateRange)->
   formatDateRange(dateRange)
 
+UI.registerHelper 'pluralize', pluralize
+
+UI.registerHelper 'incidentCount', incidentCount
+
 UI.registerHelper 'incidentToText', (incident) ->
-  if incident.cases >= 0
-    incidentDescription = pluralize("case", incident.cases)
-  else if incident.deaths >= 0
-    incidentDescription = pluralize("death", incident.deaths)
-  else if incident.specify
-    incidentDescription = incident.specify
+  incidentDescription = incidentCount(incident)
   if incident.locations.length < 2
     formattedLocations = formatLocation(incident.locations[0])
   else
