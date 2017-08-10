@@ -47,17 +47,48 @@
     color $primary
     font-size 1.2em
 
-  .event--summary
-    width 50%
-    max-width 800px
-    position relative
-    line-height 1.75em
-    span
-      white-space pre-wrap
   .edit-event
     position absolute
     top 1.5em
     right $page-padding
+
+  .event--summary
+    position relative
+    line-height 1.75em
+    span
+      white-space pre-wrap
+
+  p
+    width 100%
+    max-width 800px
+    +above(3)
+      width 65%
+
+  .event--criteria
+    margin 1em 0
+    padding 1em 0
+    border-top 1px solid $border-primary-light
+    border-bottom 1px solid $border-primary-light
+    ul
+      padding 0 0 0 30px
+      margin 0
+    li
+      &:not(:last-of-type)
+        margin-bottom 3px
+    .criteria
+      &:not(:last-of-type)
+        margin-bottom 1em
+
+  .event--dates
+    display flex
+    flex-direction row
+    flex-wrap wrap
+    p
+      width auto
+      margin-right 1em
+      &:not(:last-of-type)
+        padding-right 1em
+        border-right 1px solid $border-primary
 
 .event--summary
 .disease-name
