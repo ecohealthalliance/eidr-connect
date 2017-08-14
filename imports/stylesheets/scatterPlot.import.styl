@@ -65,18 +65,24 @@
   .report
     cursor pointer
     margin-bottom .25em
-  .count
+  .report--count
     font-weight 600
-  .dates
+  .report--dates
     font-size .8em
     text-align right
     display block
     margin-top -.2em
+  .report--details
+    span
+      display block
   p
     margin-bottom 0
+    &:first-of-type
+      display flex
+      align-items baseline
   .case
   .death
-    margin-right .15em
+    margin-right .5em
   .case
     color $primary
   .death
@@ -97,3 +103,6 @@
   fill alpha($secondary, 30%)
   stroke-width 1px
   stroke $secondary
+
+.start-circle
+  cursor pointer

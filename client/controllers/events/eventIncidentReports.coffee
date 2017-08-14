@@ -83,6 +83,10 @@ Template.eventIncidentReports.onRendered ->
               pageX: d3.event.pageX
               pageY: d3.event.pageY
             @
+          .on 'mouseover', (group, i, elements) =>
+            $(elements[0]).find('circle').attr('r', group.getNodes()[0].r * 2)
+          .on 'mouseout', (group, i, elements) =>
+            $(elements[0]).find('circle').attr('r', group.getNodes()[0].r)
   # deboune how many consecutive calls to update the plot during reactive changes
   @updatePlot = _.debounce(_.bind(@plot.update, @plot), 300)
 

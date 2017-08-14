@@ -14,26 +14,29 @@ Template.scatterPlotPopup.onDestroyed ->
 Template.scatterPlotPopup.helpers
   left: ->
     instance = Template.instance()
-    anchor = $(instance.firstNode)
+    $anchor = $(instance.firstNode)
     xOffset = instance.data.options.get().pageX or 0
-    if anchor.length
-      result = xOffset - anchor.offset().left
-      if result <= (anchor.outerWidth() / 2)
-        result
+    if $anchor.length
+      result = xOffset - $anchor.offset().left
+      if result <= ($anchor.outerWidth() / 2)
+        result + 15
+
   right: ->
     instance = Template.instance()
-    anchor = $(instance.firstNode)
+    $anchor = $(instance.firstNode)
     xOffset = instance.data.options.get().pageX or 0
-    if anchor.length
-      result = xOffset - anchor.offset().left
-      if result > (anchor.outerWidth() / 2)
-        anchor.outerWidth() - result
+    if $anchor.length
+      result = xOffset - $anchor.offset().left
+      if result > ($anchor.outerWidth() / 2)
+        $anchor.outerWidth() - result + 15
+
   top: ->
     instance = Template.instance()
-    anchor = $(instance.firstNode)
+    $anchor = $(instance.firstNode)
     yOffset = instance.data.options.get().pageY or 0
-    if anchor.length
-      yOffset - anchor.offset().top
+    if $anchor.length
+      yOffset - $anchor.offset().top
+
   hidden: ->
     instance = Template.instance()
     options = instance.data.options.get()
@@ -41,6 +44,7 @@ Template.scatterPlotPopup.helpers
       options.hidden
     else
       true
+
   incidents: ->
     Template.instance().data.options.get().incidents
 
@@ -50,4 +54,3 @@ Template.scatterPlotPopup.events
     if incidentId
       Modal.show 'incidentModal',
         incident: EventIncidents.findOne(incidentId)
-
