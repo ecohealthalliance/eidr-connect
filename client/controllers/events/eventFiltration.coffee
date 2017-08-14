@@ -108,14 +108,17 @@ Template.eventFiltration.onRendered ->
     filters = {}
 
     # Daterange
-    selectedDateRange = @selectedDateRange.get()
-    eventDateRange = @eventDateRange.get()
-    startDate = new Date(selectedDateRange[0])
-    endDate = new Date(selectedDateRange[1])
-    filters['dateRange.start'] =
-      $lte: endDate
-    filters['dateRange.end'] =
-      $gte: startDate
+    selectedRange = @selectedDateRange.get()
+    defaultRange = @eventDateRange.get()
+    startDate = new Date(selectedRange[0])
+    endDate = new Date(selectedRange[1])
+    isDefault = moment(defaultRange[0]).isSame(startDate) and
+      moment(defaultRange[1]).isSame(endDate)
+    if not isDefault
+      filters['dateRange.start'] =
+        $lte: endDate
+      filters['dateRange.end'] =
+        $gte: startDate
 
     # Types
     types = @types.get()
