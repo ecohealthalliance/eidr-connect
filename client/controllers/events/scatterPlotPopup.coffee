@@ -14,20 +14,33 @@ Template.scatterPlotPopup.onDestroyed ->
 Template.scatterPlotPopup.helpers
   left: ->
     instance = Template.instance()
-    anchor = $(instance.firstNode).offset()
-    if not anchor
-      return 0
-    (instance.data.options.get().pageX or 0) - anchor.left
+    anchor = $(instance.firstNode)
+    xOffset = instance.data.options.get().pageX or 0
+    if anchor.length
+      result = xOffset - anchor.offset().left
+      if result <= (anchor.outerWidth() / 2)
+        result
+  right: ->
+    instance = Template.instance()
+    anchor = $(instance.firstNode)
+    xOffset = instance.data.options.get().pageX or 0
+    if anchor.length
+      result = xOffset - anchor.offset().left
+      if result > (anchor.outerWidth() / 2)
+        anchor.outerWidth() - result
   top: ->
     instance = Template.instance()
-    anchor = $(instance.firstNode).offset()
-    if not anchor
-      return 0
-    (instance.data.options.get().pageY or 0)  - anchor.top
+    anchor = $(instance.firstNode)
+    yOffset = instance.data.options.get().pageY or 0
+    if anchor.length
+      yOffset - anchor.offset().top
   hidden: ->
     instance = Template.instance()
-    console.log instance.data.options.get()
-    instance.data.options.get()?.hidden
+    options = instance.data.options.get()
+    if options
+      options.hidden
+    else
+      true
   incidents: ->
     Template.instance().data.options.get().incidents
 

@@ -245,7 +245,6 @@ class Plot
   ###
   remove: () ->
     @zoom.remove()
-    @tooltip.remove()
     @axes.remove()
     @container.remove()
     @root.remove()

@@ -462,7 +462,8 @@ export pluralize = (word, count, showCount=true) ->
   if showCount then "#{count} #{word}" else word
 
 export formatDateRange = (dateRange, readable) ->
-  dateRange ?= ''
+  if not dateRange or not (dateRange.start or dateRange.end)
+    return
   start = moment.utc(dateRange.start)
   end = moment.utc(dateRange.end)
   dateFormatEnd = "MMM D, YYYY"

@@ -1,6 +1,6 @@
 template(name="scatterPlotPopup")
   .anchor
-    .scatterPlot-tooltip(style="left:#{left}px;top:#{top}px;" hidden=hidden)
+    .scatterPlot-tooltip(style="left:#{left}px;right:#{right}px;top:#{top}px;" hidden=hidden)
       each incidents
         .report.view-incident
           p
@@ -8,4 +8,4 @@ template(name="scatterPlotPopup")
             span.count {{ incidentCount this }}
             span {{ formatLocations locations }}
           p
-            span.dates {{ formatDateRange date }}
+            span.dates {{ formatDateRange dateRange }}

@@ -16,14 +16,11 @@ incidentCount = (incident) ->
     incidentDescription = incident.specify
   incidentDescription
 
-UI.registerHelper 'formatLocation', (location)->
-  formatLocation(location)
+UI.registerHelper 'formatLocation', formatLocation
 
-UI.registerHelper 'formatLocations', (locations)->
-  formatLocations(locations)
+UI.registerHelper 'formatLocations', formatLocations
 
-UI.registerHelper 'formatDateRange', (dateRange)->
-  formatDateRange(dateRange)
+UI.registerHelper 'formatDateRange', formatDateRange
 
 UI.registerHelper 'pluralize', pluralize
 
