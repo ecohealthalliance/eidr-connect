@@ -4,8 +4,7 @@ import regionToCountries from '/imports/regionToCountries.json'
 formatDateForInput = (date) ->
   unless date
     return moment()
-  date = if date.getTime then date else new Date(date)
-  moment(date)
+  if date.getTime then date else new moment(date)
 
 Template.eventFiltration.onCreated ->
   @PROP_PREFIX = 'filter-'
