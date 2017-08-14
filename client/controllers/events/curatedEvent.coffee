@@ -22,7 +22,7 @@ Template.curatedEvent.onCreated ->
 
   @hasNoIncidents = =>
     filterQuery = @filterQuery.get()
-    _.isEmpty(filterQuery) and not EventIncidents.find(filterQuery).count()
+    not EventIncidents.find().count()
 
 Template.curatedEvent.onRendered ->
   new Clipboard '.copy-link'

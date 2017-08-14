@@ -17,6 +17,9 @@ template(name="smartEvent")
             nav.event--navigation
               +eventNav smartEventId=smartEvent._id
             .event--content
+              if showNoResults
+                .veil.modal-layer
+                +noResults message=noResultsMessage classNames=classNames
               +Template.dynamic template=template.name data=template.data
     else
       +loading

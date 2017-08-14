@@ -13,8 +13,7 @@ Template.smartEvent.onCreated ->
   @selectedIncidentTypes = new ReactiveVar([])
 
   @hasNoIncidents = =>
-    filterQuery = @filterQuery.get()
-    _.isEmpty(filterQuery) and not EventIncidents.find(filterQuery).count()
+    not EventIncidents.find().count()
 
 Template.smartEvent.onRendered ->
   eventId = Router.current().getParams()._id
@@ -67,6 +66,26 @@ Template.smartEvent.helpers
 
   disableFilters: ->
     Template.instance().hasNoIncidents()
+
+  showNoResults: ->
+    instance = Template.instance()
+    instance.hasNoIncidents() or
+      not EventIncidents.find(instance.filterQuery.get()).count()
+
+  noResultsMessage: ->
+    if Template.instance().hasNoIncidents()
+      'Event currently has no incidents.'
+    else
+      Spacebars.SafeString """
+        <span class="main-message">No Results</span>
+        Adjust filter criteria to view event information.
+      """
+
+  classNames: ->
+    classNames = 'modal-layer secondary'
+    if Template.instance().hasNoIncidents()
+      classNames += ' no-results--incidents'
+    classNames
 
 Template.smartEvent.events
   'click .edit-link, click #cancel-edit': (event, instance) ->
