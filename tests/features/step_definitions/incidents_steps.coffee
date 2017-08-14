@@ -42,6 +42,7 @@ do ->
       @client.pause(2000)
 
     @When /^I click the first incident$/, ->
+      @client.pause(2000)
       @client.clickWhenVisible('#event-incidents-table tbody tr:first-child')
 
     @When /^I open the edit incident report modal$/, ->

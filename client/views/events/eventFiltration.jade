@@ -17,7 +17,7 @@ template(name="eventFiltration")
     h3 Types
     .check-buttons.container-flex
       each typeProps
-        .check-button
+        .check-button(class=this)
           input(
             type="checkbox"
             name="#{propPrex}#{this}"
