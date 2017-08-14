@@ -7,9 +7,9 @@ $arrow-height = 8px
   transform translate(-50%, -15px) scale(0)
   backface-visibility hidden
   &:not(.positioned)
+    boxShadow()
     transition .1s transform ease-in-out, .1s opacity ease-in-out
     background $border-primary-light
-    box-shadow 0 5px 15px alpha($border-primary, 90%)
     border 1px solid $border-primary
     border-radius 3px
     padding 1em

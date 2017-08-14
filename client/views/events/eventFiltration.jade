@@ -8,13 +8,10 @@ template(name="eventFiltration")
     class="{{#unless hasDateRange}} disabled {{/unless}}")
     h3 Date Range
     +slider sliderData
-    .dates.container-flex.form-group
-      .date
-        label Start Date
-        input.form-control.start-date(type="text")
-      .date
-        label End Date
-        input.form-control.end-date(type="text")
+    .daterange-wrapper
+      .daterange
+        i.fa.fa-calendar
+        input.form-control.daterange-input(type="text")
 
   section.filtration--property.type
     h3 Types

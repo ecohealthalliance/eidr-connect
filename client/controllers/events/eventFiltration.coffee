@@ -4,7 +4,7 @@ import regionToCountries from '/imports/regionToCountries.json'
 formatDateForInput = (date) ->
   unless date
     return moment()
-  date = if date.getTime then date else new Date(Math.ceil(date))
+  date = if date.getTime then date else new Date(date)
   moment(date)
 
 Template.eventFiltration.onCreated ->
@@ -50,22 +50,18 @@ Template.eventFiltration.onCreated ->
       admin2Name: location.admin2Name
 
 Template.eventFiltration.onRendered ->
-  # Instatiate date pickers for start and end date
-  settings =
-    format: 'MM/DD/YYYY'
-  @$('.start-date').datetimepicker(settings)
-  @$('.end-date').datetimepicker(settings)
-
-  # Update input picker values when slider changes
+  # Update daterangepicker when slider and incidents collection changes
   @autorun =>
-    selectedRange = @selectedDateRange.get()
     defaultRange = @eventDateRange.get()
-    ['start', 'end'].forEach (input, i) =>
-      $input = @$(".#{input}-date").data("DateTimePicker")
-      if defaultRange and not _.isNumber(defaultRange[0])
-        $input.minDate(moment(defaultRange[0]))
-        $input.maxDate(moment(defaultRange[1]))
-      $input.date(formatDateForInput(selectedRange[i]))
+    selectedRange = @selectedDateRange.get()
+    $pickerEl = @$('.daterange-input')
+    $pickerEl.data('daterangepicker')?.remove()
+    $pickerEl.daterangepicker
+      minDate: defaultRange[0]
+      maxDate: defaultRange[1]
+      startDate: formatDateForInput(selectedRange[0])
+      endDate: formatDateForInput(selectedRange[1])
+      buttonClasses: 'btn'
 
   # Establish and update date ranges when incidents collection changes
   @autorun =>
@@ -115,8 +111,8 @@ Template.eventFiltration.onRendered ->
     # Daterange
     selectedDateRange = @selectedDateRange.get()
     eventDateRange = @eventDateRange.get()
-    startDate = new Date(Math.ceil(selectedDateRange[0]))
-    endDate = new Date(Math.ceil(selectedDateRange[1]))
+    startDate = new Date(selectedDateRange[0])
+    endDate = new Date(selectedDateRange[1])
     filters['dateRange.start'] =
       $lte: endDate
     filters['dateRange.end'] =
@@ -241,15 +237,12 @@ Template.eventFiltration.events
   'click .locations .deselect-all': (event, instance) ->
     instance.selectedLocations.remove({})
 
-  'dp.change': (event, instance) ->
-    startStr = $('.start-date').data('DateTimePicker').date()?.format("YYYY-MM-DD")
-    endStr = $('.end-date').data('DateTimePicker').date()?.format("YYYY-MM-DD")
-    if startStr and endStr
-      prevDateRange = instance.selectedDateRange.get()
-      start = moment.utc(startStr).toDate()
-      end = moment.utc(endStr).toDate()
-      if not (moment(prevDateRange[0]).isSame(start) and moment(prevDateRange[1]).isSame(end))
-        instance.selectedDateRange.set([start, end])
+  'apply.daterangepicker': (event, instance, picker) ->
+    instance.selectedDateRange.set([picker.startDate, picker.endDate])
+
+  'show.daterangepicker': (event, instance, picker) ->
+    # Add custom class to picker for custom styling
+    $('.daterangepicker').addClass('event--filtration-picker')
 
   'click .clear-filters': (event, instance) ->
     instance.$('.check-buttons input:checked').attr('checked', false)

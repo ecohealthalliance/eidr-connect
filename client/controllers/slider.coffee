@@ -31,7 +31,7 @@ Template.slider.onRendered ->
         max: formattedSliderRange[1]
 
     sliderEl.noUiSlider.on 'change', _.debounce (values, handle) =>
-      @data.selectedRange.set values
+      @data.selectedRange.set([Math.ceil(values[0]), Math.ceil(values[1])])
     , 250
 
     hidden = "hidden"
