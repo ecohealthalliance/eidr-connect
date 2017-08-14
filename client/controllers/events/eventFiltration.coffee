@@ -114,7 +114,7 @@ Template.eventFiltration.onRendered ->
     endDate = new Date(selectedRange[1])
     isDefault = moment(defaultRange[0]).isSame(startDate) and
       moment(defaultRange[1]).isSame(endDate)
-    if not isDefault
+    if not isDefault and EventIncidents.find().count() > 1
       filters['dateRange.start'] =
         $lte: endDate
       filters['dateRange.end'] =
