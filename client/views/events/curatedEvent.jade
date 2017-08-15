@@ -10,6 +10,8 @@ template(name="curatedEvent")
     else
       section.event--content-wrapper.container-flex.no-break
         aside.event--filtration
+          if disableFilters
+            .veil
           +eventFiltration(
             filterQuery=filterQuery
             selectedIncidentTypes=selectedIncidentTypes)

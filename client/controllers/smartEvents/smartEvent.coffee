@@ -1,4 +1,5 @@
 import SmartEvents from '/imports/collections/smartEvents'
+import EventIncidents from '/imports/collections/eventIncidents'
 #Allow multiple modals or the suggested locations list won't show after the
 #loading modal is hidden
 Modal.allowMultiple = true
@@ -10,6 +11,9 @@ Template.smartEvent.onCreated ->
   @selectedView = new ReactiveVar('resolvedIncidentsPlot')
   @filterQuery = new ReactiveVar({})
   @selectedIncidentTypes = new ReactiveVar([])
+
+  @hasNoIncidents = =>
+    not EventIncidents.find().count()
 
 Template.smartEvent.onRendered ->
   eventId = Router.current().getParams()._id
@@ -60,7 +64,29 @@ Template.smartEvent.helpers
   selectedIncidentTypes: ->
     Template.instance().selectedIncidentTypes
 
+  disableFilters: ->
+    Template.instance().hasNoIncidents()
+
+  showNoResults: ->
+    instance = Template.instance()
+    instance.hasNoIncidents() or
+      not EventIncidents.find(instance.filterQuery.get()).count()
+
+  noResultsMessage: ->
+    if Template.instance().hasNoIncidents()
+      'Event currently has no incidents.'
+    else
+      Spacebars.SafeString """
+        <span class="main-message">No Results</span>
+        Adjust filter criteria to view event information.
+      """
+
+  classNames: ->
+    classNames = 'modal-layer secondary'
+    if Template.instance().hasNoIncidents()
+      classNames += ' no-results--incidents'
+    classNames
+
 Template.smartEvent.events
   'click .edit-link, click #cancel-edit': (event, instance) ->
     instance.editState.set(not instance.editState.get())
-

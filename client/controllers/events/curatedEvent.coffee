@@ -21,7 +21,8 @@ Template.curatedEvent.onCreated ->
       document.title = "Eidr-Connect: #{userEvent.eventName}"
 
   @hasNoIncidents = =>
-    _.isEmpty(@filterQuery.get()) and not EventIncidents.find().count()
+    filterQuery = @filterQuery.get()
+    not EventIncidents.find().count()
 
 Template.curatedEvent.onRendered ->
   new Clipboard '.copy-link'
@@ -88,3 +89,6 @@ Template.curatedEvent.helpers
     if Template.instance().hasNoIncidents()
       classNames += ' no-results--incidents'
     classNames
+
+  disableFilters: ->
+    Template.instance().hasNoIncidents()

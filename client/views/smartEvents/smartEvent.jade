@@ -8,6 +8,8 @@ template(name="smartEvent")
       else
         section.event--content-wrapper.container-flex.no-break
           aside.event--filtration
+            if disableFilters
+              .veil
             +eventFiltration(
               filterQuery=filterQuery
               selectedIncidentTypes=selectedIncidentTypes)
@@ -15,6 +17,9 @@ template(name="smartEvent")
             nav.event--navigation
               +eventNav smartEventId=smartEvent._id
             .event--content
+              if showNoResults
+                .veil.modal-layer
+                +noResults message=noResultsMessage classNames=classNames
               +Template.dynamic template=template.name data=template.data
     else
       +loading
