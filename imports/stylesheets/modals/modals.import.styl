@@ -3,7 +3,10 @@ $modal-side-padding = 20px
 $modal-transition-time = .35s
 $modal-transition-time-opacity = .25s
 
+.modal-backdrop
+  z-index $modal-layer - 1
 .modal
+  z-index $modal-layer
   &.flex
     display flex
     justify-content center

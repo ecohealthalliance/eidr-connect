@@ -10,6 +10,41 @@ if Meteor.isAppTest
 
   syncExec = Meteor.wrapAsync(exec)
 
+  locations1 = [
+    id: '5165418'
+    name: 'Ohio'
+    admin1Name: 'Ohio'
+    admin2Name: null
+    latitude: 40.25034
+    longitude: -83.00018
+    countryName: 'United States'
+    countryCode: 'US'
+    population: 11467123
+    featureClass: 'A'
+    featureCode: 'ADM1'
+    alternateNames: [
+      '\'Ohaio'
+      'Buckeye State'
+    ]
+  ]
+
+  locations2 = [
+    id: '2419472'
+    name: 'Kissidougou'
+    admin1Name: 'Faranah Region'
+    admin2Name: 'Kissidougou'
+    latitude: 9.1848
+    longitude: -10.09987
+    countryName: 'Republic of Guinea'
+    countryCode: 'GN'
+    population: 47099
+    featureClass: 'P'
+    featureCode: 'PPLA2'
+    alternateNames: [
+      'KSI'
+    ]
+  ]
+
   testEvent =
     eventName: 'Test Event 1'
     summary: 'Test summary'
@@ -20,30 +55,19 @@ if Meteor.isAppTest
     publishDate: new Date()
     publishDateTZ: 'EST'
 
+  testSource2 =
+    title: 'Test Article 2',
+    url: 'http://promedmail.org/post/5220233'
+    publishDate: new Date()
+    publishDateTZ: 'EST'
+
   testIncident =
     species:
       id: "tsn:180092"
       text: "Homo sapiens"
     cases: 375
-    locations: [
-      id: '5165418'
-      name: 'Ohio'
-      admin1Name: 'Ohio'
-      admin2Name: null
-      latitude: 40.25034
-      longitude: -83.00018
-      countryName: 'United States'
-      population: 11467123
-      featureClass: 'A'
-      featureCode: 'ADM1'
-      alternateNames: [
-        '\'Ohaio'
-        'Buckeye State'
-      ]
-    ]
+    locations: locations1
     dateRange:
-      start: new Date()
-      end: new Date()
       cumulative: false
       type: 'day'
 
@@ -66,16 +90,18 @@ if Meteor.isAppTest
         # Loading test data into database
         Meteor.call 'createTestingAdmin'
         console.log "created admin"
-        Meteor.call 'upsertUserEvent', testEvent, (error, { insertedId }) ->
-          eventId = insertedId
-          console.log 'UserEvent created', eventId
-          testSource.userEventIds = [eventId]
-          Meteor.call 'addEventSource', testSource, eventId, (error, articleId) ->
-            console.log 'Article created', articleId
-            testIncident.articleId = articleId
-            Meteor.call 'addIncidentReport', testIncident, (error, incidentId) ->
-              console.log 'Incident created', incidentId
-              Meteor.call 'addIncidentToEvent', eventId, incidentId
+        { insertedId } = Meteor.call('upsertUserEvent', testEvent)
+        eventId = insertedId
+        console.log 'UserEvent created', eventId
+        testSource.userEventIds = [eventId]
+        articleId = Meteor.call('addEventSource', testSource, eventId)
+        console.log 'Article created', articleId
+        testIncident.dateRange.start = new Date()
+        testIncident.dateRange.end = new Date()
+        testIncident.articleId = articleId
+        incidentId = Meteor.call('addIncidentReport', testIncident)
+        console.log 'Incident created', incidentId
+        Meteor.call 'addIncidentToEvent', eventId, incidentId
 
       catch error
         console.log "error loading data", error
@@ -108,3 +134,26 @@ if Meteor.isAppTest
       catch error
         # this user shouldn't belong in the production database
         console.warn("TestingAdmin user '#{email}' exists")
+
+    addIncidents: (eventId, incidentCount) ->
+      articleId = Meteor.call('addEventSource', testSource2, eventId)
+      for num in [1...incidentCount + 1]
+        incident = Object.assign({}, testIncident)
+        date = new Date()
+        if num > 1
+          date.setDate(date.getDate() - 14 * num)
+          incident.cases = num * 100
+        else
+          delete incident.cases
+          incident.deaths = 200
+          incident.travelRelated = true
+          incident.locations = locations2
+        if num > 2
+          incident.status = 'confirmed'
+        incident.dateRange.start = date
+        incident.dateRange.end = date
+        incident.articleId = articleId
+        console.log incident
+        incidentId = Meteor.call('addIncidentReport', incident)
+        console.log incidentId
+        Meteor.call('addIncidentToEvent', eventId, incidentId)

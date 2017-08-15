@@ -1,5 +1,6 @@
 do ->
   'use strict'
+  moment = require('moment')
 
   module.exports = ->
 
@@ -48,3 +49,26 @@ do ->
     @When /^I delete the event$/, ->
       @client.clickWhenVisible('.edit-event')
       @client.clickWhenVisible('.delete-event')
+
+    @When /^I filter by a date range of two weeks ago to today$/, ->
+      @client.click('.daterange-input')
+      @client.waitForVisible('[name=daterangepicker_start]')
+      @client.setValue('[name=daterangepicker_start]', moment().subtract(2, 'weeks').format('MM/DD/YYYY'))
+      @client.click('.applyBtn')
+
+    @When /^I filter by "([^']*)"$/, (type) ->
+      @client.click("label[for='filter-#{type}']")
+
+    @When /^I filter by the first location in the list$/, ->
+      @client.click('.location-list li:nth-of-type(1)')
+
+    @When /^I clear event filters$/, ->
+      @client.click('.clear-filters')
+      @client.pause(1000)
+
+    @When /^I should see "([^']*)" incidents$/, (incidentCount) ->
+      @client.pause(1000)
+      incidentRows = @client.elements('#event-incidents-table tbody tr')
+      count = incidentRows.value.length
+      if count != parseInt(incidentCount)
+        throw new Error("Event has #{count} incidents, not #{incidentCount}")

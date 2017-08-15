@@ -18,6 +18,6 @@ template(name="curatedEvent")
             +eventNav userEventId=userEvent._id
           .event--content
             if showNoResults
-              .veil.modal-layer
+              .veil.top-layer
               +noResults message=noResultsMessage classNames=classNames
             +Template.dynamic template=template.name data=template.data
