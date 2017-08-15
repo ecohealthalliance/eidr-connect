@@ -5,7 +5,9 @@
   flex 1
 
 .event--content-container
-  flex 1
+  display flex
+  flex 1 1 auto
+  flex-direction column
   .no-results
     font-size 135%
     position absolute
@@ -24,12 +26,13 @@
       font-family 'icons'
 
 .event--content
-  position relative
+  display flex
+  flex 1 1 auto
+  flex-direction column
   section
     padding 1em
 
 .event--incidents
-  flex-direction column
   .flex-col
     border-right-width 0
   +above($break-point--large-width)
