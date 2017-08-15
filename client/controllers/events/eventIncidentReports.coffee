@@ -83,9 +83,9 @@ Template.eventIncidentReports.onRendered ->
               pageX: d3.event.pageX
               pageY: d3.event.pageY
             @
-          .on 'mouseover', (group, i, elements) =>
+          .on 'mouseover', (group, i, elements) ->
             $(elements[0]).find('circle').attr('r', group.getNodes()[0].r * 2)
-          .on 'mouseout', (group, i, elements) =>
+          .on 'mouseout', (group, i, elements) ->
             $(elements[0]).find('circle').attr('r', group.getNodes()[0].r)
   # deboune how many consecutive calls to update the plot during reactive changes
   @updatePlot = _.debounce(_.bind(@plot.update, @plot), 300)
@@ -110,7 +110,7 @@ Template.eventIncidentReports.onRendered ->
       @updatePlot(groups)
       return
 
-  @autorun =>
+  @autorun ->
     EventIncidents.find(Template.instance().data.filterQuery.get())
     $('tr.details').remove()
 
@@ -230,7 +230,7 @@ Template.eventIncidentReports.events
     Modal.show 'incidentModal', incident: @
 
   'click .reactive-table tbody tr .remove': (event, instance) ->
-    Meteor.call 'removeIncidentFromEvent', @_id, instance.data.event._id, (error, res) =>
+    Meteor.call 'removeIncidentFromEvent', @_id, instance.data.event._id, (error, res) ->
       if error
         notify('error', error.reason)
         return
@@ -239,7 +239,7 @@ Template.eventIncidentReports.events
 
   'click .reactive-table tbody tr .delete': (event, instance) ->
     deleteSelectedIncidents = =>
-      Meteor.call 'deleteIncidents', [@_id], (error, result) =>
+      Meteor.call 'deleteIncidents', [@_id], (error, result) ->
         if error
           notify('error', error.reason)
           return
@@ -288,7 +288,7 @@ Template.eventIncidentReports.events
           {name: 'Document Title', classNames: "wide"}
           {name: 'Document Publication Date'}
         ],
-        rows: instance.incidents.map (incident, i) =>
+        rows: instance.incidents.map (incident, i) ->
           properties = []
           if incident.travelRelated
             properties.push "Travel Related"
