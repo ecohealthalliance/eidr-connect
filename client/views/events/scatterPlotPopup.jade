@@ -1,0 +1,13 @@
+template(name="scatterPlotPopup")
+  .anchor
+    .scatterPlot-tooltip(style="left:#{left}px;right:#{right}px;top:#{top}px;" hidden=hidden)
+      ul.list-unstyled
+        each incidents
+          li.report.view-incident
+            p
+              i.fa.fa-circle(class=type)
+              span.report--details
+                span.report--count {{ incidentCount this }}
+                span {{ formatLocations locations }}
+            p
+              span.report--dates {{ formatDateRange dateRange }}

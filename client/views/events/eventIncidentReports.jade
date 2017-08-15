@@ -13,7 +13,7 @@ template(name="eventIncidentReports")
         .veil
         +loading small=true
       if incidents.count
-        +reactiveTable collection=incidents settings=getSettings
+        +reactiveTable collection=incidents settings=tableSettings
       else
         p.center-position No incidents are associated with this event.
     .flex-col
@@ -31,4 +31,5 @@ template(name="eventIncidentReports")
               button#scatterPlot-resetZoom.btn.btn-xs.btn-default.scatterPlot-toolbar-button
                 i.fa.fa-search-plus(aria-hidden="true")
                 span Reset
+        +scatterPlotPopup options=popupOptions
         #scatterPlot

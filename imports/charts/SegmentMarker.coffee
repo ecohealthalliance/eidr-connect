@@ -258,16 +258,14 @@ SegmentMarker.createFromIncident = (plot, incident) ->
     m.meta.type = 'case'
     m.f = '#345e7e'
     m.y += incident.cases
-  if typeof incident.deaths != 'undefined'
+  else if typeof incident.deaths != 'undefined'
     m.meta.type = 'death'
     m.f = '#f07382'
     m.y += incident.deaths
-  if typeof m.meta.type == 'undefined'
+  else
     return
-  if incident.locations.length > 0
-    m.meta.location = incident.locations[0].name
-  if incident.dateRange.cumulative
-    m.meta.cumulative = true
+  m.meta.incident = incident
+  m.meta.cumulative = incident.dateRange.cumulative
   new SegmentMarker(plot, m)
 
 ###

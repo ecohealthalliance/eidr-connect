@@ -23,30 +23,7 @@ Template.eventIncidentReports.onCreated ->
   @plotZoomed = new ReactiveVar(false)
   @dataLoading = new ReactiveVar(false)
   @rendering = new ReactiveVar(false)
-  # underscore template for the mouseover event of a group
-  @tooltipTmpl = """
-    <% if ('applyFilters' in obj) { %>
-      <% _.each(obj.applyFilters(), function(node) { %>
-        <div class='report'>
-          <p>
-            <i class='fa fa-circle <%= node.meta.type%>'></i>
-            <span class='count'>
-              <%= obj.pluralize(node.meta.type, node.y) %>
-            </span>
-            <span>(<%= node.meta.location %>)</span>
-          </p>
-          <% if (node.hasOwnProperty('w')) { %>
-            <p>
-              <span class='dates'>
-                <%= obj.moment(node.x).format('MMM Do YYYY') %>
-                - <%= obj.moment(node.w).format('MMM Do YYYY') %>
-              </span>
-            </p>
-        </div>
-        <% } %>
-      <% }); %>
-    <% } %>
-  """
+  @popupOptions = new ReactiveVar({})
 
   @autorun =>
     # When user modifies query, set rendering to true which triggers a loading
@@ -60,6 +37,7 @@ Template.eventIncidentReports.onCreated ->
       , 350
 
 Template.eventIncidentReports.onRendered ->
+  popupOptions = @popupOptions
   @filters =
     notCumulative: (d) ->
       if typeof d.meta.cumulative == 'undefined' || d.meta.cumulative == false
@@ -67,9 +45,6 @@ Template.eventIncidentReports.onRendered ->
     cumulative: (d) ->
       if d.meta.cumulative
         d
-
-  # compiled the template into the variable tmpl
-  tmpl = _.template(@tooltipTmpl)
 
   @plot = new ScatterPlot
     containerID: 'scatterPlot'
@@ -86,16 +61,6 @@ Template.eventIncidentReports.onRendered ->
       y:
         title: 'Count (Case/Death)'
         type: 'numeric'
-    tooltip:
-      opacity: 1
-      # function to render the tooltip
-      template: (group) ->
-        # template reference for momentjs
-        group.moment = moment
-        # template reference for pluralize
-        group.pluralize = pluralize
-        # render the template from
-        tmpl(group)
     zoom: true
     zoomed: @plotZoomed
     # initially active filters
@@ -106,16 +71,22 @@ Template.eventIncidentReports.onRendered ->
       y: 0
     group:
       # methods to be applied when a new group is created
-      onEnter: () ->
-        # bind mouseover/mouseout events to the plot tooltip
+      onEnter: ->
         @.group
-          .on 'mouseover', () =>
-            if @plot.tooltip
-              @plot.tooltip.mouseover(@, d3.event.pageX, d3.event.pageY)
-          .on 'mouseout', () =>
-            if @plot.tooltip
-              @plot.tooltip.mouseout()
-
+          .on 'click', =>
+            event = d3.event
+            event.preventDefault()
+            popupOptions.set
+              incidents: (if @getNodes then @getNodes() else []).map (x) ->
+                _.extend(x.meta.incident, type: x.meta.type)
+              hidden: false
+              pageX: d3.event.pageX
+              pageY: d3.event.pageY
+            @
+          .on 'mouseover', (group, i, elements) =>
+            $(elements[0]).find('circle').attr('r', group.getNodes()[0].r * 2)
+          .on 'mouseout', (group, i, elements) =>
+            $(elements[0]).find('circle').attr('r', group.getNodes()[0].r)
   # deboune how many consecutive calls to update the plot during reactive changes
   @updatePlot = _.debounce(_.bind(@plot.update, @plot), 300)
 
@@ -144,7 +115,10 @@ Template.eventIncidentReports.onRendered ->
     $('tr.details').remove()
 
 Template.eventIncidentReports.helpers
-  getSettings: ->
+  popupOptions: ->
+    Template.instance().popupOptions
+
+  tableSettings: ->
     tableName = 'event-incidents'
     fields = [
       {

@@ -1,6 +1,5 @@
 import d3 from 'd3'
 import Axes from '/imports/charts/Axes.coffee'
-import Tooltip from '/imports/charts/Tooltip.coffee'
 import Zoom from '/imports/charts/Zoom.coffee'
 import Group from '/imports/charts/Group.coffee'
 import { InvalidGroupError } from '/imports/charts/Errors.coffee'
@@ -63,8 +62,6 @@ class Plot
 
     # the axes of the plot
     @axes = new Axes(@, @options.axes)
-    # the tooltip of the plot
-    @tooltip = new Tooltip(@, @options)
 
     # is zoom enabled?
     zoomEnabled = @options.zoom || false
@@ -248,7 +245,6 @@ class Plot
   ###
   remove: () ->
     @zoom.remove()
-    @tooltip.remove()
     @axes.remove()
     @container.remove()
     @root.remove()
