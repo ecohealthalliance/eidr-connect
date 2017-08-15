@@ -19,5 +19,6 @@ template(name="feeds")
           each feeds
             li.list-group-item.container-flex
               span=url
-              a.delete.flex-col.on-right.no-grow(aria-label="delete")
-                i.fa.fa-trash(title="Delete Feed" aria-hidden="true")
+              unless default
+                a.delete.flex-col.on-right.no-grow(aria-label="delete")
+                  i.fa.fa-trash(title="Delete Feed" aria-hidden="true")

@@ -14,5 +14,8 @@ feedSchema = new SimpleSchema
   addedDate:
     type: Date
     optional: true
+  default:
+    type: Boolean
+    optional: true
 
 module.exports = feedSchema

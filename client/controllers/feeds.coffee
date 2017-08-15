@@ -8,7 +8,7 @@ Template.feeds.onRendered ->
   $('.add-feed').parsley()
 
 Template.feeds.helpers
-  feeds: Feeds.find()
+  feeds: Feeds.find({}, sort: addedDate: 1)
 
 Template.feeds.events
   'submit .add-feed': (event, instance) ->
