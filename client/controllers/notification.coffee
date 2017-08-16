@@ -10,15 +10,19 @@ Template.notification.onCreated ->
     , (delayTime + 1000)
 
 Template.notification.onRendered ->
-  delayTime = @data.delayTime or 3500
-  # Ensure delay time is long enough to show the notification
+  instanceData = @data
+  delayTime = instanceData.delayTime or 5000
 
+  # Ensure delay time is long enough to show the notification
   if delayTime <= 500
     delayTime += 500
+
+  # Delay adding class so notification will animate in
   setTimeout =>
     @active.set('active')
-  , 50
-  if @data.type is 'success'
+  , 100
+
+  if instanceData.type is 'success'
     @dismiss(delayTime)
 
 Template.notification.helpers

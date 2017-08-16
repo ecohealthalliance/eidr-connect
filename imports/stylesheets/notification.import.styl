@@ -1,15 +1,16 @@
+$notification-off-canvas-position = $header-height-with-border * -1
 .notification
   position fixed
   display flex
   align-items center
-  height $header-height + 3px
-  top -100%
+  height $header-height-with-border
+  top $notification-off-canvas-position
   left 0
   right 0
-  z-index $cosmos-layer
-  transition .5s ease-in-out
+  transition .25s ease-in-out
   cursor pointer
   border-bottom 3px solid transparent
+  z-index $cosmos-layer
   &:hover
     transition .1
     &::before
@@ -73,4 +74,4 @@
     top 0
     opacity 1
   &.dismissing
-    top -100%
+    top $notification-off-canvas-position
