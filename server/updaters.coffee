@@ -11,7 +11,7 @@ import feedSchema from '/imports/schemas/feed'
 import Constants from '/imports/constants.coffee'
 import { regexEscape } from '/imports/utils'
 
-DATA_VERSION = 11
+DATA_VERSION = 12
 AppMetadata = new Meteor.Collection('appMetadata')
 priorDataVersion = AppMetadata.findOne(property: "dataVersion")?.value
 
@@ -199,4 +199,18 @@ module.exports = ->
   console.log "Removing #{invalidDateIncidents.length} incidents"
   Incidents.remove(_id: $in: invalidDateIncidents)
   AppMetadata.upsert({property: "dataVersion"}, $set: {value: DATA_VERSION})
-  console.log "database update complete"
+
+  console.log 'Disassociating deleted incidents from events...'
+  incidentCount = 0
+  UserEvents.find().forEach (event) ->
+    event.incidents?.forEach (i) ->
+      incident = Incidents.findOne(i.id)
+      if not incident or incident.deleted
+        incidentCount++
+        UserEvents.update event._id,
+          $pull:
+            incidents:
+              id: i.id
+  console.log "#{incidentCount} incidents disassociated"
+
+  console.log "Database update complete"
