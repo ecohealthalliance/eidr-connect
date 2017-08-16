@@ -1,6 +1,6 @@
-utils = require '/imports/utils.coffee'
-{ notify } = require '/imports/ui/notification'
-{ stageModals } = require '/imports/ui/modals'
+import utils from '/imports/utils.coffee'
+import notify from '/imports/ui/notification'
+import { stageModals } from '/imports/ui/modals'
 
 Template.incidentModal.onCreated ->
   @valid = new ReactiveVar(false)

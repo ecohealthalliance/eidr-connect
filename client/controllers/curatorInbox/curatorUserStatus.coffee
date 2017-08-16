@@ -1,4 +1,4 @@
-import { notify } from '/imports/ui/notification'
+import notify from '/imports/ui/notification'
 
 Template.curatorUserStatus.onCreated ->
   @userStatusHandle = @subscribe('userStatus')

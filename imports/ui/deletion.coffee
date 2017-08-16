@@ -1,4 +1,4 @@
-import { notify } from '/imports/ui/notification'
+import notify from '/imports/ui/notification'
 
 module.exports =
   commonPostDeletionTasks: (error, objNameToDelete, modalName=null) ->

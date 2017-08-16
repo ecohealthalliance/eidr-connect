@@ -1,9 +1,9 @@
 import Articles from '/imports/collections/articles.coffee'
 import Incidents from '/imports/collections/incidentReports.coffee'
 import UserEvents from '/imports/collections/userEvents.coffee'
-key = require 'keymaster'
-{ notify } = require '/imports/ui/notification'
-Hammer = require 'hammerjs'
+import key from 'keymaster'
+import notify from '/imports/ui/notification'
+import Hammer from 'hammerjs'
 
 
 Template.curatorSourceDetails.onCreated ->

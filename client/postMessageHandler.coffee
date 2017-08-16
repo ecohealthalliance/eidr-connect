@@ -1,4 +1,4 @@
-import { notify } from '/imports/ui/notification'
+import notify from '/imports/ui/notification'
 
 postMessageHandler = (event)->
   if not event.origin.match(/^https:\/\/([\w\-]+\.)*bsvecosystem\.net/) then return

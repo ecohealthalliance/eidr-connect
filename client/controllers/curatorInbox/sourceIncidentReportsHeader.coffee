@@ -1,6 +1,6 @@
 import Incidents from '/imports/collections/incidentReports'
 UserEvents = require '/imports/collections/userEvents.coffee'
-import { notify } from '/imports/ui/notification'
+import notify from '/imports/ui/notification'
 
 Template.sourceIncidentReportsHeader.onCreated ->
   @selectedIncidents = @data.selectedIncidents

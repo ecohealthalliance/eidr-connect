@@ -1,5 +1,5 @@
 Feeds = require('/imports/collections/feeds.coffee')
-import { notify } from '/imports/ui/notification'
+import notify from '/imports/ui/notification'
 
 Template.feeds.onCreated ->
   @subscribe('feeds')

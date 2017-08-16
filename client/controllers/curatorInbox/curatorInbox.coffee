@@ -2,7 +2,7 @@ import Articles from '/imports/collections/articles'
 import Feeds from '/imports/collections/feeds'
 import createInlineDateRangePicker from '/imports/ui/inlineDateRangePicker.coffee'
 import { formatDateRange, keyboardSelect, debounceCheckTop } from '/imports/utils'
-import { notify } from '/imports/ui/notification'
+import notify from '/imports/ui/notification'
 import { updateCalendarSelection } from '/imports/ui/setRange'
 
 CUSTOM_FEEDS = [

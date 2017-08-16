@@ -10,7 +10,7 @@ import {
   incidentTypeWithCountAndDisease } from '/imports/utils'
 import Articles from '/imports/collections/articles.coffee'
 import Feeds from '/imports/collections/feeds.coffee'
-import { notify } from '/imports/ui/notification'
+import notify from '/imports/ui/notification'
 import EventIncidents from '/imports/collections/eventIncidents'
 
 Template.eventIncidentReports.onDestroyed ->

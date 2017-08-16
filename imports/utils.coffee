@@ -1,6 +1,6 @@
 import Constants from '/imports/constants.coffee'
 import Articles from '/imports/collections/articles.coffee'
-import { notify } from '/imports/ui/notification'
+import notify from '/imports/ui/notification'
 
 ###
 # cleanUrl - takes an existing url and removes the last match of the applied

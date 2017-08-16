@@ -1,9 +1,9 @@
-incidentReportSchema = require('/imports/schemas/incidentReport.coffee')
-UserEvents = require('/imports/collections/userEvents')
-Incidents = require('/imports/collections/incidentReports')
-Constants = require('/imports/constants.coffee')
-{ notify } = require('/imports/ui/notification')
-{ stageModals } = require('/imports/ui/modals')
+import incidentReportSchema from '/imports/schemas/incidentReport.coffee'
+import UserEvents from '/imports/collections/userEvents'
+import Incidents from '/imports/collections/incidentReports'
+import Constants from '/imports/constants.coffee'
+import notify from '/imports/ui/notification'
+import { stageModals } from '/imports/ui/modals'
 import { annotateContentWithIncidents,
   buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
 import { formatUrl, createIncidentReportsFromEnhancements } from '/imports/utils.coffee'
