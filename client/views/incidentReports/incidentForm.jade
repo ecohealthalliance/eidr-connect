@@ -47,6 +47,8 @@ template(name="incidentForm")
             i Example: 4 people have died since the beginning of the outbreak.
           else if eq incidentType "activeCount"
             i Example: There are currently 16 people infected.
+          else if eq incidentType "specify"
+            span.space-btm-1
 
         if showCountForm
           .form-group.form-group--child
