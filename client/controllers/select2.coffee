@@ -1,5 +1,6 @@
 Template.select2.onCreated ->
   defaultOptionFn = (params, callback) =>
+    console.log @data
     callback(results: @data.options or [])
   # A function that takes parameters for a term being typed calls a callback
   # with a list of corresponding options.

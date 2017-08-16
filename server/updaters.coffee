@@ -11,7 +11,7 @@ import feedSchema from '/imports/schemas/feed'
 import Constants from '/imports/constants.coffee'
 import { regexEscape } from '/imports/utils'
 
-DATA_VERSION = 13
+DATA_VERSION = 17
 AppMetadata = new Meteor.Collection('appMetadata')
 priorDataVersion = AppMetadata.findOne(property: "dataVersion")?.value
 
@@ -216,5 +216,42 @@ module.exports = ->
   console.log 'Updating feeds - setting promed as default...'
   Feeds.update url: 'promedmail.org/post/',
     $set: default: true
+
+  console.log "Adding incident types..."
+  Incidents.update({
+    type: $exists: false
+    cases: $gte: 0
+    'dateRange.cumulative': $in: [null, false]
+  }, {
+    $set: type: 'caseCount'
+  }, multi: true)
+  Incidents.update({
+    type: $exists: false
+    deaths: $gte: 0
+    'dateRange.cumulative': $in: [null, false]
+  }, {
+    $set: type: 'deathCount'
+  }, multi: true)
+  Incidents.update({
+    type: $exists: false
+    cases: $gte: 0
+    'dateRange.cumulative': true
+  }, {
+    $set: type: 'cumulativeCaseCount'
+  }, multi: true)
+  Incidents.update({
+    type: $exists: false
+    deaths: $gte: 0
+    'dateRange.cumulative': true
+  }, {
+    $set: type: 'cumulativeDeathCount'
+  }, multi: true)
+  Incidents.update({
+    type: $exists: false
+    specify: $exists: true
+    'dateRange.cumulative': true
+  }, {
+    $set: type: 'specify'
+  }, multi: true)
 
   console.log "database update complete"

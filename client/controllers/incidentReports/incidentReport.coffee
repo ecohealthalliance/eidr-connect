@@ -15,11 +15,13 @@ Template.incidentReport.helpers
   caseCounts: ->
     @deaths or @cases
 
-  deathsLabel: ->
-    pluralize 'Death', @deaths, false
-
-  casesLabel: ->
-    pluralize 'Case', @cases, false
+  countLabel: ->
+    if @type == 'activeCount'
+      pluralize 'Active Case', @cases, false
+    else if @cases
+      pluralize 'Case', @cases, false
+    else if @deaths
+      pluralize 'Death', @deaths, false
 
   importantDetails: ->
     @deaths or @cases or @status

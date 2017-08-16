@@ -93,12 +93,10 @@ Template.eventIncidentReports.onRendered ->
   @autorun =>
     # anytime the incidents cursor changes, refetch the data and format
     segments = EventIncidents.find(@data.filterQuery.get())
-      .fetch()
       .map (incident) =>
-        SegmentMarker.createFromIncident(@plot, incident)
-      .filter (incident) ->
-        if incident
-          return incident
+        if incident.type != "activeCount"
+          SegmentMarker.createFromIncident(@plot, incident)
+      .filter (x) -> x
 
     # each overlapping group will be a 'layer' on the plot. overlapping is when
     #   segments have same y value and any portion of line segment overlaps

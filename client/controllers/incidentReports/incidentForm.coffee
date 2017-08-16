@@ -28,7 +28,8 @@ Template.incidentForm.onCreated ->
   if articleId
     @subscribe 'incidentArticle', articleId
   @incidentStatus = new ReactiveVar('')
-  @incidentType = new ReactiveVar('')
+  @incidentType = new ReactiveVar('caseCount')
+  @dateRangeType = new ReactiveVar('day')
   @locations = new ReactiveVar([])
   @suggestedFields = incident?.suggestedFields or new ReactiveVar([])
 
@@ -40,19 +41,26 @@ Template.incidentForm.onCreated ->
     @incidentData = _.extend(@incidentData, incident)
     if incident.dateRange
       @incidentData.dateRange = incident.dateRange
+      @dateRangeType.set(incident.dateRange.type)
 
     cases = @incidentData.cases
     deaths = @incidentData.deaths
     specify = @incidentData.specify
     if cases >= 0
-      type = 'cases'
+      type = 'caseCount'
     else if deaths >= 0
-      type = 'deaths'
+      type = 'deathCount'
     else if specify
-      type = 'other'
+      type = 'specify'
     else
-      type = ''
-
+      type = 'caseCount'
+    if @incidentData?.dateRange?.cumulative
+      if type == 'caseCount'
+        type = 'cumulativeCaseCount'
+      else if type == 'deathCount'
+        type = 'cumulativeDeathCount'
+    if @incidentData.type
+      type = @incidentData.type
     @incidentType.set(type)
 
     @incidentStatus.set(@incidentData.status or '')
@@ -82,10 +90,15 @@ Template.incidentForm.onRendered ->
   @$('#add-incident').parsley()
   #Update the validator when Blaze adds incident type related inputs
   @autorun =>
-    @incidentType.get()
     @locations.get()
     Meteor.defer =>
       @$('#add-incident').parsley().reset()
+
+  @autorun =>
+    switch @incidentType.get()
+      when 'activeCount' then @dateRangeType.set("day")
+      when 'cumulativeCaseCount' then @dateRangeType.set("day")
+      when 'cumulativeDeathCount' then @dateRangeType.set("day")
 
 Template.incidentForm.helpers
   incidentData: ->
@@ -94,31 +107,45 @@ Template.incidentForm.helpers
   incidentStatusChecked: (status) ->
     status is Template.instance().incidentStatus.get()
 
-  incidentTypeChecked: (type) ->
-    type is Template.instance().incidentType.get()
-
   articles: ->
     Template.instance().data.articles
 
   showCountForm: ->
     type = Template.instance().incidentType.get()
-    type is 'cases' or type is 'deaths'
+    type in [
+      'caseCount'
+      'deathCount'
+      'cumulativeCaseCount'
+      'cumulativeDeathCount'
+      'activeCount'
+    ]
 
   showOtherForm: ->
-    Template.instance().incidentType.get() is 'other'
+    Template.instance().incidentType.get() is 'specify'
+
+  showRangeTab: ->
+    type = Template.instance().incidentType.get()
+    type in [
+      'caseCount'
+      'deathCount'
+      'specify'
+    ]
 
   dayTabClass: ->
-    if Template.instance().incidentData.dateRange.type is 'day'
+    if Template.instance().dateRangeType.get() is 'day'
       'active'
 
   rangeTabClass: ->
-    if Template.instance().incidentData.dateRange.type is 'precise'
+    if Template.instance().dateRangeType.get() is 'precise'
       'active'
 
   selectedIncidentType: ->
     switch Template.instance().incidentType.get()
-      when 'cases' then 'Case'
-      when 'deaths' then 'Death'
+      when 'caseCount' then 'Case'
+      when 'deathCount' then 'Death'
+      when 'cumulativeCaseCount' then 'Case'
+      when 'cumulativeDeathCount' then 'Death'
+      when 'activeCount' then 'Case'
 
   suggestedField: (fieldName) ->
     Template.instance().isSuggestedField(fieldName)
@@ -186,12 +213,43 @@ Template.incidentForm.helpers
     article = Articles.findOne(Template.instance().data.incident?.articleId)
     not article?.url and not article?.enhancements?.source
 
-  incidentTypeValue: ->
+  incidentCount: ->
     instance = Template.instance()
-    type = instance.incidentType.get()
-    if type is 'other'
-      type = 'specify'
-    instance.incidentData[type]
+    incidentTypes = ['caseCount', 'cumulativeCaseCount', 'activeCount']
+    if instance.incidentType.get() in incidentTypes
+      instance.incidentData.cases
+    else
+      instance.incidentData.deaths
+
+  incidentSpecify: ->
+    Template.instance().incidentData.specify
+
+  incidentType: ->
+    Template.instance().incidentType.get()
+
+  incidentTypes: ->
+    [
+      id: 'caseCount'
+      text: 'Case count'
+    ,
+      id: 'deathCount'
+      text: 'Death count'
+    ,
+      id: 'cumulativeCaseCount'
+      text: 'Cumulative case count'
+    ,
+      id: 'cumulativeDeathCount'
+      text: 'Cumulative death count'
+    ,
+      id: 'activeCount'
+      text: 'Active case count'
+    ,
+      id: 'specify'
+      text: 'Other'
+    ]
+
+  isSelectedIncidentType: ->
+    @id == Template.instance().incidentType.get()
 
 Template.incidentForm.events
   'change input[name=daterangepicker_start]': (event, instance) ->
@@ -201,9 +259,9 @@ Template.incidentForm.events
     removeSuggestedProperties(instance, ['status'])
     _selectInput(event, instance, 'incidentStatus')
 
-  'click .type label, keyup .type label': (event, instance) ->
+  'change .type': (event, instance) ->
     removeSuggestedProperties(instance, ['cases', 'deaths'])
-    _selectInput(event, instance, 'incidentType')
+    instance.incidentType.set($(event.target).val())
 
   'keyup [name="count"]': (event, instance) ->
     removeSuggestedProperties(instance, ['cases', 'deaths'])
@@ -217,11 +275,13 @@ Template.incidentForm.events
   'mouseup .select2-selection': (event, instance) ->
     removeSuggestedProperties(instance, ['locations'])
 
-  'mouseup .incident--dates': (event, instance) ->
+  'click .single-date': (event, instance) ->
     removeSuggestedProperties(instance, ['dateRange'])
+    instance.dateRangeType.set('day')
 
-  'click .cumulative, keyup .cumulative': (event, instance) ->
-    removeSuggestedProperties(instance, ['cumulative'])
+  'click .date-range': (event, instance) ->
+    removeSuggestedProperties(instance, ['dateRange'])
+    instance.dateRangeType.set('precise')
 
   'submit form': (event, instance) ->
     event.preventDefault()
