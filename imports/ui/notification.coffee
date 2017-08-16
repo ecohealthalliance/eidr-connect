@@ -6,7 +6,7 @@ module.exports =
   # @param {string} text, text to show in notification
   # @param {number} delayTime, duration of notification
   ###
-  notify: (type, text, delayTime=2000) ->
+  notify: (type, text, delayTime=5000) ->
     data =
       text: text
       type: type

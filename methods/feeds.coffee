@@ -26,4 +26,7 @@ Meteor.methods
       if Meteor.isServer
         throw new Meteor.Error('auth', 'User does not have permission to delete incidents')
       return
+    if Feeds.findOne(feedId)?.default
+      throw new Meteor.Error('', 'Cannot delete the default feed')
+      return
     Feeds.remove feedId

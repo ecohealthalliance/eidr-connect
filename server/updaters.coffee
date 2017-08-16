@@ -11,7 +11,7 @@ import feedSchema from '/imports/schemas/feed'
 import Constants from '/imports/constants.coffee'
 import { regexEscape } from '/imports/utils'
 
-DATA_VERSION = 12
+DATA_VERSION = 13
 AppMetadata = new Meteor.Collection('appMetadata')
 priorDataVersion = AppMetadata.findOne(property: "dataVersion")?.value
 
@@ -213,4 +213,8 @@ module.exports = ->
               id: i.id
   console.log "#{incidentCount} incidents disassociated"
 
-  console.log "Database update complete"
+  console.log 'Updating feeds - setting promed as default...'
+  Feeds.update url: 'promedmail.org/post/',
+    $set: default: true
+
+  console.log "database update complete"

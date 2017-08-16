@@ -8,7 +8,7 @@ Template.feeds.onRendered ->
   $('.add-feed').parsley()
 
 Template.feeds.helpers
-  feeds: Feeds.find()
+  feeds: Feeds.find({}, sort: addedDate: 1)
 
 Template.feeds.events
   'submit .add-feed': (event, instance) ->
@@ -17,12 +17,15 @@ Template.feeds.events
     feedUrl = event.target.feedUrl.value
     if !/^https?:\/\//i.test(feedUrl)
       feedUrl = "http://#{feedUrl}"
+    if Feeds.findOne(url: feedUrl)
+      notify('error', "#{feedUrl} already exists")
+      return
 
     Meteor.call 'addFeed', url: feedUrl, (error, result) ->
       if error
-        toastr.warning(error.reason)
+        notify('error', reason)
       else
-        toastr.success("#{feedUrl} has been added")
+        notify('success', "#{feedUrl} has been added")
         event.target.reset()
 
   'click .delete': (event, instance) ->
