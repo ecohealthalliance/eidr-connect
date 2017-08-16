@@ -1,5 +1,6 @@
 import Constants from '/imports/constants.coffee'
 import Articles from '/imports/collections/articles.coffee'
+import { notify } from '/imports/ui/notification'
 
 ###
 # cleanUrl - takes an existing url and removes the last match of the applied
@@ -38,7 +39,7 @@ checkIncidentTypeValue = (form, input) ->
     messageText = 'count'
     if input is 'specify'
       messageText = 'incident type'
-    toastr.error("Please enter a valid #{messageText}.")
+    notify('error', "Please enter a valid #{messageText}.")
     false
   else
     true
@@ -78,7 +79,7 @@ export incidentReportFormToIncident = (form) ->
     when 'other'
       incident.specify = form.specify.value.trim()
     else
-      toastr.error("Unknown incident type [#{incidentType}]")
+      notify('error', "Unknown incident type [#{incidentType}]")
       return
 
   articleId = form.articleId?.value

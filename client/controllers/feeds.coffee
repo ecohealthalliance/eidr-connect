@@ -23,7 +23,7 @@ Template.feeds.events
 
     Meteor.call 'addFeed', url: feedUrl, (error, result) ->
       if error
-        notify('error', reason)
+        notify('error', error.reason)
       else
         notify('success', "#{feedUrl} has been added")
         event.target.reset()

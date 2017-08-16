@@ -1,10 +1,12 @@
+import { notify } from '/imports/ui/notification'
+
 Template.curatorUserStatus.onCreated ->
   @userStatusHandle = @subscribe('userStatus')
   @otherActiveUser = new ReactiveVar null
   @autorun =>
     Meteor.call 'updateCuratorUserStatus', @data.selectedSourceId.get(), (err, res) =>
       if err
-        toastr.error(err.message)
+        notify('error', err.message)
 
 Template.curatorUserStatus.onRendered ->
   instance = @
@@ -19,7 +21,7 @@ Template.curatorUserStatus.onRendered ->
 Template.curatorUserStatus.onDestroyed ->
   Meteor.call 'updateCuratorUserStatus', null, (err, res) =>
     if err
-      toastr.error(err.message)
+      notify('error', err.message)
 
 Template.curatorUserStatus.helpers
   hasOnlineUsers: ->

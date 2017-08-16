@@ -1,3 +1,5 @@
+import { notify } from '/imports/ui/notification'
+
 postMessageHandler = (event)->
   if not event.origin.match(/^https:\/\/([\w\-]+\.)*bsvecosystem\.net/) then return
   try
@@ -11,11 +13,11 @@ postMessageHandler = (event)->
     url = window.location.toString()
     if url.match(/extract\-incidents/)
       if $('#suggestedIncidentsModal:visible').length == 0
-        toastr.error "No document has been submitted"
+        notify('error', 'No document has been submitted')
         return
       table = $('table.incident-table')
       if table.length == 0
-        toastr.error "No document has been submitted"
+        notify('error', 'No document has been submitted')
         return
       dataUrl = 'data:text/csv;charset=utf-8;base64,' + table.tableExport(
         type: 'csv'

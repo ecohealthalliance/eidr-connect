@@ -87,7 +87,7 @@ Template.suggestedIncidentsModal.onRendered ->
   Meteor.call 'getArticleEnhancements', source, (error, enhancements) =>
     if error
       Modal.hide(@)
-      toastr.error error.reason
+      notify('error', error.reason)
       return
     source.enhancements = enhancements
     if @saveResults
@@ -199,7 +199,7 @@ Template.suggestedIncidentsModal.events
       return
     Meteor.call 'addIncidentReports', incidents, instance.data.article._id, (err, result)->
       if err
-        toastr.error err.reason
+        notify('error', err.reason)
       else
         # we need to allow the modal to close without warning confirmAbandonChanges
         # since the incidents have been saved to the remote, it makes sense to
