@@ -7,6 +7,8 @@ convertAllIncidentsToDifferentials = (incidents)->
   incidents.forEach (i)->
     if not i.dateRange or i.specify
       return
+    if i.type == 'activeCount'
+      return
     simpleIncident =
       startDate: new Date(i.dateRange.start)
       endDate: new Date(i.dateRange.end)

@@ -55,10 +55,11 @@ export incidentReportFormToIncident = (form) ->
 
   picker = $pickerContainer.data('daterangepicker')
 
-  incidentType = $form.find('input[name="incidentType"]:checked').val()
+  incidentType = form.type.value
   incidentStatus = $form.find('input[name="incidentStatus"]:checked').val()
 
   incident =
+    type: incidentType
     travelRelated: form.travelRelated.checked
     approximate: form.approximate.checked
     locations: []
@@ -69,14 +70,20 @@ export incidentReportFormToIncident = (form) ->
       type: rangeType
       start: moment.utc(picker.startDate.format("YYYY-MM-DD")).toDate()
       end: moment.utc(picker.endDate.format("YYYY-MM-DD")).toDate()
-      cumulative: form.cumulative.checked
+      cumulative: incidentType.startsWith("cumulative")
 
   switch incidentType || ''
-    when 'cases'
+    when 'caseCount'
       incident.cases = parseInt(form.count.value, 10)
-    when 'deaths'
+    when 'deathCount'
       incident.deaths = parseInt(form.count.value, 10)
-    when 'other'
+    when 'cumulativeCaseCount'
+      incident.cases = parseInt(form.count.value, 10)
+    when 'cumulativeDeathCount'
+      incident.deaths = parseInt(form.count.value, 10)
+    when 'activeCount'
+      incident.cases = parseInt(form.count.value, 10)
+    when 'specify'
       incident.specify = form.specify.value.trim()
     else
       notify('error', "Unknown incident type [#{incidentType}]")
@@ -357,12 +364,27 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
       if acceptByDefault and not incident.uncertainCountType
         incident.accepted = true
       # Detect whether count is cumulative
+      dateRangeHours = moment(incident.dateRange.end)
+        .diff(incident.dateRange.start, 'hours')
       if 'incremental' in attributes
         incident.dateRange.cumulative = false
       else if 'cumulative' in attributes
         incident.dateRange.cumulative = true
-      else if incident.dateRange.type == 'day' and count > 300
+      # Infer cumulative is case rate is greater than 300 per day
+      else if (count / (dateRangeHours / 24)) > 300
         incident.dateRange.cumulative = true
+      if incident.dateRange.cumulative
+        if incident.cases
+          incident.type = 'cumulativeCaseCount'
+        else if incident.deaths
+          incident.type = 'cumulativeDeathCount'
+      else
+        if "active" in attributes
+          incident.type = 'activeCount'
+        else if incident.cases
+          incident.type = 'caseCount'
+        else if incident.deaths
+          incident.type = 'deathCount'
       suspectedAttributes = _.intersection([
         'approximate', 'average', 'suspected'
       ], attributes)

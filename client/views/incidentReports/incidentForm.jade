@@ -26,52 +26,29 @@ template(name="incidentForm")
         p.incident-snippet=incidentSnippet
 
       .incident-type-wrapper.form-group.form-group--full.form-groups(class=incidentTypeClassNames)
-        .form-group.incident-type
-          label.control-label.with-info-tooltip(
-            data-toggle="tooltip"
-            data-placement="right"
-            title="Incidents are generally reports of case counts or death counts with an associated location and time. A free-text description of some other type of incident may be used instead."
-          ) Incident Type
-          .container-flex.check-buttons.type.no-break
-            .check-button
-              input(
-                type="radio"
-                name="incidentType"
-                id="cases"
-                value="cases"
-                tabindex="-1"
-                checked="{{incidentTypeChecked 'cases'}}"
-                data-parsley-errors-container=".incident-type"
-                data-parsley-class-handler=".incident-type-wrapper"
-                data-parsley-error-message="Please select one of these options."
-                required)
-              label(for="cases" tabindex="0") Cases
-            .check-button
-              input(
-                type="radio"
-                name="incidentType"
-                id="deaths"
-                value="deaths"
-                tabindex="-1"
-                checked="{{incidentTypeChecked 'deaths'}}"
-                data-parsley-errors-container=".incident-type"
-                data-parsley-class-handler=".incident-type-wrapper"
-                data-parsley-error-message="Please select one of these options."
-                required)
-              label(for="deaths" tabindex="0") Deaths
-            .check-button
-              input(
-                type="radio"
-                name="incidentType"
-                id="other"
-                value="other"
-                tabindex="-1"
-                checked="{{incidentTypeChecked 'other'}}"
-                data-parsley-errors-container=".incident-type"
-                data-parsley-class-handler=".incident-type-wrapper"
-                data-parsley-error-message="Please select one of these options."
-                required)
-              label(for="other" tabindex="0") Other
+        label.control-label.with-info-tooltip(
+          data-toggle="tooltip"
+          data-placement="right"
+          title="Incidents are generally reports of case counts or death counts with an associated location and time. A free-text description of some other type of incident may be used instead.") Incident Type
+        select(
+          name="type"
+          placeholder="Select a type").form-control.type
+          each incidentTypes
+            option(value=id selected=isSelectedIncidentType)=text
+
+        p.example
+          if eq incidentType "caseCount"
+            i Example: 2 more people were infected on Monday.
+          if eq incidentType "deathCount"
+            i Example: 3 patients died in August.
+          else if eq incidentType "cumulativeCaseCount"
+            i Example: So far there have been a total of 6 cases.
+          else if eq incidentType "cumulativeDeathCount"
+            i Example: 4 people have died since the beginning of the outbreak.
+          else if eq incidentType "activeCount"
+            i Example: There are currently 16 people infected.
+          else if eq incidentType "specify"
+            span.space-btm-1
 
         if showCountForm
           .form-group.form-group--child
@@ -80,7 +57,7 @@ template(name="incidentForm")
               name="count"
               type="number"
               min="0"
-              value=incidentTypeValue
+              value=incidentCount
               required
               tabindex="0")
 
@@ -92,7 +69,7 @@ template(name="incidentForm")
               id="specify"
               type="text"
               required
-              value=incidentTypeValue
+              value=incidentSpecify
               tabindex="0")
 
         .form-group.form-group--child(hidden=typeIsNotSelected)
@@ -102,14 +79,6 @@ template(name="incidentForm")
             title='Cumulative counts include all cases since the start of the outbreak. E.g. "So far there have been 21 cases."\nApproximate counts specify an imprecise number. E.g. "There were at least 100 deaths."'
           ) Count Attributes
           .container-flex.other-metadata.check-buttons.no-break
-            .check-button
-              input(
-                type="checkbox"
-                name="cumulative"
-                id="cumulative"
-                tabindex="-1"
-                checked=incidentData.dateRange.cumulative)
-              label.cumulative(for="cumulative" tabindex="0") Cumulative
 
             .check-button
               input(
@@ -122,7 +91,8 @@ template(name="incidentForm")
 
       .form-group.incident--dates.full-width.with-tabs(class="{{suggestedField 'dateRange'}}")
         ul.tabs.tabs-traditional.tabs-secondary(role="tablist")
-          li.with-info-tooltip(role="presentation"
+          li.with-info-tooltip.single-date(
+            role="presentation"
             class="{{dayTabClass}}"
             data-toggle="tooltip"
             data-placement="top"
@@ -132,17 +102,18 @@ template(name="incidentForm")
               aria-controls="single Date"
               role="tab"
               data-toggle="tab") Single Date
-          li.with-info-tooltip(
-            role="presentation"
-            class="{{rangeTabClass}}"
-            data-toggle="tooltip"
-            data-placement="top"
-            title='For incidents that occurred over multiple days or for which a precise date is unspecified. E.g. "There were 5 cases in the month of March."')
-            a(
-              href="#preciseRange"
-              aria-controls="date range"
-              role="tab"
-              data-toggle="tab") Date Range
+          if showRangeTab
+            li.with-info-tooltip.date-range(
+              role="presentation"
+              class="{{rangeTabClass}}"
+              data-toggle="tooltip"
+              data-placement="top"
+              title='For incidents that occurred over multiple days or for which a precise date is unspecified. E.g. "There were 5 cases in the month of March."')
+              a(
+                href="#preciseRange"
+                aria-controls="date range"
+                role="tab"
+                data-toggle="tab") Date Range
 
         .tab-content
           #singleDate.tab-pane(role="tabpanel" class="{{dayTabClass}}")

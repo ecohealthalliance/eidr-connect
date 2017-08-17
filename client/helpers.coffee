@@ -61,3 +61,5 @@ UI.registerHelper 'checkActive', (routeName) ->
     'active'
 
 UI.registerHelper 'documentTitle', documentTitle
+
+UI.registerHelper 'eq', (a, b) -> a == b

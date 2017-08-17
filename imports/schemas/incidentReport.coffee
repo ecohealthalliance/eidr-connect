@@ -12,6 +12,9 @@ IncidentReportSchema = new SimpleSchema
   _id:
     type: String
     optional: true
+  type:
+    type: String
+    optional: true
   articleId:
     type: String
     optional: true

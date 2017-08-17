@@ -27,7 +27,7 @@ do ->
       # Status
       @client.click('label[for="suspected"]')
       # Type
-      @client.click('label[for="cases"]')
+      @client.selectByValue('[name="type"]', 'caseCount')
       # Count
       @client.waitForVisible('input[name="count"]')
       @client.setValue('input[name="count"]', count)
@@ -54,9 +54,16 @@ do ->
       @client.click('.save-incident')
 
     @When /^I change the incident "([^']*)" to "([^']*)"$/, (propertyName, value) ->
-      types = ['deaths', 'cases', 'other']
+      types = [
+        'caseCount'
+        'deathCount'
+        'cumulativeCaseCount'
+        'cumulativeDeathCount'
+        'activeCount'
+        'specify'
+      ]
       if propertyName in types
-        @client.click("label[for='#{propertyName}']")
+        @client.selectByValue('[name="type"]', propertyName)
         @client.pause()
         if propertyName is 'other'
           @client.waitForVisible('[name="other"]')
