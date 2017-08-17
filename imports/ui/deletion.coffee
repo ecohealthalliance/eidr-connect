@@ -1,9 +1,9 @@
-import { notify } from '/imports/ui/notification'
+import notify from '/imports/ui/notification'
 
 module.exports =
   commonPostDeletionTasks: (error, objNameToDelete, modalName=null) ->
     if error
-      toastr.error(error.message)
+      notify('error', error.message)
       return
     modalId = if modalName then "##{modalName}" else "##{objNameToDelete}-delete-modal"
     $(modalId).modal('hide')

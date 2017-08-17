@@ -1,5 +1,5 @@
 import { dismissModal } from '/imports/ui/modals'
-import { notify } from '/imports/ui/notification'
+import notify from '/imports/ui/notification'
 
 handleCompletion = (error, objNameToAssociate, modal) ->
   if error

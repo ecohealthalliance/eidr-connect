@@ -1,9 +1,9 @@
-incidentReportSchema = require('/imports/schemas/incidentReport.coffee')
-UserEvents = require('/imports/collections/userEvents')
-Incidents = require('/imports/collections/incidentReports')
-Constants = require('/imports/constants.coffee')
-{ notify } = require('/imports/ui/notification')
-{ stageModals } = require('/imports/ui/modals')
+import incidentReportSchema from '/imports/schemas/incidentReport.coffee'
+import UserEvents from '/imports/collections/userEvents'
+import Incidents from '/imports/collections/incidentReports'
+import Constants from '/imports/constants.coffee'
+import notify from '/imports/ui/notification'
+import { stageModals } from '/imports/ui/modals'
 import { annotateContentWithIncidents,
   buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
 import { formatUrl, createIncidentReportsFromEnhancements } from '/imports/utils.coffee'
@@ -87,7 +87,7 @@ Template.suggestedIncidentsModal.onRendered ->
   Meteor.call 'getArticleEnhancements', source, (error, enhancements) =>
     if error
       Modal.hide(@)
-      toastr.error error.reason
+      notify('error', error.reason)
       return
     source.enhancements = enhancements
     if @saveResults
@@ -199,7 +199,7 @@ Template.suggestedIncidentsModal.events
       return
     Meteor.call 'addIncidentReports', incidents, instance.data.article._id, (err, result)->
       if err
-        toastr.error err.reason
+        notify('error', err.reason)
       else
         # we need to allow the modal to close without warning confirmAbandonChanges
         # since the incidents have been saved to the remote, it makes sense to

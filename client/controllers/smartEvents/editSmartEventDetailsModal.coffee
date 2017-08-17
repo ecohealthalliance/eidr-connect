@@ -1,5 +1,5 @@
 import { dismissModal } from '/imports/ui/modals'
-import { notify } from '/imports/ui/notification'
+import notify from '/imports/ui/notification'
 import createInlineDateRangePicker from '/imports/ui/inlineDateRangePicker'
 import { updateCalendarSelection } from '/imports/ui/setRange'
 import { diseaseOptionsFn, formatLocation } from '/imports/utils'

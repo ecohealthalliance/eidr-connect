@@ -1,3 +1,5 @@
+import notify from '/imports/ui/notification'
+
 Template.createAccount.onRendered ->
   @$('#add-account').parsley()
 
@@ -13,9 +15,9 @@ Template.createAccount.events
     Meteor.call 'createAccount', email, name, makeAdmin, (error, result) ->
       if error
         if error.error is 'allUsers.createAccount.exists'
-          toastr.error('The specified email address is already being used')
+          notify('error', 'The specified email address is already being used')
         else
-          toastr.error(error.error)
+          notify('error', error.error)
        else
          form.reset()
-         toastr.success("Account created for #{email}")
+         notify('success', "Account created for #{email}")

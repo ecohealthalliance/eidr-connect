@@ -1,4 +1,4 @@
-import { notify } from '/imports/ui/notification'
+import notify from '/imports/ui/notification'
 import { stageModals } from '/imports/ui/modals'
 
 Template.addGeonameModal.onCreated ->

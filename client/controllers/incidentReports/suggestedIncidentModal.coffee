@@ -1,7 +1,7 @@
 import UserEvents from'/imports/collections/userEvents.coffee'
 import incidentReportSchema from '/imports/schemas/incidentReport.coffee'
 import utils from '/imports/utils.coffee'
-import { notify } from '/imports/ui/notification'
+import notify from '/imports/ui/notification'
 import { stageModals } from '/imports/ui/modals'
 
 Template.suggestedIncidentModal.onRendered ->

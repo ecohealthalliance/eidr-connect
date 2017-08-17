@@ -36,22 +36,12 @@ do ->
         else
           assert.ok(match)
 
-    @Then /^I should( not)? see a "([^"]*)" toast$/, (noToast, type) ->
-      @client.waitForVisible('.toast')
-        # This causes a warning if no toast is visible
-      toastClasses = @client.getAttribute('.toast', 'class')
-      match = toastClasses?.match(type)
-      if noToast
-        assert.ok(not match)
-      else
-        assert.ok(match)
-
-    @Then /^I should( not)? see a "([^"]*)" notification$/, (noToast, type) ->
+    @Then /^I should( not)? see a "([^"]*)" notification$/, (shouldNot, type) ->
       # Types: success, failure, warning
       @client.waitForVisible('.notification')
-      toastClasses = @client.getAttribute('.notification', 'class')
-      match = toastClasses?.match(type)
-      if noToast
+      notifyClasses = @client.getAttribute('.notification', 'class')
+      match = notifyClasses?.match(type)
+      if shouldNot
         assert.ok(not match)
       else
         assert.ok(match)
@@ -71,7 +61,7 @@ do ->
       @browser.scroll(0, 0)
       @client.clickWhenVisible("#{modal} .close-modal")
 
-    @Then /^I dismiss the active toast$/, ->
-      @client.clickWhenVisible('.toast-close-button')
-      # Pause for toast fade animation
+    @Then /^I dismiss the active notification$/, ->
+      @client.clickWhenVisible('.notification')
+      # Wait for notification to animate off-canvas
       @client.pause(500)

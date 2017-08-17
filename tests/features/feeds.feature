@@ -7,7 +7,7 @@ Feature: Feeds
 
   Scenario: Submit a feed
     When I add the feed "http://www.testfeed.com"
-    Then I should see a "success" toast
+    Then I should see a "success" notification
     And I should see content "http://www.testfeed.com"
 
   Scenario: Remove a feed

@@ -6,7 +6,7 @@ import {
   removeSuggestedProperties,
   diseaseOptionsFn } from '/imports/utils'
 import { getIncidentSnippet } from '/imports/ui/snippets'
-import { notify } from '/imports/ui/notification'
+import notify from '/imports/ui/notification'
 
 _selectInput = (event, instance, prop, isCheckbox) ->
   return if not keyboardSelect(event) and event.type is 'keyup'
