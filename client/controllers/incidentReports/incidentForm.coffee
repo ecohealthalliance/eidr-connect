@@ -111,8 +111,7 @@ Template.incidentForm.helpers
     Template.instance().data.articles
 
   showCountForm: ->
-    type = Template.instance().incidentType.get()
-    type in [
+    Template.instance().incidentType.get() in [
       'caseCount'
       'deathCount'
       'cumulativeCaseCount'
@@ -124,8 +123,7 @@ Template.incidentForm.helpers
     Template.instance().incidentType.get() is 'specify'
 
   showRangeTab: ->
-    type = Template.instance().incidentType.get()
-    type in [
+    Template.instance().incidentType.get() in [
       'caseCount'
       'deathCount'
       'specify'
