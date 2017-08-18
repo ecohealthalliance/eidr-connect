@@ -1,5 +1,5 @@
-{ dismissModal } = require '/imports/ui/modals'
-{ notify } = require '/imports/ui/notification'
+import { dismissModal } from '/imports/ui/modals'
+import notify from '/imports/ui/notification'
 
 handleCompletion = (error, objNameToAssociate, modal) ->
   if error

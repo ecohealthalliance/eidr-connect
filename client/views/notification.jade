@@ -1,4 +1,5 @@
 template(name="notification")
   .notification(class="#{type} #{active}")
-    i.fa(class="fa-#{icon}")
-    h4=text
+    .message
+      i.fa(class="fa-#{icon}")
+      h4=text

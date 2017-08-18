@@ -7,22 +7,27 @@ import {
   formatLocations,
   documentTitle } from '/imports/utils'
 
-UI.registerHelper 'formatLocation', (location)->
-  formatLocation(location)
-
-UI.registerHelper 'formatLocations', (locations)->
-  formatLocations(locations)
-
-UI.registerHelper 'formatDateRange', (dateRange)->
-  formatDateRange(dateRange)
-
-UI.registerHelper 'incidentToText', (incident) ->
+incidentCount = (incident) ->
   if incident.cases >= 0
     incidentDescription = pluralize("case", incident.cases)
   else if incident.deaths >= 0
     incidentDescription = pluralize("death", incident.deaths)
   else if incident.specify
     incidentDescription = incident.specify
+  incidentDescription
+
+UI.registerHelper 'formatLocation', formatLocation
+
+UI.registerHelper 'formatLocations', formatLocations
+
+UI.registerHelper 'formatDateRange', formatDateRange
+
+UI.registerHelper 'pluralize', pluralize
+
+UI.registerHelper 'incidentCount', incidentCount
+
+UI.registerHelper 'incidentToText', (incident) ->
+  incidentDescription = incidentCount(incident)
   if incident.locations.length < 2
     formattedLocations = formatLocation(incident.locations[0])
   else
@@ -56,3 +61,5 @@ UI.registerHelper 'checkActive', (routeName) ->
     'active'
 
 UI.registerHelper 'documentTitle', documentTitle
+
+UI.registerHelper 'eq', (a, b) -> a == b

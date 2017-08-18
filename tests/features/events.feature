@@ -48,3 +48,28 @@ Feature: Events
     And I "cancel" deletion
     Then I should not see content "EDIT EVENT DETAILS"
     And I should see content "A test"
+
+  Scenario: Filter event properties individually
+    When I navigate to the first event
+    And I select the "incidents" tab
+    And I add "4" incidents with dates in the past
+    Then I should see "5" incidents
+    Then I filter by a date range of two weeks ago to today
+    Then I should see "2" incidents
+    Then I clear event filters
+    Then I filter by "cases"
+    Then I should see "4" incidents
+    Then I clear event filters
+    Then I filter by "deaths"
+    Then I should see "1" incidents
+    Then I clear event filters
+    Then I filter by "confirmed"
+    Then I should see "2" incidents
+    Then I clear event filters
+    Then I filter by the first location in the list
+    Then I should see "4" incidents
+    Then I clear event filters
+    Then I filter by "travelRelated"
+    Then I should see "1" incidents
+    Then I clear event filters
+    Then I should see "5" incidents

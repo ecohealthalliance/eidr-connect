@@ -1,5 +1,7 @@
 template(name="addIncidentReport")
   if isInRole "admin"
-    button.btn.btn-primary(type="button" class="open-incident-form#{class}")
+    button.btn.btn-primary(
+      type="button"
+      class="open-incident-form#{class} #{classNames}")
       i.fa.fa-plus-circle(aria-hidden="true")
       span Add Incident

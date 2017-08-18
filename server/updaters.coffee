@@ -11,7 +11,7 @@ import feedSchema from '/imports/schemas/feed'
 import Constants from '/imports/constants.coffee'
 import { regexEscape } from '/imports/utils'
 
-DATA_VERSION = 11
+DATA_VERSION = 17
 AppMetadata = new Meteor.Collection('appMetadata')
 priorDataVersion = AppMetadata.findOne(property: "dataVersion")?.value
 
@@ -199,4 +199,59 @@ module.exports = ->
   console.log "Removing #{invalidDateIncidents.length} incidents"
   Incidents.remove(_id: $in: invalidDateIncidents)
   AppMetadata.upsert({property: "dataVersion"}, $set: {value: DATA_VERSION})
+
+  console.log 'Disassociating deleted incidents from events...'
+  incidentCount = 0
+  UserEvents.find().forEach (event) ->
+    event.incidents?.forEach (i) ->
+      incident = Incidents.findOne(i.id)
+      if not incident or incident.deleted
+        incidentCount++
+        UserEvents.update event._id,
+          $pull:
+            incidents:
+              id: i.id
+  console.log "#{incidentCount} incidents disassociated"
+
+  console.log 'Updating feeds - setting promed as default...'
+  Feeds.update url: 'promedmail.org/post/',
+    $set: default: true
+
+  console.log "Adding incident types..."
+  Incidents.update({
+    type: $exists: false
+    cases: $gte: 0
+    'dateRange.cumulative': $in: [null, false]
+  }, {
+    $set: type: 'caseCount'
+  }, multi: true)
+  Incidents.update({
+    type: $exists: false
+    deaths: $gte: 0
+    'dateRange.cumulative': $in: [null, false]
+  }, {
+    $set: type: 'deathCount'
+  }, multi: true)
+  Incidents.update({
+    type: $exists: false
+    cases: $gte: 0
+    'dateRange.cumulative': true
+  }, {
+    $set: type: 'cumulativeCaseCount'
+  }, multi: true)
+  Incidents.update({
+    type: $exists: false
+    deaths: $gte: 0
+    'dateRange.cumulative': true
+  }, {
+    $set: type: 'cumulativeDeathCount'
+  }, multi: true)
+  Incidents.update({
+    type: $exists: false
+    specify: $exists: true
+    'dateRange.cumulative': true
+  }, {
+    $set: type: 'specify'
+  }, multi: true)
+
   console.log "database update complete"

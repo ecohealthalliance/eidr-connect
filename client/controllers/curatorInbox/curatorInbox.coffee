@@ -1,8 +1,9 @@
-Articles = require '/imports/collections/articles'
-Feeds = require '/imports/collections/feeds'
-createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
+import Articles from '/imports/collections/articles'
+import Feeds from '/imports/collections/feeds'
+import createInlineDateRangePicker from '/imports/ui/inlineDateRangePicker.coffee'
 import { formatDateRange, keyboardSelect, debounceCheckTop } from '/imports/utils'
-{ updateCalendarSelection } = require('/imports/ui/setRange')
+import notify from '/imports/ui/notification'
+import { updateCalendarSelection } from '/imports/ui/setRange'
 
 CUSTOM_FEEDS = [
   {
@@ -119,7 +120,8 @@ Template.curatorInbox.onRendered ->
 
     Meteor.call 'fetchPromedPosts', 100, range, (err) ->
       if err
-        return toastr.error(err.reason)
+        notify('error', err.reason)
+        return
 
     calendar = $('#date-picker').data('daterangepicker')
     if calendar

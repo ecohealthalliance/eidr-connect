@@ -154,6 +154,8 @@ Template.eventAffectedAreas.onRendered ->
       incident.locations.forEach (location) ->
         key = "#{location.latitude},#{location.longitude}"
         incidentsByLatLng[key] = (incidentsByLatLng[key] or []).concat(incident)
+    for key, incidents of incidentsByLatLng
+      incidentsByLatLng[key] = _.uniq(incidents, false, (x) -> x._id)
     if @markerLayer.get()
       markerLayerGroup = L.layerGroup()
       for key, incidents of incidentsByLatLng

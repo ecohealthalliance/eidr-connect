@@ -1,34 +1,77 @@
+$notification-off-canvas-position = $header-height-with-border * -1
 .notification
   position fixed
-  top 50%
-  left 50%
-  transform translate(-50%, -50%)
+  display flex
+  align-items center
+  height $header-height-with-border
+  top $notification-off-canvas-position
+  left 0
+  right 0
+  transition .25s ease-in-out
+  cursor pointer
+  border-bottom 3px solid transparent
   z-index $cosmos-layer
-  padding 5em
-  background alpha(white, 95%)
-  border-radius 4px
-  opacity 0
-  transition opacity .2s linear
-  font-smoothing antialiased
-  border 3px solid transparent
+  &:hover
+    transition .1
+    &::before
+      opacity 1
+      transform scale(1.25) translate(0, -50%)
+
+  .message
+    display flex
+    align-items center
+    margin-left 1em
+    +above(3)
+      margin-left 2%
+    i
+      margin-right .5em
+      font-size 175%
+      color $body-text
+      line-height 1
+
   h4
-    font-size 1.5em
+    font-size 1em
     text-align center
-  i
-    font-size 10em
+    +above(3)
+      font-size 1.25em
+  &::before
+    content '\f057'
+    icon()
+    position absolute
+    transform translate(0, -50%)
+    right 1em
+    top 50%
+    line-height 0
+    padding .1em
+    color $body-text
+    opacity .9
+    font-size 2em
     text-align center
-    display block
+    transition .1s
+    +above(3)
+      right 2%
+
   &.success
-    color $positive
-    border-color $positive
+    background lighten(alpha($positive, 98%), 50%)
+    border-color lighten($positive, 5%)
+    &::before
+    i
+      color darken($positive, 40%)
   &.failure
   &.error
-    color $danger
-    border-color $danger
+    background lighten(alpha($danger, 98%), 50%)
+    border-color lighten($danger, 5%)
+    &::before
+    i
+      color darken($danger, 40%)
   &.warning
-    color $warning
-    border-color $positive
+    background lighten(alpha($warning, 98%), 50%)
+    border-color lighten($warning, 5%)
+    &::before
+    i
+      color darken($warning, 40%)
   &.active
+    top 0
     opacity 1
   &.dismissing
-    opacity 0
+    top $notification-off-canvas-position

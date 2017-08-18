@@ -14,7 +14,6 @@ http@1.2.12
 fortawesome:fontawesome
 aslagle:reactive-table
 fuatsengul:leaflet
-chrismbeckett:toastr
 accounts-base@1.3.0
 accounts-ui@1.1.9
 accounts-password@1.3.6

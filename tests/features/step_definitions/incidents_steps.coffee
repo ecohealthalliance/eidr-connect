@@ -27,14 +27,22 @@ do ->
       # Status
       @client.click('label[for="suspected"]')
       # Type
-      @client.click('label[for="cases"]')
+      @client.selectByValue('[name="type"]', 'caseCount')
       # Count
       @client.waitForVisible('input[name="count"]')
       @client.setValue('input[name="count"]', count)
       # Submit
       @client.click('button.save-incident')
 
+    @When /^I add "([^']*)" incidents with dates in the past$/, (incidentCount) ->
+      @client.pause(2000)
+      incidentCount = parseInt(incidentCount)
+      eventId = @client.getUrl().slice(44, -10)
+      @server.call('addIncidents', eventId, incidentCount)
+      @client.pause(2000)
+
     @When /^I click the first incident$/, ->
+      @client.pause(2000)
       @client.clickWhenVisible('#event-incidents-table tbody tr:first-child')
 
     @When /^I open the edit incident report modal$/, ->
@@ -46,9 +54,16 @@ do ->
       @client.click('.save-incident')
 
     @When /^I change the incident "([^']*)" to "([^']*)"$/, (propertyName, value) ->
-      types = ['deaths', 'cases', 'other']
+      types = [
+        'caseCount'
+        'deathCount'
+        'cumulativeCaseCount'
+        'cumulativeDeathCount'
+        'activeCount'
+        'specify'
+      ]
       if propertyName in types
-        @client.click("label[for='#{propertyName}']")
+        @client.selectByValue('[name="type"]', propertyName)
         @client.pause()
         if propertyName is 'other'
           @client.waitForVisible('[name="other"]')

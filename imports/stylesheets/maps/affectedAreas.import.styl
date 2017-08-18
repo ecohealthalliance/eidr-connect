@@ -1,4 +1,7 @@
 .affected-areas--container
+  display flex
+  flex 1 1 auto
+  flex-direction column
   nav
     > ul
       > li
@@ -31,10 +34,12 @@
 
   .map-wrapper
     position relative
+    flex 1 1 auto
+    display flex
     .veil
-      z-index $modal-layer
+      z-index $top-layer
     .loading
-      z-index $modal-layer + 1
+      z-index $top-layer + 1
 
   .affected-areas--popup
     .incidents-wrapper

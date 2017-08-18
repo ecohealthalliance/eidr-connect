@@ -1,6 +1,6 @@
 import UserEvents from '/imports/collections/userEvents.coffee'
 import Incidents from '/imports/collections/incidentReports.coffee'
-import { notify } from '/imports/ui/notification'
+import notify from '/imports/ui/notification'
 import { buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
 import { formatLocations } from '/imports/utils'
 

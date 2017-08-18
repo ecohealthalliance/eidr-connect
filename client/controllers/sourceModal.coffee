@@ -1,7 +1,7 @@
-convertDate = require '/imports/convertDate.coffee'
-createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker.coffee'
-{ notify } = require '/imports/ui/notification'
-{ stageModals } = require '/imports/ui/modals'
+import convertDate from '/imports/convertDate.coffee'
+import createInlineDateRangePicker from '/imports/ui/inlineDateRangePicker.coffee'
+import notify from '/imports/ui/notification'
+import { stageModals } from '/imports/ui/modals'
 
 import {
   UTCOffsets,

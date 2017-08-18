@@ -19,7 +19,7 @@ Feature: Incidents
     And I click the first incident
     When I open the edit incident report modal
     Then I change the incident "location" to "Earth"
-    And I change the incident "deaths" to "1000"
+    And I change the incident "deathCount" to "1000"
     Then I save the incident
     Then I should not see content "357"
     And I should see content "1000"

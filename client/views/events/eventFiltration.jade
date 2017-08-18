@@ -1,24 +1,23 @@
 template(name="eventFiltration")
   .filtration--header
     h2 Filter
+    button.btn.xs-btn.btn-default.clear-filters.on-right(
+      disabled="{{#unless filtering}}disabled{{/unless}}") Clear
 
-  section.filtration--property.type(
+  section.filtration--property.date-range(
     class="{{#unless hasDateRange}} disabled {{/unless}}")
     h3 Date Range
     +slider sliderData
-    .dates.container-flex.form-group
-      .date
-        label Start Date
-        input.form-control.start-date(value=startDate type="date" min=minDate max=maxDate)
-      .date
-        label End Date
-        input.form-control.start-date(value=endDate type="date" min=minDate max=maxDate)
+    .daterange-wrapper
+      .daterange
+        i.fa.fa-calendar
+        input.form-control.daterange-input(type="text")
 
   section.filtration--property.type
     h3 Types
     .check-buttons.container-flex
       each typeProps
-        .check-button
+        .check-button(class=this)
           input(
             type="checkbox"
             name="#{propPrex}#{this}"

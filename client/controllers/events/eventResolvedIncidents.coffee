@@ -13,6 +13,7 @@ Template.eventResolvedIncidents.onCreated ->
   @legend = new ReactiveVar([])
   @loading = new ReactiveVar(false)
   @highlightedLocations = new Meteor.Collection(null)
+  @differentialIncidents = new ReactiveVar([])
 
 Template.eventResolvedIncidents.onRendered ->
   renderPlot = (differentials, locToSubintervals, locationTree, topLocations) =>
@@ -149,17 +150,29 @@ Template.eventResolvedIncidents.onRendered ->
 
   @autorun =>
     @incidents = EventIncidents.find(@data.filterQuery.get())
+    incidentType = @incidentType.get()
     allIncidents = @incidents.fetch()
+    allIncidents = allIncidents.filter (i)->
+      i.locations.every (l)-> l.featureCode
+    differentialIncidents = convertAllIncidentsToDifferentials(allIncidents)
+    @differentialIncidents.set(differentialIncidents)
+
+  @autorun =>
     @hoveredIntervalClickEvent = null
     incidentType = @incidentType.get()
-
+    differentialIncidents = @differentialIncidents.get()
+    # Toggle the incident type if there are no matching incidents
+    if not _.findWhere(differentialIncidents, type: incidentType)
+      if differentialIncidents.length >= 1
+        if incidentType == 'cases'
+          @incidentType.set('deaths')
+        else
+          @incidentType.set('cases')
+        return
     @loading.set(true)
     @highlightedLocations.remove({})
     _.delay =>
-      allIncidents = allIncidents.filter (i)->
-        i.locations.every (l)-> l.featureCode
-      differentials = convertAllIncidentsToDifferentials(allIncidents)
-      differentials = _.where(differentials, type: incidentType)
+      differentials = _.where(differentialIncidents, type: incidentType)
       subIntervals = differentailIncidentsToSubIntervals(differentials)
       extendSubIntervalsWithValues(differentials, subIntervals)
       for subInterval in subIntervals
@@ -180,15 +193,6 @@ Template.eventResolvedIncidents.onRendered ->
       @autorun =>
         renderPlot(differentials, locToSubintervals, locationTree, topLocations)
         @loading.set(false)
-    , 300
-
-  @autorun =>
-    # Update selected tab based on type filters
-    selectedIncidentTypes = @data.selectedIncidentTypes.get()
-    if 'cases' in selectedIncidentTypes and 'deaths' not in selectedIncidentTypes
-      @incidentType.set('cases')
-    else if 'cases' not in selectedIncidentTypes and 'deaths' in selectedIncidentTypes
-      @incidentType.set('deaths')
 
 Template.eventResolvedIncidents.helpers
   activeMode: (value)->
@@ -215,10 +219,14 @@ Template.eventResolvedIncidents.helpers
     Template.instance().loading.get()
 
   disableCases: ->
-    'cases' not in Template.instance().data.selectedIncidentTypes.get()
+    not _.findWhere(Template.instance().differentialIncidents.get(),
+      type: 'cases'
+    )
 
   disableDeaths: ->
-    'deaths' not in Template.instance().data.selectedIncidentTypes.get()
+    not _.findWhere(Template.instance().differentialIncidents.get(),
+      type: 'deaths'
+    )
 
 Template.eventResolvedIncidents.events
   "click .incident-type-selector .cases": (event, instance)->

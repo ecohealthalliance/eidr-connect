@@ -12,5 +12,5 @@ Feature: User Management
   Scenario: Submit a valid user form
     Given I go to the account form
     And I submit a form that has email "test@test.com" and name "The Test"
-    Then I should see a "success" toast
+    Then I should see a "success" notification
     And I should see content "The Test"

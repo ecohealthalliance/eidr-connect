@@ -1,5 +1,6 @@
 import Constants from '/imports/constants.coffee'
 import Articles from '/imports/collections/articles.coffee'
+import notify from '/imports/ui/notification'
 
 ###
 # cleanUrl - takes an existing url and removes the last match of the applied
@@ -38,7 +39,7 @@ checkIncidentTypeValue = (form, input) ->
     messageText = 'count'
     if input is 'specify'
       messageText = 'incident type'
-    toastr.error("Please enter a valid #{messageText}.")
+    notify('error', "Please enter a valid #{messageText}.")
     false
   else
     true
@@ -54,10 +55,11 @@ export incidentReportFormToIncident = (form) ->
 
   picker = $pickerContainer.data('daterangepicker')
 
-  incidentType = $form.find('input[name="incidentType"]:checked').val()
+  incidentType = form.type.value
   incidentStatus = $form.find('input[name="incidentStatus"]:checked').val()
 
   incident =
+    type: incidentType
     travelRelated: form.travelRelated.checked
     approximate: form.approximate.checked
     locations: []
@@ -68,17 +70,23 @@ export incidentReportFormToIncident = (form) ->
       type: rangeType
       start: moment.utc(picker.startDate.format("YYYY-MM-DD")).toDate()
       end: moment.utc(picker.endDate.format("YYYY-MM-DD")).toDate()
-      cumulative: form.cumulative.checked
+      cumulative: incidentType.startsWith("cumulative")
 
   switch incidentType || ''
-    when 'cases'
+    when 'caseCount'
       incident.cases = parseInt(form.count.value, 10)
-    when 'deaths'
+    when 'deathCount'
       incident.deaths = parseInt(form.count.value, 10)
-    when 'other'
+    when 'cumulativeCaseCount'
+      incident.cases = parseInt(form.count.value, 10)
+    when 'cumulativeDeathCount'
+      incident.deaths = parseInt(form.count.value, 10)
+    when 'activeCount'
+      incident.cases = parseInt(form.count.value, 10)
+    when 'specify'
       incident.specify = form.specify.value.trim()
     else
-      toastr.error("Unknown incident type [#{incidentType}]")
+      notify('error', "Unknown incident type [#{incidentType}]")
       return
 
   articleId = form.articleId?.value
@@ -356,12 +364,27 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
       if acceptByDefault and not incident.uncertainCountType
         incident.accepted = true
       # Detect whether count is cumulative
+      dateRangeHours = moment(incident.dateRange.end)
+        .diff(incident.dateRange.start, 'hours')
       if 'incremental' in attributes
         incident.dateRange.cumulative = false
       else if 'cumulative' in attributes
         incident.dateRange.cumulative = true
-      else if incident.dateRange.type == 'day' and count > 300
+      # Infer cumulative is case rate is greater than 300 per day
+      else if (count / (dateRangeHours / 24)) > 300
         incident.dateRange.cumulative = true
+      if incident.dateRange.cumulative
+        if incident.cases
+          incident.type = 'cumulativeCaseCount'
+        else if incident.deaths
+          incident.type = 'cumulativeDeathCount'
+      else
+        if "active" in attributes
+          incident.type = 'activeCount'
+        else if incident.cases
+          incident.type = 'caseCount'
+        else if incident.deaths
+          incident.type = 'deathCount'
       suspectedAttributes = _.intersection([
         'approximate', 'average', 'suspected'
       ], attributes)
@@ -462,7 +485,8 @@ export pluralize = (word, count, showCount=true) ->
   if showCount then "#{count} #{word}" else word
 
 export formatDateRange = (dateRange, readable) ->
-  dateRange ?= ''
+  if not dateRange or not (dateRange.start or dateRange.end)
+    return
   start = moment.utc(dateRange.start)
   end = moment.utc(dateRange.end)
   dateFormatEnd = "MMM D, YYYY"

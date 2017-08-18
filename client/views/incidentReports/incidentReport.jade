@@ -10,9 +10,10 @@ template(name="incidentReport")
           if caseCounts
             .incident-report--details--counts
               if deaths
-                +incidentCount label=deathsLabel count=deaths
+                span.incident-count=deaths
               if cases
-                +incidentCount label=casesLabel count=cases
+                span.incident-count=cases
+              h6.type=countLabel
           if travelRelated
             .incident-report--details--travel-related
               i.fa.fa-lg.fa-plane(aria-hidden="true")

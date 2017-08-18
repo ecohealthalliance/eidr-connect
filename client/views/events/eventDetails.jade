@@ -7,19 +7,39 @@ template(name="eventDetails")
       p.event--summary.not-available
         span No summary available.
 
-    .secondary-content
+    unless isUserEvent
+      .event--criteria.secondary-content
+        p This Smart Event includes all manually curated and
+          | automatically extracted incidents stored in EIDR-Connect which
+          | match the following properties:
+        if event.locations
+          .criteria
+            h4 Containing Location(s):
+            ul
+              each location in event.locations
+                li {{ formatLocation location }}
+        if event.diseases
+          .criteria
+            h4 Disease(s):
+            ul
+              each event.diseases
+                li=text
+        if event.dateRange
+          .criteria
+            h4 Date Range:
+            p {{ formatDateRange event.dateRange }}
+
+    .event--dates.secondary-content
       p
         | Created by
         span {{ getUserName event.createdByUserId }}
         | on
         span {{ formatDate event.creationDate }}
-
-    .secondary-content
       p
         | Last Modified by
         span {{ getUserName event.lastModifiedByUserId }}
         | on
-        span {{formatDate user.lastModifiedDate}}
+        span {{ formatDate user.lastModifiedDate }}
 
     button.btn.btn-sm.btn-default.edit-event
       i.fa.fa-pencil
