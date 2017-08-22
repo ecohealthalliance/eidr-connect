@@ -1,6 +1,5 @@
-Incidents = require '/imports/collections/incidentReports.coffee'
-createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker'
-{ setVariables }            = require '/imports/ui/setRange'
+import createInlineDateRangePicker from '/imports/ui/inlineDateRangePicker'
+import { setVariables } from '/imports/ui/setRange'
 
 Template.mapFilters.onCreated ->
   @dateVariables = new ReactiveVar

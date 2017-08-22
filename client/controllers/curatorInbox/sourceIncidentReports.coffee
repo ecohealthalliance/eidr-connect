@@ -1,4 +1,4 @@
-Incidents = require '/imports/collections/incidentReports.coffee'
+import Incidents from '/imports/collections/incidentReports.coffee'
 
 findIncident = (accepted) ->
   query = {}

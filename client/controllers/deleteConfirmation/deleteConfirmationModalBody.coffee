@@ -6,8 +6,6 @@ Template.deleteConfirmationModalBody.events
     data = instance.data
     id = data.objId
     objNameToDelete = data.objNameToDelete
-    #modalId = if modalName then "#edit-event-modal" else "##{objNameToDelete}-delete-modal"
-    #$(modalId).modal('hide')
     Modal.hide()
     $('body').removeClass('modal-open')
     $('.modal-backdrop').remove()

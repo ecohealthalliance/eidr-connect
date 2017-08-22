@@ -1,7 +1,3 @@
-Incidents = require '/imports/collections/incidentReports.coffee'
-UserEvents = require '/imports/collections/userEvents.coffee'
-Articles = require '/imports/collections/articles.coffee'
-
 redirectIfNotAuthorized = (router, roles) ->
   unless Meteor.userId() and roles.length
     router.redirect '/sign-in'
@@ -48,7 +44,7 @@ Router.route "/admins",
   onBeforeAction: ->
     redirectIfNotAuthorized(@, ['admin'])
   waitOn: ->
-    Meteor.subscribe "allUsers"
+    [Meteor.subscribe("allUsers"), Meteor.subscribe("roles")]
   data: ->
     adminUsers: Meteor.users.find({ roles: {$in: ["admin"]} }, {sort: {'profile.name': 1}})
     curatorUsers: Meteor.users.find({ roles: {$in: ["curator"] }}, {sort: {'profile.name': 1}})
@@ -90,7 +86,7 @@ Router.route "/curator-inbox",
   name: 'curator-inbox'
   title: 'Curator Inbox'
   waitOn: ->
-    Meteor.subscribe "userEvents"
+    Meteor.subscribe('user')
   onBeforeAction: ->
     redirectIfNotAuthorized(@, ['admin', 'curator'])
 
@@ -104,6 +100,8 @@ Router.route "/events/smart-events/:_id/:_view?",
   name: 'smart-event'
 
 Router.route "/feeds",
+  waitOn: ->
+    Meteor.subscribe('user')
   onBeforeAction: ->
     redirectIfNotAuthorized(@, ['admin'])
   name: 'feeds'
