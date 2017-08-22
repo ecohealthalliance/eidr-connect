@@ -1,5 +1,5 @@
 import Incidents from '/imports/collections/incidentReports.coffee'
-UserEvents = require '/imports/collections/userEvents.coffee'
+import UserEvents from '/imports/collections/userEvents.coffee'
 import { buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
 import notify from '/imports/ui/notification'
 

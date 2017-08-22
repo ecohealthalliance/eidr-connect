@@ -2,6 +2,7 @@ import UserEvents from '/imports/collections/userEvents.coffee'
 import Articles from '/imports/collections/articles.coffee'
 import Incidents from '/imports/collections/incidentReports.coffee'
 import utils from '/imports/utils.coffee'
+import PromedPosts from '/imports/collections/promedPosts.coffee'
 
 fs = Npm.require('fs')
 path = Npm.require('path')
@@ -121,3 +122,24 @@ Router.route("/api/events-with-source", {where: "server"})
   @response.setHeader('Access-Control-Allow-Origin', '*')
   @response.statusCode = 200
   @response.end(JSON.stringify(events))
+
+Router.route("/api/process-document", {where: "server"})
+.get ->
+  promedId = @request.query.promedId
+  post = PromedPosts.findOne
+    promedId: promedId
+  Meteor.call 'getArticleEnhancements', {
+    content: post.content
+    publishDate: post.promedDate
+  }, (error, enhancements) =>
+    if error
+      @response.statusCode = 400
+      return @response.end(JSON.stringify(error))
+    incidents = utils.createIncidentReportsFromEnhancements enhancements,
+      acceptByDefault: true
+    @response.setHeader('Access-Control-Allow-Origin', '*')
+    @response.statusCode = 200
+    @response.end(JSON.stringify(
+      enhancements: enhancements
+      incidents: incidents
+    ))
