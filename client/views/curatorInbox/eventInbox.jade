@@ -1,0 +1,33 @@
+template(name="eventInbox")
+  .pane-container.curator-inbox
+    .curator-inbox-header.pane-head.pane-head-l
+      .head-text
+        .line=event.eventName
+        .line Documents
+      .curator-inbox-options
+        a.option.add-document.plain-focus(
+          data-toggle="tooltip"
+          title="Add New Document"
+          tabindex="0")
+          i.fa.fa-plus(aria-hidden="true")
+
+    .curator-inbox-sources.pane.pane-l.curator-inbox--pane
+      if isReady
+        .curator-inbox-source-list
+          +reactiveTable(
+            collection=documents
+            settings=tableSettings
+            class="table table-hover curator-inbox-table")
+      else
+        +loading static=true
+    #touch-stage.curator-source-details.pane.pane-r.curator-inbox--pane
+      if isReady
+        +curatorSourceDetails(
+          selectedSourceId=selectedSourceId
+          currentPaneInView=currentPaneInView
+          dateType=dateType)
+    .curator-inbox-sources--back-to-top.off-canvas
+      button.btn.btn-primary.btn-wide.back-to-top(
+        type="button")
+        i.fa.fa-chevron-circle-up
+        span Back to Top

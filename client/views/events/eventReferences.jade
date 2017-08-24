@@ -2,4 +2,7 @@ template(name="eventReferences")
   section.event--references
     .tab-form
       h3.heading Documents
+      a(href="{{pathFor 'event-inbox' _id=event._id}}").btn.btn-primary.event-inbox-btn Event Inbox
+
     +reactiveTable collection=documents settings=settings
+

@@ -22,4 +22,5 @@ template(name="curatedEvent")
             if showNoResults
               .veil.top-layer
               +noResults message=noResultsMessage classNames=classNames
-            +Template.dynamic template=template.name data=template.data
+            if template
+              +Template.dynamic template=template.name data=template.data

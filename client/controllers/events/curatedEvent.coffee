@@ -37,28 +37,31 @@ Template.curatedEvent.helpers
   template: ->
     instance = Template.instance()
     currentView = Router.current().getParams()._view
-    templateName = switch currentView
-      when 'estimated-epi-curves', undefined
-        'eventResolvedIncidents'
-      when 'affected-areas'
-        'eventAffectedAreas'
-      when 'incidents'
-        'eventIncidentReports'
-      when 'references'
-        'eventReferences'
-      when 'details'
-        'eventDetails'
-      else
-        currentView
-
-    name: templateName
-    data:
-      isUserEvent: true
-      event: UserEvents.findOne(instance.data.userEventId)
-      filterQuery: instance.filterQuery
-      selectedIncidentTypes: instance.selectedIncidentTypes
-      articles: EventArticles.find()
-      loaded: instance.loaded
+    event = UserEvents.findOne(instance.data.userEventId)
+    eventArticles = EventArticles.find()
+    if event and eventArticles.count() > 0
+      templateName = switch currentView
+        when 'estimated-epi-curves', undefined
+          'eventResolvedIncidents'
+        when 'affected-areas'
+          'eventAffectedAreas'
+        when 'incidents'
+          'eventIncidentReports'
+        when 'references'
+          'eventReferences'
+        when 'details'
+          'eventDetails'
+        else
+          currentView
+  
+      name: templateName
+      data:
+        isUserEvent: true
+        event: event
+        filterQuery: instance.filterQuery
+        selectedIncidentTypes: instance.selectedIncidentTypes
+        articles: eventArticles
+        loaded: instance.loaded
 
   loaded: ->
     Template.instance().loaded.get()
