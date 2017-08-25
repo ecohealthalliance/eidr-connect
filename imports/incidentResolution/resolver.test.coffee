@@ -1,5 +1,5 @@
 import { chai } from 'meteor/practicalmeteor:chai'
-import solverExport from 'javascript-lp-solver'
+import Solver from './LPSolver'
 import incidents from './incidents.coffee'
 import convertAllIncidentsToDifferentials from './convertAllIncidentsToDifferentials.coffee'
 import {
@@ -7,13 +7,6 @@ import {
   subIntervalsToLP,
   intervalToEndpoints
 } from './incidentResolution.coffee'
-
-# When the solver is imported for the browser it uses the global namespace
-# instead of exporting a handle.
-if _.isEmpty solverExport
-  Solver = solver
-else
-  Solver = solverExport
 
 lome =
   admin1Name: "Maritime"
