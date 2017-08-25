@@ -4,7 +4,6 @@ import notify from '/imports/ui/notification'
 import { pluralize } from '/imports/utils'
 
 Template.addToEvent.onCreated ->
-  @subscribe('userEvents')
   @subscribe('article', @data.source._sourceId)
   @selectedEventId = new ReactiveVar(null)
 

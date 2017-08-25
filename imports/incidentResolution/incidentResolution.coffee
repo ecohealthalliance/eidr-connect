@@ -33,7 +33,7 @@
 # rates in the incident reports as closly as possible.
 
 import LocationTree from './LocationTree.coffee'
-import solverExport from 'javascript-lp-solver'
+import Solver from './LPSolver'
 
 class Endpoint
   constructor: (@isStart, @offset, @interval) ->
@@ -163,7 +163,7 @@ subIntervalsToLP = (incidents, subIntervals)->
 
 extendSubIntervalsWithValues = (incidents, subIntervals)->
   model = subIntervalsToLP(incidents, subIntervals)
-  solution = solver.Solve(solver.ReformatLP(model))
+  solution = Solver.Solve(Solver.ReformatLP(model))
   # set default values for subintervals
   subIntervals.forEach (s)->
     s.value = 0

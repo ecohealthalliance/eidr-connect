@@ -288,6 +288,7 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
         timeAnnotation.timeRange.end
       ).endOf('day')
       if timeAnnotation.beginMoment > timeAnnotation.endMoment
+        console.log(timeAnnotation)
         console.error("End date occurs before start date.")
         return
       publishMoment = moment.utc(publishDate)
