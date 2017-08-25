@@ -162,7 +162,8 @@ Router.route("/api/process-document", {where: "server"})
     ))
 
 ###
-@api {post} resolve-incidents Request frequent descriptors for the term
+@api {post} resolve-incidents Resolve a set of potentially overlapping incidents into
+                              single case or death count values over each location and time interval.
 @apiParamExample {json} Request-Example:
     [
       {
