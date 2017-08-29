@@ -1,4 +1,4 @@
-import EventArticles from '/imports/collections/eventArticles'
+import Articles from '/imports/collections/articles'
 import UserEvents from '/imports/collections/userEvents'
 import { debounceCheckTop, keyboardSelect } from '/imports/utils'
 
@@ -29,7 +29,7 @@ Template.eventInbox.onRendered ->
   @selectFirstUnreviewed = =>
     unReviewedQuery =
       reviewed: $in: [false, null]
-    firstSource = EventArticles.findOne(unReviewedQuery, sort: addedDate: -1)
+    firstSource = Articles.findOne(unReviewedQuery, sort: addedDate: -1)
     if firstSource
       @selectedSourceId.set(firstSource._id)
     @ready.set(true)
@@ -52,7 +52,7 @@ Template.eventInbox.helpers
     UserEvents.findOne("YqpQ8B6QkTysGeR4Q")
 
   documents: ->
-    EventArticles.find().fetch()
+    Articles.find().fetch()
 
   tableSettings: ->
     instance = Template.instance()

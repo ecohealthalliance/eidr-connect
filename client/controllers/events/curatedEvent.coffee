@@ -1,5 +1,5 @@
 import EventIncidents from '/imports/collections/eventIncidents'
-import EventArticles from '/imports/collections/eventArticles'
+import Articles from '/imports/collections/articles'
 import UserEvents from '/imports/collections/userEvents'
 
 #Allow multiple modals or the suggested locations list won't show after the loading modal is hidden
@@ -38,7 +38,7 @@ Template.curatedEvent.helpers
     instance = Template.instance()
     currentView = Router.current().getParams()._view
     event = UserEvents.findOne(instance.data.userEventId)
-    eventArticles = EventArticles.find()
+    eventArticles = Articles.find()
     if event and eventArticles.count() > 0
       templateName = switch currentView
         when 'estimated-epi-curves', undefined

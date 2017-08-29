@@ -1,12 +1,12 @@
-import EventArticles from '/imports/collections/eventArticles.coffee'
-import { documentTitle } from '/imports/utils.coffee'
+import Articles from '/imports/collections/articles'
+import { documentTitle } from '/imports/utils'
 
 Template.eventReferences.onRendered ->
   console.log @
 
 Template.eventReferences.helpers
   documents: ->
-    EventArticles.find()
+    Articles.find()
 
   settings: ->
     fields = [
