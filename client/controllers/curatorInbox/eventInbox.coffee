@@ -25,6 +25,7 @@ Template.eventInbox.onRendered ->
       Meteor.defer =>
         @$('[data-toggle="tooltip"]').tooltip
           container: 'body'
+          placement: 'bottom'
 
   @selectFirstUnreviewed = =>
     unReviewedQuery =
@@ -100,6 +101,9 @@ Template.eventInbox.helpers
       if source._id is instance.selectedSourceId.get()
         'selected'
 
+  eventId: ->
+    Router.current().params._id
+
 Template.eventInbox.events
   'click .back-to-top': (event, instance) ->
     event.preventDefault()
@@ -124,4 +128,3 @@ Template.eventInbox.events
     if selectedSourceId.get() != @_id
       selectedSourceId.set(@_id)
     $(event.currentTarget).blur()
-

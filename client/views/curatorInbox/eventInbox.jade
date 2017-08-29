@@ -1,17 +1,20 @@
 template(name="eventInbox")
-  .pane-container.curator-inbox
+  .pane-container.curator-inbox.event-inbox
     .curator-inbox-header.pane-head.pane-head-l
-      .head-text
-        .line=event.eventName
-        .line Documents
-      .curator-inbox-options
-        a.option.add-document.plain-focus(
-          data-toggle="tooltip"
-          title="Add New Document"
-          tabindex="0")
-          i.fa.fa-plus(aria-hidden="true")
+      a.back-to-event(href="{{pathFor 'curated-event' _id=eventId _view='incidents'}}")
+        i.fa.fa-arrow-left
+      h1=event.eventName
 
     .curator-inbox-sources.pane.pane-l.curator-inbox--pane
+      .curator-source-details--header
+        h2 Event Documents
+        .curator-inbox-options
+          a.option.add-document.plain-focus.small(
+            data-toggle="tooltip"
+            title="Add New Document"
+            tabindex="0")
+            i.fa.fa-plus(aria-hidden="true")
+
       if isReady
         .curator-inbox-source-list
           +reactiveTable(
@@ -20,12 +23,14 @@ template(name="eventInbox")
             class="table table-hover curator-inbox-table")
       else
         +loading static=true
+
     #touch-stage.curator-source-details.pane.pane-r.curator-inbox--pane
       if isReady
         +curatorSourceDetails(
           selectedSourceId=selectedSourceId
           currentPaneInView=currentPaneInView
           dateType=dateType)
+
     .curator-inbox-sources--back-to-top.off-canvas
       button.btn.btn-primary.btn-wide.back-to-top(
         type="button")
