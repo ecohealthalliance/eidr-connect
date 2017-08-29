@@ -39,7 +39,7 @@ Template.curatedEvent.helpers
     currentView = Router.current().getParams()._view
     event = UserEvents.findOne(instance.data.userEventId)
     eventArticles = Articles.find()
-    if event and eventArticles.count() > 0
+    if event
       templateName = switch currentView
         when 'estimated-epi-curves', undefined
           'eventResolvedIncidents'

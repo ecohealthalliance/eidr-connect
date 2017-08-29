@@ -1,9 +1,6 @@
 import Articles from '/imports/collections/articles'
 import { documentTitle } from '/imports/utils'
 
-Template.eventReferences.onRendered ->
-  console.log @
-
 Template.eventReferences.helpers
   documents: ->
     Articles.find()
