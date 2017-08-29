@@ -11,7 +11,7 @@ import feedSchema from '/imports/schemas/feed'
 import Constants from '/imports/constants.coffee'
 import { regexEscape } from '/imports/utils'
 
-DATA_VERSION = 17
+DATA_VERSION = 18
 AppMetadata = new Meteor.Collection('appMetadata')
 priorDataVersion = AppMetadata.findOne(property: "dataVersion")?.value
 
@@ -253,5 +253,11 @@ module.exports = ->
   }, {
     $set: type: 'specify'
   }, multi: true)
+
+  console.log 'Updating incidents - removing alternate locations...'
+  Incidents.find('locations.alternateNames': $exists: true).forEach (i) ->
+    i.locations.forEach (l) ->
+      delete l.alternateNames
+    Incidents.update i._id, i
 
   console.log "database update complete"
