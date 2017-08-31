@@ -32,14 +32,14 @@ template(name="eventDetails")
     .event--dates.secondary-content
       p
         | Created by
-        span {{ getUserName event.createdByUserId }}
+        span=event.createdByUserName
         | on
         span {{ formatDate event.creationDate }}
       p
         | Last Modified by
-        span {{ getUserName event.lastModifiedByUserId }}
+        span=event.lastModifiedByUserName
         | on
-        span {{ formatDate user.lastModifiedDate }}
+        span {{ formatDate event.lastModifiedDate }}
 
     button.btn.btn-sm.btn-default.edit-event
       i.fa.fa-pencil

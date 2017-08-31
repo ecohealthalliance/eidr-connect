@@ -38,6 +38,9 @@ module.exports = (url)->
         if not priorArticle
           Articles.upsert(article._id, article)
       if priorEvent
+        # Check if the the event has changed.
+        if not(userEvent.deleted or newIncidents.length > 0)
+          return
         # Only add the incidents that weren't in the incidents collection before.
         # The others may have been intentionally removed from the event on this instance.
         UserEvents.update(userEvent._id,
@@ -48,6 +51,7 @@ module.exports = (url)->
             lastModifiedDate: new Date()
             deleted: userEvent.deleted
             lastModifiedByUserName: "Sync from " + process.env.ONE_WAY_SYNC_URL
+            lastModifiedByUserId: "sync:" + process.env.ONE_WAY_SYNC_URL
         )
         Meteor.call('editUserEventLastIncidentDate', userEvent._id)
       else

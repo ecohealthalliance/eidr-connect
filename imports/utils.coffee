@@ -350,7 +350,6 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
       end: moment(publishDate).add(1, 'day').toDate()
       type: 'day'
     if dateTerritory.annotations.length > 0
-      console.log dateTerritory, dateTerritories
       dateAnnotation = nearestAnnotation(
         countAnnotation, dateTerritory.annotations
       )
