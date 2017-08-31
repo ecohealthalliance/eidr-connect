@@ -248,6 +248,26 @@ export getTerritories = (annotationsWithOffsets, sents, options={}) ->
         territories[territories.length - 1].territoryEnd = sentEnd
   return territories
 
+# The number of characters between annotationA and annotationB.
+annotationDistance = (annotationA, annotationB) ->
+  [startA, endA] = annotationA.textOffsets[0]
+  [startB, endB] = annotationB.textOffsets[0]
+  if startA < startB
+    return startB - endA
+  else
+    return startA - endB
+
+nearestAnnotation = (annotation, otherAnnotations) ->
+  nearest = null
+  minDist = Infinity
+  for otherAnnotation in otherAnnotations
+    newDist = annotationDistance(otherAnnotation, annotation)
+    console.assert(newDist < Infinity)
+    if newDist < minDist
+      minDist = newDist
+      nearest = otherAnnotation
+  return nearest
+
 export createIncidentReportsFromEnhancements = (enhancements, options) ->
   { countAnnotations, acceptByDefault, articleId, publishDate } = options
   if not publishDate
@@ -308,13 +328,13 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
   countAnnotations.forEach (countAnnotation) =>
     [start, end] = countAnnotation.textOffsets[0]
     locationTerritory = _.find locTerritories, ({territoryStart, territoryEnd}) ->
-      start <= territoryEnd and start >= territoryStart
+      start < territoryEnd and start >= territoryStart
     dateTerritory = _.find dateTerritories, ({territoryStart, territoryEnd}) ->
-      start <= territoryEnd and start >= territoryStart
+      start < territoryEnd and start >= territoryStart
     diseaseTerritory = _.find diseaseTerritories, ({territoryStart, territoryEnd}) ->
-      start <= territoryEnd and start >= territoryStart
+      start < territoryEnd and start >= territoryStart
     speciesTerritory = _.find speciesTerritories, ({territoryStart, territoryEnd}) ->
-      start <= territoryEnd and start >= territoryStart
+      start < territoryEnd and start >= territoryStart
     # grouping is done to deduplicate geonames
     locations = _.chain(locationTerritory.annotations)
       .pluck('geoname')
@@ -324,30 +344,25 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
       .value()
     incident =
       locations: locations
-    maxPrecision = Infinity
     # Use the document's date as the default
     incident.dateRange =
       start: publishDate
       end: moment(publishDate).add(1, 'day').toDate()
       type: 'day'
-    dateTerritory.annotations.forEach (timeAnnotation) ->
-      if (timeAnnotation.beginMoment.isValid() and
-        timeAnnotation.endMoment.isValid()
+    if dateTerritory.annotations.length > 0
+      console.log dateTerritory, dateTerritories
+      dateAnnotation = nearestAnnotation(
+        countAnnotation, dateTerritory.annotations
       )
-        precision = timeAnnotation.endMoment - timeAnnotation.beginMoment
-        if precision < maxPrecision
-          maxPrecision = timeAnnotation.precision
-        else
-          return
-        incident.dateRange =
-          start: timeAnnotation.beginMoment.toDate()
-          end: timeAnnotation.endMoment.toDate()
-        rangeHours = moment(incident.dateRange.end)
-          .diff(incident.dateRange.start, 'hours')
-        if rangeHours <= 24
-          incident.dateRange.type = 'day'
-        else
-          incident.dateRange.type = 'precise'
+      incident.dateRange =
+        start: dateAnnotation.beginMoment.toDate()
+        end: dateAnnotation.endMoment.toDate()
+      rangeHours = moment(incident.dateRange.end)
+        .diff(incident.dateRange.start, 'hours')
+      if rangeHours <= 24
+        incident.dateRange.type = 'day'
+      else
+        incident.dateRange.type = 'precise'
     incident.dateTerritory = dateTerritory
     incident.locationTerritory = locationTerritory
     incident.diseaseTerritory = diseaseTerritory
@@ -392,19 +407,20 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
       if suspectedAttributes.length > 0
         incident.status = 'suspected'
     incident.articleId = articleId
-    # The disease field is set to the last disease mentioned.
-    diseaseTerritory.annotations.forEach (annotation) ->
+    diseaseAnnotation = nearestAnnotation(countAnnotation, diseaseTerritory.annotations)
+    if diseaseAnnotation
       incident.resolvedDisease =
-        id: annotation.resolutions[0].entity.id
-        text: annotation.resolutions[0].entity.label
+        id: diseaseAnnotation.resolutions[0].entity.id
+        text: diseaseAnnotation.resolutions[0].entity.label
     # Suggest humans as a default
     incident.species =
       id: "tsn:180092"
       text: "Homo sapiens"
-    speciesTerritory.annotations.forEach (annotation) ->
+    speciesAnnotation = nearestAnnotation(countAnnotation, speciesTerritory.annotations)
+    if speciesAnnotation
       incident.species =
-        id: annotation.resolutions[0].entity.id
-        text: annotation.resolutions[0].entity.label
+        id: speciesAnnotation.resolutions[0].entity.id
+        text: speciesAnnotation.resolutions[0].entity.label
     incident.suggestedFields = _.intersection(
       Object.keys(incident),
       [
