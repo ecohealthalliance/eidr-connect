@@ -36,7 +36,7 @@ Template.eventInbox.onRendered ->
     @ready.set(true)
 
   # TODO Get id from router
-  @subscribe "userEvent", "YqpQ8B6QkTysGeR4Q", @selectFirstUnreviewed
+  @subscribe "userEvent", Router.current().params._id, @selectFirstUnreviewed
 
 Template.eventInbox.onDestroyed ->
   $('.inlineRangePicker').off('mouseleave')
@@ -50,7 +50,7 @@ Template.eventInbox.helpers
     Template.instance().selectedSourceId
 
   event: ->
-    UserEvents.findOne("YqpQ8B6QkTysGeR4Q")
+    UserEvents.findOne(Router.current().params._id)
 
   documents: ->
     Articles.find().fetch()
@@ -101,9 +101,6 @@ Template.eventInbox.helpers
       if source._id is instance.selectedSourceId.get()
         'selected'
 
-  eventId: ->
-    Router.current().params._id
-
 Template.eventInbox.events
   'click .back-to-top': (event, instance) ->
     event.preventDefault()
@@ -114,7 +111,7 @@ Template.eventInbox.events
 
   'click .add-document': (event, instance) ->
     Modal.show 'sourceModal',
-      userEventId: "YqpQ8B6QkTysGeR4Q"
+      userEventId: Router.current().params._id
       suggest: false
       selectedSourceId: instance.selectedSourceId
 

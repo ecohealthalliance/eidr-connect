@@ -1,7 +1,7 @@
 template(name="eventInbox")
   .pane-container.curator-inbox.event-inbox
     .curator-inbox-header.pane-head.pane-head-l
-      a.back-to-event(href="{{pathFor 'curated-event' _id=eventId _view='incidents'}}")
+      a.back-to-event(href="{{pathFor 'curated-event' _id=event._id _view='references'}}")
         i.fa.fa-arrow-left
       h1=event.eventName
 
