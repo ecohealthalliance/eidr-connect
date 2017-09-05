@@ -14,6 +14,7 @@ Template.eventAffectedAreas.onCreated ->
   @markerLayer = new ReactiveVar()
   @worldGeoJSONRV = new ReactiveVar()
   @loading = new ReactiveVar(false)
+  @tooManyIncidents = new ReactiveVar(false)
   HTTP.get '/world.geo.json', (error, resp) =>
     if error
       console.error error
@@ -79,6 +80,12 @@ Template.eventAffectedAreas.onRendered ->
       differentials = convertAllIncidentsToDifferentials(mapableIncidents)
       differentials = _.where(differentials, type: incidentType)
       subIntervals = differentailIncidentsToSubIntervals(differentials)
+      if subIntervals.length > 2000
+        @tooManyIncidents.set(true)
+        @maxCount.set(0)
+        return
+      else
+        @tooManyIncidents.set(false)
       extendSubIntervalsWithValues(differentials, subIntervals)
       for subInterval in subIntervals
         subInterval.incidents = subInterval.incidentIds.map (id) ->
@@ -180,6 +187,9 @@ Template.eventAffectedAreas.onRendered ->
       @choroplethLayer.set('deaths')
 
 Template.eventAffectedAreas.helpers
+  tooManyIncidents: ->
+    Template.instance().tooManyIncidents.get()
+
   legendValues: ->
     maxCount = Template.instance().maxCount.get()
     _.range(1, 1 + (maxCount or 0), maxCount / 5).map (value) ->
