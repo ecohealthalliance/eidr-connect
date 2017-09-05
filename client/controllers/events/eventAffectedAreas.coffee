@@ -10,7 +10,7 @@ import MapHelpers from '/imports/ui/mapMarkers.coffee'
 
 Template.eventAffectedAreas.onCreated ->
   @maxCount = new ReactiveVar()
-  @choroplethLayer = new ReactiveVar()
+  @choroplethLayer = new ReactiveVar('cases')
   @markerLayer = new ReactiveVar()
   @worldGeoJSONRV = new ReactiveVar()
   @loading = new ReactiveVar(false)
