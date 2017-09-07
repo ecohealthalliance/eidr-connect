@@ -68,7 +68,7 @@ Meteor.publishComposite 'userEvent', (eventId) ->
           _id: $in: incidentIds
           deleted: $in: [null, false]
     }, {
-      collectionName: 'eventArticles'
+      collectionName: 'articles'
       find: (event) ->
         incidents = Incidents.find(_id: $in: _.pluck(event.incidents, 'id'))
         Articles.find

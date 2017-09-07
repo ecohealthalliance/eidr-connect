@@ -25,12 +25,7 @@ Template.curatorSourceDetails.onCreated ->
         @notifying.set(true)
         setTimeout =>
           if showNext
-            unReviewedQuery = $and: [ {reviewed: false}, instanceData.query.get()]
-            sort = sort: {}
-            sort.sort[instanceData.dateType] = -1
-            nextSource = Articles.findOne(unReviewedQuery, sort)
-            if nextSource
-              @selectedSourceId.set(nextSource._id)
+            $(@firstNode).trigger('sourceReviewed')
           @notifying.set(false)
           resolve()
         , 1200

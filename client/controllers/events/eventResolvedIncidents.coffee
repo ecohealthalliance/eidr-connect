@@ -1,17 +1,19 @@
 import Rickshaw from 'meteor/eidr:rickshaw.min'
-import convertAllIncidentsToDifferentials from '/imports/incidentResolution/convertAllIncidentsToDifferentials.coffee'
+import convertAllIncidentsToDifferentials from '/imports/incidentResolution/convertAllIncidentsToDifferentials'
 import {
   differentailIncidentsToSubIntervals,
   extendSubIntervalsWithValues
-} from '/imports/incidentResolution/incidentResolution.coffee'
-import LocationTree from '/imports/incidentResolution/LocationTree.coffee'
+} from '/imports/incidentResolution/incidentResolution'
+import LocationTree from '/imports/incidentResolution/LocationTree'
 import EventIncidents from '/imports/collections/eventIncidents'
+import Constants from '/imports/constants'
 
 Template.eventResolvedIncidents.onCreated ->
   @incidentType = new ReactiveVar("cases")
   @plotType = new ReactiveVar("rate")
   @legend = new ReactiveVar([])
   @loading = new ReactiveVar(false)
+  @tooManyIncidents = new ReactiveVar(false)
   @highlightedLocations = new Meteor.Collection(null)
   @differentialIncidents = new ReactiveVar([])
 
@@ -48,20 +50,20 @@ Template.eventResolvedIncidents.onRendered ->
         groupedLocSubIntervals = _.groupBy(locSubIntervals, 'start')
         maxSubintervals = []
         for group, subIntervalGroup of groupedLocSubIntervals
-          maxSubintervals.push(_.max(subIntervalGroup, (x)-> x.value))
-        maxSubintervals = _.sortBy(maxSubintervals, (x)-> x.start)
+          maxSubintervals.push(_.max(subIntervalGroup, (x) -> x.value))
+        maxSubintervals = _.sortBy(maxSubintervals, (x) -> x.start)
         if plotType == 'rate'
           formattedData = _.chain(_.zip(maxSubintervals, maxSubintervals.slice(1)))
-            .map(([subInt, iNext])->
+            .map(([subInt, iNext]) ->
               onClick = ->
                 concurrentIntervals = groupedLocSubIntervals[subInt.start] or []
-                componentTree = LocationTree.from(concurrentIntervals.map (x)-> x.location)
-                concurrentIntervals.forEach (x)->
+                componentTree = LocationTree.from(concurrentIntervals.map (x) -> x.location)
+                concurrentIntervals.forEach (x) ->
                   componentTree.getNodeById(x.location.id).associatedObject = x
                 Modal.show('intervalDetailsModal',
                   interval: subInt
                   componentTree: componentTree
-                  incidents: subInt.incidentIds.map (id)->
+                  incidents: subInt.incidentIds.map (id) ->
                     differentials[id]
                 )
               days = (subInt.end - subInt.start) / MILLIS_PER_DAY
@@ -76,7 +78,7 @@ Template.eventResolvedIncidents.onRendered ->
               result
             )
             .flatten(true)
-            .reduce((sofar, cur)->
+            .reduce((sofar, cur) ->
               prev = sofar.slice(0)[1]
               if prev and prev.x == cur.x
                 cur.x += 1
@@ -88,16 +90,16 @@ Template.eventResolvedIncidents.onRendered ->
         else
           total = 0
           formattedData = _.chain(maxSubintervals)
-            .map((subInt)->
+            .map((subInt) ->
               onClick = ->
                 concurrentIntervals = groupedLocSubIntervals[subInt.start] or []
-                componentTree = LocationTree.from(concurrentIntervals.map (x)-> x.location)
-                concurrentIntervals.forEach (x)->
+                componentTree = LocationTree.from(concurrentIntervals.map (x) -> x.location)
+                concurrentIntervals.forEach (x) ->
                   componentTree.getNodeById(x.location.id).associatedObject = x
                 Modal.show('intervalDetailsModal',
                   interval: subInt
                   componentTree: componentTree
-                  incidents: subInt.incidentIds.map (id)->
+                  incidents: subInt.incidentIds.map (id) ->
                     differentials[id]
                 )
               days = (subInt.end - subInt.start) / MILLIS_PER_DAY
@@ -139,7 +141,7 @@ Template.eventResolvedIncidents.onRendered ->
     )
     new Rickshaw.Graph.HoverDetail(
       graph: graph
-      formatter: (series, x, y, formattedX, formattedY, obj)=>
+      formatter: (series, x, y, formattedX, formattedY, obj) =>
         @hoveredIntervalClickEvent = obj.value.onClick
         if plotType == 'rate'
           "#{series.name}: #{y.toFixed(2)} cases per day"
@@ -152,8 +154,8 @@ Template.eventResolvedIncidents.onRendered ->
     @incidents = EventIncidents.find(@data.filterQuery.get())
     incidentType = @incidentType.get()
     allIncidents = @incidents.fetch()
-    allIncidents = allIncidents.filter (i)->
-      i.locations.every (l)-> l.featureCode
+    allIncidents = allIncidents.filter (i) ->
+      i.locations.every (l) -> l.featureCode
     differentialIncidents = convertAllIncidentsToDifferentials(allIncidents)
     @differentialIncidents.set(differentialIncidents)
 
@@ -171,16 +173,22 @@ Template.eventResolvedIncidents.onRendered ->
         return
     @loading.set(true)
     @highlightedLocations.remove({})
+    differentials = _.where(differentialIncidents, type: incidentType)
+    subIntervals = differentailIncidentsToSubIntervals(differentials)
+    if subIntervals.length > Constants.MAX_SUBINTERVALS
+      @tooManyIncidents.set(true)
+      @loading.set(false)
+      return
+    else
+      @tooManyIncidents.set(false)
     _.delay =>
-      differentials = _.where(differentialIncidents, type: incidentType)
-      subIntervals = differentailIncidentsToSubIntervals(differentials)
       extendSubIntervalsWithValues(differentials, subIntervals)
       for subInterval in subIntervals
-        subInterval.incidents = subInterval.incidentIds.map (id)->
+        subInterval.incidents = subInterval.incidentIds.map (id) ->
           differentials[id]
 
-      locationTree = LocationTree.from(subIntervals.map (x)->x.location)
-      topLocations = locationTree.children.map (x)->x.value
+      locationTree = LocationTree.from(subIntervals.map (x) -> x.location)
+      topLocations = locationTree.children.map (x) -> x.value
       locToSubintervals = {}
       for topLocation in topLocations
         locToSubintervals[topLocation.id] = []
@@ -195,7 +203,10 @@ Template.eventResolvedIncidents.onRendered ->
         @loading.set(false)
 
 Template.eventResolvedIncidents.helpers
-  activeMode: (value)->
+  tooManyIncidents: ->
+    Template.instance().tooManyIncidents.get()
+
+  activeMode: (value) ->
     instance = Template.instance()
     if instance.incidentType.get() == 'deaths'
       if instance.plotType.get() == 'rate'
@@ -229,27 +240,27 @@ Template.eventResolvedIncidents.helpers
     )
 
 Template.eventResolvedIncidents.events
-  "click .incident-type-selector .cases": (event, instance)->
+  "click .incident-type-selector .cases": (event, instance) ->
     instance.incidentType.set("cases")
     instance.plotType.set("cumulative")
 
-  "click .incident-type-selector .deaths": (event, instance)->
+  "click .incident-type-selector .deaths": (event, instance) ->
     instance.incidentType.set("deaths")
     instance.plotType.set("cumulative")
 
-  "click .incident-type-selector .case-rate": (event, instance)->
+  "click .incident-type-selector .case-rate": (event, instance) ->
     instance.incidentType.set("cases")
     instance.plotType.set("rate")
 
-  "click .incident-type-selector .death-rate": (event, instance)->
+  "click .incident-type-selector .death-rate": (event, instance) ->
     instance.incidentType.set("deaths")
     instance.plotType.set("rate")
 
-  "click .rickshaw_graph": (event, instance)->
+  "click .rickshaw_graph": (event, instance) ->
     if instance.hoveredIntervalClickEvent
       instance.hoveredIntervalClickEvent(event, instance)
 
-  "click .legend label": (event, instance)->
+  "click .legend label": (event, instance) ->
     if instance.highlightedLocations.findOne(@id)
       instance.highlightedLocations.remove(@id)
     else

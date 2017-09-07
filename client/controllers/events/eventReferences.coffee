@@ -1,9 +1,9 @@
-import EventArticles from '/imports/collections/eventArticles.coffee'
-import { documentTitle } from '/imports/utils.coffee'
+import Articles from '/imports/collections/articles'
+import { documentTitle } from '/imports/utils'
 
 Template.eventReferences.helpers
   documents: ->
-    EventArticles.find()
+    Articles.find()
 
   settings: ->
     fields = [
@@ -16,7 +16,8 @@ Template.eventReferences.helpers
       {
         key: 'publishDate'
         label: 'Publish Date'
-        fn: (value, object, key) -> moment.utc(value).format('MMM D, YYYY')
+        fn: (value, object, key) ->
+          if value then moment.utc(value).format('MMM D, YYYY')
         sortFn: (value, object) ->
           +new Date(value)
       }
