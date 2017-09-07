@@ -1,16 +1,13 @@
-import UserEvents from '/imports/collections/userEvents.coffee'
-import Articles from '/imports/collections/articles.coffee'
-import PromedPosts from '/imports/collections/promedPosts.coffee'
+import UserEvents from '/imports/collections/userEvents'
+import Articles from '/imports/collections/articles'
+import PromedPosts from '/imports/collections/promedPosts'
 import Incidents from '/imports/collections/incidentReports'
-import incidentReportSchema from '/imports/schemas/incidentReport.coffee'
-import {
-  formatUrl,
-  cleanUrl,
-  createIncidentReportsFromEnhancements,
-  regexEscape } from '/imports/utils.coffee'
-import Constants from '/imports/constants.coffee'
+import incidentReportSchema from '/imports/schemas/incidentReport'
+import { formatUrl } from '/imports/utils'
+import { createIncidentReportsFromEnhancements } from '/imports/nlp'
+import Constants from '/imports/constants'
+import GeonameSchema from '/imports/schemas/geoname'
 import sqlite3 from 'sqlite3'
-import GeonameSchema from '/imports/schemas/geoname.coffee'
 
 DateRegEx = /<span class="blue">Published Date:<\/span> ([^<]+)/
 

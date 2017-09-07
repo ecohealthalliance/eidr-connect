@@ -1,5 +1,5 @@
 import { buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
-import { createIncidentReportsFromEnhancements } from '/imports/utils.coffee'
+import { createIncidentReportsFromEnhancements } from '/imports/nlp'
 
 Template.newIncidentFromSelection.onCreated ->
   @annotatedText = =>
