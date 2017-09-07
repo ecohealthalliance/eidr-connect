@@ -7,6 +7,7 @@ import {
 } from '/imports/incidentResolution/incidentResolution.coffee'
 import LocationTree from '/imports/incidentResolution/LocationTree.coffee'
 import MapHelpers from '/imports/ui/mapMarkers.coffee'
+import Constants from '/imports/constants'
 
 Template.eventAffectedAreas.onCreated ->
   @maxCount = new ReactiveVar()
@@ -80,7 +81,7 @@ Template.eventAffectedAreas.onRendered ->
       differentials = convertAllIncidentsToDifferentials(mapableIncidents)
       differentials = _.where(differentials, type: incidentType)
       subIntervals = differentailIncidentsToSubIntervals(differentials)
-      if subIntervals.length > 2000
+      if subIntervals.length > Constants.MAX_SUBINTERVALS
         @tooManyIncidents.set(true)
         @maxCount.set(0)
         return

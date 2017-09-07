@@ -35,7 +35,6 @@ Template.eventInbox.onRendered ->
       @selectedSourceId.set(firstSource._id)
     @ready.set(true)
 
-  # TODO Get id from router
   @subscribe "userEvent", Router.current().params._id, @selectFirstUnreviewed
 
 Template.eventInbox.onDestroyed ->
@@ -77,7 +76,7 @@ Template.eventInbox.helpers
         description: 'The document\'s title.'
         label: 'Title'
         sortDirection: -1
-        fn: (value, object)->
+        fn: (value, object) ->
           object.title or object.url or (object.content?.slice(0,30) + "...")
       },
       {

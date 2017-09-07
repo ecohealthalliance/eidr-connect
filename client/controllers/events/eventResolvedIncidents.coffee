@@ -1,11 +1,12 @@
 import Rickshaw from 'meteor/eidr:rickshaw.min'
-import convertAllIncidentsToDifferentials from '/imports/incidentResolution/convertAllIncidentsToDifferentials.coffee'
+import convertAllIncidentsToDifferentials from '/imports/incidentResolution/convertAllIncidentsToDifferentials'
 import {
   differentailIncidentsToSubIntervals,
   extendSubIntervalsWithValues
-} from '/imports/incidentResolution/incidentResolution.coffee'
-import LocationTree from '/imports/incidentResolution/LocationTree.coffee'
+} from '/imports/incidentResolution/incidentResolution'
+import LocationTree from '/imports/incidentResolution/LocationTree'
 import EventIncidents from '/imports/collections/eventIncidents'
+import Constants from '/imports/constants'
 
 Template.eventResolvedIncidents.onCreated ->
   @incidentType = new ReactiveVar("cases")
@@ -174,7 +175,7 @@ Template.eventResolvedIncidents.onRendered ->
     @highlightedLocations.remove({})
     differentials = _.where(differentialIncidents, type: incidentType)
     subIntervals = differentailIncidentsToSubIntervals(differentials)
-    if subIntervals.length > 2000
+    if subIntervals.length > Constants.MAX_SUBINTERVALS
       @tooManyIncidents.set(true)
       @loading.set(false)
       return
