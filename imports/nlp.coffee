@@ -131,7 +131,7 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
       ).endOf('day')
       if timeAnnotation.beginMoment > timeAnnotation.endMoment
         console.log(timeAnnotation)
-        console.error("End date occurs before start date.")
+        console.error('End date occurs before start date.')
         return
       publishMoment = moment.utc(publishDate)
       if timeAnnotation.beginMoment.isAfter publishMoment, 'day'
@@ -193,7 +193,7 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
     if count
       if 'death' in attributes
         incident.deaths = count
-      else if "case" in attributes or "hospitalization" in attributes
+      else if 'case' in attributes or 'hospitalization' in attributes
         incident.cases = count
       else
         incident.cases = count
@@ -216,17 +216,25 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
         else if incident.deaths
           incident.type = 'cumulativeDeathCount'
       else
-        if "active" in attributes
+        if 'active' in attributes
           incident.type = 'activeCount'
         else if incident.cases
           incident.type = 'caseCount'
         else if incident.deaths
           incident.type = 'deathCount'
-      suspectedAttributes = _.intersection([
-        'approximate', 'average', 'suspected'
-      ], attributes)
+      approximateAttributes = [
+        'approximate', 'average', 'min', 'max'
+      ]
+      suspectedAttributes = _.intersection(
+        ['suspected'].concat(approximateAttributes), attributes
+      )
       if suspectedAttributes.length > 0
         incident.status = 'suspected'
+      approximateAttributesUsed = _.intersection(
+        approximateAttributes, attributes
+      )
+      if approximateAttributesUsed.length > 0
+        incident.approximate = true
     incident.articleId = articleId
     diseaseAnnotation = nearestAnnotation(countAnnotation, diseaseTerritory.annotations)
     if diseaseAnnotation
@@ -235,8 +243,8 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
         text: diseaseAnnotation.resolutions[0].entity.label
     # Suggest humans as a default
     incident.species =
-      id: "tsn:180092"
-      text: "Homo sapiens"
+      id: 'tsn:180092'
+      text: 'Homo sapiens'
     speciesAnnotation = nearestAnnotation(countAnnotation, speciesTerritory.annotations)
     if speciesAnnotation
       incident.species =
@@ -251,6 +259,7 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
         'deaths'
         'dateRange'
         'status'
+        'approximate'
         if incident.locations.length then 'locations'
       ]
     )
