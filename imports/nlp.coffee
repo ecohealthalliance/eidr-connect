@@ -71,7 +71,7 @@ export getTerritories = (annotationsWithOffsets, sents, options={}) ->
   return territories
 
 # The number of characters between annotationA and annotationB.
-annotationDistance = (annotationA, annotationB) ->
+export annotationDistance = (annotationA, annotationB) ->
   [startA, endA] = annotationA.textOffsets[0]
   [startB, endB] = annotationB.textOffsets[0]
   if startA < startB
@@ -79,7 +79,7 @@ annotationDistance = (annotationA, annotationB) ->
   else
     return startA - endB
 
-nearestAnnotation = (annotation, otherAnnotations) ->
+export nearestAnnotation = (annotation, otherAnnotations) ->
   nearest = null
   minDist = Infinity
   for otherAnnotation in otherAnnotations
