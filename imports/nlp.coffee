@@ -90,7 +90,7 @@ export nearestAnnotation = (annotation, otherAnnotations) ->
       nearest = otherAnnotation
   return nearest
 
-export createIncidentReportsFromEnhancements = (enhancements, options) ->
+export createIncidentReportsFromEnhancements = (enhancements, options={}) ->
   { countAnnotations, acceptByDefault, articleId, publishDate } = options
   if not publishDate
     publishDate = new Date()
@@ -124,11 +124,10 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
         timeAnnotation.timeRange.end.month--
       timeAnnotation.beginMoment = moment.utc(
         timeAnnotation.timeRange.begin
-      )
-      # Round up the to day end
+      ).startOf('day')
       timeAnnotation.endMoment = moment.utc(
         timeAnnotation.timeRange.end
-      ).endOf('day')
+      ).startOf('day')
       if timeAnnotation.beginMoment > timeAnnotation.endMoment
         console.log(timeAnnotation)
         console.error('End date occurs before start date.')
