@@ -4,4 +4,4 @@ if [ ! -d "/itisSqlite" ]; then
     mv unzipped/itisSqlite* itisSqlite
     rmdir unzipped
 fi
-supervisord --nodaemon --config /etc/supervisor/supervisord.conf
+/bin/bash /eidr-connect.sh
