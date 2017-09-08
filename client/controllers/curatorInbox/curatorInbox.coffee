@@ -43,6 +43,7 @@ Template.curatorInbox.onDestroyed ->
   @$('.curator-inbox-sources').off 'scroll'
 
 Template.curatorInbox.onCreated ->
+  @subscribe('userEvents')
   @calendarState = new ReactiveVar(false)
   @ready = new ReactiveVar(false)
   @selectedArticle = false

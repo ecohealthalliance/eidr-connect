@@ -6,7 +6,7 @@ import notify from '/imports/ui/notification'
 import { stageModals } from '/imports/ui/modals'
 import { annotateContentWithIncidents,
   buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
-import { formatUrl, createIncidentReportsFromEnhancements } from '/imports/utils.coffee'
+import { createIncidentReportsFromEnhancements } from '/imports/nlp'
 
 # determines if the user should be prompted before leaving the current modal
 #

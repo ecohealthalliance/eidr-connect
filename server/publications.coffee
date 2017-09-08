@@ -68,7 +68,7 @@ Meteor.publishComposite 'userEvent', (eventId) ->
           _id: $in: incidentIds
           deleted: $in: [null, false]
     }, {
-      collectionName: 'eventArticles'
+      collectionName: 'articles'
       find: (event) ->
         incidents = Incidents.find(_id: $in: _.pluck(event.incidents, 'id'))
         Articles.find
@@ -168,6 +168,9 @@ Meteor.publish "allUsers", ->
   if not Roles.userIsInRole(@userId, ['admin'])
     throw new Meteor.Error('auth', 'User does not have permission to access user data')
   Meteor.users.find({}, {fields: {'_id': 1, 'roles': 1, 'profile.name': 1, 'emails': 1}})
+
+Meteor.publish "user", ->
+  Meteor.users.find(_id: @userId)
 
 Meteor.publish "roles", () ->
   Meteor.roles.find({})

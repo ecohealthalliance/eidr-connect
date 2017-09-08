@@ -1,6 +1,6 @@
-MapHelpers = require '/imports/ui/mapMarkers.coffee'
-Incidents = require '/imports/collections/incidentReports.coffee'
-UserEvents = require '/imports/collections/userEvents.coffee'
+import MapHelpers from '/imports/ui/mapMarkers.coffee'
+import Incidents from '/imports/collections/incidentReports.coffee'
+import UserEvents from '/imports/collections/userEvents.coffee'
 
 L.Icon.Default.imagePath = "/packages/fuatsengul_leaflet/images"
 

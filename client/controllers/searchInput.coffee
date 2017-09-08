@@ -11,7 +11,7 @@
     classes:     Classes which will be applied to the input's parent element
     searching:   Reactive Var that is true when the search input is visible
 ####
-{ regexEscape } = require '/imports/utils'
+import { regexEscape } from '/imports/utils'
 
 Template.searchInput.onCreated ->
   @clearSearch = (instance) =>

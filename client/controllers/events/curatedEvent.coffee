@@ -1,5 +1,5 @@
 import EventIncidents from '/imports/collections/eventIncidents'
-import EventArticles from '/imports/collections/eventArticles'
+import Articles from '/imports/collections/articles'
 import UserEvents from '/imports/collections/userEvents'
 
 #Allow multiple modals or the suggested locations list won't show after the loading modal is hidden
@@ -37,28 +37,31 @@ Template.curatedEvent.helpers
   template: ->
     instance = Template.instance()
     currentView = Router.current().getParams()._view
-    templateName = switch currentView
-      when 'estimated-epi-curves', undefined
-        'eventResolvedIncidents'
-      when 'affected-areas'
-        'eventAffectedAreas'
-      when 'incidents'
-        'eventIncidentReports'
-      when 'references'
-        'eventReferences'
-      when 'details'
-        'eventDetails'
-      else
-        currentView
-
-    name: templateName
-    data:
-      isUserEvent: true
-      event: UserEvents.findOne(instance.data.userEventId)
-      filterQuery: instance.filterQuery
-      selectedIncidentTypes: instance.selectedIncidentTypes
-      articles: EventArticles.find()
-      loaded: instance.loaded
+    event = UserEvents.findOne(instance.data.userEventId)
+    eventArticles = Articles.find()
+    if event
+      templateName = switch currentView
+        when 'estimated-epi-curves', undefined
+          'eventResolvedIncidents'
+        when 'affected-areas'
+          'eventAffectedAreas'
+        when 'incidents'
+          'eventIncidentReports'
+        when 'references'
+          'eventReferences'
+        when 'details'
+          'eventDetails'
+        else
+          currentView
+  
+      name: templateName
+      data:
+        isUserEvent: true
+        event: event
+        filterQuery: instance.filterQuery
+        selectedIncidentTypes: instance.selectedIncidentTypes
+        articles: eventArticles
+        loaded: instance.loaded
 
   loaded: ->
     Template.instance().loaded.get()

@@ -1,6 +1,7 @@
-createInlineDateRangePicker = require '/imports/ui/inlineDateRangePicker'
-{ setVariables,
-  clearDateRange }          = require '/imports/ui/setRange'
+import createInlineDateRangePicker from '/imports/ui/inlineDateRangePicker'
+import {
+  setVariables,
+  clearDateRange } from '/imports/ui/setRange'
 
 Template.dateSelector.onRendered ->
   date = new Date()

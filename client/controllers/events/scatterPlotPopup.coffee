@@ -40,7 +40,7 @@ Template.scatterPlotPopup.helpers
   hidden: ->
     instance = Template.instance()
     options = instance.data.options.get()
-    if options
+    if 'hidden' of options
       options.hidden
     else
       true

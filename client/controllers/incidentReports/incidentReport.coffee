@@ -1,4 +1,4 @@
-Articles = require '/imports/collections/articles.coffee'
+import Articles from '/imports/collections/articles.coffee'
 import { pluralize } from '/imports/utils'
 import { getIncidentSnippet } from '/imports/ui/snippets'
 

@@ -1,0 +1,13 @@
+template(name="articleSelect2")
+  select.article-select2.form-control.select2(
+    id="{{selectId}}"
+    name="{{selectId}}"
+    multiple="{{multiple}}"
+    required
+    data-parsley-errors-container=errorContainer
+    data-parsley-class-handler=classHandler
+    data-parsley-error-message=errorMessage)
+    unless multiple
+      option(value="")
+    each article in articles
+      option(value=article._id) {{documentTitle article}}
