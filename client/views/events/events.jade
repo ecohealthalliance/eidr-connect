@@ -2,19 +2,19 @@ template(name="events")
   .events
     .container-fluid-padded.page-heading.container-flex.no-break
       h1
-        span.text Events
         span.icon
           i.i-event
+        span.text Events
       ul.tabs
         li.tab(class="{{#if activeTab 'curated'}} active {{/if}}")
           a.curated-events(href="{{pathFor route='events' _view='curated'}}")
-            span Curated Events
+            span Curated
         li.tab(class="{{#if activeTab 'smart'}} active {{/if}}")
           a.smart-events(href="{{pathFor route='events' _view='smart'}}")
-            span Smart Events
+            span Smart
         li.tab(class="{{#if activeTab 'auto'}} active {{/if}}")
           a.smart-events(href="{{pathFor route='events' _view='auto'}}")
-            span Auto Events
+            span Auto
       .page-options.container-flex.no-break.vertically-centered
         unless activeTab 'auto'
           if isInRole "admin"
@@ -31,7 +31,7 @@ template(name="events")
               label.show-current-user-events(for="showCurrentUserEvents" tabindex="0") My Events
         +searchInput searchSettings
 
-    .info-section
+    p.info-section
       if activeTab 'curated'
         | Curated Events are composed of human curated incident reports and articles.
       else if activeTab 'smart'
