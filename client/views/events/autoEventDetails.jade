@@ -1,9 +1,9 @@
 template(name="autoEventDetails")
   section.event--details
+    p This Auto Event includes all manually curated and
+      | automatically extracted incidents stored in EIDR-Connect which
+      | match the following properties:
     .event--criteria.secondary-content
-      p This Auto Event includes all manually curated and
-        | automatically extracted incidents stored in EIDR-Connect which
-        | match the following properties:
       if event.locations
         .criteria
           h4 Containing Location(s):
