@@ -167,7 +167,7 @@ export createIncidentReportsFromEnhancements = (enhancements, options={}) ->
       locations: locations
     # Use the document's date as the default
     incident.dateRange =
-      start: publishDate
+      start: new Date(publishDate)
       end: moment(publishDate).add(1, 'day').toDate()
       type: 'day'
     if dateTerritory.annotations.length > 0
@@ -198,7 +198,9 @@ export createIncidentReportsFromEnhancements = (enhancements, options={}) ->
         incident.cases = count
         incident.uncertainCountType = true
       if acceptByDefault and not incident.uncertainCountType
-        incident.accepted = true
+        # if the incident has an unspecified location or date do not auto-accept.
+        if dateTerritory.annotations.length > 0 and locationTerritory.annotations.length > 0
+          incident.accepted = true
       # Detect whether count is cumulative
       dateRangeHours = moment(incident.dateRange.end)
         .diff(incident.dateRange.start, 'hours')
