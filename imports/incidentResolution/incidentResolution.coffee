@@ -28,7 +28,7 @@
 # subintervals an interval contains must sum to at least the number of cases in
 # the interval.
 # The objective function minimizes the combined absolute values of the
-# difference between the subinterval case rates and their associated incident
+# max difference between the subinterval case rates and their associated incident
 # case rates. Essentially, it tries to make the resolved rates fit the
 # rates in the incident reports as closly as possible.
 
@@ -134,9 +134,13 @@ subIntervalsToLP = (incidents, subIntervals)->
     for subInterval in incidentSubs
       { id, start, end } = subInterval
       itervalLengthDays = (end - start) / MILLIS_PER_DAY
-      # The absIntervalId variables are the absolute value of the difference
-      # between the subinterval's rate and the source incident's overall rate.
+      # The absX variables are the absolute value of the max difference
+      # between the subinterval's rate and the source incidents' overall rates.
       # The objective function will attempt to minimize this quantity.
+      # Note: It might be simpler in some regards to create an absX variable for
+      # each incident sub-interval pair so the differences are all minimized
+      # rather than only the max difference. However, it would increase the
+      # number of variables and it would give more weight to repeated incidents.
       constraints.push("#{(1 / itervalLengthDays).toFixed(12)} s#{id} -1 abs#{id} <= #{incidentRate}")
       constraints.push("#{(1 / itervalLengthDays).toFixed(12)} s#{id} 1 abs#{id} >= #{incidentRate}")
       mainConstraintVars.push "1 s" + id
@@ -158,7 +162,7 @@ subIntervalsToLP = (incidents, subIntervals)->
   # down by 5x or more.
   # constraints = constraints.concat(subIntervals.map (s)->"int s#{s.id}")
   return [
-    "min: " + incidents.map((i, idx)-> "1 abs#{idx}").join(" ")
+    "min: " + subIntervals.map((i, idx)-> "1 abs#{idx}").join(" ")
   ].concat(constraints)
 
 extendSubIntervalsWithValues = (incidents, subIntervals)->
