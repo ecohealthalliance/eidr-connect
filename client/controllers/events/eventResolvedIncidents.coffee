@@ -8,6 +8,10 @@ import LocationTree from '/imports/incidentResolution/LocationTree'
 import EventIncidents from '/imports/collections/eventIncidents'
 import Constants from '/imports/constants'
 
+sortComponentTreeChildren = (componentTree) ->
+  componentTree.children = _.sortBy(componentTree.children, (x) -> -x.associatedObject.value)
+  componentTree.children.forEach(sortComponentTreeChildren)
+
 Template.eventResolvedIncidents.onCreated ->
   @incidentType = new ReactiveVar("cases")
   @plotType = new ReactiveVar("rate")
@@ -60,6 +64,7 @@ Template.eventResolvedIncidents.onRendered ->
                 componentTree = LocationTree.from(concurrentIntervals.map (x) -> x.location)
                 concurrentIntervals.forEach (x) ->
                   componentTree.getNodeById(x.location.id).associatedObject = x
+                sortComponentTreeChildren(componentTree)
                 Modal.show('intervalDetailsModal',
                   interval: subInt
                   componentTree: componentTree
@@ -96,6 +101,7 @@ Template.eventResolvedIncidents.onRendered ->
                 componentTree = LocationTree.from(concurrentIntervals.map (x) -> x.location)
                 concurrentIntervals.forEach (x) ->
                   componentTree.getNodeById(x.location.id).associatedObject = x
+                sortComponentTreeChildren(componentTree)
                 Modal.show('intervalDetailsModal',
                   interval: subInt
                   componentTree: componentTree

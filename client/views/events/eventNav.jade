@@ -22,7 +22,7 @@ template(name="eventNav")
             span
               i.fa.fa-info-circle
               span Details
-        if userEventId
+        if showReferences
           li(class="{{checkActive 'references'}}")
             a(href="{{pathFor route=route _id=id _view='references'}}")
               span

@@ -9,8 +9,8 @@ checkPermission = (userId) ->
 
 Meteor.methods
   upsertUserEvent: (userEvent) ->
+    checkPermission(@userId)
     user = Meteor.user()
-    checkPermission(user._id)
     now = new Date()
     eventName = userEvent.eventName
     if UserEvents.findOne(eventName: eventName, _id: $ne: userEvent._id)

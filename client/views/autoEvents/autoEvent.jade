@@ -1,13 +1,7 @@
-template(name="curatedEvent")
+template(name="autoEvent")
   .event
-    unless loaded
-      .veil
-      +loading
-    h1= userEvent.eventName
-    if deleted
-      .event--deleted
-        h2 This event has been deleted
-    else
+    if loaded
+      h1= event.eventName
       section.event--content-wrapper.container-flex.no-break
         aside.event--filtration
           if noIncidents
@@ -17,11 +11,12 @@ template(name="curatedEvent")
             selectedIncidentTypes=selectedIncidentTypes)
         .event--content-container
           nav.event--navigation
-            +eventNav route="curated-event" id=userEvent._id showReferences=true
+            +eventNav route="auto-event" id=event._id
           .event--content
             if filterableView
               if noFilterMatches
                 .veil.top-layer
                 +eventNoResults noIncidents=noIncidents noFilterMatches=noFilterMatches
-            if template
-              +Template.dynamic template=template.name data=template.data
+            +Template.dynamic template=template.name data=template.data
+    else
+      +loading

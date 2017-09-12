@@ -1,38 +1,21 @@
-import SmartEvents from '/imports/collections/smartEvents'
+import AutoEvents from '/imports/collections/autoEvents'
 import EventIncidents from '/imports/collections/eventIncidents'
-#Allow multiple modals or the suggested locations list won't show after the
-#loading modal is hidden
-Modal.allowMultiple = true
 
-Template.smartEvent.onCreated ->
-  @editState = new ReactiveVar(false)
+Template.autoEvent.onCreated ->
   @eventId = new ReactiveVar()
   @loaded = new ReactiveVar(false)
   @selectedView = new ReactiveVar('resolvedIncidentsPlot')
   @filterQuery = new ReactiveVar({})
   @selectedIncidentTypes = new ReactiveVar([])
 
-  @hasNoIncidents = =>
-    not EventIncidents.find().count()
-
-Template.smartEvent.onRendered ->
   eventId = Router.current().getParams()._id
   @eventId.set(eventId)
-  @subscribe 'smartEvent', eventId, =>
+  @subscribe 'autoEvent', eventId, =>
     @loaded.set(true)
 
-Template.smartEvent.onRendered ->
-  new Clipboard '.copy-link'
-
-Template.smartEvent.helpers
-  smartEvent: ->
-    SmartEvents.findOne(Template.instance().eventId.get())
-
-  isEditing: ->
-    Template.instance().editState.get()
-
-  deleted: ->
-    SmartEvents.findOne(Template.instance().eventId.get())?.deleted
+Template.autoEvent.helpers
+  event: ->
+    AutoEvents.findOne(Template.instance().eventId.get())
 
   loaded: ->
     Template.instance().loaded.get()
@@ -48,13 +31,13 @@ Template.smartEvent.helpers
       when 'incidents'
         'eventIncidentReports'
       when 'details'
-        'eventDetails'
+        'autoEventDetails'
       else
         currentView
 
     name: templateName
     data:
-      event: SmartEvents.findOne(instance.eventId.get())
+      event: AutoEvents.findOne(instance.eventId.get())
       filterQuery: instance.filterQuery
       selectedIncidentTypes: instance.selectedIncidentTypes
 
@@ -69,12 +52,8 @@ Template.smartEvent.helpers
     instance.loaded.get() and Router.current().getParams()._view not in ['references', 'details']
 
   noIncidents: ->
-    Template.instance().hasNoIncidents()
+    not EventIncidents.find().count()
 
   noFilterMatches: ->
     instance = Template.instance()
     not EventIncidents.find(instance.filterQuery.get()).count()
-
-Template.smartEvent.events
-  'click .edit-link, click #cancel-edit': (event, instance) ->
-    instance.editState.set(not instance.editState.get())

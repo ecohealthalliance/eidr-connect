@@ -103,6 +103,9 @@ Router.route "/events/curated-events/:_id/:_view?",
 Router.route "/events/smart-events/:_id/:_view?",
   name: 'smart-event'
 
+Router.route "/events/auto-events/:_id/:_view?",
+  name: 'auto-event'
+
 Router.route "/feeds",
   waitOn: ->
     Meteor.subscribe('user')

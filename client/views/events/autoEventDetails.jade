@@ -1,0 +1,22 @@
+template(name="autoEventDetails")
+  section.event--details
+    .event--criteria.secondary-content
+      p This Auto Event includes all manually curated and
+        | automatically extracted incidents stored in EIDR-Connect which
+        | match the following properties:
+      if event.locations
+        .criteria
+          h4 Containing Location(s):
+          ul
+            each location in event.locations
+              li {{ formatLocation location }}
+      if event.diseases
+        .criteria
+          h4 Disease(s):
+          ul
+            each event.diseases
+              li=text
+      if event.dateRange
+        .criteria
+          h4 Date Range:
+          p {{ formatDateRange event.dateRange }}
