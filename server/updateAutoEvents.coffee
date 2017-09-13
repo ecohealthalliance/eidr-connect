@@ -3,14 +3,14 @@ import AutoEvents from '/imports/collections/autoEvents'
 
 module.exports = ->
   diseaseGroups = {}
-  Incidents.find('resolvedDisease.id': $exists: true).forEach (i) ->
-    disease = i.resolvedDisease
+  Incidents.find('resolvedDisease.id': $exists: true).forEach (incident) ->
+    disease = incident.resolvedDisease
     diseaseGroup = diseaseGroups[disease.id] or {
       resolvedDisease: disease
       incidentCount: 0
     }
-    if i.dateRange.end > diseaseGroup.lastIncidentDate or not diseaseGroup.lastIncidentDate
-      diseaseGroup.lastIncidentDate = i.dateRange.end
+    if incident.dateRange.end > diseaseGroup.lastIncidentDate or not diseaseGroup.lastIncidentDate
+      diseaseGroup.lastIncidentDate = incident.dateRange.end
     diseaseGroup.incidentCount++
     diseaseGroups[disease.id] = diseaseGroup
   for id, diseaseGroup of diseaseGroups

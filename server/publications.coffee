@@ -151,13 +151,10 @@ Meteor.publishComposite 'autoEvent', (eventId) ->
     }
   ]
 
-# Smart Events
 ReactiveTable.publish 'smartEvents', SmartEvents, deleted: $in: [null, false]
 
-# Smart Events
 ReactiveTable.publish 'autoEvents', AutoEvents
 
-# Articles
 Meteor.publish 'articles', (query={}) ->
   if not Roles.userIsInRole(@userId, ['admin', 'curator'])
     throw new Meteor.Error('auth', 'User does not have permission to access articles')
@@ -173,7 +170,6 @@ Meteor.publish 'article', (sourceId) ->
 Meteor.publish 'incidentArticle', (articleId) ->
   Articles.find(articleId)
 
-# Feeds
 Meteor.publish 'feeds', ->
   Feeds.find()
 
