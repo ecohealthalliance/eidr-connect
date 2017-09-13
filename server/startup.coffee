@@ -1,9 +1,10 @@
-import incidentReportSchema from '/imports/schemas/incidentReport.coffee'
-import Incidents from '/imports/collections/incidentReports.coffee'
-import Articles from '/imports/collections/articles.coffee'
-import autoprocessArticles from '/server/autoprocess.coffee'
-import updateDatabase from '/server/updaters.coffee'
-import syncCollection from '/server/oneWaySync.coffee'
+import incidentReportSchema from '/imports/schemas/incidentReport'
+import Incidents from '/imports/collections/incidentReports'
+import Articles from '/imports/collections/articles'
+import autoprocessArticles from '/server/autoprocess'
+import updateDatabase from '/server/updaters'
+import syncCollection from '/server/oneWaySync'
+import updateAutoEvents from '/server/updateAutoEvents'
 
 Meteor.startup ->
   # Clean-up curatorInboxSourceId when user goes offline
@@ -46,3 +47,6 @@ Meteor.startup ->
     Meteor.setTimeout(syncCollection, 1000)
     # Pull data every 6 hours
     Meteor.setInterval(syncCollection, 6 * 60 * 60 * 1000)
+
+  Meteor.setInterval updateAutoEvents, 60 * 60 * 1000
+  updateAutoEvents()

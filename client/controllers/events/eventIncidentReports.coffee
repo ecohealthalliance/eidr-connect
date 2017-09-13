@@ -286,7 +286,9 @@ Template.eventIncidentReports.events
           {name: 'Document Title', classNames: "wide"}
           {name: 'Document Publication Date'}
         ],
-        rows: instance.incidents.map (incident, i) ->
+        rows: EventIncidents.find(
+          instance.data.filterQuery.get()
+        ).map (incident, i) ->
           properties = []
           if incident.travelRelated
             properties.push "Travel Related"

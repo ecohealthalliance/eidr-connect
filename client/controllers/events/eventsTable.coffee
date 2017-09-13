@@ -21,6 +21,11 @@ Template.eventsTable.onCreated ->
       sortOrder: 3
       displayFn: (value, object) ->
         value?.length or 0
+    incidentCount:
+      description: 'Number of incidents in the event'
+      displayName: 'Incident Count'
+      sortable: true
+      sortOrder: 3
     lastModifiedDate:
       description: 'Date the event was last modified.'
       displayName: 'Last Modified Date'
@@ -32,6 +37,17 @@ Template.eventsTable.onCreated ->
         else
           content =  "No date"
         new Spacebars.SafeString("<span data-heading='Last Modified Date'>#{content}</span>")
+    lastIncidentDate:
+      description: 'End date of the most recent incident.'
+      displayName: 'Last Incident Date'
+      defaultSortDirection: -1
+      sortOrder: 1
+      displayFn: (value, object, key) ->
+        if value != null
+          content =  moment(value).format('MMM D, YYYY')
+        else
+          content =  "No date"
+        new Spacebars.SafeString("<span data-heading='Last Incident Date'>#{content}</span>")
   @tableOptions =
     fieldVisibility: {}
     sortOrder: {}
@@ -46,8 +62,13 @@ Template.eventsTable.helpers
     eventType = instance.data.eventType.get()
     fields = instance.tableOptions.fields
 
-    if eventType is 'smart'
-      fields = _.omit(fields, 'incidents')
+    fields = switch eventType
+      when 'smart'
+        _.pick(fields, 'eventName', 'lastModifiedDate')
+      when 'auto'
+        _.pick(fields, 'eventName', 'incidentCount', 'lastIncidentDate')
+      else
+        _.pick(fields, 'eventName', 'incidents', 'lastModifiedDate')
 
     id: "#{eventType}-events-table"
     fields: tableFields(fields, instance.tableOptions)
@@ -62,10 +83,15 @@ Template.eventsTable.helpers
     noDataTmpl: Template.noResults
 
   collection: ->
-    if Template.instance().data.eventType.get() is 'curated'
-      'userEvents'
-    else
-      'smartEvents'
+    switch Template.instance().data.eventType.get()
+      when 'curated'
+        'userEvents'
+      when 'smart'
+        'smartEvents'
+      when 'auto'
+        'autoEvents'
+      else
+        'userEvents'
 
 Template.eventsTable.events
   'click .reactive-table tbody tr': gotoEvent

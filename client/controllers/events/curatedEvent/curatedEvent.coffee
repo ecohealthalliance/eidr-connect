@@ -72,26 +72,13 @@ Template.curatedEvent.helpers
   selectedIncidentTypes: ->
     Template.instance().selectedIncidentTypes
 
-  showNoResults: ->
+  filterableView: ->
     instance = Template.instance()
-    (instance.loaded.get() and not
-      EventIncidents.find(instance.filterQuery.get()).count()) and
-      Router.current().getParams()._view not in ['references', 'details']
+    instance.loaded.get() and Router.current().getParams()._view not in ['references', 'details']
 
-  noResultsMessage: ->
-    if Template.instance().hasNoIncidents()
-      'Event currently has no incidents.'
-    else
-      Spacebars.SafeString """
-        <span class="main-message">No Results</span>
-        Adjust filter criteria to view event information.
-      """
+  noFilterMatches: ->
+    instance = Template.instance()
+    not EventIncidents.find(instance.filterQuery.get()).count()
 
-  classNames: ->
-    classNames = 'top-layer secondary'
-    if Template.instance().hasNoIncidents()
-      classNames += ' no-results--incidents'
-    classNames
-
-  disableFilters: ->
+  noIncidents: ->
     Template.instance().hasNoIncidents()

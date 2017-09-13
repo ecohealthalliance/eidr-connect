@@ -225,6 +225,10 @@ export pluralize = (word, count, showCount=true) ->
 export formatDateRange = (dateRange, readable) ->
   if not dateRange or not (dateRange.start or dateRange.end)
     return
+  if not dateRange.start
+    return "before " + moment.utc(dateRange.end).format("MMM D, YYYY")
+  if not dateRange.end
+    return "after " + moment.utc(dateRange.start).format("MMM D, YYYY")
   start = moment.utc(dateRange.start)
   end = moment.utc(dateRange.end)
   dateFormatEnd = "MMM D, YYYY"
