@@ -54,6 +54,8 @@ IncidentReportSchema = new SimpleSchema
     type: String
     allowedValues: ["day","precise"]
     optional: true
+  # Datetimes are treated as offset naive so the look the same from any
+  # browser client and match the dates in their source documents.
   "dateRange.start":
     type: Date
     optional: true
@@ -69,6 +71,7 @@ IncidentReportSchema = new SimpleSchema
   approximate:
     type: Boolean
     optional: true
+  # Deprecated
   disease:
     type: String
     optional: true
@@ -99,6 +102,9 @@ IncidentReportSchema = new SimpleSchema
   deletedDate:
     type: Date
     optional: true
+  # Unaccepted incidents are hidden from the UI except for in the incident
+  # extraction view. This property is used to annotate counts which do not
+  # appear to be case couse so the user can check them for false negatives.
   accepted:
     type: Boolean
     optional: true

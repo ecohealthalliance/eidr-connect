@@ -13,6 +13,10 @@ sortComponentTreeChildren = (componentTree) ->
   componentTree.children.forEach(sortComponentTreeChildren)
 
 Template.eventResolvedIncidents.onCreated ->
+  # This reactive var is for testing. It allows the resolution method to
+  # be toggled via browser console so the results can be compared without
+  # reloading the page.
+  window.resolutionMethod = new ReactiveVar("topologicalSort")
   @incidentType = new ReactiveVar("cases")
   @plotType = new ReactiveVar("rate")
   @legend = new ReactiveVar([])
@@ -187,8 +191,9 @@ Template.eventResolvedIncidents.onRendered ->
       return
     else
       @tooManyIncidents.set(false)
+    resolutionMethod = window.resolutionMethod.get()
     _.delay =>
-      extendSubIntervalsWithValues(differentials, subIntervals)
+      extendSubIntervalsWithValues(differentials, subIntervals, resolutionMethod)
       for subInterval in subIntervals
         subInterval.incidents = subInterval.incidentIds.map (id) ->
           differentials[id]
