@@ -15,6 +15,14 @@ IncidentReportSchema = new SimpleSchema
   type:
     type: String
     optional: true
+    allowedValues: [
+      'caseCount'
+      'deathCount'
+      'cumulativeCaseCount'
+      'cumulativeDeathCount'
+      'activeCount'
+      'specify'
+    ]
   articleId:
     type: String
     optional: true
