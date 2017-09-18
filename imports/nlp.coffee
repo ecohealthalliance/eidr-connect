@@ -198,9 +198,11 @@ export createIncidentReportsFromEnhancements = (enhancements, options={}) ->
         incident.cases = count
         incident.uncertainCountType = true
       if acceptByDefault and not incident.uncertainCountType
-        # if the incident has an unspecified location or date do not auto-accept.
-        if dateTerritory.annotations.length > 0 and locationTerritory.annotations.length > 0
-          incident.accepted = true
+        # if the incident is not an EIDR-C supported count type do not auto-accept.
+        if _.intersection(['recovery', 'annual', 'monthly', 'weekly'], attributes).length == 0
+          # if the incident has an unspecified location or date do not auto-accept.
+          if dateTerritory.annotations.length > 0 and locationTerritory.annotations.length > 0
+            incident.accepted = true
       # Detect whether count is cumulative
       dateRangeHours = moment(incident.dateRange.end)
         .diff(incident.dateRange.start, 'hours')
@@ -211,15 +213,15 @@ export createIncidentReportsFromEnhancements = (enhancements, options={}) ->
       # Infer cumulative is case rate is greater than 300 per day
       else if (count / (dateRangeHours / 24)) > 300
         incident.dateRange.cumulative = true
-      if incident.dateRange.cumulative
+      if 'ongoing' in attributes
+        incident.type = 'activeCount'
+      else if incident.dateRange.cumulative
         if incident.cases
           incident.type = 'cumulativeCaseCount'
         else if incident.deaths
           incident.type = 'cumulativeDeathCount'
       else
-        if 'active' in attributes
-          incident.type = 'activeCount'
-        else if incident.cases
+        if incident.cases
           incident.type = 'caseCount'
         else if incident.deaths
           incident.type = 'deathCount'

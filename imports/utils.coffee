@@ -223,45 +223,43 @@ export pluralize = (word, count, showCount=true) ->
   if showCount then "#{count} #{word}" else word
 
 export formatDateRange = (dateRange, readable) ->
+  # Prevent passing of template context object to be interpreted as true
+  readable = readable == true
+  DATE_FORMAT = "MMM D, YYYY"
   if not dateRange or not (dateRange.start or dateRange.end)
     return
-  if not dateRange.start
-    return "before " + moment.utc(dateRange.end).format("MMM D, YYYY")
+  if not dateRange.start or dateRange.cumulative
+    return "on or before " + moment.utc(dateRange.end).format(DATE_FORMAT)
   if not dateRange.end
-    return "after " + moment.utc(dateRange.start).format("MMM D, YYYY")
+    return "on or after " + moment.utc(dateRange.start).format(DATE_FORMAT)
   start = moment.utc(dateRange.start)
-  end = moment.utc(dateRange.end)
-  dateFormatEnd = "MMM D, YYYY"
-  dateFormatStart = dateFormatEnd
-  inSameYear = start?.year() == end?.year()
-  inSameMonthAndYear = inSameYear and start?.month() == end?.month()
-  sameMonthAndYearDateRange =
-    start.format('MMM D') + ' - ' + end.format('D') + ', ' + end.format('YYYY')
-  if inSameYear
-    dateFormatStart = "MMM D"
-  startFormated = start.format(dateFormatStart)
-  startFormatedWithYear = start.format(dateFormatEnd)
-  endFormated = end.format(dateFormatEnd)
+  # Formatted date ranges include the final date in the range.
+  # Ex: "June 1 - June 2" goes from the start of June 1 to the end of June 2.
+  # The end timestamp in the range will be at the start of the next day.
+  # A minute is subtracted from it so that it is on the final day in the range
+  # when it is formatted.
+  end = moment.utc(dateRange.end).subtract(1, 'minute')
 
-  if dateRange.type is "day"
-    if dateRange.cumulative
-      "before " + endFormated
-    else
-      if readable
-        "on " + startFormatedWithYear
-      else
-        startFormatedWithYear
-  else if dateRange.type is "precise"
+  type = dateRange.type or "precise"
+  if start.format(DATE_FORMAT) == end.format(DATE_FORMAT)
+    type = "day"
+
+  if type is "day"
     if readable
-      "between " + startFormated + " and " + endFormated
-    else if inSameMonthAndYear
-      sameMonthAndYearDateRange
+      return "on " + start.format(DATE_FORMAT)
     else
-      startFormated + " - " + endFormated
-  else if inSameMonthAndYear
-    sameMonthAndYearDateRange
-  else
-    startFormated + " - " + endFormated
+      return start.format(DATE_FORMAT)
+  else if type is "precise"
+    startFormated = start.format(DATE_FORMAT)
+    if start.year() == end.year()
+      startFormated = start.format("MMM D")
+    endFormated = end.format(DATE_FORMAT)
+    if readable
+      return "between " + startFormated + " and " + endFormated
+    else if start.format("MMM YYYY") == end.format("MMM YYYY")
+      return start.format('MMM D') + ' - ' + end.format('D, YYYY')
+    else
+      return startFormated + " - " + endFormated
 
 export formatLocation = (locations) ->
   return unless locations

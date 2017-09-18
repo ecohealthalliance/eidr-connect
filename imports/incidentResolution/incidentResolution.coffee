@@ -20,20 +20,21 @@
 #   +-------------------------------------------------------------------------+
 #   +                         Time
 #
-# In order to compute the number of cases that fall within each subinterval
-# linear programming is used.
-# There is a variable for each subinterval that indicates how many cases occur
-# within it.
-# The constraints are formed by the incident intervals. The number of cases in the 
-# subintervals an interval contains must sum to at least the number of cases in
-# the interval.
-# The objective function minimizes the combined absolute values of the
-# max difference between the subinterval case rates and their associated incident
-# case rates. Essentially, it tries to make the resolved rates fit the
-# rates in the incident reports as closly as possible.
+# There are two resolution methods implemented. One is based on
+# linear programming. The other chooses the maximum incident case rates over
+# each sub-interval and uses a topological sort to ensure the larger of
+# the sub-interval or sum of the sub-location sub-interval counts is used.
+# The linear programming method is slower and cannot handle as many incidents.
+# Linear programming has a potential advantage when handling bi-directional
+# relationships between case rates. For instance, it may be desirable to
+# decrease the case rates of some of the sub-intervals that overlap an incident
+# interval if one of them has a rate that is greater than the incident's case
+# rate.
 
 import LocationTree from './LocationTree.coffee'
 import Solver from './LPSolver'
+
+MILLIS_PER_DAY = 1000 * 60 * 60 * 24
 
 class Endpoint
   constructor: (@isStart, @offset, @interval) ->
@@ -128,7 +129,6 @@ subIntervalsToLP = (incidents, subIntervals)->
     incidentSubs = IncidentToSELs[incidentId]
     if not incidentSubs
       console.log "Error: No subintervals for", incidentId
-    MILLIS_PER_DAY = 1000 * 60 * 60 * 24
     incidentLength = (Number(incident.endDate) - Number(incident.startDate)) / MILLIS_PER_DAY
     incidentRate = incident.count / incidentLength
     for subInterval in incidentSubs
@@ -165,7 +165,18 @@ subIntervalsToLP = (incidents, subIntervals)->
     "min: " + subIntervals.map((i, idx)-> "1 abs#{idx}").join(" ")
   ].concat(constraints)
 
-extendSubIntervalsWithValues = (incidents, subIntervals)->
+# This method uses linear programming to compute the number of cases in
+# each sub-interval.
+# There is a variable for each subinterval that indicates how many cases occur
+# within it.
+# The constraints are formed by the incident intervals. The number of cases in
+# the subintervals an interval contains must sum to at least the number of cases
+# in the interval.
+# The objective function minimizes the combined absolute values of the
+# max difference between the subinterval case rates and their associated incident
+# case rates. Essentially, it tries to make the resolved rates fit the
+# rates in the incident reports as closely as possible.
+extendSubIntervalsWithValuesLP = (incidents, subIntervals)->
   model = subIntervalsToLP(incidents, subIntervals)
   solution = Solver.Solve(Solver.ReformatLP(model))
   # set default values for subintervals
@@ -176,6 +187,96 @@ extendSubIntervalsWithValues = (incidents, subIntervals)->
       subId = key.split("s")[1]
       subInterval = subIntervals[parseInt(subId)]
       subInterval.value = value
+
+topologicalSort = (incomingNodesInit) ->
+  # Copy incoming nodes
+  incomingNodes = incomingNodesInit.map (nodes) -> new Set(nodes)
+  # Create outgoing node index
+  outgoingNodes = incomingNodes.map(-> new Set())
+  incomingNodes.forEach (incomingIds, id) ->
+    incomingIds.forEach (incomingId) ->
+      outgoingNodes[incomingId].add(id)
+  # Based on Kahn's algorithm
+  sortedIds = []
+  noIncomingNodes = []
+  incomingNodes.forEach (incomingNodes, id) ->
+    if incomingNodes.size == 0
+      noIncomingNodes.push(id)
+  while noIncomingNodes.length > 0
+    nodeId = noIncomingNodes.pop()
+    sortedIds.push(nodeId)
+    outgoingNodes[nodeId].forEach (outgoingNodeId) ->
+      outgoingNodeIncomingNodes = incomingNodes[outgoingNodeId]
+      outgoingNodeIncomingNodes.delete(nodeId)
+      if outgoingNodeIncomingNodes.size == 0
+        noIncomingNodes.push(outgoingNodeId)
+    outgoingNodes[nodeId] = new Set()
+  # Check for cycles
+  console.assert(incomingNodes.every((nodes) -> nodes.size == 0))
+  console.assert(outgoingNodes.every((nodes) -> nodes.size == 0))
+  return sortedIds
+
+# This resolves incidents using a method where the max incident over each
+# subinterval is selected as the subinterval's rate. The rate for each location
+# is the greater of the location's rate or the sum of its child location rates.
+# Toplological sorting is used to resolve the child location rates.
+extendSubIntervalsWithValuesTS = (incidents, subIntervals) ->
+  IncidentToSELs = {}
+  SEToLocations = {}
+  SELToId = {}
+  subIntervals.forEach (interval) ->
+    {start, end, incidentIds, location} = interval
+    for incidentId in incidentIds
+      IncidentToSELs[incidentId] = (IncidentToSELs[incidentId] or []).concat(interval)
+    SELToId["#{start},#{end},#{location.id}"] = interval.id
+    key = "#{start},#{end}"
+    SEToLocations[key] = (SEToLocations[key] or []).concat(location)
+  SEToLocationTree = {}
+  for key, locations of SEToLocations
+    SEToLocationTree[key] = LocationTree.from(locations)
+  subIntervalRates = subIntervals.map(-> [])
+  incidents.forEach((incident, incidentId) ->
+    incidentSubs = IncidentToSELs[incidentId]
+    if not incidentSubs
+      console.log "Error: No subintervals for", incidentId
+    incidentLength = (Number(incident.endDate) - Number(incident.startDate)) / MILLIS_PER_DAY
+    # The case rate is divided by the number of locations in the incident
+    # so that a report of cases distributed in 3 states won't result in
+    # a count of triple that for the country.
+    incidentRate = incident.count / incidentLength / incident.locations.length
+    for subInterval in incidentSubs
+      subIntervalRates[subInterval.id].push(incidentRate)
+  )
+  subIntervalRates = subIntervalRates.map (rates) ->
+    _.max(rates.concat(0))
+  # incomingNodes specifies a DAG where there is a node for each sub-interval
+  # and directed edges that indicate the sub-interval of the starting node
+  # contributes to the case rate of of the sub-interval of the ending node.
+  incomingNodes = []
+  subIntervals.forEach ({id}) ->
+    incomingNodes[id] = new Set()
+  subIntervals.forEach ({id, start, end, locationId}) ->
+    locationTree = SEToLocationTree[start + "," + end]
+    ltNode = locationTree.getNodeById(locationId)
+    for sublocation in ltNode.children
+      sublocSubIntId = SELToId[start + "," + end + "," + sublocation.value.id]
+      incomingNodes[id].add(sublocSubIntId)
+  sortedSubIntervalIds = topologicalSort(incomingNodes)
+  for id in sortedSubIntervalIds
+    subLocationTotal = 0
+    incomingNodes[id].forEach (incomingNodeId) ->
+      subLocationTotal += subIntervalRates[incomingNodeId]
+    subIntervalRates[id] = Math.max(subIntervalRates[id], subLocationTotal)
+  subIntervals.forEach (subInterval) ->
+    {start, end} = subInterval
+    itervalLengthDays = (end - start) / MILLIS_PER_DAY
+    subInterval.value = subIntervalRates[subInterval.id] * itervalLengthDays
+
+extendSubIntervalsWithValues = (incidents, subIntervals, method="topologicalSort") ->
+  if method is "topologicalSort"
+    extendSubIntervalsWithValuesTS(incidents, subIntervals)
+  else
+    extendSubIntervalsWithValuesLP(incidents, subIntervals)
 
 export intervalToEndpoints = intervalToEndpoints
 export differentailIncidentsToSubIntervals = differentailIncidentsToSubIntervals

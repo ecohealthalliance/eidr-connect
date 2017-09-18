@@ -5,7 +5,7 @@ import convertAllIncidentsToDifferentials from './convertAllIncidentsToDifferent
 import {
   differentailIncidentsToSubIntervals,
   subIntervalsToLP,
-  intervalToEndpoints
+  intervalToEndpoints,
 } from './incidentResolution.coffee'
 
 lome =

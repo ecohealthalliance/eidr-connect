@@ -303,13 +303,13 @@ Template.eventIncidentReports.events
           article = Articles.findOne(incident.articleId)
           feed = Feeds.findOne(article?.feedId)
 
-          'Type': _.keys(_.pick(incident, 'cases', 'deaths', 'specify'))[0]
+          'Type': incident.type
           'Value': _.values(_.pick(incident, 'cases', 'deaths', 'specify'))[0]
           'Start Date': startDate
           'End Date': endDate
           'Locations': formatLocations(incident.locations)
           'Status': incident.status
-          'Species': incident.species
+          'Species': incident.species?.text
           'Properties': properties.join(";")
           'Disease': incident.resolvedDisease?.text
           'Feed': feed?.title or feed?.url

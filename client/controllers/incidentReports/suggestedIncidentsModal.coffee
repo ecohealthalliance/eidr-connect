@@ -120,7 +120,6 @@ Template.suggestedIncidentsModal.helpers
   incidents: ->
     Template.instance().collection().find
       accepted: true
-      specify: $exists: false
 
   incidentsFound: ->
     Template.instance().collection().find().count()

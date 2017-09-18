@@ -76,7 +76,7 @@ template(name="incidentForm")
           label.control-label.with-info-tooltip(
             data-toggle="tooltip"
             data-placement="right"
-            title='Cumulative counts include all cases since the start of the outbreak. E.g. "So far there have been 21 cases."\nApproximate counts specify an imprecise number. E.g. "There were at least 100 deaths."'
+            title='Approximate counts specify an imprecise number. E.g. "There were at least 100 deaths."'
           ) Count Attributes
           .container-flex.other-metadata.check-buttons.no-break
 
@@ -108,7 +108,7 @@ template(name="incidentForm")
               class="{{rangeTabClass}}"
               data-toggle="tooltip"
               data-placement="top"
-              title='For incidents that occurred over multiple days or for which a precise date is unspecified. E.g. "There were 5 cases in the month of March."')
+              title='For incidents that occurred over multiple days or for which a precise date is unspecified. E.g. "There were 5 cases in the month of March." The date range includes the final day in the range.')
               a(
                 href="#preciseRange"
                 aria-controls="date range"
