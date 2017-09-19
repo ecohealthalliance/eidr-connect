@@ -26,7 +26,7 @@ module.exports = ->
       done()
   forEachAsync(batch, (article, next) ->
     count++
-    Meteor.call('getArticleEnhancementsAndUpdate', article, {
+    Meteor.call('getArticleEnhancementsAndUpdate', article._id, {
       hideLogs: true
       priority: false
     }, (error)->

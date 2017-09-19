@@ -61,6 +61,10 @@ template(name="curatorSourceDetails")
                   i.i-incident
                   | Incidents
                   span.count (#{incidents.count})
+                button.btn.btn-default.btn-sm.reprocess.on-right(
+                  data-toggle="tooltip"
+                  title="Automatically extract incidents again using the latest version of GRITS. User edited incidents will remain and deleted incidents will not be recreated.")
+                  i.fa.fa-refresh
                 button.btn.btn-default.btn-sm.add-incident.on-right Add New Incident
               +sourceIncidentReportsHeader(
                 selectedIncidents=selectedIncidents
