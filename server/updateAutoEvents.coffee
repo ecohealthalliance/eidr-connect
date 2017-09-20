@@ -3,7 +3,10 @@ import AutoEvents from '/imports/collections/autoEvents'
 
 module.exports = ->
   diseaseGroups = {}
-  Incidents.find('resolvedDisease.id': $exists: true).forEach (incident) ->
+  Incidents.find(
+    'resolvedDisease.id': $exists: true
+    deleted: $in: [null, false]
+  ).forEach (incident) ->
     disease = incident.resolvedDisease
     diseaseGroup = diseaseGroups[disease.id] or {
       resolvedDisease: disease
@@ -23,3 +26,7 @@ module.exports = ->
       # filter out incidents that appear to have invalid dates
       dateRange:
         start: new Date("1950-1-1")
+  # Remove AutoEvents without any incidents:
+  AutoEvents.find().forEach (event)->
+    if event.diseases[0].id not of diseaseGroups
+      AutoEvents.remove(event)
