@@ -38,6 +38,9 @@ Template.incidentModal.helpers
   submitting: ->
     Template.instance().submitting.get()
 
+  edit: ->
+    Template.instance().data.incident?._id
+
 Template.incidentModal.events
   'click .save-incident, click .save-incident-duplicate': (event, instance) ->
     # Submit the form to trigger validation and to update the 'valid'
@@ -62,7 +65,18 @@ Template.incidentModal.events
       incident.annotations ?= {}
       incident.annotations.case = [manualAnnotation]
 
-    if @add
+    if @incident?._id
+      incident._id = @incident._id
+      Meteor.call 'editIncidentReport', incident, (error, result) ->
+        if not error
+          $('.reactive-table tr').removeClass('open')
+          $('.reactive-table tr.details').remove()
+          notify('success', 'Incident updated')
+          Modal.hide('incidentModal')
+        else
+          notify('error', error.reason)
+        instance.submitting.set(false)
+    else
       Meteor.call 'addIncidentReport', incident, instanceData.userEventId, (error, result) ->
         if not error
           $('.reactive-table tr').removeClass('open')
@@ -79,14 +93,11 @@ Template.incidentModal.events
           notify('error', errorString)
         instance.submitting.set(false)
 
-    else if @incident._id
-      incident._id = @incident._id
-      Meteor.call 'editIncidentReport', incident, (error, result) ->
-        if not error
-          $('.reactive-table tr').removeClass('open')
-          $('.reactive-table tr.details').remove()
-          notify('success', 'Incident updated')
-          Modal.hide('incidentModal')
-        else
-          notify('error', error.reason)
-        instance.submitting.set(false)
+  'click .delete-incident': (event, instance) ->
+    Meteor.call 'deleteIncidents', [@incident._id], (error, result) ->
+      console.log error, result
+      if error
+        notify('error', error.reason)
+        return
+      notify('success', 'Incident Deleted')
+      Modal.hide()

@@ -22,5 +22,7 @@ template(name="incidentModal")
 
         .modal-footer
           button.btn.btn-default.on-left(type="button" data-dismiss="modal") Cancel
+          if edit
+            button.btn.btn-danger.delete-incident(type="button") Delete
           button.btn.btn-primary.btn-wide.save-incident(type="button"
             disabled="{{#if submitting}} true {{/if}}") Save

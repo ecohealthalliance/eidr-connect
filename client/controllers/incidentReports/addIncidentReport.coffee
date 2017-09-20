@@ -4,4 +4,3 @@ Template.addIncidentReport.events
     Modal.show 'incidentModal',
       articles: data.articles
       userEventId: data.event._id
-      add: true
