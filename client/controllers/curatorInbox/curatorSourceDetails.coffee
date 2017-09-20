@@ -73,7 +73,7 @@ Template.curatorSourceDetails.onRendered ->
       if enhancements?.dateOfDiagnosis or enhancements?.error or enhancements?.processingStartedAt
         return
       else
-        Meteor.call 'getArticleEnhancementsAndUpdate', source
+        Meteor.call 'getArticleEnhancementsAndUpdate', source._id
 
 Template.curatorSourceDetails.onDestroyed ->
   $(window).off('resize')
@@ -163,7 +163,7 @@ Template.curatorSourceDetails.events
 
   'click .retry': (event, instance)->
     source = Articles.findOne(instance.selectedSourceId.get())
-    Meteor.call 'getArticleEnhancementsAndUpdate', source, (error, enhancements) =>
+    Meteor.call 'getArticleEnhancementsAndUpdate', source._id, (error, enhancements) =>
       if error
         notify('error', error.reason)
 
@@ -179,3 +179,10 @@ Template.curatorSourceDetails.events
         articleId: instance.selectedSourceId.get()
       add: true
       accept: true
+
+  'click .reprocess': (event, instance) ->
+    Meteor.call(
+      'getArticleEnhancementsAndUpdate',
+      instance.selectedSourceId.get(),
+      reprocess: true
+    )

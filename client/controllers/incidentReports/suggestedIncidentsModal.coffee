@@ -91,7 +91,7 @@ Template.suggestedIncidentsModal.onRendered ->
       return
     source.enhancements = enhancements
     if @saveResults
-      Meteor.call 'getArticleEnhancementsAndUpdate', source,  (error, enhancements) =>
+      Meteor.call 'getArticleEnhancementsAndUpdate', source._id,  (error, enhancements) =>
         if error
           notify('error', error.reason)
         else
