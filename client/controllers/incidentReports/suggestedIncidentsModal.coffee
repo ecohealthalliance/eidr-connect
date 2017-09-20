@@ -211,7 +211,6 @@ Template.suggestedIncidentsModal.events
     sendModalOffStage(instance)
     Modal.show 'incidentModal',
       userEventId: instance.data.userEventId
-      add: true
       incident:
         articleId: instance.data.article._id
       offCanvas: 'right'
