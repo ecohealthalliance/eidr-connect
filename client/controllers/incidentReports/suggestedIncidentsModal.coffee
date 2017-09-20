@@ -91,7 +91,7 @@ Template.suggestedIncidentsModal.onRendered ->
       return
     source.enhancements = enhancements
     if @saveResults
-      Meteor.call 'getArticleEnhancementsAndUpdate', source,  (error, enhancements) =>
+      Meteor.call 'getArticleEnhancementsAndUpdate', source._id,  (error, enhancements) =>
         if error
           notify('error', error.reason)
         else
@@ -120,7 +120,6 @@ Template.suggestedIncidentsModal.helpers
   incidents: ->
     Template.instance().collection().find
       accepted: true
-      specify: $exists: false
 
   incidentsFound: ->
     Template.instance().collection().find().count()

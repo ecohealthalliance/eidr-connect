@@ -2,30 +2,42 @@ template(name="events")
   .events
     .container-fluid-padded.page-heading.container-flex.no-break
       h1
-        span.text Events
         span.icon
           i.i-event
+        span.text Events
       ul.tabs
         li.tab(class="{{#if activeTab 'curated'}} active {{/if}}")
           a.curated-events(href="{{pathFor route='events' _view='curated'}}")
-            span Curated Events
+            span Curated
         li.tab(class="{{#if activeTab 'smart'}} active {{/if}}")
           a.smart-events(href="{{pathFor route='events' _view='smart'}}")
-            span Smart Events
+            span Smart
+        li.tab(class="{{#if activeTab 'auto'}} active {{/if}}")
+          a.smart-events(href="{{pathFor route='events' _view='auto'}}")
+            span Auto
       .page-options.container-flex.no-break.vertically-centered
-        if isInRole "admin"
-          button.create-event.btn.btn-primary.btn-sm
-            i.fa.fa-plus-circle(aria-hidden="true")
-            span Add #{eventTypeText} Event
-        if showUserOptions
-          .check-button.small-text
-            input(
-              type="checkbox"
-              name="showCurrentUserEvents"
-              tabindex="-1"
-              checked=showCurrentUserEventsChecked)
-            label.show-current-user-events(for="showCurrentUserEvents" tabindex="0") My Events
+        unless activeTab 'auto'
+          if isInRole "admin"
+            button.create-event.btn.btn-primary.btn-sm
+              i.fa.fa-plus-circle(aria-hidden="true")
+              span Add #{eventTypeText} Event
+          if showUserOptions
+            .check-button.small-text
+              input(
+                type="checkbox"
+                name="showCurrentUserEvents"
+                tabindex="-1"
+                checked=showCurrentUserEventsChecked)
+              label.show-current-user-events(for="showCurrentUserEvents" tabindex="0") My Events
         +searchInput searchSettings
+
+    p.info-section
+      if activeTab 'curated'
+        | Curated Events are composed of human curated incident reports and articles.
+      else if activeTab 'smart'
+        | Smart Events are composed of all incidents, including automatically extracted ones, that match a given query.
+      else if activeTab 'auto'
+        | Auto Events are composed of all incidents, including automatically extracted ones, that are related to a given disease.
 
     .featured-table.table-wrapper
       +eventsTable eventType=eventType

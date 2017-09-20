@@ -7,7 +7,7 @@ template(name="intervalDetailsModal")
             h4 Interval Details
           +modalCloseButton
         .modal-body
-          h5 {{formatDate interval.start}} - {{formatDate interval.end}}
+          h5 {{formatDateRange interval}}
           each componentTree.children
             +componentTreeList
 

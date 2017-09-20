@@ -1,13 +1,10 @@
 import Incidents from '/imports/collections/incidentReports.coffee'
 import UserEvents from '/imports/collections/userEvents.coffee'
 import SmartEvents from '/imports/collections/smartEvents.coffee'
+import AutoEvents from '/imports/collections/autoEvents.coffee'
 import Articles from '/imports/collections/articles.coffee'
 import Feeds from '/imports/collections/feeds.coffee'
 import regionToCountries from '/imports/regionToCountries.json'
-
-# Incidents
-ReactiveTable.publish 'curatorEventIncidents', Incidents,
-  deleted: {$in: [null, false]}
 
 Meteor.publish 'mapIncidents', (incidentIds) ->
   Incidents.find
@@ -80,6 +77,49 @@ Meteor.publishComposite 'userEvent', (eventId) ->
     }
   ]
 
+eventToIncidentQuery = (event) ->
+  query =
+    accepted: $in: [null, true]
+    deleted: $in: [null, false]
+    locations: $not: $size: 0
+  if event.diseases and event.diseases.length > 0
+    query['resolvedDisease.id'] = $in: event.diseases.map (x) -> x.id
+  eventDateRange = event.dateRange
+  if eventDateRange
+    if eventDateRange.end
+      query['dateRange.start'] = $lte: eventDateRange.end
+    if eventDateRange.start
+      query['dateRange.end'] = $gte: eventDateRange.start
+  locationQueries = []
+  for location in (event.locations or [])
+    locationQueries.push
+      id: location.id
+    if location.id of regionToCountries
+      locationQueries.push
+        countryCode: $in: regionToCountries[location.id].countryISOs
+      continue
+    locationQuery =
+      countryName: location.countryName
+    featureCode = location.featureCode
+    if featureCode.startsWith("PCL")
+      locationQueries.push(locationQuery)
+    else
+      locationQuery.admin1Name = location.admin1Name
+      if featureCode is 'ADM1'
+        locationQueries.push(locationQuery)
+      else
+        locationQuery.admin2Name = location.admin2Name
+        if featureCode is 'ADM2'
+          locationQueries.push(locationQuery)
+  locationQueries = locationQueries.map (locationQuery) ->
+    result = {}
+    for prop, value of locationQuery
+      result["locations.#{prop}"] = value
+    return result
+  if locationQueries.length > 0
+    query['$or'] = locationQueries
+  query
+
 Meteor.publishComposite 'smartEvent', (eventId) ->
   find: ->
     SmartEvents.find(_id: eventId)
@@ -96,55 +136,25 @@ Meteor.publishComposite 'smartEvent', (eventId) ->
     }, {
       collectionName: 'eventIncidents'
       find: (event) ->
-        query =
-          accepted: $in: [null, true]
-          deleted: $in: [null, false]
-          locations: $not: $size: 0
-        if event.diseases and event.diseases.length > 0
-          query['resolvedDisease.id'] = $in: event.diseases.map (x) -> x.id
-        eventDateRange = event.dateRange
-        if eventDateRange
-          query['dateRange.start'] = $lte: eventDateRange.end
-          query['dateRange.end'] = $gte: eventDateRange.start
-        locationQueries = []
-        for location in (event.locations or [])
-          locationQueries.push
-            id: location.id
-          if location.id of regionToCountries
-            locationQueries.push
-              countryCode: $in: regionToCountries[location.id].countryISOs
-            continue
-          locationQuery =
-            countryName: location.countryName
-          featureCode = location.featureCode
-          if featureCode.startsWith("PCL")
-            locationQueries.push(locationQuery)
-          else
-            locationQuery.admin1Name = location.admin1Name
-            if featureCode is 'ADM1'
-              locationQueries.push(locationQuery)
-            else
-              locationQuery.admin2Name = location.admin2Name
-              if featureCode is 'ADM2'
-                locationQueries.push(locationQuery)
-        locationQueries = locationQueries.map (locationQuery) ->
-          result = {}
-          for prop, value of locationQuery
-            result["locations.#{prop}"] = value
-          return result
-        if locationQueries.length > 0
-          query['$or'] = locationQueries
-        Incidents.find(query)
+        Incidents.find(eventToIncidentQuery(event))
     }
   ]
 
-# Smart Events
+Meteor.publishComposite 'autoEvent', (eventId) ->
+  find: ->
+    AutoEvents.find(_id: eventId)
+  children: [
+    {
+      collectionName: 'eventIncidents'
+      find: (event) ->
+        Incidents.find(eventToIncidentQuery(event))
+    }
+  ]
+
 ReactiveTable.publish 'smartEvents', SmartEvents, deleted: $in: [null, false]
 
-Meteor.publish 'smartEvents', () ->
-  SmartEvents.find({deleted: {$in: [null, false]}})
+ReactiveTable.publish 'autoEvents', AutoEvents
 
-# Articles
 Meteor.publish 'articles', (query={}) ->
   if not Roles.userIsInRole(@userId, ['admin', 'curator'])
     throw new Meteor.Error('auth', 'User does not have permission to access articles')
@@ -160,7 +170,6 @@ Meteor.publish 'article', (sourceId) ->
 Meteor.publish 'incidentArticle', (articleId) ->
   Articles.find(articleId)
 
-# Feeds
 Meteor.publish 'feeds', ->
   Feeds.find()
 

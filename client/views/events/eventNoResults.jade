@@ -1,0 +1,9 @@
+template(name="eventNoResults")
+  if noIncidents
+    .no-results.modal-layer.secondary.no-results--incidents
+      p Event currently has no incidents.
+  else if noFilterMatches
+    .no-results.modal-layer.secondary
+      p
+        span.main-message No Results
+        | Adjust the filter criteria to view event incidents.

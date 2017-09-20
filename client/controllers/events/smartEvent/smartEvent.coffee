@@ -64,28 +64,16 @@ Template.smartEvent.helpers
   selectedIncidentTypes: ->
     Template.instance().selectedIncidentTypes
 
-  disableFilters: ->
+  filterableView: ->
+    instance = Template.instance()
+    instance.loaded.get() and Router.current().getParams()._view not in ['references', 'details']
+
+  noIncidents: ->
     Template.instance().hasNoIncidents()
 
-  showNoResults: ->
+  noFilterMatches: ->
     instance = Template.instance()
-    instance.hasNoIncidents() or
-      not EventIncidents.find(instance.filterQuery.get()).count()
-
-  noResultsMessage: ->
-    if Template.instance().hasNoIncidents()
-      'Event currently has no incidents.'
-    else
-      Spacebars.SafeString """
-        <span class="main-message">No Results</span>
-        Adjust filter criteria to view event information.
-      """
-
-  classNames: ->
-    classNames = 'modal-layer secondary'
-    if Template.instance().hasNoIncidents()
-      classNames += ' no-results--incidents'
-    classNames
+    not EventIncidents.find(instance.filterQuery.get()).count()
 
 Template.smartEvent.events
   'click .edit-link, click #cancel-edit': (event, instance) ->

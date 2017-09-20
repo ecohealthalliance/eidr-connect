@@ -90,7 +90,7 @@ export nearestAnnotation = (annotation, otherAnnotations) ->
       nearest = otherAnnotation
   return nearest
 
-export createIncidentReportsFromEnhancements = (enhancements, options) ->
+export createIncidentReportsFromEnhancements = (enhancements, options={}) ->
   { countAnnotations, acceptByDefault, articleId, publishDate } = options
   if not publishDate
     publishDate = new Date()
@@ -124,11 +124,10 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
         timeAnnotation.timeRange.end.month--
       timeAnnotation.beginMoment = moment.utc(
         timeAnnotation.timeRange.begin
-      )
-      # Round up the to day end
+      ).startOf('day')
       timeAnnotation.endMoment = moment.utc(
         timeAnnotation.timeRange.end
-      ).endOf('day')
+      ).startOf('day')
       if timeAnnotation.beginMoment > timeAnnotation.endMoment
         console.log(timeAnnotation)
         console.error('End date occurs before start date.')
@@ -168,7 +167,7 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
       locations: locations
     # Use the document's date as the default
     incident.dateRange =
-      start: publishDate
+      start: new Date(publishDate)
       end: moment(publishDate).add(1, 'day').toDate()
       type: 'day'
     if dateTerritory.annotations.length > 0
@@ -199,7 +198,11 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
         incident.cases = count
         incident.uncertainCountType = true
       if acceptByDefault and not incident.uncertainCountType
-        incident.accepted = true
+        # if the incident is not an EIDR-C supported count type do not auto-accept.
+        if _.intersection(['recovery', 'annual', 'monthly', 'weekly'], attributes).length == 0
+          # if the incident has an unspecified location or date do not auto-accept.
+          if dateTerritory.annotations.length > 0 and locationTerritory.annotations.length > 0
+            incident.accepted = true
       # Detect whether count is cumulative
       dateRangeHours = moment(incident.dateRange.end)
         .diff(incident.dateRange.start, 'hours')
@@ -210,15 +213,15 @@ export createIncidentReportsFromEnhancements = (enhancements, options) ->
       # Infer cumulative is case rate is greater than 300 per day
       else if (count / (dateRangeHours / 24)) > 300
         incident.dateRange.cumulative = true
-      if incident.dateRange.cumulative
+      if 'ongoing' in attributes
+        incident.type = 'activeCount'
+      else if incident.dateRange.cumulative
         if incident.cases
           incident.type = 'cumulativeCaseCount'
         else if incident.deaths
           incident.type = 'cumulativeDeathCount'
       else
-        if 'active' in attributes
-          incident.type = 'activeCount'
-        else if incident.cases
+        if incident.cases
           incident.type = 'caseCount'
         else if incident.deaths
           incident.type = 'deathCount'

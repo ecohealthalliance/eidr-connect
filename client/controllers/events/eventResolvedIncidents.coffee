@@ -8,7 +8,15 @@ import LocationTree from '/imports/incidentResolution/LocationTree'
 import EventIncidents from '/imports/collections/eventIncidents'
 import Constants from '/imports/constants'
 
+sortComponentTreeChildren = (componentTree) ->
+  componentTree.children = _.sortBy(componentTree.children, (x) -> -x.associatedObject.value)
+  componentTree.children.forEach(sortComponentTreeChildren)
+
 Template.eventResolvedIncidents.onCreated ->
+  # This reactive var is for testing. It allows the resolution method to
+  # be toggled via browser console so the results can be compared without
+  # reloading the page.
+  window.resolutionMethod = new ReactiveVar("topologicalSort")
   @incidentType = new ReactiveVar("cases")
   @plotType = new ReactiveVar("rate")
   @legend = new ReactiveVar([])
@@ -60,6 +68,7 @@ Template.eventResolvedIncidents.onRendered ->
                 componentTree = LocationTree.from(concurrentIntervals.map (x) -> x.location)
                 concurrentIntervals.forEach (x) ->
                   componentTree.getNodeById(x.location.id).associatedObject = x
+                sortComponentTreeChildren(componentTree)
                 Modal.show('intervalDetailsModal',
                   interval: subInt
                   componentTree: componentTree
@@ -96,6 +105,7 @@ Template.eventResolvedIncidents.onRendered ->
                 componentTree = LocationTree.from(concurrentIntervals.map (x) -> x.location)
                 concurrentIntervals.forEach (x) ->
                   componentTree.getNodeById(x.location.id).associatedObject = x
+                sortComponentTreeChildren(componentTree)
                 Modal.show('intervalDetailsModal',
                   interval: subInt
                   componentTree: componentTree
@@ -181,8 +191,9 @@ Template.eventResolvedIncidents.onRendered ->
       return
     else
       @tooManyIncidents.set(false)
+    resolutionMethod = window.resolutionMethod.get()
     _.delay =>
-      extendSubIntervalsWithValues(differentials, subIntervals)
+      extendSubIntervalsWithValues(differentials, subIntervals, resolutionMethod)
       for subInterval in subIntervals
         subInterval.incidents = subInterval.incidentIds.map (id) ->
           differentials[id]

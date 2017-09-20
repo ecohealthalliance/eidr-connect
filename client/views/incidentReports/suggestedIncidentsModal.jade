@@ -48,14 +48,12 @@ template(name="suggestedIncidentsModal")
                   tbody
                     each incidents
                       tr.incident-report(data-incident-id=_id)
+                        td=type
                         if hasType 'cases'
-                          td Case Count
                           td=cases
                         else if hasType 'deaths'
-                          td Death Count
                           td=deaths
                         else
-                          td Other
                           td=specify
                         td
                           unless dateRange.cumulative

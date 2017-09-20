@@ -10,17 +10,18 @@ template(name="curatedEvent")
     else
       section.event--content-wrapper.container-flex.no-break
         aside.event--filtration
-          if disableFilters
+          if noIncidents
             .veil
           +eventFiltration(
             filterQuery=filterQuery
             selectedIncidentTypes=selectedIncidentTypes)
         .event--content-container
           nav.event--navigation
-            +eventNav userEventId=userEvent._id
+            +eventNav route="curated-event" id=userEvent._id showReferences=true
           .event--content
-            if showNoResults
-              .veil.top-layer
-              +noResults message=noResultsMessage classNames=classNames
+            if filterableView
+              if noFilterMatches
+                .veil.top-layer
+                +eventNoResults noIncidents=noIncidents noFilterMatches=noFilterMatches
             if template
               +Template.dynamic template=template.name data=template.data

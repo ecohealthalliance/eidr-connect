@@ -5,7 +5,7 @@ import convertAllIncidentsToDifferentials from './convertAllIncidentsToDifferent
 import {
   differentailIncidentsToSubIntervals,
   subIntervalsToLP,
-  intervalToEndpoints
+  intervalToEndpoints,
 } from './incidentResolution.coffee'
 
 lome =
@@ -29,6 +29,14 @@ overlappingIncidents = [{
     end: new Date("Jan 1 2012")
   locations: [lome]
 }]
+
+inconsistentIncidents = _.clone(overlappingIncidents)
+inconsistentIncidents.push
+  cases: 40
+  dateRange:
+    start: new Date("Dec 1 2008")
+    end: new Date("Jan 1 2013")
+  locations: [lome]
 
 describe 'Incident Resolution', ->
 
@@ -101,7 +109,7 @@ describe 'Incident Resolution', ->
   # This tests an problem that occurs when using an incident min/max rate
   # squeezing objective function. With such an objective function, it would
   # cause the minimum and maximum values of the first incident to be constrained
-  # which would cause some of its subintervals to have unbalance counts.
+  # which would cause some of its subintervals to have unbalanced counts.
   # The current absolute value based objective function resolves this issue.
   it 'allocates counts proportionately 2', ->
     differentialIncidents = convertAllIncidentsToDifferentials([{
@@ -127,7 +135,7 @@ describe 'Incident Resolution', ->
     model = subIntervalsToLP(differentialIncidents, subIntervals)
     solution = Solver.Solve(Solver.ReformatLP(model))
     lomeIntervalIds = subIntervals
-      .filter (s) -> s.location.id == '2365267'
+      .filter (s) -> s.location.id == lome.id
       .map (s) -> s.id
     chai.assert(solution["s#{lomeIntervalIds[0]}"] > 15)
     chai.assert(solution["s#{lomeIntervalIds[1]}"] > 2)
@@ -135,13 +143,6 @@ describe 'Incident Resolution', ->
     chai.assert(solution["s#{lomeIntervalIds[3]}"] >= 50)
 
   it 'handles inconsistent counts', ->
-    inconsistentIncidents = _.clone(overlappingIncidents)
-    inconsistentIncidents.push
-      cases: 40
-      dateRange:
-        start: new Date("Dec 1 2008")
-        end: new Date("Jan 1 2013")
-      locations: [lome]
     differentialIncidents = convertAllIncidentsToDifferentials(inconsistentIncidents)
     subIntervals = differentailIncidentsToSubIntervals(differentialIncidents)
     model = subIntervalsToLP(differentialIncidents, subIntervals)
@@ -149,6 +150,38 @@ describe 'Incident Resolution', ->
     chai.assert(solution.s1 < 50)
     chai.assert(solution.s2 < 10)
     chai.assert(solution.s3 < 50)
+
+
+  # Test that adding prior non-overlapping incidents doesn't affect
+  # handling of inconsistent incidents.
+  it 'handles inconsistent counts with prior incidents', ->
+    initialIncidents6Subintervals = [{
+      cases: 1
+      dateRange:
+        start: new Date("Jan 1 2001")
+        end: new Date("Jan 1 2002")
+      locations: [lome]
+    }, {
+      cases: 1
+      dateRange:
+        start: new Date("Jan 1 2003")
+        end: new Date("Jan 1 2004")
+      locations: [lome]
+    }, {
+      cases: 1
+      dateRange:
+        start: new Date("Jan 1 2005")
+        end: new Date("Jan 1 2006")
+      locations: [lome]
+    }]
+    incidents = initialIncidents6Subintervals.concat(inconsistentIncidents)
+    differentialIncidents = convertAllIncidentsToDifferentials(incidents)
+    subIntervals = differentailIncidentsToSubIntervals(differentialIncidents)
+    model = subIntervalsToLP(differentialIncidents, subIntervals)
+    solution = Solver.Solve(Solver.ReformatLP(model))
+    chai.assert(solution.s7 < 50)
+    chai.assert(solution.s8 < 10)
+    chai.assert(solution.s9 < 50)
 
   it 'can resolve a large number of incidents', ->
     differentialIncidents = convertAllIncidentsToDifferentials(incidents).filter (i)->i.type == "deaths"

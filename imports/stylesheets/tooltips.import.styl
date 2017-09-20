@@ -5,7 +5,6 @@
   font-size 1em
 
 .popover
-  z-index $cosmos-layer
   min-width 300px
   font-size 12px
   .quote-text
@@ -33,6 +32,7 @@
 .tooltip
 .tooltip-inner
 .popover-content
+  z-index $cosmos-layer + 1
   +below(3)
     min-width 200px
     max-width 325px
