@@ -112,22 +112,11 @@ export createIncidentReportsFromEnhancements = (enhancements, options={}) ->
   locTerritories = getTerritories(locationAnnotations, sents)
   datetimeAnnotations = datetimeAnnotations
     .map (timeAnnotation) =>
-      if not (timeAnnotation.timeRange and
-        timeAnnotation.timeRange.begin and
-        timeAnnotation.timeRange.end
-      )
+      timeRange = timeAnnotation.timeRange
+      if not (timeRange and timeRange.beginISO and timeRange.endISO)
         return
-      # moment parses 0 based month indecies
-      if timeAnnotation.timeRange.begin.month
-        timeAnnotation.timeRange.begin.month--
-      if timeAnnotation.timeRange.end.month
-        timeAnnotation.timeRange.end.month--
-      timeAnnotation.beginMoment = moment.utc(
-        timeAnnotation.timeRange.begin
-      ).startOf('day')
-      timeAnnotation.endMoment = moment.utc(
-        timeAnnotation.timeRange.end
-      ).startOf('day')
+      timeAnnotation.beginMoment = moment.utc(timeRange.beginISO)
+      timeAnnotation.endMoment = moment.utc(timeRange.endISO)
       if timeAnnotation.beginMoment > timeAnnotation.endMoment
         console.log(timeAnnotation)
         console.error('End date occurs before start date.')
