@@ -95,7 +95,6 @@ Template.incidentModal.events
 
   'click .delete-incident': (event, instance) ->
     Meteor.call 'deleteIncidents', [@incident._id], (error, result) ->
-      console.log error, result
       if error
         notify('error', error.reason)
         return
