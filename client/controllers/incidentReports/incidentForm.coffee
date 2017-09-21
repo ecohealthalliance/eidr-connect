@@ -4,7 +4,8 @@ import {
   formatLocation,
   keyboardSelect,
   removeSuggestedProperties,
-  diseaseOptionsFn } from '/imports/utils'
+  diseaseOptionsFn,
+  speciesOptionsFn } from '/imports/utils'
 import { getIncidentSnippet } from '/imports/ui/snippets'
 import notify from '/imports/ui/notification'
 
@@ -156,29 +157,7 @@ Template.incidentForm.helpers
 
   diseaseOptionsFn: -> diseaseOptionsFn
 
-  speciesOptionsFn: ->
-    return (params, callback) ->
-      term = params.term?.trim()
-      if not term
-        return callback(results: [])
-      Meteor.call 'searchSpeciesNames', term, (error, results) ->
-        if error
-          notify('error', error.reason)
-        callback(
-          results: results.map((item) ->
-            text = item.completeName
-            if (new RegExp(term, "i")).test(item.vernacularName)
-              text = item.vernacularName + " | " + item.completeName
-            {
-              id: 'tsn:' + item.tsn
-              text: text
-              item: item
-            }
-          ).concat([
-            id: "userSpecifiedSpecies:#{term}"
-            text: "Other Species: #{term}"
-          ])
-        )
+  speciesOptionsFn: -> speciesOptionsFn
 
   document: ->
     incident = Template.instance().data.incident

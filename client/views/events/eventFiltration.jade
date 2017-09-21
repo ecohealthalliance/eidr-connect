@@ -43,8 +43,8 @@ template(name="eventFiltration")
       each locationLevels
         option(value=prop)=name
 
-    .location-list--wrapper
-      ul.list-unstyled.location-list
+    .option-list--wrapper
+      ul.list-unstyled.option-list.location-list
         each locations
           li
             i.fa(class="fa-{{#if locationSelected}}check-circle{{else}}circle-o{{/if}}")
@@ -53,8 +53,22 @@ template(name="eventFiltration")
           p.emphasized No locations
 
     .actions
-      a.select-all(class="{{#if allLocationsSelected}}disabled{{/if}}") Select All
-      a.deselect-all(class="{{#if noEventsSelected}}disabled{{/if}}") Deselect All
+      a.deselect-all(class="{{#if noLocationsSelected}}disabled{{/if}}") Deselect All
+
+  section.filtration--property.species
+    h3 Species
+
+    .option-list--wrapper
+      ul.list-unstyled.species-list.option-list
+        each speciesList
+          li
+            i.fa(class="fa-{{#if speciesSelected}}check-circle{{else}}circle-o{{/if}}")
+            span=label
+        else
+          p.emphasized No species
+
+    .actions
+      a.deselect-all(class="{{#if noSpeciesSelected}}disabled{{/if}}") Deselect All
 
   section.filtration--property.other-properties
     h3 Other Properties

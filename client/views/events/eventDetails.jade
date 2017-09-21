@@ -24,6 +24,12 @@ template(name="eventDetails")
             ul
               each event.diseases
                 li=text
+        if event.species
+          .criteria
+            h4 Species:
+            ul
+              each event.species
+                li=text
         if event.dateRange
           .criteria
             h4 Date Range:

@@ -6,6 +6,8 @@ import Articles from '/imports/collections/articles.coffee'
 import Feeds from '/imports/collections/feeds.coffee'
 import regionToCountries from '/imports/regionToCountries.json'
 
+INCIDENT_LIMIT = 10000
+
 Meteor.publish 'mapIncidents', (incidentIds) ->
   Incidents.find
     _id: $in: incidentIds
@@ -64,6 +66,7 @@ Meteor.publishComposite 'userEvent', (eventId) ->
         Incidents.find
           _id: $in: incidentIds
           deleted: $in: [null, false]
+        , limit: INCIDENT_LIMIT
     }, {
       collectionName: 'articles'
       find: (event) ->
@@ -118,6 +121,8 @@ eventToIncidentQuery = (event) ->
     return result
   if locationQueries.length > 0
     query['$or'] = locationQueries
+  if event.species and event.species.length > 0
+    query['species.id'] = $in: event.species.map (x) -> x.id
   query
 
 Meteor.publishComposite 'smartEvent', (eventId) ->
@@ -136,7 +141,7 @@ Meteor.publishComposite 'smartEvent', (eventId) ->
     }, {
       collectionName: 'eventIncidents'
       find: (event) ->
-        Incidents.find(eventToIncidentQuery(event))
+        Incidents.find(eventToIncidentQuery(event), limit: INCIDENT_LIMIT)
     }
   ]
 
@@ -147,7 +152,7 @@ Meteor.publishComposite 'autoEvent', (eventId) ->
     {
       collectionName: 'eventIncidents'
       find: (event) ->
-        Incidents.find(eventToIncidentQuery(event))
+        Incidents.find(eventToIncidentQuery(event), limit: INCIDENT_LIMIT)
     }
   ]
 

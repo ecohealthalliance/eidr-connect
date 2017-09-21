@@ -34,6 +34,8 @@ Template.eventFiltration.onCreated ->
   @countryLevel = new ReactiveVar(@locationLevels[0].prop)
   @selectedLocations = new Meteor.Collection(null)
   @locations = new Meteor.Collection(null)
+  @speciesList = new Meteor.Collection(null)
+  @selectedSpecies = new Meteor.Collection(null)
   @dateRange = new ReactiveVar([])
   @selectedDateRange = new ReactiveVar([])
   @eventDateRange = new ReactiveVar([ 0, 100 ])
@@ -76,12 +78,25 @@ Template.eventFiltration.onRendered ->
       # Set range as Numbers so range slider will not error out and will appear
       @eventDateRange.set([1, 100])
 
+  @autorun =>
+    @selectedSpecies.remove({})
+    @speciesList.remove({})
+    EventIncidents.find().map (incident) =>
+      if incident.species?.id
+        @speciesList.upsert(incident.species?.id,
+          label: incident.species.text
+        )
+    @speciesList.insert(
+      _id: "unspecified"
+      label: "Unspecified"
+    )
+
   # Establish and update locations when incidents collection changes
   @autorun =>
-    incidentLocations = _.uniq(
-      _.flatten(EventIncidents.find({}, field: locations: 1).map (incident) ->
-        incident.locations
-      )
+    incidentLocations = _.flatten(
+      EventIncidents.find({}, field: locations: 1)
+        .map (incident) ->
+          incident.locations
     )
     countryLevel = @countryLevel.get()
     @locations.remove({})
@@ -150,9 +165,14 @@ Template.eventFiltration.onRendered ->
         if countryLevel == level
           break
       query
-
     if selectedLocations.length
       filters.$or = (filters.$or or []).concat selectedLocations
+
+    # Species
+    selectedSpeciesIds = @selectedSpecies.find().map (x) ->
+      if x._id != "unspecified" then x._id else null
+    if selectedSpeciesIds.length > 0
+      filters['species.id'] = $in: selectedSpeciesIds
 
     # Other Properties
     filters = _.extend(filters, @properties.get())
@@ -183,11 +203,7 @@ Template.eventFiltration.helpers
   locationSelected: ->
     Template.instance().selectedLocations.findOne(@_id)
 
-  allLocationsSelected: ->
-    instance = Template.instance()
-    instance.selectedLocations.find().count() == instance.locations.find().count()
-
-  noEventsSelected: ->
+  noLocationsSelected: ->
     Template.instance().selectedLocations.find().count() == 0
 
   sliderData: ->
@@ -202,6 +218,16 @@ Template.eventFiltration.helpers
 
   filtering: ->
     not _.isEmpty(Template.instance().data.filterQuery.get())
+
+  speciesList: ->
+    Template.instance().speciesList.find()
+
+  speciesSelected: ->
+    Template.instance().selectedSpecies.findOne(@_id)
+
+  noSpeciesSelected: ->
+    Template.instance().selectedSpecies.find().count() == 0
+
 
 Template.eventFiltration.events
   'change .type input': (event, instance) ->
@@ -232,12 +258,18 @@ Template.eventFiltration.events
     else
       instance.insertLocation(@)
 
-  'click .locations .select-all': (event, instance) ->
-    instance.locations.find().forEach (location) ->
-      instance.insertLocation(location)
-
   'click .locations .deselect-all': (event, instance) ->
     instance.selectedLocations.remove({})
+
+  'click .species .deselect-all': (event, instance) ->
+    instance.selectedSpecies.remove({})
+
+  'click .species-list li': (event, instance) ->
+    selectedSpecies = instance.selectedSpecies
+    if selectedSpecies.findOne(@_id)
+      selectedSpecies.remove(@_id)
+    else
+      selectedSpecies.insert(@)
 
   'apply.daterangepicker': (event, instance, picker) ->
     instance.selectedDateRange.set([picker.startDate, picker.endDate])
