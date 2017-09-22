@@ -4,7 +4,7 @@ if Meteor.isServer
   Feeds = require '/imports/collections/feeds.coffee'
 
   Meteor.methods
-    fetchPromedPosts: (limit, range) ->
+    fetchPromedPosts: (range) ->
       @unblock
       endDate = range?.endDate || new Date()
       startDate = moment(endDate).subtract(2, 'weeks').toDate()

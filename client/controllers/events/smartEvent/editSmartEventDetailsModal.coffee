@@ -2,12 +2,16 @@ import { dismissModal } from '/imports/ui/modals'
 import notify from '/imports/ui/notification'
 import createInlineDateRangePicker from '/imports/ui/inlineDateRangePicker'
 import { updateCalendarSelection } from '/imports/ui/setRange'
-import { diseaseOptionsFn, formatLocation } from '/imports/utils'
+import {
+  diseaseOptionsFn,
+  speciesOptionsFn,
+  formatLocation } from '/imports/utils'
 
 Template.editSmartEventDetailsModal.onCreated ->
   @confirmingDeletion = new ReactiveVar(false)
   @addDate = new ReactiveVar(false)
   @locations = new ReactiveVar([])
+  @species = new ReactiveVar([])
 
 Template.editSmartEventDetailsModal.onRendered ->
   if @data.event?.dateRange
@@ -19,6 +23,9 @@ Template.editSmartEventDetailsModal.onRendered ->
       text: formatLocation(loc)
       item: loc
     )
+
+  if @data.event?.species
+    @species.set(@data.event.species)
 
   @autorun =>
     if @addDate.get()
@@ -64,6 +71,10 @@ Template.editSmartEventDetailsModal.helpers
 
   diseaseOptionsFn: -> diseaseOptionsFn
 
+  speciesOptionsFn: -> speciesOptionsFn
+
+  species: -> Template.instance().species
+
   locations: -> Template.instance().locations
 
 Template.editSmartEventDetailsModal.events
@@ -73,16 +84,19 @@ Template.editSmartEventDetailsModal.events
     event.preventDefault()
 
     diseases = $(form)
-    .find('#disease-select2')
-    .select2('data')
-    .map (option)->
-      id: option.id
-      text: option?.item?.label or option.text
+      .find('#disease-select2')
+      .select2('data')
+      .map (option)->
+        id: option.id
+        text: option?.item?.label or option.text
 
     smartEvent =
       eventName: form.eventName.value.trim()
       summary: form.eventSummary.value.trim()
       diseases: diseases
+      species: instance.species.get().map (option) ->
+        id: option.id
+        text: option.item?.completeName or option.text
 
     if @event?._id
       smartEvent._id = @event?._id

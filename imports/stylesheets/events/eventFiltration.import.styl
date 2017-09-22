@@ -40,24 +40,24 @@
       z-index $cosmos-layer
       border-top 0
 
-  &.locations
-    .actions
-      display flex
-      justify-content flex-end
-      a
-        padding 0 .2em
-        font-size .9em
-        &:first-of-type
-          padding-right .5em
-          border-right 1px solid $border-primary
-        &:last-of-type
-          padding-left .5em
+  .actions
+    display flex
+    justify-content flex-end
+    a
+      padding 0 .2em
+      font-size .9em
+      &:first-of-type
+        padding-right .5em
+      &:nth-of-type(2)
+        border-left 1px solid $border-primary
+      &:last-of-type
+        padding-left .5em
 
-  .location-list--wrapper
+  .option-list--wrapper
     gradientTopAndBottom()
     position relative
 
-  .location-list
+  .option-list
     max-height 25vh
     overflow-x scroll
     padding .75em .5em 1em .5em

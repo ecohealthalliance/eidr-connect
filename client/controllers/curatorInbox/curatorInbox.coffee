@@ -119,7 +119,7 @@ Template.curatorInbox.onRendered ->
 
     @query.set(query)
 
-    Meteor.call 'fetchPromedPosts', 100, range, (err) ->
+    Meteor.call 'fetchPromedPosts', range, (err) ->
       if err
         notify('error', err.reason)
         return

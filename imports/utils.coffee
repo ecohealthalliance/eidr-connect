@@ -136,6 +136,9 @@ export UTCOffsets =
   WGST: '-0200'
   WGT: '-0300'
 
+export capitalize = (s) ->
+  s.charAt(0).toUpperCase() + s.substring(1)
+
 export regexEscape = (s) ->
   # Based on bobince's regex escape function.
   # source: http://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711#3561711
@@ -173,6 +176,29 @@ export diseaseOptionsFn = (params, callback) ->
       ).concat([
         id: "userSpecifiedDisease:#{term}"
         text: "Other Disease: #{term}"
+      ])
+    )
+
+export speciesOptionsFn = (params, callback) ->
+  term = params.term?.trim()
+  if not term
+    return callback(results: [])
+  Meteor.call 'searchSpeciesNames', term, (error, results) ->
+    if error
+      notify('error', error.reason)
+    callback(
+      results: results.map((item) ->
+        text = item.completeName
+        if (new RegExp(term, "i")).test(item.vernacularName)
+          text = item.vernacularName + " | " + item.completeName
+        {
+          id: 'tsn:' + item.tsn
+          text: text
+          item: item
+        }
+      ).concat([
+        id: "userSpecifiedSpecies:#{term}"
+        text: "Other Species: #{term}"
       ])
     )
 

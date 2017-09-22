@@ -53,7 +53,14 @@ template(name="editSmartEventDetailsModal")
               .form-group
                 label Summary
                 textarea.form-control(name="eventSummary" rows="15")= event.summary
-
+              .form-group
+                label Species
+                +select2(
+                  name="species"
+                  selectId="species-select2"
+                  multiple=true
+                  optionsFn=speciesOptionsFn
+                  values=species)
           unless confirmingDeletion
             .modal-footer
               .on-left
