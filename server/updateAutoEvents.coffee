@@ -1,32 +1,43 @@
 import Incidents from '/imports/collections/incidentReports'
 import AutoEvents from '/imports/collections/autoEvents'
+import {capitalize} from '/imports/utils'
 
 module.exports = ->
+  startDate = moment().subtract(2, 'years').toDate()
   diseaseGroups = {}
   Incidents.find(
     'resolvedDisease.id': $exists: true
+    'species.id': $exists: true
     deleted: $in: [null, false]
+    'dateRange.end': $gte: startDate
   ).forEach (incident) ->
     disease = incident.resolvedDisease
-    diseaseGroup = diseaseGroups[disease.id] or {
+    key = disease.id + ":" + incident.species.id
+    diseaseGroup = diseaseGroups[key] or {
       resolvedDisease: disease
+      species: incident.species
       incidentCount: 0
     }
     if incident.dateRange.end > diseaseGroup.lastIncidentDate or not diseaseGroup.lastIncidentDate
       diseaseGroup.lastIncidentDate = incident.dateRange.end
     diseaseGroup.incidentCount++
-    diseaseGroups[disease.id] = diseaseGroup
+    diseaseGroups[key] = diseaseGroup
   for id, diseaseGroup of diseaseGroups
     disease = diseaseGroup.resolvedDisease
+    species = diseaseGroup.species
+    eventName = capitalize(if species.id is 'tsn:180092' then 'Human' else species.text)
+    eventName += ' ' + capitalize(disease.text)
     AutoEvents.upsert 'diseases.id': disease.id,
-      eventName: disease.text
+      eventName: eventName
       diseases: [disease]
+      species: [species]
       lastIncidentDate: diseaseGroup.lastIncidentDate
       incidentCount: diseaseGroup.incidentCount
       # filter out incidents that appear to have invalid dates
       dateRange:
-        start: new Date("1950-1-1")
+        start: startDate
   # Remove AutoEvents without any incidents:
   AutoEvents.find().forEach (event)->
-    if event.diseases[0].id not of diseaseGroups
+    key = event.diseases[0].id + ":" + event.species[0].id
+    if key not of diseaseGroups
       AutoEvents.remove(event)
