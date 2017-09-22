@@ -50,3 +50,11 @@ Meteor.startup ->
 
   Meteor.setInterval updateAutoEvents, 60 * 60 * 1000
   updateAutoEvents()
+
+  Meteor.setInterval ->
+    # Pull in the latest ProMED posts for processing.
+    Meteor.call('fetchPromedPosts',
+      startDate: moment().subtract(2, 'days').toDate()
+      endDate: new Date()
+    )
+  , 5 * 60 * 60 * 1000
