@@ -6,6 +6,20 @@ formatDateForInput = (date) ->
     return moment()
   if date.getTime then date else new moment(date)
 
+updateInput = (event) ->
+  eventTarget = event.target
+  classList = eventTarget.classList
+  if classList.length == 0
+    classList.add('positive')
+  else if 'positive' in classList
+    event.preventDefault()
+    event.stopPropagation()
+    eventTarget.checked = true
+    classList.remove('positive')
+    classList.add('negative')
+  else
+    classList.remove('negative')
+
 Template.eventFiltration.onCreated ->
   @PROP_PREFIX = 'filter-'
   @typeProps = ['cases', 'deaths']
@@ -228,22 +242,28 @@ Template.eventFiltration.helpers
   noSpeciesSelected: ->
     Template.instance().selectedSpecies.find().count() == 0
 
-
 Template.eventFiltration.events
-  'change .type input': (event, instance) ->
+  'click .type input': (event, instance) ->
     types = []
+    updateInput(event)
     instance.$('.type input:checked').each (i, input) ->
-      types.push instance.removePropPrefix(input.id)
+      types.push
+        prop: instance.removePropPrefix(input.id)
+        state: input.classList[0]
     instance.types.set(types)
 
-  'change .status input': (event, instance) ->
+  'click .status input': (event, instance) ->
     status = []
+    updateInput(event)
     instance.$('.status input:checked').each (i, input) ->
-      status.push instance.removePropPrefix(input.id)
+      status.push
+        props: instance.removePropPrefix(input.id)
+        type: input.classList[0]
     instance.status.set(status)
 
-  'change .other-properties input': (event, instance) ->
+  'click .other-properties input': (event, instance) ->
     otherProps = {}
+    updateInput(event)
     instance.$('.other-properties input:checked').each (i, input) ->
       otherProps[instance.removePropPrefix(input.id)] = true
     instance.properties.set(otherProps)

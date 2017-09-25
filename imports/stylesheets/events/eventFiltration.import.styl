@@ -111,3 +111,18 @@
     button
       &:first-of-type
         margin-right .5em
+
+.check-button
+  input.negative[type=checkbox]:checked + label
+    background lighten($danger, 50%)
+    &::before
+      content '\f057'
+    &:hover
+      border-color darken($danger, 20%)
+      &::before
+        content '\f10c'
+  input.positive[type=checkbox]:checked + label
+    &:hover
+      border-color darken($secondary, 20%)
+      &::before
+        content '\f057'
