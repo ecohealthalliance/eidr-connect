@@ -113,16 +113,33 @@
         margin-right .5em
 
 .check-button
+  input[type=checkbox]:checked + label
+  input.positive[type=checkbox]:checked + label
+    background lighten($positive, 75%)
+    border-color darken(@background, 20%)
+    &:focus
+    &:hover
+      background darken(@background, 5%)
+      border-color darken(@background, 20%)
+
+  input.positive[type=checkbox]:checked + label
+    &:focus
+    &:hover
+      &::before
+        content '\f057'
+
+  input[type=checkbox]:checked + label
+    &:focus
+    &:hover
+      &::before
+        content '\f10c'
+
   input.negative[type=checkbox]:checked + label
-    background lighten($danger, 50%)
+    background lighten($danger, 75%)
+    border-color lighten($danger, 15%)
     &::before
       content '\f057'
     &:hover
-      border-color darken($danger, 20%)
+      border-color lighten($danger, 10%)
       &::before
         content '\f10c'
-  input.positive[type=checkbox]:checked + label
-    &:hover
-      border-color darken($secondary, 20%)
-      &::before
-        content '\f057'

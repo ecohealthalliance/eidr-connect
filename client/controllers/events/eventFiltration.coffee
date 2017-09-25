@@ -6,7 +6,8 @@ formatDateForInput = (date) ->
     return moment()
   if date.getTime then date else new moment(date)
 
-updateInput = (event) ->
+# Update input classes based on state of button: unselected, positive, negative
+updateInputState = (event) ->
   eventTarget = event.target
   classList = eventTarget.classList
   if classList.length == 0
@@ -19,6 +20,27 @@ updateInput = (event) ->
     classList.add('negative')
   else
     classList.remove('negative')
+
+# Build query based on the state of the button/prop
+propStates = (props) ->
+  query = {}
+  [ negative, positive ] = [false, true].map (state) ->
+    _.filter(props, (prop) -> prop.state == state).map (prop) -> prop.name
+  if positive.length
+    query.$in = positive
+  if negative.length
+    query.$nin = negative
+  query
+
+# Build query based on the state of the other prop button/prop
+otherPropStates = (props) ->
+  query = {}
+  props.forEach (prop) ->
+    query[prop.name] = prop.state
+  query
+
+inputState = (input) ->
+  if 'negative' in input.classList then false else true
 
 Template.eventFiltration.onCreated ->
   @PROP_PREFIX = 'filter-'
@@ -44,7 +66,7 @@ Template.eventFiltration.onCreated ->
   ]
   @types = new ReactiveVar([])
   @status = new ReactiveVar([])
-  @properties = new ReactiveVar({})
+  @properties = new ReactiveVar([])
   @countryLevel = new ReactiveVar(@locationLevels[0].prop)
   @selectedLocations = new Meteor.Collection(null)
   @locations = new Meteor.Collection(null)
@@ -164,8 +186,8 @@ Template.eventFiltration.onRendered ->
     # Status
     status = @status.get()
     if status.length
-      filters.status =
-        $in: status
+      filters.status = {}
+      filters.status = propStates(status)
 
     countryLevel = @countryLevel.get()
     selectedLocations = @selectedLocations.find().map (location) ->
@@ -180,7 +202,7 @@ Template.eventFiltration.onRendered ->
           break
       query
     if selectedLocations.length
-      filters.$or = (filters.$or or []).concat selectedLocations
+      filters.$or = (filters.$or or []).concat(selectedLocations)
 
     # Species
     selectedSpeciesIds = @selectedSpecies.find().map (x) ->
@@ -189,7 +211,9 @@ Template.eventFiltration.onRendered ->
       filters['species.id'] = $in: selectedSpeciesIds
 
     # Other Properties
-    filters = _.extend(filters, @properties.get())
+    otherProps = @properties.get()
+    if otherProps.length
+      filters = _.extend(filters, otherPropStates(otherProps))
 
     # Set filterQuery used to filter EventIncidents collection
     # in child templates.
@@ -245,27 +269,26 @@ Template.eventFiltration.helpers
 Template.eventFiltration.events
   'click .type input': (event, instance) ->
     types = []
-    updateInput(event)
     instance.$('.type input:checked').each (i, input) ->
-      types.push
-        prop: instance.removePropPrefix(input.id)
-        state: input.classList[0]
+      types.push(instance.removePropPrefix(input.id))
     instance.types.set(types)
 
   'click .status input': (event, instance) ->
     status = []
-    updateInput(event)
+    updateInputState(event)
     instance.$('.status input:checked').each (i, input) ->
       status.push
-        props: instance.removePropPrefix(input.id)
-        type: input.classList[0]
+        name: instance.removePropPrefix(input.id)
+        state: inputState(input)
     instance.status.set(status)
 
   'click .other-properties input': (event, instance) ->
-    otherProps = {}
-    updateInput(event)
+    otherProps = []
+    updateInputState(event)
     instance.$('.other-properties input:checked').each (i, input) ->
-      otherProps[instance.removePropPrefix(input.id)] = true
+      otherProps.push
+        name: instance.removePropPrefix(input.id)
+        state: inputState(input)
     instance.properties.set(otherProps)
 
   'change .locations select': (event, instance) ->
@@ -299,7 +322,9 @@ Template.eventFiltration.events
     $('.daterangepicker').addClass('event--filtration-picker')
 
   'click .clear-filters': (event, instance) ->
-    instance.$('.check-buttons input:checked').attr('checked', false)
+    instance.$('.check-buttons input:checked')
+      .attr('checked', false)
+      .removeClass()
     instance.types.set([])
     instance.data.selectedIncidentTypes.set([])
     instance.status.set([])
