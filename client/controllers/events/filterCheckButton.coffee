@@ -1,5 +1,6 @@
 Template.filterCheckButton.onCreated ->
   @state = new ReactiveVar(0)
+  @tooltipsSeen = new ReactiveVar(false)
 
   @textBasedOnState = (text) ->
     switch @state.get()
@@ -8,8 +9,12 @@ Template.filterCheckButton.onCreated ->
       when 2 then text[1]
 
 Template.filterCheckButton.onRendered ->
-  @$('[data-toggle=tooltip]').tooltip
-    placement: 'bottom'
+  if @data.showTooltip
+    @$('label[data-toggle="tooltip"]').tooltip
+      placement: 'bottom'
+      viewport:
+        selector: 'body'
+        padding: 15
 
 Template.filterCheckButton.helpers
   state: ->
@@ -22,7 +27,7 @@ Template.filterCheckButton.helpers
 
   tooltipTitle: ->
     instance = Template.instance()
-    return unless instance.data.showtooltip
+    return '' if not instance.data.showTooltip or instance.tooltipsSeen.get()
     instance.textBasedOnState(
       [
         'Click again to exclude from filtration'
@@ -36,7 +41,7 @@ Template.filterCheckButton.events
     currentState = state.get()
     if currentState > 1
       state.set(0)
-      instance.$('[data-toggle=tooltip]').tooltip('destroy')
+      instance.tooltipsSeen.set(true)
     else
       state.set( state.get() + 1 )
     # Force tooltip of input's label to show
