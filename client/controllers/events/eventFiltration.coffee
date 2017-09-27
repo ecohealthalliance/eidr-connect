@@ -10,7 +10,8 @@ formatDateForInput = (date) ->
 propStates = (props) ->
   query = {}
   [ negative, positive ] = [false, true].map (state) ->
-    _.filter(props, (prop) -> prop.state == state).map (prop) -> prop.name
+    _.filter(props, (prop) -> prop.state == state)
+      .map((prop) -> prop.name)
   if positive.length
     query.$in = positive
   if negative.length

@@ -7,4 +7,8 @@ template(name="filterCheckButton")
       id='#{propPrex}#{name}'
       tabindex="-1"
       checked=checked)
-    label(for='#{propPrex}#{name}' tabindex="0")= title
+    label(
+      for='#{propPrex}#{name}'
+      tabindex="0"
+      data-toggle="{{#if showtooltip}}tooltip{{/if}}"
+      data-original-title=tooltipTitle)= title
