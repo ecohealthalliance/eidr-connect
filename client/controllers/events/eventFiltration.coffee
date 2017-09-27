@@ -21,7 +21,10 @@ propStates = (props) ->
 otherPropStates = (props) ->
   query = {}
   props.forEach (prop) ->
-    query[prop.name] = prop.state
+    if prop.state
+      query[prop.name] = prop.state
+    else
+      query[prop.name] = $in: [null, false]
   query
 
 inputState = (input) ->
