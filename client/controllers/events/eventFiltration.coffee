@@ -6,21 +6,6 @@ formatDateForInput = (date) ->
     return moment()
   if date.getTime then date else new moment(date)
 
-# Update input classes based on state of button: unselected, positive, negative
-updateInputState = (event) ->
-  eventTarget = event.target
-  classList = eventTarget.classList
-  if classList.length == 0
-    classList.add('positive')
-  else if 'positive' in classList
-    event.preventDefault()
-    event.stopPropagation()
-    eventTarget.checked = true
-    classList.remove('positive')
-    classList.add('negative')
-  else
-    classList.remove('negative')
-
 # Build query based on the state of the button/prop
 propStates = (props) ->
   query = {}
@@ -85,6 +70,23 @@ Template.eventFiltration.onCreated ->
       countryName: location.countryName
       admin1Name: location.admin1Name
       admin2Name: location.admin2Name
+
+  @setSelectedProps = (propWithState, inputClassName, propName) =>
+    event.preventDefault()
+    event.stopPropagation()
+    selected = []
+    Meteor.defer =>
+      @$(".#{inputClassName} input:checked").each (i, input) =>
+        name = @removePropPrefix(input.id)
+        if propWithState
+          prop =
+            name: name
+            state: inputState(input)
+        else
+          prop = name
+        selected.push(prop)
+
+      @[propName].set(selected)
 
 Template.eventFiltration.onRendered ->
   # Update daterangepicker when slider and incidents collection changes
@@ -267,29 +269,14 @@ Template.eventFiltration.helpers
     Template.instance().selectedSpecies.find().count() == 0
 
 Template.eventFiltration.events
-  'click .type input': (event, instance) ->
-    types = []
-    instance.$('.type input:checked').each (i, input) ->
-      types.push(instance.removePropPrefix(input.id))
-    instance.types.set(types)
+  'change .type input': (event, instance) ->
+    instance.setSelectedProps(false, 'type', 'types', event)
 
   'click .status input': (event, instance) ->
-    status = []
-    updateInputState(event)
-    instance.$('.status input:checked').each (i, input) ->
-      status.push
-        name: instance.removePropPrefix(input.id)
-        state: inputState(input)
-    instance.status.set(status)
+    instance.setSelectedProps(true, 'status', 'status', event)
 
   'click .other-properties input': (event, instance) ->
-    otherProps = []
-    updateInputState(event)
-    instance.$('.other-properties input:checked').each (i, input) ->
-      otherProps.push
-        name: instance.removePropPrefix(input.id)
-        state: inputState(input)
-    instance.properties.set(otherProps)
+    instance.setSelectedProps(true, 'other-properties', 'properties', event)
 
   'change .locations select': (event, instance) ->
     instance.countryLevel.set(event.target.value)

@@ -17,25 +17,22 @@ template(name="eventFiltration")
     h3 Types
     .check-buttons.container-flex
       each typeProps
-        .check-button(class=this)
-          input(
-            type="checkbox"
-            name="#{propPrex}#{this}"
-            id="#{propPrex}#{this}"
-            tabindex="-1")
-          label(for="#{propPrex}#{this}" tabindex="0")=this
+        +filterCheckButton(
+          className=this
+          type="checkbox"
+          name=this
+          propPrex=propPrex
+          title=this)
 
   section.filtration--property.status
     h3 Status
     .check-buttons.container-flex
       each statusProps
-        .check-button
-          input(
-            type="checkbox"
-            name="#{propPrex}#{this}"
-            id="#{propPrex}#{this}"
-            tabindex="-1")
-          label(for="#{propPrex}#{this}" tabindex="0")=this
+        +filterCheckButton(
+          type="checkbox"
+          name=this
+          propPrex=propPrex
+          title=this)
 
   section.filtration--property.locations
     h3 Locations
@@ -73,10 +70,8 @@ template(name="eventFiltration")
   section.filtration--property.other-properties
     h3 Other Properties
     .check-buttons.container-flex
-      .check-button
-        input(
-          type="checkbox"
-          name='#{propPrex}travelRelated'
-          id='#{propPrex}travelRelated'
-          tabindex="-1")
-        label(for='#{propPrex}travelRelated' tabindex="0") Travel Related
+      +filterCheckButton(
+        type="checkbox"
+        name="travelRelated"
+        propPrex=propPrex
+        title= "Travel Related")
