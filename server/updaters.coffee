@@ -7,7 +7,6 @@ import articleSchema from '/imports/schemas/article.coffee'
 import Articles from '/imports/collections/articles.coffee'
 import CuratorSources from '/imports/collections/curatorSources'
 import Feeds from '/imports/collections/feeds'
-import feedSchema from '/imports/schemas/feed'
 import Constants from '/imports/constants.coffee'
 import { regexEscape } from '/imports/utils'
 
@@ -60,17 +59,6 @@ oldUpdaters = ->
             resolvedDisease:
               id: "userSpecifiedDisease:#{incident.disease}"
               text: "Other Disease: #{incident.disease}"
-
-  promedFeed = Feeds.findOne(url: 'promedmail.org/post/')
-  if not promedFeed?.title
-    newFeedProps =
-      title: 'ProMED-mail'
-      url: 'promedmail.org/post/'
-    feedSchema.validate(newFeedProps)
-    Feeds.upsert promedFeed?._id,
-      $set: newFeedProps
-      $setOnInsert:
-        addedDate: new Date()
 
   promedFeedId = Feeds.findOne(url: 'promedmail.org/post/')?._id
 

@@ -5,12 +5,26 @@ import autoprocessArticles from '/server/autoprocess'
 import updateDatabase from '/server/updaters'
 import syncCollection from '/server/oneWaySync'
 import updateAutoEvents from '/server/updateAutoEvents'
+import Feeds from '/imports/collections/feeds'
+import feedSchema from '/imports/schemas/feed'
 
 Meteor.startup ->
   # Clean-up curatorInboxSourceId when user goes offline
   Meteor.users.find({'status.online': true}).observe
     removed: (user) ->
       Meteor.users.update(user._id, {$set : {'status.curatorInboxSourceId': null}})
+
+  # Ensure promed feed exists
+  promedFeed = Feeds.findOne(url: 'promedmail.org/post/')
+  if not promedFeed?.title
+    newFeedProps =
+      title: 'ProMED-mail'
+      url: 'promedmail.org/post/'
+    feedSchema.validate(newFeedProps)
+    Feeds.upsert promedFeed?._id,
+      $set: newFeedProps
+      $setOnInsert:
+        addedDate: new Date()
 
   updateDatabase()
 
