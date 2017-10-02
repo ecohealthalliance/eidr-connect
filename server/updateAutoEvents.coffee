@@ -38,6 +38,6 @@ module.exports = ->
         start: startDate
   # Remove AutoEvents without any incidents:
   AutoEvents.find().forEach (event)->
-    key = event.diseases[0].id + ":" + event.species[0].id
+    key = event.diseases?[0].id + ":" + event.species?[0].id
     if key not of diseaseGroups
       AutoEvents.remove(event)

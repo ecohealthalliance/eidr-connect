@@ -1,0 +1,14 @@
+template(name="filterCheckButton")
+  .check-button(class=className)
+    input(
+      class=state
+      type=type
+      name='#{propPrex}#{name}'
+      id='#{propPrex}#{name}'
+      tabindex="-1"
+      checked=checked)
+    label(
+      for='#{propPrex}#{name}'
+      tabindex="0"
+      data-toggle="{{#if showTooltip}}tooltip{{/if}}"
+      data-original-title=tooltipTitle)= title

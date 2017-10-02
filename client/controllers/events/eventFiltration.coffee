@@ -6,6 +6,31 @@ formatDateForInput = (date) ->
     return moment()
   if date.getTime then date else new moment(date)
 
+# Build query based on the state of the button/prop
+propStates = (props) ->
+  query = {}
+  [ negative, positive ] = [false, true].map (state) ->
+    _.filter(props, (prop) -> prop.state == state)
+      .map((prop) -> prop.name)
+  if positive.length
+    query.$in = positive
+  if negative.length
+    query.$nin = negative
+  query
+
+# Build query based on the state of the other prop button/prop
+otherPropStates = (props) ->
+  query = {}
+  props.forEach (prop) ->
+    if prop.state
+      query[prop.name] = prop.state
+    else
+      query[prop.name] = $in: [null, false]
+  query
+
+inputState = (input) ->
+  if 'negative' in input.classList then false else true
+
 Template.eventFiltration.onCreated ->
   @PROP_PREFIX = 'filter-'
   @typeProps = ['cases', 'deaths']
@@ -30,7 +55,7 @@ Template.eventFiltration.onCreated ->
   ]
   @types = new ReactiveVar([])
   @status = new ReactiveVar([])
-  @properties = new ReactiveVar({})
+  @properties = new ReactiveVar([])
   @countryLevel = new ReactiveVar(@locationLevels[0].prop)
   @selectedLocations = new Meteor.Collection(null)
   @locations = new Meteor.Collection(null)
@@ -49,6 +74,23 @@ Template.eventFiltration.onCreated ->
       countryName: location.countryName
       admin1Name: location.admin1Name
       admin2Name: location.admin2Name
+
+  @setSelectedProps = (propWithState, inputClassName, propName) =>
+    event.preventDefault()
+    event.stopPropagation()
+    selected = []
+    Meteor.defer =>
+      @$(".#{inputClassName} input:checked").each (i, input) =>
+        name = @removePropPrefix(input.id)
+        if propWithState
+          prop =
+            name: name
+            state: inputState(input)
+        else
+          prop = name
+        selected.push(prop)
+
+      @[propName].set(selected)
 
 Template.eventFiltration.onRendered ->
   # Update daterangepicker when slider and incidents collection changes
@@ -150,8 +192,8 @@ Template.eventFiltration.onRendered ->
     # Status
     status = @status.get()
     if status.length
-      filters.status =
-        $in: status
+      filters.status = {}
+      filters.status = propStates(status)
 
     countryLevel = @countryLevel.get()
     selectedLocations = @selectedLocations.find().map (location) ->
@@ -166,7 +208,7 @@ Template.eventFiltration.onRendered ->
           break
       query
     if selectedLocations.length
-      filters.$or = (filters.$or or []).concat selectedLocations
+      filters.$or = (filters.$or or []).concat(selectedLocations)
 
     # Species
     selectedSpeciesIds = @selectedSpecies.find().map (x) ->
@@ -175,7 +217,9 @@ Template.eventFiltration.onRendered ->
       filters['species.id'] = $in: selectedSpeciesIds
 
     # Other Properties
-    filters = _.extend(filters, @properties.get())
+    otherProps = @properties.get()
+    if otherProps.length
+      filters = _.extend(filters, otherPropStates(otherProps))
 
     # Set filterQuery used to filter EventIncidents collection
     # in child templates.
@@ -228,25 +272,15 @@ Template.eventFiltration.helpers
   noSpeciesSelected: ->
     Template.instance().selectedSpecies.find().count() == 0
 
-
 Template.eventFiltration.events
   'change .type input': (event, instance) ->
-    types = []
-    instance.$('.type input:checked').each (i, input) ->
-      types.push instance.removePropPrefix(input.id)
-    instance.types.set(types)
+    instance.setSelectedProps(false, 'type', 'types', event)
 
-  'change .status input': (event, instance) ->
-    status = []
-    instance.$('.status input:checked').each (i, input) ->
-      status.push instance.removePropPrefix(input.id)
-    instance.status.set(status)
+  'click .status input': (event, instance) ->
+    instance.setSelectedProps(true, 'status', 'status', event)
 
-  'change .other-properties input': (event, instance) ->
-    otherProps = {}
-    instance.$('.other-properties input:checked').each (i, input) ->
-      otherProps[instance.removePropPrefix(input.id)] = true
-    instance.properties.set(otherProps)
+  'click .other-properties input': (event, instance) ->
+    instance.setSelectedProps(true, 'other-properties', 'properties', event)
 
   'change .locations select': (event, instance) ->
     instance.countryLevel.set(event.target.value)
@@ -279,7 +313,9 @@ Template.eventFiltration.events
     $('.daterangepicker').addClass('event--filtration-picker')
 
   'click .clear-filters': (event, instance) ->
-    instance.$('.check-buttons input:checked').attr('checked', false)
+    instance.$('.check-buttons input:checked')
+      .attr('checked', false)
+      .removeClass()
     instance.types.set([])
     instance.data.selectedIncidentTypes.set([])
     instance.status.set([])
