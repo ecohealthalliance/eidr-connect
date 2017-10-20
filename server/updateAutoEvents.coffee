@@ -11,6 +11,10 @@ module.exports = ->
     deleted: $in: [null, false]
     'dateRange.end': $gte: startDate
   ).forEach (incident) ->
+    # Filter out non-human incidents because they have
+    # a larger number of false-positives.
+    if incident.species.id != 'tsn:180092'
+      return
     disease = incident.resolvedDisease
     key = disease.id + ":" + incident.species.id
     diseaseGroup = diseaseGroups[key] or {
