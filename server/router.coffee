@@ -9,6 +9,7 @@ import {
   differentailIncidentsToSubIntervals,
   extendSubIntervalsWithValues
 } from '/imports/incidentResolution/incidentResolution'
+import LocationTree from '/imports/incidentResolution/LocationTree'
 
 fs = Npm.require('fs')
 path = Npm.require('path')
@@ -209,9 +210,13 @@ Router.route("/api/process-document", {where: "server"})
       }
     ]
 ###
-Router.route("/api/resolve-incidents", {where: "server"})
+Router.route("/api/resolve-incidents", where: "server")
 .post ->
-  differentials = convertAllIncidentsToDifferentials(@request.body)
+  try
+    differentials = convertAllIncidentsToDifferentials(@request.body)
+  catch e
+    @response.statusCode = 400
+    return @response.end("Invalid incidents: " + e)
   # Require a single type of incident
   if _.findWhere(differentials, type: 'cases') and _.findWhere(differentials, type: 'deaths')
     @response.statusCode = 400
@@ -227,3 +232,85 @@ Router.route("/api/resolve-incidents", {where: "server"})
     incidentIds: s.incidentIds
     value: s.value
   )))
+
+###
+@api {post} events-with-resolved-data Return the resolved cases for a set of
+  events specified by id. The resolved cases are broken down by time and location.
+@apiSuccessExample {json} Success-Response:
+  {
+    eventId: {
+      "locations": {
+        CountryCode: Number
+      },
+      "timseries": [
+        {
+          "date": ISODate,
+          "value": Number
+        }
+      ]
+    }
+  }
+###
+Router.route("/api/events-with-resolved-data", where: "server")
+.get ->
+  eventIds = @request.query.ids
+  events = UserEvents.find(
+    _id:
+      $in: eventIds
+    deleted:
+      $in: [null, false]
+  ).map (event)->
+    event.incidents = Incidents.find(
+      _id: $in: _.pluck(event.incidents, 'id')
+      accepted: $in: [null, true]
+      deleted: $in: [null, false]
+      locations: $not: $size: 0
+    ).fetch()
+    event
+  @response.setHeader('Access-Control-Allow-Origin', '*')
+  @response.statusCode = 200
+  @response.end(JSON.stringify(events.map (event)->
+    console.log event.incidents[0]
+    differentials = _.where(convertAllIncidentsToDifferentials(event.incidents), type: 'cases')
+    subIntervals = differentailIncidentsToSubIntervals(differentials)
+    extendSubIntervalsWithValues(differentials, subIntervals)
+    locationTree = LocationTree.from(subIntervals.map (x) -> x.location)
+    topLocations = locationTree.children.map (x) -> x.value
+    console.log topLocations
+    locToSubintervals = {}
+    for topLocation in topLocations
+      locToSubintervals[topLocation.id] = []
+    for topLocation in topLocations
+      for subInterval in subIntervals
+        loc = subInterval.location
+        if LocationTree.locationContains(topLocation, loc)
+          locToSubintervals[topLocation.id].push(subInterval)
+    countryCodeToCount = {}
+    maxSubintervalsPerLocation = []
+    _.pairs(locToSubintervals).map ([key, locSubIntervals]) ->
+      location = locationTree.getLocationById(key)
+      groupedLocSubIntervals = _.groupBy(locSubIntervals, 'start')
+      maxSubintervals = []
+      for group, subIntervalGroup of groupedLocSubIntervals
+        maxSubintervals.push(_.max(subIntervalGroup, (x) -> x.value))
+      maxSubintervalsPerLocation = maxSubintervalsPerLocation.concat(maxSubintervals)
+      maxSubintervals = _.sortBy(maxSubintervals, (x) -> x.start)
+      total = 0
+      formattedData = maxSubintervals.forEach (subInt) ->
+        rate = subInt.value / ((subInt.end - subInt.start) / 1000 / 60 / 60 / 24)
+        total += subInt.value
+      prevTotal = countryCodeToCount[location.countryCode] or 0
+      countryCodeToCount[location.countryCode] = prevTotal + total
+    groupedSubIntervals = _.groupBy(maxSubintervalsPerLocation, 'end')
+    overallTimeseries = _.chain(groupedSubIntervals)
+      .pairs()
+      .map ([end, group]) ->
+        date: new Date(parseInt(end))
+        value: group.reduce(((sofar, cur)-> sofar + cur.value), 0)
+      .sortBy('date')
+      .value()
+    return {
+      locations: countryCodeToCount
+      timeseries: overallTimeseries
+    }
+  ))
