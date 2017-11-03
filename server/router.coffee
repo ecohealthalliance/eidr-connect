@@ -310,6 +310,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
       .sortBy('date')
       .value()
     return {
+      eventName: event.eventName
       locations: countryCodeToCount
       timeseries: overallTimeseries
     }
