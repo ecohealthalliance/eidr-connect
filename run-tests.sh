@@ -106,7 +106,7 @@ trap finishTest SIGTERM # 15
 # determine if the app has started by grep on the log
 pauseForApp
 
-chimp=node_modules/chimp/bin/chimp.js
+chimp="meteor node node_modules/chimp/bin/chimp.js"
 
 $chimp .config/chimp.js \
   --watch=$watch \

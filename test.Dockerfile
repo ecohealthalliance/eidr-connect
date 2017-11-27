@@ -1,6 +1,17 @@
-FROM ubuntu:14.04
-RUN add-apt-repository universe &&   add-apt-repository multiverse &&   apt-get update
-RUN apt-get install -y curl libfontconfig build-essential xvfb x11vnc git-core python vim
+FROM ubuntu:16.04
+
+RUN apt-get update && \
+  apt-get install -y \
+    curl \
+    libfontconfig \
+    build-essential\
+    xvfb \
+    x11vnc \
+    git-core \
+    python \
+    vim \
+    software-properties-common \
+    python-software-properties
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927 && \
   echo "deb http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.2 multiverse" | \
   tee /etc/apt/sources.list.d/mongodb-org-3.2.list && \
@@ -10,11 +21,10 @@ RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true 
 RUN add-apt-repository -y ppa:webupd8team/java && \
   apt-get update && \
   apt-get install -y oracle-java8-installer
-# RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - &&   sh -c 'echo "deb http://dl.google.com/linux/chrome/deb/ stable main" >> /etc/apt/sources.list.d/google.list' &&   apt-get update &&   apt-get install -y google-chrome-stable libexif-dev
 RUN groupadd meteor && adduser --ingroup meteor --disabled-password --gecos "" --home /home/meteor meteor
 
 # Add spcies data from ITIS
-RUN wget https://s3.amazonaws.com/bsve-integration/itisSqlite.zip
+# RUN wget https://s3.amazonaws.com/bsve-integration/itisSqlite.zip
 
 # Install nodejs
 #RUN wget https://nodejs.org/download/release/v4.4.7/node-v4.4.7-linux-x64.tar.gz && \
@@ -22,10 +32,10 @@ RUN wget https://s3.amazonaws.com/bsve-integration/itisSqlite.zip
 #    rm node-v4.4.7-linux-x64.tar.gz
 #ENV PATH $PATH:/node-v4.4.7-linux-x64/bin
 
-USER meteor
-
 # Install Meteor
 RUN curl https://install.meteor.com/ | sh
+
+USER meteor
 
 # Create the working directory
 RUN mkdir /home/meteor/eidr-connect
@@ -34,7 +44,7 @@ WORKDIR /home/meteor/eidr-connect
 # Add package.json to cache npm install
 COPY package.json package.json
 
-#USER meteor
+USER meteor
 
 # Install npm dependencies
 RUN meteor npm install
@@ -47,8 +57,7 @@ USER root
 COPY . .
 
 # Admin chores
-RUN ln -s /usr/bin/meteor /usr/local/bin/meteor  && \
-  ln -s /home/meteor/eidr-connect/node_modules/phantomjs-prebuilt/lib/phantom/bin/phantomjs /usr/local/bin/phantomjs  && \
+RUN ln -s /home/meteor/eidr-connect/node_modules/phantomjs-prebuilt/lib/phantom/bin/phantomjs /usr/local/bin/phantomjs  && \
   chown -R meteor:meteor /home/meteor/
 
 # Setup github
