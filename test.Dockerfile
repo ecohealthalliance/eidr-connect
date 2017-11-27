@@ -25,9 +25,9 @@ RUN ln -s /usr/bin/meteor /usr/local/bin/meteor  && \
   chown -R meteor:meteor /home/meteor/
 
 # Setup github
-RUN git config user.email "ecohealth-automation@users.noreply.github.com" && \
-  git config user.name "ecohealth-automation"  && \
-  git remote set-url origin https://github.com/ecohealthalliance/eidr-connect.git
+# RUN git config user.email "ecohealth-automation@users.noreply.github.com" && \
+#   git config user.name "ecohealth-automation"  && \
+#   git remote set-url origin https://github.com/ecohealthalliance/eidr-connect.git
 
 USER meteor
 

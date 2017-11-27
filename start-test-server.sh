@@ -63,11 +63,11 @@ if [ $is_docker = "true" ]; then
   mongo --host $mongo_host --port $mongo_port $test_db --eval "db.dropDatabase()"
   # copy settings-dev.json from the shared volume
   cp $shared_dir/settings-dev.json ${pwd}/settings-dev.json
-  cp $shared_dir/sensitive-environment-vars.env ${pwd}/sensitive-environment-vars.env
+  # cp $shared_dir/sensitive-environment-vars.env ${pwd}/sensitive-environment-vars.env
   # checkout the correct branch
-  git fetch && git checkout origin/$ghprbSourceBranch
+  # git fetch && git checkout origin/$ghprbSourceBranch
   # perform npm install in case the branch added new dependencies
-  npm install .
+  # meteor npm install
 else
   $mongo/mongo.js --host $mongo_host --port $mongo_port $test_db --eval "db.dropDatabase()"
 fi
