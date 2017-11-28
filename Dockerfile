@@ -12,10 +12,10 @@ RUN apt-get clean all && apt-get update && \
 RUN wget https://s3.amazonaws.com/bsve-integration/itisSqlite.zip
 
 # Install nodejs
-RUN wget https://nodejs.org/download/release/v4.4.7/node-v4.4.7-linux-x64.tar.gz && \
-    tar -zxf node-v4.4.7-linux-x64.tar.gz && \
-    rm node-v4.4.7-linux-x64.tar.gz
-ENV PATH $PATH:/node-v4.4.7-linux-x64/bin
+RUN wget https://nodejs.org/download/release/v8.9.1/node-v8.9.1-linux-x64.tar.gz && \
+    tar -zxf node-v8.9.1-linux-x64.tar.gz && \
+    rm node-v8.9.1-linux-x64.tar.gz
+ENV PATH $PATH:/node-v8.9.1-linux-x64/bin
 
 #Add in the repo
 ADD . /eidr-connect
