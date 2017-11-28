@@ -21,10 +21,11 @@
     "javascript-lp-solver": "^0.4.3",
     "keymaster": "^1.6.2",
     "meteor-node-stubs": "^0.2.6",
+    "moment": "^2.19.2",
     "nouislider": "^10.0.0",
     "pluralize": "^3.0.0",
     "rupture": "^0.6.1",
-    "sqlite3": "^3.1.8",
+    "sqlite3": "^3.1.13",
     "underscore": "^1.8.3"
   }
 }
