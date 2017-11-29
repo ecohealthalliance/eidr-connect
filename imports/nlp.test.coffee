@@ -71,16 +71,8 @@ test_enhancements = {
         ]
       ],
       "timeRange": {
-        "begin": {
-          "date": 9,
-          "month": 6,
-          "year": 2017
-        },
-        "end": {
-          "date": 10,
-          "month": 6,
-          "year": 2017
-        }
+        "beginISO": "2017-6-9",
+        "endISO": "2017-6-10"
       },
       "type": "datetime",
       "name": "9 Jun 2017",

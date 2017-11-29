@@ -259,7 +259,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
       $in: eventIds
     deleted:
       $in: [null, false]
-  ).map (event)->
+  ).map (event) ->
     event.incidents = Incidents.find(
       _id: $in: _.pluck(event.incidents, 'id')
       accepted: $in: [null, true]
@@ -269,49 +269,52 @@ Router.route("/api/events-with-resolved-data", where: "server")
     event
   @response.setHeader('Access-Control-Allow-Origin', '*')
   @response.statusCode = 200
-  @response.end(JSON.stringify(events.map (event)->
-    console.log event.incidents[0]
-    differentials = _.where(convertAllIncidentsToDifferentials(event.incidents), type: 'cases')
-    subIntervals = differentailIncidentsToSubIntervals(differentials)
-    extendSubIntervalsWithValues(differentials, subIntervals)
-    locationTree = LocationTree.from(subIntervals.map (x) -> x.location)
-    topLocations = locationTree.children.map (x) -> x.value
-    console.log topLocations
-    locToSubintervals = {}
-    for topLocation in topLocations
-      locToSubintervals[topLocation.id] = []
-    for topLocation in topLocations
-      for subInterval in subIntervals
-        loc = subInterval.location
-        if LocationTree.locationContains(topLocation, loc)
-          locToSubintervals[topLocation.id].push(subInterval)
-    countryCodeToCount = {}
-    maxSubintervalsPerLocation = []
-    _.pairs(locToSubintervals).map ([key, locSubIntervals]) ->
-      location = locationTree.getLocationById(key)
-      groupedLocSubIntervals = _.groupBy(locSubIntervals, 'start')
-      maxSubintervals = []
-      for group, subIntervalGroup of groupedLocSubIntervals
-        maxSubintervals.push(_.max(subIntervalGroup, (x) -> x.value))
-      maxSubintervalsPerLocation = maxSubintervalsPerLocation.concat(maxSubintervals)
-      maxSubintervals = _.sortBy(maxSubintervals, (x) -> x.start)
-      total = 0
-      formattedData = maxSubintervals.forEach (subInt) ->
-        rate = subInt.value / ((subInt.end - subInt.start) / 1000 / 60 / 60 / 24)
-        total += subInt.value
-      prevTotal = countryCodeToCount[location.countryCode] or 0
-      countryCodeToCount[location.countryCode] = prevTotal + total
-    groupedSubIntervals = _.groupBy(maxSubintervalsPerLocation, 'end')
-    overallTimeseries = _.chain(groupedSubIntervals)
-      .pairs()
-      .map ([end, group]) ->
-        date: new Date(parseInt(end))
-        value: group.reduce(((sofar, cur)-> sofar + cur.value), 0)
-      .sortBy('date')
-      .value()
-    return {
-      eventName: event.eventName
-      locations: countryCodeToCount
-      timeseries: overallTimeseries
-    }
-  ))
+  @response.end(JSON.stringify({
+    events: events.map (event) ->
+      differentials = _.where(
+        convertAllIncidentsToDifferentials(event.incidents),
+        type: 'cases'
+      )
+      subIntervals = differentailIncidentsToSubIntervals(differentials)
+      extendSubIntervalsWithValues(differentials, subIntervals)
+      locationTree = LocationTree.from(subIntervals.map (x) -> x.location)
+      topLocations = locationTree.children.map (x) -> x.value
+      locToSubintervals = {}
+      for topLocation in topLocations
+        locToSubintervals[topLocation.id] = []
+      for topLocation in topLocations
+        for subInterval in subIntervals
+          loc = subInterval.location
+          if LocationTree.locationContains(topLocation, loc)
+            locToSubintervals[topLocation.id].push(subInterval)
+      countryCodeToCount = {}
+      maxSubintervalsPerLocation = []
+      _.pairs(locToSubintervals).map ([key, locSubIntervals]) ->
+        location = locationTree.getLocationById(key)
+        groupedLocSubIntervals = _.groupBy(locSubIntervals, 'start')
+        maxSubintervals = []
+        for group, subIntervalGroup of groupedLocSubIntervals
+          maxSubintervals.push(_.max(subIntervalGroup, (x) -> x.value))
+        maxSubintervalsPerLocation = maxSubintervalsPerLocation.concat(maxSubintervals)
+        maxSubintervals = _.sortBy(maxSubintervals, (x) -> x.start)
+        total = 0
+        formattedData = maxSubintervals.forEach (subInt) ->
+          rate = subInt.value / \
+            ((subInt.end - subInt.start) / 1000 / 60 / 60 / 24)
+          total += subInt.value
+        prevTotal = countryCodeToCount[location.countryCode] or 0
+        countryCodeToCount[location.countryCode] = prevTotal + total
+      groupedSubIntervals = _.groupBy(maxSubintervalsPerLocation, 'end')
+      overallTimeseries = _.chain(groupedSubIntervals)
+        .pairs()
+        .map ([end, group]) ->
+          date: new Date(parseInt(end))
+          value: group.reduce(((sofar, cur)-> sofar + cur.value), 0)
+        .sortBy('date')
+        .value()
+      return {
+        eventName: event.eventName
+        locations: countryCodeToCount
+        timeseries: overallTimeseries
+      }
+  }))

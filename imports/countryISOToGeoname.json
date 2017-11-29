@@ -1,0 +1,1766 @@
+{
+  "BD": {
+    "countryName": "Bangladesh", 
+    "featureCode": "PCL*", 
+    "id": "1210997", 
+    "countryCode": "BD", 
+    "name": "Bangladesh"
+  }, 
+  "BE": {
+    "countryName": "Belgium", 
+    "featureCode": "PCL*", 
+    "id": "2802361", 
+    "countryCode": "BE", 
+    "name": "Belgium"
+  }, 
+  "BF": {
+    "countryName": "Burkina Faso", 
+    "featureCode": "PCL*", 
+    "id": "2361809", 
+    "countryCode": "BF", 
+    "name": "Burkina Faso"
+  }, 
+  "BG": {
+    "countryName": "Bulgaria", 
+    "featureCode": "PCL*", 
+    "id": "732800", 
+    "countryCode": "BG", 
+    "name": "Bulgaria"
+  }, 
+  "BA": {
+    "countryName": "Bosnia and Herzegovina", 
+    "featureCode": "PCL*", 
+    "id": "3277605", 
+    "countryCode": "BA", 
+    "name": "Bosnia and Herzegovina"
+  }, 
+  "BB": {
+    "countryName": "Barbados", 
+    "featureCode": "PCL*", 
+    "id": "3374084", 
+    "countryCode": "BB", 
+    "name": "Barbados"
+  }, 
+  "WF": {
+    "countryName": "Wallis and Futuna", 
+    "featureCode": "PCL*", 
+    "id": "4034749", 
+    "countryCode": "WF", 
+    "name": "Wallis and Futuna"
+  }, 
+  "BL": {
+    "countryName": "Saint Barthelemy", 
+    "featureCode": "PCL*", 
+    "id": "3578476", 
+    "countryCode": "BL", 
+    "name": "Saint Barthelemy"
+  }, 
+  "BM": {
+    "countryName": "Bermuda", 
+    "featureCode": "PCL*", 
+    "id": "3573345", 
+    "countryCode": "BM", 
+    "name": "Bermuda"
+  }, 
+  "BN": {
+    "countryName": "Brunei", 
+    "featureCode": "PCL*", 
+    "id": "1820814", 
+    "countryCode": "BN", 
+    "name": "Brunei"
+  }, 
+  "BO": {
+    "countryName": "Bolivia", 
+    "featureCode": "PCL*", 
+    "id": "3923057", 
+    "countryCode": "BO", 
+    "name": "Bolivia"
+  }, 
+  "BH": {
+    "countryName": "Bahrain", 
+    "featureCode": "PCL*", 
+    "id": "290291", 
+    "countryCode": "BH", 
+    "name": "Bahrain"
+  }, 
+  "BI": {
+    "countryName": "Burundi", 
+    "featureCode": "PCL*", 
+    "id": "433561", 
+    "countryCode": "BI", 
+    "name": "Burundi"
+  }, 
+  "BJ": {
+    "countryName": "Benin", 
+    "featureCode": "PCL*", 
+    "id": "2395170", 
+    "countryCode": "BJ", 
+    "name": "Benin"
+  }, 
+  "BT": {
+    "countryName": "Bhutan", 
+    "featureCode": "PCL*", 
+    "id": "1252634", 
+    "countryCode": "BT", 
+    "name": "Bhutan"
+  }, 
+  "JM": {
+    "countryName": "Jamaica", 
+    "featureCode": "PCL*", 
+    "id": "3489940", 
+    "countryCode": "JM", 
+    "name": "Jamaica"
+  }, 
+  "BV": {
+    "countryName": "Bouvet Island", 
+    "featureCode": "PCL*", 
+    "id": "3371123", 
+    "countryCode": "BV", 
+    "name": "Bouvet Island"
+  }, 
+  "BW": {
+    "countryName": "Botswana", 
+    "featureCode": "PCL*", 
+    "id": "933860", 
+    "countryCode": "BW", 
+    "name": "Botswana"
+  }, 
+  "WS": {
+    "countryName": "Samoa", 
+    "featureCode": "PCL*", 
+    "id": "4034894", 
+    "countryCode": "WS", 
+    "name": "Samoa"
+  }, 
+  "BQ": {
+    "countryName": "Bonaire, Saint Eustatius and Saba ", 
+    "featureCode": "PCL*", 
+    "id": "7626844", 
+    "countryCode": "BQ", 
+    "name": "Bonaire, Saint Eustatius and Saba "
+  }, 
+  "BR": {
+    "countryName": "Brazil", 
+    "featureCode": "PCL*", 
+    "id": "3469034", 
+    "countryCode": "BR", 
+    "name": "Brazil"
+  }, 
+  "BS": {
+    "countryName": "Bahamas", 
+    "featureCode": "PCL*", 
+    "id": "3572887", 
+    "countryCode": "BS", 
+    "name": "Bahamas"
+  }, 
+  "JE": {
+    "countryName": "Jersey", 
+    "featureCode": "PCL*", 
+    "id": "3042142", 
+    "countryCode": "JE", 
+    "name": "Jersey"
+  }, 
+  "BY": {
+    "countryName": "Belarus", 
+    "featureCode": "PCL*", 
+    "id": "630336", 
+    "countryCode": "BY", 
+    "name": "Belarus"
+  }, 
+  "BZ": {
+    "countryName": "Belize", 
+    "featureCode": "PCL*", 
+    "id": "3582678", 
+    "countryCode": "BZ", 
+    "name": "Belize"
+  }, 
+  "RU": {
+    "countryName": "Russia", 
+    "featureCode": "PCL*", 
+    "id": "2017370", 
+    "countryCode": "RU", 
+    "name": "Russia"
+  }, 
+  "RW": {
+    "countryName": "Rwanda", 
+    "featureCode": "PCL*", 
+    "id": "49518", 
+    "countryCode": "RW", 
+    "name": "Rwanda"
+  }, 
+  "RS": {
+    "countryName": "Serbia", 
+    "featureCode": "PCL*", 
+    "id": "6290252", 
+    "countryCode": "RS", 
+    "name": "Serbia"
+  }, 
+  "TL": {
+    "countryName": "East Timor", 
+    "featureCode": "PCL*", 
+    "id": "1966436", 
+    "countryCode": "TL", 
+    "name": "East Timor"
+  }, 
+  "RE": {
+    "countryName": "Reunion", 
+    "featureCode": "PCL*", 
+    "id": "935317", 
+    "countryCode": "RE", 
+    "name": "Reunion"
+  }, 
+  "TM": {
+    "countryName": "Turkmenistan", 
+    "featureCode": "PCL*", 
+    "id": "1218197", 
+    "countryCode": "TM", 
+    "name": "Turkmenistan"
+  }, 
+  "TJ": {
+    "countryName": "Tajikistan", 
+    "featureCode": "PCL*", 
+    "id": "1220409", 
+    "countryCode": "TJ", 
+    "name": "Tajikistan"
+  }, 
+  "RO": {
+    "countryName": "Romania", 
+    "featureCode": "PCL*", 
+    "id": "798549", 
+    "countryCode": "RO", 
+    "name": "Romania"
+  }, 
+  "TK": {
+    "countryName": "Tokelau", 
+    "featureCode": "PCL*", 
+    "id": "4031074", 
+    "countryCode": "TK", 
+    "name": "Tokelau"
+  }, 
+  "GW": {
+    "countryName": "Guinea-Bissau", 
+    "featureCode": "PCL*", 
+    "id": "2372248", 
+    "countryCode": "GW", 
+    "name": "Guinea-Bissau"
+  }, 
+  "GU": {
+    "countryName": "Guam", 
+    "featureCode": "PCL*", 
+    "id": "4043988", 
+    "countryCode": "GU", 
+    "name": "Guam"
+  }, 
+  "GT": {
+    "countryName": "Guatemala", 
+    "featureCode": "PCL*", 
+    "id": "3595528", 
+    "countryCode": "GT", 
+    "name": "Guatemala"
+  }, 
+  "GS": {
+    "countryName": "South Georgia and the South Sandwich Islands", 
+    "featureCode": "PCL*", 
+    "id": "3474415", 
+    "countryCode": "GS", 
+    "name": "South Georgia and the South Sandwich Islands"
+  }, 
+  "GR": {
+    "countryName": "Greece", 
+    "featureCode": "PCL*", 
+    "id": "390903", 
+    "countryCode": "GR", 
+    "name": "Greece"
+  }, 
+  "GQ": {
+    "countryName": "Equatorial Guinea", 
+    "featureCode": "PCL*", 
+    "id": "2309096", 
+    "countryCode": "GQ", 
+    "name": "Equatorial Guinea"
+  }, 
+  "GP": {
+    "countryName": "Guadeloupe", 
+    "featureCode": "PCL*", 
+    "id": "3579143", 
+    "countryCode": "GP", 
+    "name": "Guadeloupe"
+  }, 
+  "JP": {
+    "countryName": "Japan", 
+    "featureCode": "PCL*", 
+    "id": "1861060", 
+    "countryCode": "JP", 
+    "name": "Japan"
+  }, 
+  "GY": {
+    "countryName": "Guyana", 
+    "featureCode": "PCL*", 
+    "id": "3378535", 
+    "countryCode": "GY", 
+    "name": "Guyana"
+  }, 
+  "GG": {
+    "countryName": "Guernsey", 
+    "featureCode": "PCL*", 
+    "id": "3042362", 
+    "countryCode": "GG", 
+    "name": "Guernsey"
+  }, 
+  "GF": {
+    "countryName": "French Guiana", 
+    "featureCode": "PCL*", 
+    "id": "3381670", 
+    "countryCode": "GF", 
+    "name": "French Guiana"
+  }, 
+  "GE": {
+    "countryName": "Georgia", 
+    "featureCode": "PCL*", 
+    "id": "614540", 
+    "countryCode": "GE", 
+    "name": "Georgia"
+  }, 
+  "GD": {
+    "countryName": "Grenada", 
+    "featureCode": "PCL*", 
+    "id": "3580239", 
+    "countryCode": "GD", 
+    "name": "Grenada"
+  }, 
+  "GB": {
+    "countryName": "United Kingdom", 
+    "featureCode": "PCL*", 
+    "id": "2635167", 
+    "countryCode": "GB", 
+    "name": "United Kingdom"
+  }, 
+  "GA": {
+    "countryName": "Gabon", 
+    "featureCode": "PCL*", 
+    "id": "2400553", 
+    "countryCode": "GA", 
+    "name": "Gabon"
+  }, 
+  "SV": {
+    "countryName": "El Salvador", 
+    "featureCode": "PCL*", 
+    "id": "3585968", 
+    "countryCode": "SV", 
+    "name": "El Salvador"
+  }, 
+  "GN": {
+    "countryName": "Guinea", 
+    "featureCode": "PCL*", 
+    "id": "2420477", 
+    "countryCode": "GN", 
+    "name": "Guinea"
+  }, 
+  "GM": {
+    "countryName": "Gambia", 
+    "featureCode": "PCL*", 
+    "id": "2413451", 
+    "countryCode": "GM", 
+    "name": "Gambia"
+  }, 
+  "GL": {
+    "countryName": "Greenland", 
+    "featureCode": "PCL*", 
+    "id": "3425505", 
+    "countryCode": "GL", 
+    "name": "Greenland"
+  }, 
+  "GI": {
+    "countryName": "Gibraltar", 
+    "featureCode": "PCL*", 
+    "id": "2411586", 
+    "countryCode": "GI", 
+    "name": "Gibraltar"
+  }, 
+  "GH": {
+    "countryName": "Ghana", 
+    "featureCode": "PCL*", 
+    "id": "2300660", 
+    "countryCode": "GH", 
+    "name": "Ghana"
+  }, 
+  "OM": {
+    "countryName": "Oman", 
+    "featureCode": "PCL*", 
+    "id": "286963", 
+    "countryCode": "OM", 
+    "name": "Oman"
+  }, 
+  "TN": {
+    "countryName": "Tunisia", 
+    "featureCode": "PCL*", 
+    "id": "2464461", 
+    "countryCode": "TN", 
+    "name": "Tunisia"
+  }, 
+  "JO": {
+    "countryName": "Jordan", 
+    "featureCode": "PCL*", 
+    "id": "248816", 
+    "countryCode": "JO", 
+    "name": "Jordan"
+  }, 
+  "HR": {
+    "countryName": "Croatia", 
+    "featureCode": "PCL*", 
+    "id": "3202326", 
+    "countryCode": "HR", 
+    "name": "Croatia"
+  }, 
+  "HT": {
+    "countryName": "Haiti", 
+    "featureCode": "PCL*", 
+    "id": "3723988", 
+    "countryCode": "HT", 
+    "name": "Haiti"
+  }, 
+  "HU": {
+    "countryName": "Hungary", 
+    "featureCode": "PCL*", 
+    "id": "719819", 
+    "countryCode": "HU", 
+    "name": "Hungary"
+  }, 
+  "HK": {
+    "countryName": "Hong Kong", 
+    "featureCode": "PCL*", 
+    "id": "1819730", 
+    "countryCode": "HK", 
+    "name": "Hong Kong"
+  }, 
+  "HN": {
+    "countryName": "Honduras", 
+    "featureCode": "PCL*", 
+    "id": "3608932", 
+    "countryCode": "HN", 
+    "name": "Honduras"
+  }, 
+  "HM": {
+    "countryName": "Heard Island and McDonald Islands", 
+    "featureCode": "PCL*", 
+    "id": "1547314", 
+    "countryCode": "HM", 
+    "name": "Heard Island and McDonald Islands"
+  }, 
+  "VE": {
+    "countryName": "Venezuela", 
+    "featureCode": "PCL*", 
+    "id": "3625428", 
+    "countryCode": "VE", 
+    "name": "Venezuela"
+  }, 
+  "PR": {
+    "countryName": "Puerto Rico", 
+    "featureCode": "PCL*", 
+    "id": "4566966", 
+    "countryCode": "PR", 
+    "name": "Puerto Rico"
+  }, 
+  "PS": {
+    "countryName": "Palestinian Territory", 
+    "featureCode": "PCL*", 
+    "id": "6254930", 
+    "countryCode": "PS", 
+    "name": "Palestinian Territory"
+  }, 
+  "PW": {
+    "countryName": "Palau", 
+    "featureCode": "PCL*", 
+    "id": "1559582", 
+    "countryCode": "PW", 
+    "name": "Palau"
+  }, 
+  "PT": {
+    "countryName": "Portugal", 
+    "featureCode": "PCL*", 
+    "id": "2264397", 
+    "countryCode": "PT", 
+    "name": "Portugal"
+  }, 
+  "SJ": {
+    "countryName": "Svalbard and Jan Mayen", 
+    "featureCode": "PCL*", 
+    "id": "607072", 
+    "countryCode": "SJ", 
+    "name": "Svalbard and Jan Mayen"
+  }, 
+  "PY": {
+    "countryName": "Paraguay", 
+    "featureCode": "PCL*", 
+    "id": "3437598", 
+    "countryCode": "PY", 
+    "name": "Paraguay"
+  }, 
+  "IQ": {
+    "countryName": "Iraq", 
+    "featureCode": "PCL*", 
+    "id": "99237", 
+    "countryCode": "IQ", 
+    "name": "Iraq"
+  }, 
+  "PA": {
+    "countryName": "Panama", 
+    "featureCode": "PCL*", 
+    "id": "3703430", 
+    "countryCode": "PA", 
+    "name": "Panama"
+  }, 
+  "PF": {
+    "countryName": "French Polynesia", 
+    "featureCode": "PCL*", 
+    "id": "4030656", 
+    "countryCode": "PF", 
+    "name": "French Polynesia"
+  }, 
+  "PG": {
+    "countryName": "Papua New Guinea", 
+    "featureCode": "PCL*", 
+    "id": "2088628", 
+    "countryCode": "PG", 
+    "name": "Papua New Guinea"
+  }, 
+  "PE": {
+    "countryName": "Peru", 
+    "featureCode": "PCL*", 
+    "id": "3932488", 
+    "countryCode": "PE", 
+    "name": "Peru"
+  }, 
+  "PK": {
+    "countryName": "Pakistan", 
+    "featureCode": "PCL*", 
+    "id": "1168579", 
+    "countryCode": "PK", 
+    "name": "Pakistan"
+  }, 
+  "PH": {
+    "countryName": "Philippines", 
+    "featureCode": "PCL*", 
+    "id": "1694008", 
+    "countryCode": "PH", 
+    "name": "Philippines"
+  }, 
+  "PN": {
+    "countryName": "Pitcairn", 
+    "featureCode": "PCL*", 
+    "id": "4030699", 
+    "countryCode": "PN", 
+    "name": "Pitcairn"
+  }, 
+  "PL": {
+    "countryName": "Poland", 
+    "featureCode": "PCL*", 
+    "id": "798544", 
+    "countryCode": "PL", 
+    "name": "Poland"
+  }, 
+  "PM": {
+    "countryName": "Saint Pierre and Miquelon", 
+    "featureCode": "PCL*", 
+    "id": "3424932", 
+    "countryCode": "PM", 
+    "name": "Saint Pierre and Miquelon"
+  }, 
+  "ZM": {
+    "countryName": "Zambia", 
+    "featureCode": "PCL*", 
+    "id": "895949", 
+    "countryCode": "ZM", 
+    "name": "Zambia"
+  }, 
+  "EH": {
+    "countryName": "Western Sahara", 
+    "featureCode": "PCL*", 
+    "id": "2461445", 
+    "countryCode": "EH", 
+    "name": "Western Sahara"
+  }, 
+  "EE": {
+    "countryName": "Estonia", 
+    "featureCode": "PCL*", 
+    "id": "453733", 
+    "countryCode": "EE", 
+    "name": "Estonia"
+  }, 
+  "EG": {
+    "countryName": "Egypt", 
+    "featureCode": "PCL*", 
+    "id": "357994", 
+    "countryCode": "EG", 
+    "name": "Egypt"
+  }, 
+  "ZA": {
+    "countryName": "South Africa", 
+    "featureCode": "PCL*", 
+    "id": "953987", 
+    "countryCode": "ZA", 
+    "name": "South Africa"
+  }, 
+  "EC": {
+    "countryName": "Ecuador", 
+    "featureCode": "PCL*", 
+    "id": "3658394", 
+    "countryCode": "EC", 
+    "name": "Ecuador"
+  }, 
+  "IT": {
+    "countryName": "Italy", 
+    "featureCode": "PCL*", 
+    "id": "3175395", 
+    "countryCode": "IT", 
+    "name": "Italy"
+  }, 
+  "VN": {
+    "countryName": "Vietnam", 
+    "featureCode": "PCL*", 
+    "id": "1562822", 
+    "countryCode": "VN", 
+    "name": "Vietnam"
+  }, 
+  "SB": {
+    "countryName": "Solomon Islands", 
+    "featureCode": "PCL*", 
+    "id": "2103350", 
+    "countryCode": "SB", 
+    "name": "Solomon Islands"
+  }, 
+  "ET": {
+    "countryName": "Ethiopia", 
+    "featureCode": "PCL*", 
+    "id": "337996", 
+    "countryCode": "ET", 
+    "name": "Ethiopia"
+  }, 
+  "SO": {
+    "countryName": "Somalia", 
+    "featureCode": "PCL*", 
+    "id": "51537", 
+    "countryCode": "SO", 
+    "name": "Somalia"
+  }, 
+  "ZW": {
+    "countryName": "Zimbabwe", 
+    "featureCode": "PCL*", 
+    "id": "878675", 
+    "countryCode": "ZW", 
+    "name": "Zimbabwe"
+  }, 
+  "SA": {
+    "countryName": "Saudi Arabia", 
+    "featureCode": "PCL*", 
+    "id": "102358", 
+    "countryCode": "SA", 
+    "name": "Saudi Arabia"
+  }, 
+  "ES": {
+    "countryName": "Spain", 
+    "featureCode": "PCL*", 
+    "id": "2510769", 
+    "countryCode": "ES", 
+    "name": "Spain"
+  }, 
+  "ER": {
+    "countryName": "Eritrea", 
+    "featureCode": "PCL*", 
+    "id": "338010", 
+    "countryCode": "ER", 
+    "name": "Eritrea"
+  }, 
+  "ME": {
+    "countryName": "Montenegro", 
+    "featureCode": "PCL*", 
+    "id": "3194884", 
+    "countryCode": "ME", 
+    "name": "Montenegro"
+  }, 
+  "MD": {
+    "countryName": "Moldova", 
+    "featureCode": "PCL*", 
+    "id": "617790", 
+    "countryCode": "MD", 
+    "name": "Moldova"
+  }, 
+  "MG": {
+    "countryName": "Madagascar", 
+    "featureCode": "PCL*", 
+    "id": "1062947", 
+    "countryCode": "MG", 
+    "name": "Madagascar"
+  }, 
+  "MF": {
+    "countryName": "Saint Martin", 
+    "featureCode": "PCL*", 
+    "id": "3578421", 
+    "countryCode": "MF", 
+    "name": "Saint Martin"
+  }, 
+  "MA": {
+    "countryName": "Morocco", 
+    "featureCode": "PCL*", 
+    "id": "2542007", 
+    "countryCode": "MA", 
+    "name": "Morocco"
+  }, 
+  "MC": {
+    "countryName": "Monaco", 
+    "featureCode": "PCL*", 
+    "id": "2993457", 
+    "countryCode": "MC", 
+    "name": "Monaco"
+  }, 
+  "UZ": {
+    "countryName": "Uzbekistan", 
+    "featureCode": "PCL*", 
+    "id": "1512440", 
+    "countryCode": "UZ", 
+    "name": "Uzbekistan"
+  }, 
+  "MM": {
+    "countryName": "Myanmar", 
+    "featureCode": "PCL*", 
+    "id": "1327865", 
+    "countryCode": "MM", 
+    "name": "Myanmar"
+  }, 
+  "ML": {
+    "countryName": "Mali", 
+    "featureCode": "PCL*", 
+    "id": "2453866", 
+    "countryCode": "ML", 
+    "name": "Mali"
+  }, 
+  "MO": {
+    "countryName": "Macao", 
+    "featureCode": "PCL*", 
+    "id": "1821275", 
+    "countryCode": "MO", 
+    "name": "Macao"
+  }, 
+  "MN": {
+    "countryName": "Mongolia", 
+    "featureCode": "PCL*", 
+    "id": "2029969", 
+    "countryCode": "MN", 
+    "name": "Mongolia"
+  }, 
+  "MH": {
+    "countryName": "Marshall Islands", 
+    "featureCode": "PCL*", 
+    "id": "2080185", 
+    "countryCode": "MH", 
+    "name": "Marshall Islands"
+  }, 
+  "MK": {
+    "countryName": "Macedonia", 
+    "featureCode": "PCL*", 
+    "id": "718075", 
+    "countryCode": "MK", 
+    "name": "Macedonia"
+  }, 
+  "MU": {
+    "countryName": "Mauritius", 
+    "featureCode": "PCL*", 
+    "id": "934292", 
+    "countryCode": "MU", 
+    "name": "Mauritius"
+  }, 
+  "MT": {
+    "countryName": "Malta", 
+    "featureCode": "PCL*", 
+    "id": "2562770", 
+    "countryCode": "MT", 
+    "name": "Malta"
+  }, 
+  "MW": {
+    "countryName": "Malawi", 
+    "featureCode": "PCL*", 
+    "id": "927384", 
+    "countryCode": "MW", 
+    "name": "Malawi"
+  }, 
+  "MV": {
+    "countryName": "Maldives", 
+    "featureCode": "PCL*", 
+    "id": "1282028", 
+    "countryCode": "MV", 
+    "name": "Maldives"
+  }, 
+  "MQ": {
+    "countryName": "Martinique", 
+    "featureCode": "PCL*", 
+    "id": "3570311", 
+    "countryCode": "MQ", 
+    "name": "Martinique"
+  }, 
+  "MP": {
+    "countryName": "Northern Mariana Islands", 
+    "featureCode": "PCL*", 
+    "id": "4041468", 
+    "countryCode": "MP", 
+    "name": "Northern Mariana Islands"
+  }, 
+  "MS": {
+    "countryName": "Montserrat", 
+    "featureCode": "PCL*", 
+    "id": "3578097", 
+    "countryCode": "MS", 
+    "name": "Montserrat"
+  }, 
+  "MR": {
+    "countryName": "Mauritania", 
+    "featureCode": "PCL*", 
+    "id": "2378080", 
+    "countryCode": "MR", 
+    "name": "Mauritania"
+  }, 
+  "IM": {
+    "countryName": "Isle of Man", 
+    "featureCode": "PCL*", 
+    "id": "3042225", 
+    "countryCode": "IM", 
+    "name": "Isle of Man"
+  }, 
+  "UG": {
+    "countryName": "Uganda", 
+    "featureCode": "PCL*", 
+    "id": "226074", 
+    "countryCode": "UG", 
+    "name": "Uganda"
+  }, 
+  "TZ": {
+    "countryName": "Tanzania", 
+    "featureCode": "PCL*", 
+    "id": "149590", 
+    "countryCode": "TZ", 
+    "name": "Tanzania"
+  }, 
+  "MY": {
+    "countryName": "Malaysia", 
+    "featureCode": "PCL*", 
+    "id": "1733045", 
+    "countryCode": "MY", 
+    "name": "Malaysia"
+  }, 
+  "MX": {
+    "countryName": "Mexico", 
+    "featureCode": "PCL*", 
+    "id": "3996063", 
+    "countryCode": "MX", 
+    "name": "Mexico"
+  }, 
+  "IL": {
+    "countryName": "Israel", 
+    "featureCode": "PCL*", 
+    "id": "294640", 
+    "countryCode": "IL", 
+    "name": "Israel"
+  }, 
+  "FR": {
+    "countryName": "France", 
+    "featureCode": "PCL*", 
+    "id": "3017382", 
+    "countryCode": "FR", 
+    "name": "France"
+  }, 
+  "IO": {
+    "countryName": "British Indian Ocean Territory", 
+    "featureCode": "PCL*", 
+    "id": "1282588", 
+    "countryCode": "IO", 
+    "name": "British Indian Ocean Territory"
+  }, 
+  "SH": {
+    "countryName": "Saint Helena", 
+    "featureCode": "PCL*", 
+    "id": "3370751", 
+    "countryCode": "SH", 
+    "name": "Saint Helena"
+  }, 
+  "FI": {
+    "countryName": "Finland", 
+    "featureCode": "PCL*", 
+    "id": "660013", 
+    "countryCode": "FI", 
+    "name": "Finland"
+  }, 
+  "FJ": {
+    "countryName": "Fiji", 
+    "featureCode": "PCL*", 
+    "id": "2205218", 
+    "countryCode": "FJ", 
+    "name": "Fiji"
+  }, 
+  "FK": {
+    "countryName": "Falkland Islands", 
+    "featureCode": "PCL*", 
+    "id": "3474414", 
+    "countryCode": "FK", 
+    "name": "Falkland Islands"
+  }, 
+  "FM": {
+    "countryName": "Micronesia", 
+    "featureCode": "PCL*", 
+    "id": "2081918", 
+    "countryCode": "FM", 
+    "name": "Micronesia"
+  }, 
+  "FO": {
+    "countryName": "Faroe Islands", 
+    "featureCode": "PCL*", 
+    "id": "2622320", 
+    "countryCode": "FO", 
+    "name": "Faroe Islands"
+  }, 
+  "NI": {
+    "countryName": "Nicaragua", 
+    "featureCode": "PCL*", 
+    "id": "3617476", 
+    "countryCode": "NI", 
+    "name": "Nicaragua"
+  }, 
+  "NL": {
+    "countryName": "Netherlands", 
+    "featureCode": "PCL*", 
+    "id": "2750405", 
+    "countryCode": "NL", 
+    "name": "Netherlands"
+  }, 
+  "NO": {
+    "countryName": "Norway", 
+    "featureCode": "PCL*", 
+    "id": "3144096", 
+    "countryCode": "NO", 
+    "name": "Norway"
+  }, 
+  "NA": {
+    "countryName": "Namibia", 
+    "featureCode": "PCL*", 
+    "id": "3355338", 
+    "countryCode": "NA", 
+    "name": "Namibia"
+  }, 
+  "VU": {
+    "countryName": "Vanuatu", 
+    "featureCode": "PCL*", 
+    "id": "2134431", 
+    "countryCode": "VU", 
+    "name": "Vanuatu"
+  }, 
+  "NC": {
+    "countryName": "New Caledonia", 
+    "featureCode": "PCL*", 
+    "id": "2139685", 
+    "countryCode": "NC", 
+    "name": "New Caledonia"
+  }, 
+  "NE": {
+    "countryName": "Niger", 
+    "featureCode": "PCL*", 
+    "id": "2440476", 
+    "countryCode": "NE", 
+    "name": "Niger"
+  }, 
+  "NF": {
+    "countryName": "Norfolk Island", 
+    "featureCode": "PCL*", 
+    "id": "2155115", 
+    "countryCode": "NF", 
+    "name": "Norfolk Island"
+  }, 
+  "NG": {
+    "countryName": "Nigeria", 
+    "featureCode": "PCL*", 
+    "id": "2328926", 
+    "countryCode": "NG", 
+    "name": "Nigeria"
+  }, 
+  "NZ": {
+    "countryName": "New Zealand", 
+    "featureCode": "PCL*", 
+    "id": "2186224", 
+    "countryCode": "NZ", 
+    "name": "New Zealand"
+  }, 
+  "NP": {
+    "countryName": "Nepal", 
+    "featureCode": "PCL*", 
+    "id": "1282988", 
+    "countryCode": "NP", 
+    "name": "Nepal"
+  }, 
+  "NR": {
+    "countryName": "Nauru", 
+    "featureCode": "PCL*", 
+    "id": "2110425", 
+    "countryCode": "NR", 
+    "name": "Nauru"
+  }, 
+  "NU": {
+    "countryName": "Niue", 
+    "featureCode": "PCL*", 
+    "id": "4036232", 
+    "countryCode": "NU", 
+    "name": "Niue"
+  }, 
+  "CK": {
+    "countryName": "Cook Islands", 
+    "featureCode": "PCL*", 
+    "id": "1899402", 
+    "countryCode": "CK", 
+    "name": "Cook Islands"
+  }, 
+  "XK": {
+    "countryName": "Kosovo", 
+    "featureCode": "PCL*", 
+    "id": "831053", 
+    "countryCode": "XK", 
+    "name": "Kosovo"
+  }, 
+  "CI": {
+    "countryName": "Ivory Coast", 
+    "featureCode": "PCL*", 
+    "id": "2287781", 
+    "countryCode": "CI", 
+    "name": "Ivory Coast"
+  }, 
+  "CH": {
+    "countryName": "Switzerland", 
+    "featureCode": "PCL*", 
+    "id": "2658434", 
+    "countryCode": "CH", 
+    "name": "Switzerland"
+  }, 
+  "CO": {
+    "countryName": "Colombia", 
+    "featureCode": "PCL*", 
+    "id": "3686110", 
+    "countryCode": "CO", 
+    "name": "Colombia"
+  }, 
+  "CN": {
+    "countryName": "China", 
+    "featureCode": "PCL*", 
+    "id": "1814991", 
+    "countryCode": "CN", 
+    "name": "China"
+  }, 
+  "CM": {
+    "countryName": "Cameroon", 
+    "featureCode": "PCL*", 
+    "id": "2233387", 
+    "countryCode": "CM", 
+    "name": "Cameroon"
+  }, 
+  "CL": {
+    "countryName": "Chile", 
+    "featureCode": "PCL*", 
+    "id": "3895114", 
+    "countryCode": "CL", 
+    "name": "Chile"
+  }, 
+  "CC": {
+    "countryName": "Cocos Islands", 
+    "featureCode": "PCL*", 
+    "id": "1547376", 
+    "countryCode": "CC", 
+    "name": "Cocos Islands"
+  }, 
+  "CA": {
+    "countryName": "Canada", 
+    "featureCode": "PCL*", 
+    "id": "6251999", 
+    "countryCode": "CA", 
+    "name": "Canada"
+  }, 
+  "CG": {
+    "countryName": "Republic of the Congo", 
+    "featureCode": "PCL*", 
+    "id": "2260494", 
+    "countryCode": "CG", 
+    "name": "Republic of the Congo"
+  }, 
+  "CF": {
+    "countryName": "Central African Republic", 
+    "featureCode": "PCL*", 
+    "id": "239880", 
+    "countryCode": "CF", 
+    "name": "Central African Republic"
+  }, 
+  "CD": {
+    "countryName": "Democratic Republic of the Congo", 
+    "featureCode": "PCL*", 
+    "id": "203312", 
+    "countryCode": "CD", 
+    "name": "Democratic Republic of the Congo"
+  }, 
+  "CZ": {
+    "countryName": "Czechia", 
+    "featureCode": "PCL*", 
+    "id": "3077311", 
+    "countryCode": "CZ", 
+    "name": "Czechia"
+  }, 
+  "CY": {
+    "countryName": "Cyprus", 
+    "featureCode": "PCL*", 
+    "id": "146669", 
+    "countryCode": "CY", 
+    "name": "Cyprus"
+  }, 
+  "CX": {
+    "countryName": "Christmas Island", 
+    "featureCode": "PCL*", 
+    "id": "2078138", 
+    "countryCode": "CX", 
+    "name": "Christmas Island"
+  }, 
+  "CS": {
+    "countryName": "Serbia and Montenegro", 
+    "featureCode": "PCL*", 
+    "id": "8505033", 
+    "countryCode": "CS", 
+    "name": "Serbia and Montenegro"
+  }, 
+  "CR": {
+    "countryName": "Costa Rica", 
+    "featureCode": "PCL*", 
+    "id": "3624060", 
+    "countryCode": "CR", 
+    "name": "Costa Rica"
+  }, 
+  "CW": {
+    "countryName": "Curacao", 
+    "featureCode": "PCL*", 
+    "id": "7626836", 
+    "countryCode": "CW", 
+    "name": "Curacao"
+  }, 
+  "CV": {
+    "countryName": "Cape Verde", 
+    "featureCode": "PCL*", 
+    "id": "3374766", 
+    "countryCode": "CV", 
+    "name": "Cape Verde"
+  }, 
+  "CU": {
+    "countryName": "Cuba", 
+    "featureCode": "PCL*", 
+    "id": "3562981", 
+    "countryCode": "CU", 
+    "name": "Cuba"
+  }, 
+  "SZ": {
+    "countryName": "Swaziland", 
+    "featureCode": "PCL*", 
+    "id": "934841", 
+    "countryCode": "SZ", 
+    "name": "Swaziland"
+  }, 
+  "SY": {
+    "countryName": "Syria", 
+    "featureCode": "PCL*", 
+    "id": "163843", 
+    "countryCode": "SY", 
+    "name": "Syria"
+  }, 
+  "SX": {
+    "countryName": "Sint Maarten", 
+    "featureCode": "PCL*", 
+    "id": "7609695", 
+    "countryCode": "SX", 
+    "name": "Sint Maarten"
+  }, 
+  "KG": {
+    "countryName": "Kyrgyzstan", 
+    "featureCode": "PCL*", 
+    "id": "1527747", 
+    "countryCode": "KG", 
+    "name": "Kyrgyzstan"
+  }, 
+  "KE": {
+    "countryName": "Kenya", 
+    "featureCode": "PCL*", 
+    "id": "192950", 
+    "countryCode": "KE", 
+    "name": "Kenya"
+  }, 
+  "SS": {
+    "countryName": "South Sudan", 
+    "featureCode": "PCL*", 
+    "id": "7909807", 
+    "countryCode": "SS", 
+    "name": "South Sudan"
+  }, 
+  "SR": {
+    "countryName": "Suriname", 
+    "featureCode": "PCL*", 
+    "id": "3382998", 
+    "countryCode": "SR", 
+    "name": "Suriname"
+  }, 
+  "KI": {
+    "countryName": "Kiribati", 
+    "featureCode": "PCL*", 
+    "id": "4030945", 
+    "countryCode": "KI", 
+    "name": "Kiribati"
+  }, 
+  "KH": {
+    "countryName": "Cambodia", 
+    "featureCode": "PCL*", 
+    "id": "1831722", 
+    "countryCode": "KH", 
+    "name": "Cambodia"
+  }, 
+  "KN": {
+    "countryName": "Saint Kitts and Nevis", 
+    "featureCode": "PCL*", 
+    "id": "3575174", 
+    "countryCode": "KN", 
+    "name": "Saint Kitts and Nevis"
+  }, 
+  "KM": {
+    "countryName": "Comoros", 
+    "featureCode": "PCL*", 
+    "id": "921929", 
+    "countryCode": "KM", 
+    "name": "Comoros"
+  }, 
+  "ST": {
+    "countryName": "Sao Tome and Principe", 
+    "featureCode": "PCL*", 
+    "id": "2410758", 
+    "countryCode": "ST", 
+    "name": "Sao Tome and Principe"
+  }, 
+  "SK": {
+    "countryName": "Slovakia", 
+    "featureCode": "PCL*", 
+    "id": "3057568", 
+    "countryCode": "SK", 
+    "name": "Slovakia"
+  }, 
+  "KR": {
+    "countryName": "South Korea", 
+    "featureCode": "PCL*", 
+    "id": "1835841", 
+    "countryCode": "KR", 
+    "name": "South Korea"
+  }, 
+  "SI": {
+    "countryName": "Slovenia", 
+    "featureCode": "PCL*", 
+    "id": "3190538", 
+    "countryCode": "SI", 
+    "name": "Slovenia"
+  }, 
+  "KP": {
+    "countryName": "North Korea", 
+    "featureCode": "PCL*", 
+    "id": "1873107", 
+    "countryCode": "KP", 
+    "name": "North Korea"
+  }, 
+  "KW": {
+    "countryName": "Kuwait", 
+    "featureCode": "PCL*", 
+    "id": "285570", 
+    "countryCode": "KW", 
+    "name": "Kuwait"
+  }, 
+  "SN": {
+    "countryName": "Senegal", 
+    "featureCode": "PCL*", 
+    "id": "2245662", 
+    "countryCode": "SN", 
+    "name": "Senegal"
+  }, 
+  "SM": {
+    "countryName": "San Marino", 
+    "featureCode": "PCL*", 
+    "id": "3168068", 
+    "countryCode": "SM", 
+    "name": "San Marino"
+  }, 
+  "SL": {
+    "countryName": "Sierra Leone", 
+    "featureCode": "PCL*", 
+    "id": "2403846", 
+    "countryCode": "SL", 
+    "name": "Sierra Leone"
+  }, 
+  "SC": {
+    "countryName": "Seychelles", 
+    "featureCode": "PCL*", 
+    "id": "241170", 
+    "countryCode": "SC", 
+    "name": "Seychelles"
+  }, 
+  "KZ": {
+    "countryName": "Kazakhstan", 
+    "featureCode": "PCL*", 
+    "id": "1522867", 
+    "countryCode": "KZ", 
+    "name": "Kazakhstan"
+  }, 
+  "KY": {
+    "countryName": "Cayman Islands", 
+    "featureCode": "PCL*", 
+    "id": "3580718", 
+    "countryCode": "KY", 
+    "name": "Cayman Islands"
+  }, 
+  "SG": {
+    "countryName": "Singapore", 
+    "featureCode": "PCL*", 
+    "id": "1880251", 
+    "countryCode": "SG", 
+    "name": "Singapore"
+  }, 
+  "SE": {
+    "countryName": "Sweden", 
+    "featureCode": "PCL*", 
+    "id": "2661886", 
+    "countryCode": "SE", 
+    "name": "Sweden"
+  }, 
+  "SD": {
+    "countryName": "Sudan", 
+    "featureCode": "PCL*", 
+    "id": "366755", 
+    "countryCode": "SD", 
+    "name": "Sudan"
+  }, 
+  "DO": {
+    "countryName": "Dominican Republic", 
+    "featureCode": "PCL*", 
+    "id": "3508796", 
+    "countryCode": "DO", 
+    "name": "Dominican Republic"
+  }, 
+  "DM": {
+    "countryName": "Dominica", 
+    "featureCode": "PCL*", 
+    "id": "3575830", 
+    "countryCode": "DM", 
+    "name": "Dominica"
+  }, 
+  "DJ": {
+    "countryName": "Djibouti", 
+    "featureCode": "PCL*", 
+    "id": "223816", 
+    "countryCode": "DJ", 
+    "name": "Djibouti"
+  }, 
+  "DK": {
+    "countryName": "Denmark", 
+    "featureCode": "PCL*", 
+    "id": "2623032", 
+    "countryCode": "DK", 
+    "name": "Denmark"
+  }, 
+  "VG": {
+    "countryName": "British Virgin Islands", 
+    "featureCode": "PCL*", 
+    "id": "3577718", 
+    "countryCode": "VG", 
+    "name": "British Virgin Islands"
+  }, 
+  "DE": {
+    "countryName": "Germany", 
+    "featureCode": "PCL*", 
+    "id": "2921044", 
+    "countryCode": "DE", 
+    "name": "Germany"
+  }, 
+  "YE": {
+    "countryName": "Yemen", 
+    "featureCode": "PCL*", 
+    "id": "69543", 
+    "countryCode": "YE", 
+    "name": "Yemen"
+  }, 
+  "DZ": {
+    "countryName": "Algeria", 
+    "featureCode": "PCL*", 
+    "id": "2589581", 
+    "countryCode": "DZ", 
+    "name": "Algeria"
+  }, 
+  "US": {
+    "countryName": "United States", 
+    "featureCode": "PCL*", 
+    "id": "6252001", 
+    "countryCode": "US", 
+    "name": "United States"
+  }, 
+  "UY": {
+    "countryName": "Uruguay", 
+    "featureCode": "PCL*", 
+    "id": "3439705", 
+    "countryCode": "UY", 
+    "name": "Uruguay"
+  }, 
+  "YT": {
+    "countryName": "Mayotte", 
+    "featureCode": "PCL*", 
+    "id": "1024031", 
+    "countryCode": "YT", 
+    "name": "Mayotte"
+  }, 
+  "UM": {
+    "countryName": "United States Minor Outlying Islands", 
+    "featureCode": "PCL*", 
+    "id": "5854968", 
+    "countryCode": "UM", 
+    "name": "United States Minor Outlying Islands"
+  }, 
+  "LB": {
+    "countryName": "Lebanon", 
+    "featureCode": "PCL*", 
+    "id": "272103", 
+    "countryCode": "LB", 
+    "name": "Lebanon"
+  }, 
+  "LC": {
+    "countryName": "Saint Lucia", 
+    "featureCode": "PCL*", 
+    "id": "3576468", 
+    "countryCode": "LC", 
+    "name": "Saint Lucia"
+  }, 
+  "LA": {
+    "countryName": "Laos", 
+    "featureCode": "PCL*", 
+    "id": "1655842", 
+    "countryCode": "LA", 
+    "name": "Laos"
+  }, 
+  "TV": {
+    "countryName": "Tuvalu", 
+    "featureCode": "PCL*", 
+    "id": "2110297", 
+    "countryCode": "TV", 
+    "name": "Tuvalu"
+  }, 
+  "TW": {
+    "countryName": "Taiwan", 
+    "featureCode": "PCL*", 
+    "id": "1668284", 
+    "countryCode": "TW", 
+    "name": "Taiwan"
+  }, 
+  "TT": {
+    "countryName": "Trinidad and Tobago", 
+    "featureCode": "PCL*", 
+    "id": "3573591", 
+    "countryCode": "TT", 
+    "name": "Trinidad and Tobago"
+  }, 
+  "TR": {
+    "countryName": "Turkey", 
+    "featureCode": "PCL*", 
+    "id": "298795", 
+    "countryCode": "TR", 
+    "name": "Turkey"
+  }, 
+  "LK": {
+    "countryName": "Sri Lanka", 
+    "featureCode": "PCL*", 
+    "id": "1227603", 
+    "countryCode": "LK", 
+    "name": "Sri Lanka"
+  }, 
+  "LI": {
+    "countryName": "Liechtenstein", 
+    "featureCode": "PCL*", 
+    "id": "3042058", 
+    "countryCode": "LI", 
+    "name": "Liechtenstein"
+  }, 
+  "LV": {
+    "countryName": "Latvia", 
+    "featureCode": "PCL*", 
+    "id": "458258", 
+    "countryCode": "LV", 
+    "name": "Latvia"
+  }, 
+  "TO": {
+    "countryName": "Tonga", 
+    "featureCode": "PCL*", 
+    "id": "4032283", 
+    "countryCode": "TO", 
+    "name": "Tonga"
+  }, 
+  "LT": {
+    "countryName": "Lithuania", 
+    "featureCode": "PCL*", 
+    "id": "597427", 
+    "countryCode": "LT", 
+    "name": "Lithuania"
+  }, 
+  "LU": {
+    "countryName": "Luxembourg", 
+    "featureCode": "PCL*", 
+    "id": "2960313", 
+    "countryCode": "LU", 
+    "name": "Luxembourg"
+  }, 
+  "LR": {
+    "countryName": "Liberia", 
+    "featureCode": "PCL*", 
+    "id": "2275384", 
+    "countryCode": "LR", 
+    "name": "Liberia"
+  }, 
+  "LS": {
+    "countryName": "Lesotho", 
+    "featureCode": "PCL*", 
+    "id": "932692", 
+    "countryCode": "LS", 
+    "name": "Lesotho"
+  }, 
+  "TH": {
+    "countryName": "Thailand", 
+    "featureCode": "PCL*", 
+    "id": "1605651", 
+    "countryCode": "TH", 
+    "name": "Thailand"
+  }, 
+  "TF": {
+    "countryName": "French Southern Territories", 
+    "featureCode": "PCL*", 
+    "id": "1546748", 
+    "countryCode": "TF", 
+    "name": "French Southern Territories"
+  }, 
+  "TG": {
+    "countryName": "Togo", 
+    "featureCode": "PCL*", 
+    "id": "2363686", 
+    "countryCode": "TG", 
+    "name": "Togo"
+  }, 
+  "TD": {
+    "countryName": "Chad", 
+    "featureCode": "PCL*", 
+    "id": "2434508", 
+    "countryCode": "TD", 
+    "name": "Chad"
+  }, 
+  "TC": {
+    "countryName": "Turks and Caicos Islands", 
+    "featureCode": "PCL*", 
+    "id": "3576916", 
+    "countryCode": "TC", 
+    "name": "Turks and Caicos Islands"
+  }, 
+  "LY": {
+    "countryName": "Libya", 
+    "featureCode": "PCL*", 
+    "id": "2215636", 
+    "countryCode": "LY", 
+    "name": "Libya"
+  }, 
+  "VA": {
+    "countryName": "Vatican", 
+    "featureCode": "PCL*", 
+    "id": "3164670", 
+    "countryCode": "VA", 
+    "name": "Vatican"
+  }, 
+  "VC": {
+    "countryName": "Saint Vincent and the Grenadines", 
+    "featureCode": "PCL*", 
+    "id": "3577815", 
+    "countryCode": "VC", 
+    "name": "Saint Vincent and the Grenadines"
+  }, 
+  "AE": {
+    "countryName": "United Arab Emirates", 
+    "featureCode": "PCL*", 
+    "id": "290557", 
+    "countryCode": "AE", 
+    "name": "United Arab Emirates"
+  }, 
+  "AD": {
+    "countryName": "Andorra", 
+    "featureCode": "PCL*", 
+    "id": "3041565", 
+    "countryCode": "AD", 
+    "name": "Andorra"
+  }, 
+  "AG": {
+    "countryName": "Antigua and Barbuda", 
+    "featureCode": "PCL*", 
+    "id": "3576396", 
+    "countryCode": "AG", 
+    "name": "Antigua and Barbuda"
+  }, 
+  "AF": {
+    "countryName": "Afghanistan", 
+    "featureCode": "PCL*", 
+    "id": "1149361", 
+    "countryCode": "AF", 
+    "name": "Afghanistan"
+  }, 
+  "AI": {
+    "countryName": "Anguilla", 
+    "featureCode": "PCL*", 
+    "id": "3573511", 
+    "countryCode": "AI", 
+    "name": "Anguilla"
+  }, 
+  "VI": {
+    "countryName": "U.S. Virgin Islands", 
+    "featureCode": "PCL*", 
+    "id": "4796775", 
+    "countryCode": "VI", 
+    "name": "U.S. Virgin Islands"
+  }, 
+  "IS": {
+    "countryName": "Iceland", 
+    "featureCode": "PCL*", 
+    "id": "2629691", 
+    "countryCode": "IS", 
+    "name": "Iceland"
+  }, 
+  "IR": {
+    "countryName": "Iran", 
+    "featureCode": "PCL*", 
+    "id": "130758", 
+    "countryCode": "IR", 
+    "name": "Iran"
+  }, 
+  "AM": {
+    "countryName": "Armenia", 
+    "featureCode": "PCL*", 
+    "id": "174982", 
+    "countryCode": "AM", 
+    "name": "Armenia"
+  }, 
+  "AL": {
+    "countryName": "Albania", 
+    "featureCode": "PCL*", 
+    "id": "783754", 
+    "countryCode": "AL", 
+    "name": "Albania"
+  }, 
+  "AO": {
+    "countryName": "Angola", 
+    "featureCode": "PCL*", 
+    "id": "3351879", 
+    "countryCode": "AO", 
+    "name": "Angola"
+  }, 
+  "AN": {
+    "countryName": "Netherlands Antilles", 
+    "featureCode": "PCL*", 
+    "id": "8505032", 
+    "countryCode": "AN", 
+    "name": "Netherlands Antilles"
+  }, 
+  "AQ": {
+    "countryName": "Antarctica", 
+    "featureCode": "PCL*", 
+    "id": "6697173", 
+    "countryCode": "AQ", 
+    "name": "Antarctica"
+  }, 
+  "AS": {
+    "countryName": "American Samoa", 
+    "featureCode": "PCL*", 
+    "id": "5880801", 
+    "countryCode": "AS", 
+    "name": "American Samoa"
+  }, 
+  "AR": {
+    "countryName": "Argentina", 
+    "featureCode": "PCL*", 
+    "id": "3865483", 
+    "countryCode": "AR", 
+    "name": "Argentina"
+  }, 
+  "AU": {
+    "countryName": "Australia", 
+    "featureCode": "PCL*", 
+    "id": "2077456", 
+    "countryCode": "AU", 
+    "name": "Australia"
+  }, 
+  "AT": {
+    "countryName": "Austria", 
+    "featureCode": "PCL*", 
+    "id": "2782113", 
+    "countryCode": "AT", 
+    "name": "Austria"
+  }, 
+  "AW": {
+    "countryName": "Aruba", 
+    "featureCode": "PCL*", 
+    "id": "3577279", 
+    "countryCode": "AW", 
+    "name": "Aruba"
+  }, 
+  "IN": {
+    "countryName": "India", 
+    "featureCode": "PCL*", 
+    "id": "1269750", 
+    "countryCode": "IN", 
+    "name": "India"
+  }, 
+  "AX": {
+    "countryName": "Aland Islands", 
+    "featureCode": "PCL*", 
+    "id": "661882", 
+    "countryCode": "AX", 
+    "name": "Aland Islands"
+  }, 
+  "AZ": {
+    "countryName": "Azerbaijan", 
+    "featureCode": "PCL*", 
+    "id": "587116", 
+    "countryCode": "AZ", 
+    "name": "Azerbaijan"
+  }, 
+  "IE": {
+    "countryName": "Ireland", 
+    "featureCode": "PCL*", 
+    "id": "2963597", 
+    "countryCode": "IE", 
+    "name": "Ireland"
+  }, 
+  "ID": {
+    "countryName": "Indonesia", 
+    "featureCode": "PCL*", 
+    "id": "1643084", 
+    "countryCode": "ID", 
+    "name": "Indonesia"
+  }, 
+  "UA": {
+    "countryName": "Ukraine", 
+    "featureCode": "PCL*", 
+    "id": "690791", 
+    "countryCode": "UA", 
+    "name": "Ukraine"
+  }, 
+  "QA": {
+    "countryName": "Qatar", 
+    "featureCode": "PCL*", 
+    "id": "289688", 
+    "countryCode": "QA", 
+    "name": "Qatar"
+  }, 
+  "MZ": {
+    "countryName": "Mozambique", 
+    "featureCode": "PCL*", 
+    "id": "1036973", 
+    "countryCode": "MZ", 
+    "name": "Mozambique"
+  }
+}

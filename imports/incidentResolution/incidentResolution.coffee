@@ -31,7 +31,7 @@
 # interval if one of them has a rate that is greater than the incident's case
 # rate.
 
-import LocationTree from './LocationTree.coffee'
+import LocationTree from './LocationTree'
 import Solver from './LPSolver'
 
 MILLIS_PER_DAY = 1000 * 60 * 60 * 24
@@ -39,22 +39,20 @@ MILLIS_PER_DAY = 1000 * 60 * 60 * 24
 class Endpoint
   constructor: (@isStart, @offset, @interval) ->
 
-intervalToEndpoints = (interval)->
+intervalToEndpoints = (interval) ->
   console.assert Number(interval.startDate) < Number(interval.endDate)
   [
     new Endpoint(true, Number(interval.startDate), interval)
     new Endpoint(false, Number(interval.endDate), interval)
   ]
 
-differentailIncidentsToSubIntervals = (incidents)->
+differentailIncidentsToSubIntervals = (incidents) ->
   if incidents.length == 0
     return []
   endpoints = []
   locationsById = {}
-  incidents.forEach (incident, idx)->
+  incidents.forEach (incident, idx) ->
     incident.id = idx
-    # Remove contained locations from loc array
-    incident.locations = LocationTree.from(incident.locations).children.map (x)->x.value
     console.assert(incident.locations.length > 0)
     for location in incident.locations
       locationsById[location.id] = location
@@ -77,7 +75,7 @@ differentailIncidentsToSubIntervals = (incidents)->
   console.assert priorEndpoint.isStart
   SELToIncidents = {}
   activeIntervals = [priorEndpoint.interval]
-  endpoints.slice(1).forEach (endpoint)->
+  endpoints.slice(1).forEach (endpoint) ->
     if priorEndpoint.offset != endpoint.offset
       # Ensure a subinterval is created for the top level locations between
       # every endpoint.
