@@ -115,5 +115,3 @@ $chimp .config/chimp.js \
   --tags=$tags \
   --chai=true \
   --debug=false
-
-meteor test --driver-package practicalmeteor:mocha
