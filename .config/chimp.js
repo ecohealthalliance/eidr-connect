@@ -27,12 +27,12 @@ module.exports = {
   screenshotsOnError: true,
   screenshotsPath: '.screenshots',
   captureAllStepScreenshots: false,
-  saveScreenshotsToDisk: false,
+  saveScreenshotsToDisk: true,
   // Note: With a large viewport size and captureAllStepScreenshots enabled,
   // you may run out of memory. Use browser.setViewportSize to make the
   // viewport size smaller.
-  saveScreenshotsToReport: false,
-  jsonOutput: null,
+  saveScreenshotsToReport: true,
+  jsonOutput: true,
   coffee: true,
   compiler: 'coffee:coffee-script/register',
   conditionOutput: true,

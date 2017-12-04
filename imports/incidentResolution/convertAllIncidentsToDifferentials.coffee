@@ -1,22 +1,37 @@
+import LocationTree from './LocationTree'
+import regionToCountries from '/imports/regionToCountries.json'
+import countryISOToGeoname from '/imports/countryISOToGeoname.json'
+
 # Replace cumulative incident reports with differential incident reports
 # created by taking the difference in counts between two subsequent cumulative
 # reports in the same location.
-convertAllIncidentsToDifferentials = (incidents)->
+convertAllIncidentsToDifferentials = (incidents, replaceRegionsWithCountries=true) ->
   cumulativeIncidents = []
   differentailIncidents = []
-  incidents.forEach (i)->
-    if not i.dateRange or i.specify
+  incidents.forEach (incident) ->
+    # Replace regions with contained country geonames
+    locations = []
+    incident.locations?.forEach (location) ->
+      if replaceRegionsWithCountries and regionToCountries[location.id]
+        regionToCountries[location.id].countryISOs.forEach (iso) ->
+          console.assert countryISOToGeoname[iso]
+          locations.push(countryISOToGeoname[iso])
+      else
+        locations.push(location)
+    # Remove duplicate/contained locations from loc array
+    locations = LocationTree.from(locations).children.map (x)->x.value
+    if not incident.dateRange or incident.specify
       return
-    if i.type == 'activeCount'
+    if incident.type == 'activeCount'
       return
     simpleIncident =
-      startDate: new Date(i.dateRange.start)
-      endDate: new Date(i.dateRange.end)
-      count: i.cases or i.deaths
-      type: _.keys(_.pick(i, 'cases', 'deaths', 'specify'))[0]
-      locations: i.locations
-      cumulative: i.dateRange.cumulative
-      originalIncidents: [i]
+      startDate: new Date(incident.dateRange.start)
+      endDate: new Date(incident.dateRange.end)
+      count: incident.cases or incident.deaths
+      type: _.keys(_.pick(incident, 'cases', 'deaths', 'specify'))[0]
+      locations: locations
+      cumulative: incident.dateRange.cumulative
+      originalIncidents: [incident]
     if not simpleIncident.count
       return
     simpleIncident.startDate.setUTCHours(0)
@@ -30,7 +45,7 @@ convertAllIncidentsToDifferentials = (incidents)->
     simpleIncident.endDate.setUTCMinutes(0)
     simpleIncident.endDate.setUTCSeconds(0)
     simpleIncident.endDate.setUTCMilliseconds(0)
-    if i.dateRange.cumulative
+    if incident.dateRange.cumulative
       cumulativeIncidents.push(simpleIncident)
     else
       if simpleIncident.startDate > simpleIncident.endDate

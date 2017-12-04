@@ -1,5 +1,8 @@
 import json
 import pandas as pd
+import requests
+from StringIO import StringIO
+import re
 
 continent_names = {
     "AF": "Africa",
@@ -19,9 +22,9 @@ continent_geonameids = {
     "SA": "6255150",
     "AN": "6255152",
 }
-country_table = pd.read_csv("http://download.geonames.org/export/dump/countryInfo.txt",
+response = requests.get("http://download.geonames.org/export/dump/countryInfo.txt")
+country_table = pd.read_csv(StringIO(re.split(r'^#[^\n]*$', response.content, flags=re.M)[-1]),
                             sep='\t',
-                            comment='#',
                             header=None,
                             names=[
                                 "ISO",
@@ -51,7 +54,7 @@ for group, rows in country_table.groupby("Continent"):
     regionToCountries[continent_geonameids[group]] = {
         "name": continent_names[group],
         "continentCode": group,
-        "countryISOs":  list(rows.ISO.values),
+        "countryISOs":  list(rows.ISO.values)
     }
 
 regionToCountries["7729885"] = {
@@ -79,3 +82,16 @@ regionToCountries["7729885"] = {
 
 with open("regionToCountries.json", "w") as f:
     json.dump(regionToCountries, f, indent=2)
+
+countryISOToGeoname = {
+    group: {
+        "id": str(rows.geonameid.values[0]),
+        "countryName": rows.Country.values[0],
+        "countryCode": rows.ISO.values[0],
+        "featureCode": "PCL*",
+        "name": rows.Country.values[0],
+    }
+    for group, rows in country_table.groupby("ISO") }
+
+with open("countryISOToGeoname.json", "w") as f:
+    json.dump(countryISOToGeoname, f, indent=2)

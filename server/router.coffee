@@ -236,6 +236,8 @@ Router.route("/api/resolve-incidents", where: "server")
 ###
 @api {post} events-with-resolved-data Return the resolved cases for a set of
   events specified by id. The resolved cases are broken down by time and location.
+@apiParam {ISODateString} startDate The date range of incident to resolve.
+@apiParam {ISODateString} endDate The date range of incident to resolve.
 @apiSuccessExample {json} Success-Response:
   {
     eventId: {
@@ -254,64 +256,84 @@ Router.route("/api/resolve-incidents", where: "server")
 Router.route("/api/events-with-resolved-data", where: "server")
 .get ->
   eventIds = @request.query.ids
+  if @request.query.startDate
+    dateRange =
+      start: new Date(@request.query.startDate)
+      end: new Date(@request.query.endDate)
   events = UserEvents.find(
     _id:
       $in: eventIds
     deleted:
       $in: [null, false]
-  ).map (event)->
-    event.incidents = Incidents.find(
+  ).map (event) ->
+    query =
       _id: $in: _.pluck(event.incidents, 'id')
       accepted: $in: [null, true]
       deleted: $in: [null, false]
       locations: $not: $size: 0
-    ).fetch()
+    if dateRange
+      query['dateRange.start'] = $lte: dateRange.end
+      query['dateRange.end'] = $gte: dateRange.start
+    event.incidents = Incidents.find(query).fetch()
     event
   @response.setHeader('Access-Control-Allow-Origin', '*')
+  @response.setHeader('Content-Type', 'application/json')
   @response.statusCode = 200
-  @response.end(JSON.stringify(events.map (event)->
-    console.log event.incidents[0]
-    differentials = _.where(convertAllIncidentsToDifferentials(event.incidents), type: 'cases')
-    subIntervals = differentailIncidentsToSubIntervals(differentials)
-    extendSubIntervalsWithValues(differentials, subIntervals)
-    locationTree = LocationTree.from(subIntervals.map (x) -> x.location)
-    topLocations = locationTree.children.map (x) -> x.value
-    console.log topLocations
-    locToSubintervals = {}
-    for topLocation in topLocations
-      locToSubintervals[topLocation.id] = []
-    for topLocation in topLocations
-      for subInterval in subIntervals
-        loc = subInterval.location
-        if LocationTree.locationContains(topLocation, loc)
-          locToSubintervals[topLocation.id].push(subInterval)
-    countryCodeToCount = {}
-    maxSubintervalsPerLocation = []
-    _.pairs(locToSubintervals).map ([key, locSubIntervals]) ->
-      location = locationTree.getLocationById(key)
-      groupedLocSubIntervals = _.groupBy(locSubIntervals, 'start')
-      maxSubintervals = []
-      for group, subIntervalGroup of groupedLocSubIntervals
-        maxSubintervals.push(_.max(subIntervalGroup, (x) -> x.value))
-      maxSubintervalsPerLocation = maxSubintervalsPerLocation.concat(maxSubintervals)
-      maxSubintervals = _.sortBy(maxSubintervals, (x) -> x.start)
-      total = 0
-      formattedData = maxSubintervals.forEach (subInt) ->
-        rate = subInt.value / ((subInt.end - subInt.start) / 1000 / 60 / 60 / 24)
-        total += subInt.value
-      prevTotal = countryCodeToCount[location.countryCode] or 0
-      countryCodeToCount[location.countryCode] = prevTotal + total
-    groupedSubIntervals = _.groupBy(maxSubintervalsPerLocation, 'end')
-    overallTimeseries = _.chain(groupedSubIntervals)
-      .pairs()
-      .map ([end, group]) ->
-        date: new Date(parseInt(end))
-        value: group.reduce(((sofar, cur)-> sofar + cur.value), 0)
-      .sortBy('date')
-      .value()
-    return {
-      eventName: event.eventName
-      locations: countryCodeToCount
-      timeseries: overallTimeseries
-    }
-  ))
+  @response.end(JSON.stringify({
+    events: events.map (event) ->
+      differentials = _.where(
+        convertAllIncidentsToDifferentials(event.incidents),
+        type: 'cases'
+      )
+      subIntervals = differentailIncidentsToSubIntervals(differentials)
+      extendSubIntervalsWithValues(differentials, subIntervals)
+      locationTree = LocationTree.from(subIntervals.map (x) -> x.location)
+      topLocations = locationTree.children.map (x) -> x.value
+      locToSubintervals = {}
+      for topLocation in topLocations
+        locToSubintervals[topLocation.id] = []
+      for topLocation in topLocations
+        for subInterval in subIntervals
+          loc = subInterval.location
+          if LocationTree.locationContains(topLocation, loc)
+            locToSubintervals[topLocation.id].push(subInterval)
+      countryCodeToCount = {}
+      maxSubintervalsPerLocation = []
+      _.pairs(locToSubintervals).map ([key, locSubIntervals]) ->
+        location = locationTree.getLocationById(key)
+        groupedLocSubIntervals = _.groupBy(locSubIntervals, 'start')
+        maxSubintervals = []
+        for group, subIntervalGroup of groupedLocSubIntervals
+          maxSubintervals.push(_.max(subIntervalGroup, (x) -> x.value))
+        maxSubintervalsPerLocation = maxSubintervalsPerLocation.concat(maxSubintervals)
+        maxSubintervals = _.sortBy(maxSubintervals, (x) -> x.start)
+        total = 0
+        maxSubintervals.forEach (subInt) ->
+          # Prorate the count if it is outside of the dateRange
+          if dateRange and (subInt.end > dateRange.end or subInt.start < dateRange.start)
+            [noop, overlapStart, overlapEnd, noop2] = [
+              subInt.end, subInt.start, Number(dateRange.start), Number(dateRange.end)
+            ].sort()
+            overlapRatio = (overlapEnd - overlapStart) / (subInt.end - subInt.start)
+            total += subInt.value * overlapRatio
+          else
+            total += subInt.value
+        # If the country code appeared before, it is because the top locations
+        # are not at the country level, so values with the same country code
+        # can be combined to get the count for the country.
+        prevTotal = countryCodeToCount[location.countryCode] or 0
+        countryCodeToCount[location.countryCode] = prevTotal + total
+      groupedSubIntervals = _.groupBy(maxSubintervalsPerLocation, 'end')
+      overallTimeseries = _.chain(groupedSubIntervals)
+        .pairs()
+        .map ([end, group]) ->
+          date: new Date(parseInt(end))
+          value: group.reduce(((sofar, cur)-> sofar + cur.value), 0)
+        .sortBy('date')
+        .value()
+      return {
+        eventName: event.eventName
+        locations: countryCodeToCount
+        timeseries: overallTimeseries
+      }
+  }))

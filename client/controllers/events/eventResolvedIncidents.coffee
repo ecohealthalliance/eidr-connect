@@ -166,7 +166,10 @@ Template.eventResolvedIncidents.onRendered ->
     allIncidents = @incidents.fetch()
     allIncidents = allIncidents.filter (i) ->
       i.locations.every (l) -> l.featureCode
-    differentialIncidents = convertAllIncidentsToDifferentials(allIncidents)
+    differentialIncidents = convertAllIncidentsToDifferentials(
+      allIncidents,
+      replaceRegionsWithCountries=false
+    )
     @differentialIncidents.set(differentialIncidents)
 
   @autorun =>
