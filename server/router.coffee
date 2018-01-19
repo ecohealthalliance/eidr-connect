@@ -1,4 +1,5 @@
 import UserEvents from '/imports/collections/userEvents'
+import AutoEvents from '/imports/collections/autoEvents'
 import Articles from '/imports/collections/articles'
 import Incidents from '/imports/collections/incidentReports'
 import utils from '/imports/utils'
@@ -10,6 +11,7 @@ import {
   extendSubIntervalsWithValues
 } from '/imports/incidentResolution/incidentResolution'
 import LocationTree from '/imports/incidentResolution/LocationTree'
+
 
 fs = Npm.require('fs')
 path = Npm.require('path')
@@ -35,6 +37,15 @@ Router.route("/api/events", {where: "server"})
   @response.setHeader('Content-Type', 'application/ejson')
   @response.statusCode = 200
   @response.end(EJSON.stringify(UserEvents.find({}, {
+    skip: parseInt(@request.query.skip or 0)
+    limit: parseInt(@request.query.limit or 100)
+  }).fetch()))
+
+Router.route("/api/auto-events", {where: "server"})
+.get ->
+  @response.setHeader('Content-Type', 'application/ejson')
+  @response.statusCode = 200
+  @response.end(EJSON.stringify(AutoEvents.find({}, {
     skip: parseInt(@request.query.skip or 0)
     limit: parseInt(@request.query.limit or 100)
   }).fetch()))
@@ -236,6 +247,7 @@ Router.route("/api/resolve-incidents", where: "server")
 ###
 @api {post} events-with-resolved-data Return the resolved cases for a set of
   events specified by id. The resolved cases are broken down by time and location.
+@apiParam {string} eventType="user" Whether the event ids correspond to user curated events or auto events.
 @apiParam {ISODateString} startDate The date range of incident to resolve.
 @apiParam {ISODateString} endDate The date range of incident to resolve.
 @apiSuccessExample {json} Success-Response:
@@ -260,22 +272,33 @@ Router.route("/api/events-with-resolved-data", where: "server")
     dateRange =
       start: new Date(@request.query.startDate)
       end: new Date(@request.query.endDate)
-  events = UserEvents.find(
-    _id:
-      $in: eventIds
-    deleted:
-      $in: [null, false]
-  ).map (event) ->
-    query =
-      _id: $in: _.pluck(event.incidents, 'id')
-      accepted: $in: [null, true]
-      deleted: $in: [null, false]
-      locations: $not: $size: 0
+  if @request.query.eventType == 'user'
+    events = UserEvents.find(
+      _id:
+        $in: eventIds
+      deleted:
+        $in: [null, false]
+    ).fetch()
+  else if @request.query.eventType == 'auto'
+    events = AutoEvents.find(
+      _id:
+        $in: eventIds
+      deleted:
+        $in: [null, false]
+    ).fetch()
+  events.forEach (event) ->
+    if event.incidents
+      query =
+        _id: $in: _.pluck(event.incidents, 'id')
+        accepted: $in: [null, true]
+        deleted: $in: [null, false]
+        locations: $not: $size: 0
+    else
+      query = utils.eventToIncidentQuery(event)
     if dateRange
       query['dateRange.start'] = $lte: dateRange.end
       query['dateRange.end'] = $gte: dateRange.start
     event.incidents = Incidents.find(query).fetch()
-    event
   @response.setHeader('Access-Control-Allow-Origin', '*')
   @response.setHeader('Content-Type', 'application/json')
   @response.statusCode = 200
