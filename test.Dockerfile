@@ -17,10 +17,7 @@ RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv EA312927 && \
   tee /etc/apt/sources.list.d/mongodb-org-3.2.list && \
   apt-get update && \
   apt-get install -y mongodb-org-tools=3.2.10 mongodb-org-shell=3.2.10
-RUN echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | debconf-set-selections
-RUN add-apt-repository -y ppa:webupd8team/java && \
-  apt-get update && \
-  apt-get install -y oracle-java8-installer
+RUN apt-get install -y openjdk-8-jre
 RUN groupadd meteor && adduser --ingroup meteor --disabled-password --gecos "" --home /home/meteor meteor
 
 # Add spcies data from ITIS
