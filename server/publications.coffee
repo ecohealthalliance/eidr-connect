@@ -4,7 +4,7 @@ import SmartEvents from '/imports/collections/smartEvents.coffee'
 import AutoEvents from '/imports/collections/autoEvents.coffee'
 import Articles from '/imports/collections/articles.coffee'
 import Feeds from '/imports/collections/feeds.coffee'
-import regionToCountries from '/imports/regionToCountries.json'
+import utils from '/imports/utils'
 
 INCIDENT_LIMIT = 10000
 
@@ -80,51 +80,6 @@ Meteor.publishComposite 'userEvent', (eventId) ->
     }
   ]
 
-eventToIncidentQuery = (event) ->
-  query =
-    accepted: $in: [null, true]
-    deleted: $in: [null, false]
-    locations: $not: $size: 0
-  if event.diseases and event.diseases.length > 0
-    query['resolvedDisease.id'] = $in: event.diseases.map (x) -> x.id
-  eventDateRange = event.dateRange
-  if eventDateRange
-    if eventDateRange.end
-      query['dateRange.start'] = $lte: eventDateRange.end
-    if eventDateRange.start
-      query['dateRange.end'] = $gte: eventDateRange.start
-  locationQueries = []
-  for location in (event.locations or [])
-    locationQueries.push
-      id: location.id
-    if location.id of regionToCountries
-      locationQueries.push
-        countryCode: $in: regionToCountries[location.id].countryISOs
-      continue
-    locationQuery =
-      countryName: location.countryName
-    featureCode = location.featureCode
-    if featureCode.startsWith("PCL")
-      locationQueries.push(locationQuery)
-    else
-      locationQuery.admin1Name = location.admin1Name
-      if featureCode is 'ADM1'
-        locationQueries.push(locationQuery)
-      else
-        locationQuery.admin2Name = location.admin2Name
-        if featureCode is 'ADM2'
-          locationQueries.push(locationQuery)
-  locationQueries = locationQueries.map (locationQuery) ->
-    result = {}
-    for prop, value of locationQuery
-      result["locations.#{prop}"] = value
-    return result
-  if locationQueries.length > 0
-    query['$or'] = locationQueries
-  if event.species and event.species.length > 0
-    query['species.id'] = $in: event.species.map (x) -> x.id
-  query
-
 Meteor.publishComposite 'smartEvent', (eventId) ->
   find: ->
     SmartEvents.find(_id: eventId)
@@ -141,7 +96,7 @@ Meteor.publishComposite 'smartEvent', (eventId) ->
     }, {
       collectionName: 'eventIncidents'
       find: (event) ->
-        Incidents.find(eventToIncidentQuery(event), limit: INCIDENT_LIMIT)
+        Incidents.find(utils.eventToIncidentQuery(event), limit: INCIDENT_LIMIT)
     }
   ]
 
@@ -152,7 +107,7 @@ Meteor.publishComposite 'autoEvent', (eventId) ->
     {
       collectionName: 'eventIncidents'
       find: (event) ->
-        Incidents.find(eventToIncidentQuery(event), limit: INCIDENT_LIMIT)
+        Incidents.find(utils.eventToIncidentQuery(event), limit: INCIDENT_LIMIT)
     }
   ]
 

@@ -1,6 +1,7 @@
 import Constants from '/imports/constants.coffee'
 import Articles from '/imports/collections/articles.coffee'
 import notify from '/imports/ui/notification'
+import regionToCountries from '/imports/regionToCountries.json'
 
 ###
 # cleanUrl - takes an existing url and removes the last match of the applied
@@ -301,3 +302,48 @@ export formatLocations = (locations) ->
 
 export documentTitle = (doc) ->
   doc.title or doc.url or (doc.content?.slice(0,30) + "...")
+
+export eventToIncidentQuery = (event) ->
+  query =
+    accepted: $in: [null, true]
+    deleted: $in: [null, false]
+    locations: $not: $size: 0
+  if event.diseases and event.diseases.length > 0
+    query['resolvedDisease.id'] = $in: event.diseases.map (x) -> x.id
+  eventDateRange = event.dateRange
+  if eventDateRange
+    if eventDateRange.end
+      query['dateRange.start'] = $lte: eventDateRange.end
+    if eventDateRange.start
+      query['dateRange.end'] = $gte: eventDateRange.start
+  locationQueries = []
+  for location in (event.locations or [])
+    locationQueries.push
+      id: location.id
+    if location.id of regionToCountries
+      locationQueries.push
+        countryCode: $in: regionToCountries[location.id].countryISOs
+      continue
+    locationQuery =
+      countryName: location.countryName
+    featureCode = location.featureCode
+    if featureCode.startsWith("PCL")
+      locationQueries.push(locationQuery)
+    else
+      locationQuery.admin1Name = location.admin1Name
+      if featureCode is 'ADM1'
+        locationQueries.push(locationQuery)
+      else
+        locationQuery.admin2Name = location.admin2Name
+        if featureCode is 'ADM2'
+          locationQueries.push(locationQuery)
+  locationQueries = locationQueries.map (locationQuery) ->
+    result = {}
+    for prop, value of locationQuery
+      result["locations.#{prop}"] = value
+    return result
+  if locationQueries.length > 0
+    query['$or'] = locationQueries
+  if event.species and event.species.length > 0
+    query['species.id'] = $in: event.species.map (x) -> x.id
+  query
