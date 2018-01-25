@@ -288,7 +288,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
     ).fetch()
   # sort events so they are returned in same order as the ids
   events = eventIds.map (eventId)->
-    events.findOne(eventId)
+    _.findWhere(events, _id: eventId)
   events.forEach (event) ->
     if event.incidents
       query =
