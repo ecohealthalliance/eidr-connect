@@ -286,6 +286,9 @@ Router.route("/api/events-with-resolved-data", where: "server")
       deleted:
         $in: [null, false]
     ).fetch()
+  # sort events so they are returned in same order as the ids
+  events = eventIds.map (eventId)->
+    events.findOne(eventId)
   events.forEach (event) ->
     if event.incidents
       query =
@@ -355,6 +358,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
         .sortBy('date')
         .value()
       return {
+        eventId: event._id
         eventName: event.eventName
         locations: countryCodeToCount
         timeseries: overallTimeseries
