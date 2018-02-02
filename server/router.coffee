@@ -11,7 +11,7 @@ import {
   extendSubIntervalsWithValues
 } from '/imports/incidentResolution/incidentResolution'
 import LocationTree from '/imports/incidentResolution/LocationTree'
-
+import { _ } from 'meteor/underscore';
 
 fs = Npm.require('fs')
 path = Npm.require('path')

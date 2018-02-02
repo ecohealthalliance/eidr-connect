@@ -4,6 +4,7 @@ import Articles from '/imports/collections/articles'
 import autoprocessArticles from '/server/autoprocess'
 import updateDatabase from '/server/updaters'
 import syncCollection from '/server/oneWaySync'
+import syncStructuredFeeds from '/server/syncStructuredFeeds'
 import updateAutoEvents from '/server/updateAutoEvents'
 import Feeds from '/imports/collections/feeds'
 import feedSchema from '/imports/schemas/feed'
@@ -72,3 +73,5 @@ Meteor.startup ->
       endDate: new Date()
     )
   , 5 * 60 * 60 * 1000
+
+  syncStructuredFeeds()

@@ -10,7 +10,7 @@ import Feeds from '/imports/collections/feeds'
 import Constants from '/imports/constants.coffee'
 import { regexEscape } from '/imports/utils'
 
-DATA_VERSION = 18
+DATA_VERSION = 19
 AppMetadata = new Meteor.Collection('appMetadata')
 priorDataVersion = AppMetadata.findOne(property: "dataVersion")?.value
 
@@ -28,137 +28,10 @@ getGeonameById = (id)->
   geonamesById[id] = GeonameSchema.clean(geoname)
   return geonamesById[id]
 
-oldUpdaters = ->
-  Incidents.find(disease: $exists: false).forEach (incident) ->
-    disease = UserEvents.findOne(incident.userEventId)?.disease
-    if disease
-      Incidents.update incident._id,
-        $set: disease: disease
-
-  # Set resolved diseases
-  Incidents.find(
-    resolvedDisease: {$exists: false}
-    disease: {$exists: true}
-  ).forEach (incident) ->
-    if incident.disease
-      console.log incident.disease
-      requestResult = HTTP.get Constants.GRITS_URL + "/api/v1/disease_ontology/lookup",
-        params:
-          q: incident.disease
-      result = requestResult.data.result
-      if result.length > 0
-        d = result[0]
-        Incidents.update _id: incident._id,
-          $set:
-            resolvedDisease:
-              id: d.uri
-              text: d.label
-      else
-        Incidents.update _id: incident._id,
-          $set:
-            resolvedDisease:
-              id: "userSpecifiedDisease:#{incident.disease}"
-              text: "Other Disease: #{incident.disease}"
-
-  promedFeedId = Feeds.findOne(url: 'promedmail.org/post/')?._id
-
-  Articles.find(
-    url: $regex: /promedmail.org/
-    feedId: $exists: false
-  ).forEach (article) ->
-    Articles.update article._id,
-      $set: feedId: promedFeedId
-      $unset: feed: ''
-
-  CuratorSources.find().forEach (source) ->
-    url = "promedmail.org/post/#{source._sourceId}"
-    article =
-      _id: source._id._str
-      url: url
-      addedDate: source.addedDate
-      publishDate: source.publishDate
-      publishDateTZ: "EDT"
-      title: source.title
-      reviewed: source.reviewed
-      feedId: promedFeedId
-    articleSchema.validate(article)
-    Articles.upsert(article._id, article)
-
-  Incidents.find(
-    'articleId': {$exists: false}
-    deleted: {$in: [null, false]}
-  ).forEach (incident) ->
-    incidentUrl = incident.url
-    if _.isArray(incidentUrl)
-      incidentUrl = incidentUrl[0]
-    if not _.isString(incidentUrl)
-      console.log "Invalid URL:", incidentUrl
-      return
-    article = Articles.findOne(url: {$regex: regexEscape(incidentUrl) + "$" })
-    if article
-      Incidents.update _id: incident._id,
-        $set: articleId: article._id
-        $unset: url: ''
-    else
-      console.log "No article with url:", incident.url
-
-  # update articles to use arrays instead of strings for their UserEventId values
-  Articles.find({userEventIds: $exists: false}).forEach (article) ->
-    Articles.update _id: article._id,
-      $set: userEventIds: [article.userEventId]
-
-  Incidents.find(userEventId: $exists: true).forEach (incident) ->
-    incidentData =
-      id: incident._id
-      associationDate: incident.creationDate or new Date
-      associationUserId: incident.addedByUserId or ''
-    UserEvents.update _id: incident.userEventId,
-      $addToSet: incidents: incidentData
-    Incidents.update _id: incident._id,
-      $unset: userEventId: ''
-
-  UserEvents.update {},
-    $unset: articleCount: ''
-    {multi: true}
-
-  Articles.find().forEach (article) ->
-    Articles.update _id: article._id,
-      $unset: userEventId: ''
-
-  console.log "Updating species field..."
-  Incidents.find(species: $exists: true).forEach (incident) ->
-    if incident.species?.id
-      return
-    else if /^human/i.test(incident.species)
-      Incidents.update _id: incident._id,
-        $set:
-          species:
-            id: "tsn:180092"
-            text: "Homo sapiens"
-    else if not incident.species
-      Incidents.update _id: incident._id,
-        $unset: species: ''
-    else
-      Incidents.update _id: incident._id,
-        $set:
-          species:
-            id: "userSpecifiedSpecies:#{incident.species}"
-            text: "Other Species: #{incident.species}"
-      console.log('Unknown species: ' + incident.species)
-
-  console.log "Updating geonames..."
-  Incidents.find().map (incident) ->
-    Incidents.update _id: incident._id,
-      $set: locations: incident.locations.map (x)-> getGeonameById(x.id) or x
-  console.log "done"
-
 module.exports = ->
   if priorDataVersion and priorDataVersion >= DATA_VERSION
     return
   console.log "Running database update code..."
-
-  if priorDataVersion < 8
-    oldUpdaters()
 
   console.log "Updating events with unmarked cumulative counts..."
   UserEvents.find(creationDate: $lte: new Date("Dec 1 2016")).map (event) ->
@@ -247,5 +120,28 @@ module.exports = ->
     i.locations.forEach (l) ->
       delete l.alternateNames
     Incidents.update i._id, i
+
+  console.log 'Resolving known user specified diseases'
+  Incidents.update({
+    'resolvedDisease.id': "userSpecifiedDisease:Hand, Foot, and Mouth Disease"
+  }, {
+    $set:
+      'resolvedDisease.id': 'http://purl.obolibrary.org/obo/DOID_10881'
+      'resolvedDisease.text': 'hand, foot and mouth disease'
+  }, multi: true)
+  Incidents.update({
+    'resolvedDisease.id': "userSpecifiedDisease:MERS-CoV"
+  }, {
+    $set:
+      'resolvedDisease.id': 'https://www.wikidata.org/wiki/Q16654806'
+      'resolvedDisease.text': 'Middle East respiratory syndrome'
+  }, multi: true)
+  Incidents.update({
+    'resolvedDisease.id': "userSpecifiedDisease:Lasa Fever"
+  }, {
+    $set:
+      'resolvedDisease.id': 'http://purl.obolibrary.org/obo/DOID_9537'
+      'resolvedDisease.text': 'Lassa fever'
+  }, multi: true)
 
   console.log "database update complete"
