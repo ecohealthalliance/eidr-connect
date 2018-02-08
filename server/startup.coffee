@@ -74,4 +74,5 @@ Meteor.startup ->
     )
   , 5 * 60 * 60 * 1000
 
+  console.log "Syncing structured data feeds"
   syncStructuredFeeds()

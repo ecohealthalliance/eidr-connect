@@ -1,12 +1,13 @@
 import { chai } from 'meteor/practicalmeteor:chai'
 import Solver from './LPSolver'
-import incidents from './incidents.coffee'
-import convertAllIncidentsToDifferentials from './convertAllIncidentsToDifferentials.coffee'
+import incidents from './incidents'
+import convertAllIncidentsToDifferentials from './convertAllIncidentsToDifferentials'
 import {
   differentailIncidentsToSubIntervals,
   subIntervalsToLP,
   intervalToEndpoints,
-} from './incidentResolution.coffee'
+  removeOutlierIncidents
+} from './incidentResolution'
 
 lome =
   admin1Name: "Maritime"
@@ -174,8 +175,8 @@ describe 'Incident Resolution', ->
         end: new Date("Jan 1 2006")
       locations: [lome]
     }]
-    incidents = initialIncidents6Subintervals.concat(inconsistentIncidents)
-    differentialIncidents = convertAllIncidentsToDifferentials(incidents)
+    allIncidents = initialIncidents6Subintervals.concat(inconsistentIncidents)
+    differentialIncidents = convertAllIncidentsToDifferentials(allIncidents)
     subIntervals = differentailIncidentsToSubIntervals(differentialIncidents)
     model = subIntervalsToLP(differentialIncidents, subIntervals)
     solution = Solver.Solve(Solver.ReformatLP(model))
@@ -184,6 +185,7 @@ describe 'Incident Resolution', ->
     chai.assert(solution.s9 < 50)
 
   it 'can resolve a large number of incidents', ->
+    @timeout(5000)
     differentialIncidents = convertAllIncidentsToDifferentials(incidents).filter (i)->i.type == "deaths"
     subIntervals = differentailIncidentsToSubIntervals(differentialIncidents)
     model = subIntervalsToLP(differentialIncidents, subIntervals)
@@ -197,3 +199,34 @@ describe 'Incident Resolution', ->
     differentialIncidents = convertAllIncidentsToDifferentials(incidents)
     endpoints = intervalToEndpoints(differentialIncidents[0])
     chai.assert(endpoints[0].isStart)
+
+  it 'can remove outlier incidents', ->
+    baseIncidents = [{
+      cases: 50
+      dateRange:
+        start: new Date("Dec 31 2009")
+        end: new Date("Jan 1 2011")
+      locations: [lome]
+    }, {
+      cases: 50
+      dateRange:
+        start: new Date("Dec 31 2009")
+        end: new Date("Jan 1 2011")
+      locations: [lome]
+    }, {
+      cases: 45
+      dateRange:
+        start: new Date("Dec 31 2010")
+        end: new Date("Jan 1 2012")
+      locations: [lome]
+    }]
+    constrainingIncidents = [{
+      cases: 45
+      dateRange:
+        start: new Date("Dec 1 2009")
+        end: new Date("Jan 1 2012")
+      locations: [lome]
+    }]
+    result = removeOutlierIncidents(baseIncidents, constrainingIncidents)
+    console.log result
+    chai.assert(result[0] == baseIncidents[2])

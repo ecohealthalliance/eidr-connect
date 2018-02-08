@@ -33,6 +33,7 @@
 
 import LocationTree from './LocationTree'
 import Solver from './LPSolver'
+import convertAllIncidentsToDifferentials from './convertAllIncidentsToDifferentials'
 
 MILLIS_PER_DAY = 1000 * 60 * 60 * 24
 
@@ -276,7 +277,146 @@ extendSubIntervalsWithValues = (incidents, subIntervals, method="topologicalSort
   else
     extendSubIntervalsWithValuesLP(incidents, subIntervals)
 
+getContainedSubIntervals = (containingIncident, subIntsByStart) ->
+  overlappingSubInts = []
+  for [start, subIntervalGroup] in subIntsByStart
+    if start < Number(containingIncident.startDate)
+      continue
+    if start >= Number(containingIncident.endDate)
+      break
+    overlappingSubInts = overlappingSubInts.concat(subIntervalGroup)
+  overlappingSubInts.filter (subInt) ->
+    LocationTree.locationContains(containingIncident.locations[0], subInt.location)
+
+getTopLevelSubInts = (subInts) ->
+  tree = LocationTree.from(subInts.map((x) -> x.location))
+  locationToSubInts = _.groupBy(subInts, (subInt) -> subInt.location.id)
+  tree.children.reduce((sofar, locationNode) ->
+    sofar.concat(locationToSubInts[locationNode.value.id])
+  , [])
+
+removeOutlierIncidents = (originalIncidents, constrainingIncidents) ->
+  incidents = convertAllIncidentsToDifferentials(originalIncidents)
+  constrainingIncidents = convertAllIncidentsToDifferentials(constrainingIncidents)
+  # When a constraining incident has more than one location this creates a
+  # a clone of it with each location as the only location.
+  # This makes the constraint weaker since the combined counts at all locations
+  # could exceed the count given in the incident. The planned uses of
+  # constrainting incidents involve only single location incidents, so handling
+  # multiple location incidents in the optimal way is not a priority.
+  constrainingIncidents = _.chain(constrainingIncidents)
+    .map (x) ->
+      x.locations.map (loc) ->
+        y = Object.create(x)
+        y.locations = [loc]
+        y
+    .flatten()
+    .value()
+  # Mix in constraining incidents with counts set to zero so the sub-interval
+  # bounds align with the constraining incidents. Counts are set to zero
+  # so they do not alter the resolved count.
+  incidents = incidents.concat(constrainingIncidents.map (x) ->
+    x = Object.create(x)
+    x.count = 0
+    x.__virtualIncident = true
+    x
+  )
+  # Iteratively remove incidents until the constraining incidents are not
+  # exceeded by any counts.
+  loop
+    outlierIncidentIds = new Set()
+    subIntervals = differentailIncidentsToSubIntervals(incidents)
+    # Compute CASIM for each sub-interval
+    # CASIM = count above sub-interval median
+    # The "lower" median is used so we have an upper bound on the cases that
+    # will be removed by removing the incident. The median is "lower" in that
+    # if the size of the set is even, the smaller of the middle values is used
+    # rather than their mid-point.
+    subIntervals.forEach (subInt) ->
+      {start, end, incidentIds} = subInt
+      subIntervalLength = (end - start)  / MILLIS_PER_DAY
+      valuesByIncident = {}
+      for incidentId in incidentIds
+        incident = incidents[incidentId]
+        # Exclude virtual incidents from 
+        if incident.__virtualIncident
+          continue
+        incidentLength = (incident.endDate - incident.startDate)  / MILLIS_PER_DAY
+        incidentRate = incident.count / incidentLength / incident.locations.length
+        valuesByIncident[incidentId] = incidentRate * subIntervalLength
+      values = _.values(valuesByIncident).concat([0])
+      lowerMedian = values.sort()[Math.ceil(values.length / 2) - 1]
+      subInt.__valuesByIncident = valuesByIncident
+      subInt.__CASIMByIncident = _.object(
+        [k, Math.max(0, v - lowerMedian)] for k, v of valuesByIncident
+      )
+    extendSubIntervalsWithValues(incidents, subIntervals)
+    subIntsByStart = _.chain(subIntervals)
+      .groupBy('start')
+      .pairs()
+      .map ([start, subIntGroup]) -> [parseInt(start), subIntGroup]
+      .sortBy (x) -> x[0]
+      .value()
+    excessCounts = 0
+    constrainingIncidents.forEach (cIncident) ->
+      # Compute a resolved count for sub-intervals that occur at a time/location
+      # that overlaps the constraining incident.
+      # If it exceeds the constraining incident, remove the incidents with
+      # the highest CASIM values.
+      containedSubInts = getContainedSubIntervals(cIncident, subIntsByStart)
+      resolvedSum = getTopLevelSubInts(containedSubInts).reduce (sofar, subInt) ->
+        sofar + subInt.value
+      , 0
+      difference = resolvedSum - cIncident.count
+      if difference > 0
+        excessCounts += 1
+        # Remove incidents that have values exceeding the constraining incident.
+        incidentToTotalValue = {}
+        for subInterval in containedSubInts
+          for incidentId, value of subInterval.__valuesByIncident
+            incidentToTotalValue[incidentId] = (incidentToTotalValue[incidentId] || 0) + value
+        incidentsRemoved = false
+        for incidentId, value of incidentToTotalValue
+          if value > cIncident.count
+            outlierIncidentIds.add(parseInt(incidentId))
+            incidentsRemoved = true
+        if incidentsRemoved
+          return
+        # Remove incidents until the total CASIM of the removed incidents
+        # is greater than or equal to the excess resolved count.
+        # Since many incidents could cause the resolved count to exceed
+        # the constraining incident's count, removing the top incidents
+        # won't necessariliy fix the constraint violation. That is why
+        # this process is looped until there are no longer any excess cases
+        # in the resolved counts.
+        incidentToTotalCASIM = {}
+        for subInterval in containedSubInts
+          for incidentId, value of subInterval.__CASIMByIncident
+            incidentToTotalCASIM[incidentId] = (incidentToTotalCASIM[incidentId] || 0) + value
+        sortedIncidentToCASIM = _.chain(incidentToTotalCASIM)
+          .pairs()
+          .map ([k, v]) -> [parseInt(k), v]
+          .sortBy (x) -> -x[1]
+          .value()
+        console.log sortedIncidentToCASIM
+        totalCASIMRemoved = 0
+        for [incidentId, incidentCASIM] in sortedIncidentToCASIM
+          outlierIncidentIds.add(incidentId)
+          totalCASIMRemoved += incidentCASIM
+          if totalCASIMRemoved >= difference
+            break
+    if excessCounts == 0
+      break
+    console.log "excessCounts:", excessCounts
+    incidents = incidents.filter (x) -> not outlierIncidentIds.has(x.id)
+  return _.chain(incidents)
+    .filter (x) -> not x.__virtualIncident
+    .pluck('originalIncidents')
+    .flatten(true)
+    .value()
+
 export intervalToEndpoints = intervalToEndpoints
 export differentailIncidentsToSubIntervals = differentailIncidentsToSubIntervals
 export subIntervalsToLP = subIntervalsToLP
 export extendSubIntervalsWithValues = extendSubIntervalsWithValues
+export removeOutlierIncidents = removeOutlierIncidents
