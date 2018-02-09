@@ -295,6 +295,8 @@ getTopLevelSubInts = (subInts) ->
     sofar.concat(locationToSubInts[locationNode.value.id])
   , [])
 
+# Remove incidends that cause the resolved number of cases to exceed
+# the numbers given in the constraining incidents.
 removeOutlierIncidents = (originalIncidents, constrainingIncidents) ->
   incidents = convertAllIncidentsToDifferentials(originalIncidents)
   constrainingIncidents = convertAllIncidentsToDifferentials(constrainingIncidents)
@@ -398,7 +400,6 @@ removeOutlierIncidents = (originalIncidents, constrainingIncidents) ->
           .map ([k, v]) -> [parseInt(k), v]
           .sortBy (x) -> -x[1]
           .value()
-        console.log sortedIncidentToCASIM
         totalCASIMRemoved = 0
         for [incidentId, incidentCASIM] in sortedIncidentToCASIM
           outlierIncidentIds.add(incidentId)
@@ -407,7 +408,7 @@ removeOutlierIncidents = (originalIncidents, constrainingIncidents) ->
             break
     if excessCounts == 0
       break
-    console.log "excessCounts:", excessCounts
+    #console.log "excessCounts:", excessCounts
     incidents = incidents.filter (x) -> not outlierIncidentIds.has(x.id)
   return _.chain(incidents)
     .filter (x) -> not x.__virtualIncident
@@ -415,8 +416,87 @@ removeOutlierIncidents = (originalIncidents, constrainingIncidents) ->
     .flatten(true)
     .value()
 
+# Merge adjacent sub-intervals.
+mergeSubIntervals = (subIntervals) ->
+  subIntervals.reduce (sofar, subInterval) ->
+    prev = sofar.slice(-1)[0]
+    if prev and prev.end == subInterval.start
+      prev.end = subInterval.end
+      sofar
+    else
+      sofar.concat(Object.create(subInterval))
+  , []
+
+# Create new differential incidents that when resolved with the original
+# incidents will produce counts equal to the target incidents.
+createSupplementalIncidents = (originalIncidents, targetIncidents) ->
+  supplementalIncidents = []
+  incidents = convertAllIncidentsToDifferentials(originalIncidents)
+  targetIncidents = convertAllIncidentsToDifferentials(targetIncidents)
+  incidents = incidents.concat(targetIncidents.map (x) ->
+    x = Object.create(x)
+    x.count = 0
+    x.__virtualIncident = true
+    x
+  )
+  subIntervals = differentailIncidentsToSubIntervals(incidents)
+  extendSubIntervalsWithValues(incidents, subIntervals)
+  subIntervals.forEach (subInt) ->
+    {start, end, value} = subInt
+    subInt.duration = (end - start) / MILLIS_PER_DAY
+    subInt.rate = value / subInt.duration
+  subIntsByStart = _.chain(subIntervals)
+    .groupBy('start')
+    .pairs()
+    .map ([start, subIntGroup]) -> [parseInt(start), subIntGroup]
+    .sortBy (x) -> x[0]
+    .value()
+  targetIncidents.forEach (targetIncident) ->
+    containedSubInts = getContainedSubIntervals(targetIncident, subIntsByStart)
+    containedTopLevelSubIntervals = getTopLevelSubInts(containedSubInts)
+    resolvedSum = containedTopLevelSubIntervals.reduce (sofar, subInt) ->
+      sofar + subInt.value
+    , 0
+    remainingCountDifference = targetIncident.count - resolvedSum
+    if remainingCountDifference < 0
+      return
+    # Supplemental incidents are added by increasing the rates at the lowest
+    # sub-intervals until there is not difference in counts between the
+    # target incident and resolved sub-intervals. This similar to filling up a
+    # a pool where the water is the supplemental incidents and the floor
+    # rate is its level.
+    subIntsSortedByRate = _.sortBy(containedTopLevelSubIntervals, 'rate')
+    supplementedSubIntervals = []
+    floorRate = 0
+    for [subInt, nextSubInt] in _.zip(subIntsSortedByRate, subIntsSortedByRate.slice(1))
+      supplementedSubIntervals.push(subInt)
+      totalNewSubIntDuration = supplementedSubIntervals.reduce (sofar, supSubInt) ->
+        sofar + supSubInt.duration
+      , 0
+      if not nextSubInt
+        floorRate += remainingCountDifference / totalNewSubIntDuration
+        break
+      nextRateDifference = nextSubInt.rate - subInt.rate
+      if nextRateDifference * totalNewSubIntDuration >= remainingCountDifference
+        floorRate += remainingCountDifference / totalNewSubIntDuration
+        break
+      else
+        remainingCountDifference -= nextRateDifference * totalNewSubIntDuration
+        floorRate = nextSubInt.rate
+    supplementalIncidents = supplementalIncidents.concat(
+      mergeSubIntervals(supplementedSubIntervals).map (subInt) ->
+        {start, end} = subInt
+        baseIncident = Object.create(targetIncident)
+        baseIncident.count = floorRate * (end - start) / MILLIS_PER_DAY
+        baseIncident.startDate = new Date(start)
+        baseIncident.endDate = new Date(end)
+        baseIncident
+    )
+  return supplementalIncidents
+
 export intervalToEndpoints = intervalToEndpoints
 export differentailIncidentsToSubIntervals = differentailIncidentsToSubIntervals
 export subIntervalsToLP = subIntervalsToLP
 export extendSubIntervalsWithValues = extendSubIntervalsWithValues
 export removeOutlierIncidents = removeOutlierIncidents
+export createSupplementalIncidents = createSupplementalIncidents

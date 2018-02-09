@@ -6,7 +6,9 @@ import {
   differentailIncidentsToSubIntervals,
   subIntervalsToLP,
   intervalToEndpoints,
-  removeOutlierIncidents
+  removeOutlierIncidents,
+  createSupplementalIncidents,
+  extendSubIntervalsWithValues
 } from './incidentResolution'
 
 lome =
@@ -17,17 +19,24 @@ lome =
   id: "2365267"
   name: "Lomé"
 
+tongo =
+  countryName: "Togolese Republic"
+  featureClass: "A"
+  featureCode: "PCLI"
+  id: "2363686"
+  name: "Togolese Republic"
+
 overlappingIncidents = [{
   cases: 40
   dateRange:
-    start: new Date("Dec 31 2009")
-    end: new Date("Jan 1 2011")
+    start: new Date("Dec 31 2009 UTC")
+    end: new Date("Jan 1 2011 UTC")
   locations: [lome]
 }, {
   cases: 45
   dateRange:
-    start: new Date("Dec 1 2010")
-    end: new Date("Jan 1 2012")
+    start: new Date("Dec 1 2010 UTC")
+    end: new Date("Jan 1 2012 UTC")
   locations: [lome]
 }]
 
@@ -35,8 +44,8 @@ inconsistentIncidents = _.clone(overlappingIncidents)
 inconsistentIncidents.push
   cases: 40
   dateRange:
-    start: new Date("Dec 1 2008")
-    end: new Date("Jan 1 2013")
+    start: new Date("Dec 1 2008 UTC")
+    end: new Date("Jan 1 2013 UTC")
   locations: [lome]
 
 describe 'Incident Resolution', ->
@@ -51,22 +60,22 @@ describe 'Incident Resolution', ->
         deaths: 10
         dateRange:
           cumulative: true
-          end: new Date("Jan 1 2012")
+          end: new Date("Jan 1 2012 UTC")
       }, {
         deaths: 15
         dateRange:
           cumulative: true
-          end: new Date("Jan 10 2012")
+          end: new Date("Jan 10 2012 UTC")
       }, {
         deaths: 5
         dateRange:
           cumulative: true
-          end: new Date("Jan 20 2012")
+          end: new Date("Jan 20 2012 UTC")
       }, {
         deaths: 20
         dateRange:
           cumulative: true
-          end: new Date("Jan 24 2012")
+          end: new Date("Jan 24 2012 UTC")
       }
     ])
     chai.assert.equal(differentialIncidents.length, 2)
@@ -83,14 +92,14 @@ describe 'Incident Resolution', ->
     overlappingIncidentsSharedStart = [{
       cases: 40
       dateRange:
-        start: new Date("Dec 31 2009")
-        end: new Date("Jan 1 2011")
+        start: new Date("Dec 31 2009 UTC")
+        end: new Date("Jan 1 2011 UTC")
       locations: [lome]
     }, {
       cases: 45
       dateRange:
-        start: new Date("Dec 31 2009")
-        end: new Date("Jan 1 2011")
+        start: new Date("Dec 31 2009 UTC")
+        end: new Date("Jan 1 2011 UTC")
       locations: [lome]
     }]
     differentialIncidents = convertAllIncidentsToDifferentials(overlappingIncidentsSharedStart)
@@ -116,20 +125,20 @@ describe 'Incident Resolution', ->
     differentialIncidents = convertAllIncidentsToDifferentials([{
       cases: 100
       dateRange:
-        start: new Date("Jan 1 2009")
-        end: new Date("Jan 1 2012")
+        start: new Date("Jan 1 2009 UTC")
+        end: new Date("Jan 1 2012 UTC")
       locations: [lome]
     }, {
       cases: 2
       dateRange:
-        start: new Date("Jan 1 2010")
-        end: new Date("Jan 1 2011")
+        start: new Date("Jan 1 2010 UTC")
+        end: new Date("Jan 1 2011 UTC")
       locations: [lome]
     }, {
       cases: 50
       dateRange:
-        start: new Date("Dec 1 2011")
-        end: new Date("Jan 1 2012")
+        start: new Date("Dec 1 2011 UTC")
+        end: new Date("Jan 1 2012 UTC")
       locations: [lome]
     }])
     subIntervals = differentailIncidentsToSubIntervals(differentialIncidents)
@@ -159,20 +168,20 @@ describe 'Incident Resolution', ->
     initialIncidents6Subintervals = [{
       cases: 1
       dateRange:
-        start: new Date("Jan 1 2001")
-        end: new Date("Jan 1 2002")
+        start: new Date("Jan 1 2001 UTC")
+        end: new Date("Jan 1 2002 UTC")
       locations: [lome]
     }, {
       cases: 1
       dateRange:
-        start: new Date("Jan 1 2003")
-        end: new Date("Jan 1 2004")
+        start: new Date("Jan 1 2003 UTC")
+        end: new Date("Jan 1 2004 UTC")
       locations: [lome]
     }, {
       cases: 1
       dateRange:
-        start: new Date("Jan 1 2005")
-        end: new Date("Jan 1 2006")
+        start: new Date("Jan 1 2005 UTC")
+        end: new Date("Jan 1 2006 UTC")
       locations: [lome]
     }]
     allIncidents = initialIncidents6Subintervals.concat(inconsistentIncidents)
@@ -204,29 +213,119 @@ describe 'Incident Resolution', ->
     baseIncidents = [{
       cases: 50
       dateRange:
-        start: new Date("Dec 31 2009")
-        end: new Date("Jan 1 2011")
+        start: new Date("Dec 31 2009 UTC")
+        end: new Date("Jan 1 2011 UTC")
       locations: [lome]
     }, {
       cases: 50
       dateRange:
-        start: new Date("Dec 31 2009")
-        end: new Date("Jan 1 2011")
+        start: new Date("Dec 31 2009 UTC")
+        end: new Date("Jan 1 2011 UTC")
       locations: [lome]
     }, {
       cases: 45
       dateRange:
-        start: new Date("Dec 31 2010")
-        end: new Date("Jan 1 2012")
+        start: new Date("Dec 31 2010 UTC")
+        end: new Date("Jan 1 2012 UTC")
       locations: [lome]
     }]
     constrainingIncidents = [{
       cases: 45
       dateRange:
-        start: new Date("Dec 1 2009")
-        end: new Date("Jan 1 2012")
+        start: new Date("Dec 1 2009 UTC")
+        end: new Date("Jan 1 2012 UTC")
       locations: [lome]
     }]
     result = removeOutlierIncidents(baseIncidents, constrainingIncidents)
-    console.log result
     chai.assert(result[0] == baseIncidents[2])
+
+  it 'can create supplemental incidents', ->
+    baseIncidents = [{
+      cases: 41
+      dateRange:
+        start: new Date("Dec 31 2010 UTC")
+        end: new Date("Jan 1 2012 UTC")
+      locations: [lome]
+    }]
+    constrainingIncidents = [{
+      cases: 45
+      dateRange:
+        start: new Date("Dec 1 2009 UTC")
+        end: new Date("Jan 1 2012 UTC")
+      locations: [lome]
+    }]
+    result = createSupplementalIncidents(baseIncidents, constrainingIncidents)
+    chai.assert.equal(result[0].count, 4)
+    chai.assert.equal("" + result[0].startDate, "" + new Date("Dec 1 2009 UTC"))
+    chai.assert.equal("" + result[0].endDate, "" + new Date("Dec 31 2010 UTC"))
+
+  it 'can handle empty incident arrays', ->
+    baseIncidents = [{
+      cases: 41
+      dateRange:
+        start: new Date("Dec 31 2010")
+        end: new Date("Jan 1 2012")
+      locations: [lome]
+    }]
+    constrainingIncidents = []
+    result = createSupplementalIncidents(baseIncidents, constrainingIncidents)
+    chai.assert(result.length == 0)
+    result = removeOutlierIncidents(baseIncidents, constrainingIncidents)
+    chai.assert(result[0] == baseIncidents[0])
+    constrainingIncidents = [{
+      cases: 45
+      dateRange:
+        start: new Date("Dec 1 2009 UTC")
+        end: new Date("Jan 1 2012 UTC")
+      locations: [lome]
+    }]
+    result = createSupplementalIncidents([], constrainingIncidents)
+    chai.assert.equal(result[0].count, 45)
+    chai.assert.equal("" + result[0].startDate, "" + new Date("Dec 1 2009 UTC"))
+    chai.assert.equal("" + result[0].endDate, "" + new Date("Jan 1 2012 UTC"))
+
+  it 'can fit an incident set to constraining incidents', ->
+    baseIncidents = [{
+      cases: 15
+      dateRange:
+        start: new Date("Dec 1 2008 UTC")
+        end: new Date("Dec 10 2008 UTC")
+      locations: [tongo]
+    }, {
+      cases: 15
+      dateRange:
+        start: new Date("Nov 1 2008 UTC")
+        end: new Date("Nov 2 2008 UTC")
+      locations: [tongo]
+    }, {
+      cases: 4
+      dateRange:
+        start: new Date("Dec 20 2008 UTC")
+        end: new Date("Jan 20 2009 UTC")
+      locations: [lome]
+    }]
+    constrainingIncidents = [{
+      cases: 20
+      dateRange:
+        start: new Date("Jan 1 2008 UTC")
+        end: new Date("Jan 1 2009 UTC")
+      locations: [tongo]
+    }, {
+      cases: 10
+      dateRange:
+        start: new Date("Jan 1 2009 UTC")
+        end: new Date("Jan 1 2010 UTC")
+      locations: [tongo]
+    }]
+    incidentsWithoutOutliers = removeOutlierIncidents(baseIncidents, constrainingIncidents)
+    supplementalIncidents = createSupplementalIncidents(incidentsWithoutOutliers, constrainingIncidents)
+    combinedIncidents = convertAllIncidentsToDifferentials(incidentsWithoutOutliers)
+     .concat(supplementalIncidents)
+    subIntervals = differentailIncidentsToSubIntervals(combinedIncidents)
+    extendSubIntervalsWithValues(combinedIncidents, subIntervals)
+    total = subIntervals
+      .filter (x) -> x.location == tongo
+      .reduce (sofar, x) ->
+        sofar + x.value
+      , 0
+    chai.assert.equal(Math.round(total), 30)

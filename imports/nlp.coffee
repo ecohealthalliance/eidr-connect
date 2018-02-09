@@ -115,8 +115,8 @@ export createIncidentReportsFromEnhancements = (enhancements, options={}) ->
       timeRange = timeAnnotation.timeRange
       if not (timeRange and timeRange.beginISO and timeRange.endISO)
         return
-      timeAnnotation.beginMoment = moment.utc(timeRange.beginISO)
-      timeAnnotation.endMoment = moment.utc(timeRange.endISO)
+      timeAnnotation.beginMoment = moment.utc(timeRange.beginISO, "YYYY-MM-DD")
+      timeAnnotation.endMoment = moment.utc(timeRange.endISO, "YYYY-MM-DD")
       if timeAnnotation.beginMoment.isAfter timeAnnotation.endMoment
         console.log(timeAnnotation)
         console.error('End date occurs before start date.')
