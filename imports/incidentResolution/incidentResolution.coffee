@@ -295,11 +295,72 @@ getTopLevelSubInts = (subInts) ->
     sofar.concat(locationToSubInts[locationNode.value.id])
   , [])
 
-# Remove incidends that cause the resolved number of cases to exceed
-# the numbers given in the constraining incidents.
+# Remove incidents that cause the resolved number of cases to exceed
+# the numbers given in the constraining incidents, cumulative incidents
+# that are inconsistent, and incidents that far exceed the typical case rate.
 removeOutlierIncidents = (originalIncidents, constrainingIncidents) ->
   incidents = convertAllIncidentsToDifferentials(originalIncidents)
   constrainingIncidents = convertAllIncidentsToDifferentials(constrainingIncidents)
+  # Incidents are partitioned so that confirmed incidents only constrain
+  # confirmed incidents and deaths only constrain deaths
+  partitions = {
+    "cases": {
+      "confirmed": []
+      "unconfirmed": []
+    }
+    "deaths": {
+      "confirmed": []
+      "unconfirmed": []
+    }
+  }
+  incidents.forEach (incident) ->
+    status = if incident.status == "confirmed" then "confirmed" else "unconfirmed"
+    partitions[incident.type][status].push incident
+  resultingIncidents = []
+  resultingIncidents = removeOutlierIncidentsSingleType(
+    resultingIncidents.concat(partitions["deaths"]["confirmed"]),
+    constrainingIncidents)
+  resultingIncidents = removeOutlierIncidentsSingleType(
+    resultingIncidents.concat(partitions["deaths"]["unconfirmed"]),
+    constrainingIncidents.filter (x) -> x.status != "confirmed")
+  resultingIncidents = removeOutlierIncidentsSingleType(
+    resultingIncidents.concat(partitions["cases"]["confirmed"]),
+    constrainingIncidents.filter (x) -> x.type == "cases")
+  resultingIncidents = removeOutlierIncidentsSingleType(
+    resultingIncidents.concat(partitions["cases"]["unconfirmed"]),
+    constrainingIncidents.filter (x) -> x.type == "cases" && x.status != "confirmed")
+  return _.chain(resultingIncidents)
+    .filter (x) -> not x.__virtualIncident
+    .pluck('originalIncidents')
+    .flatten(true)
+    .value()
+
+# This is the core of the outlier incident remove routine.
+# It is designed to work only on a single type of differential,
+# so the top main function takes care of partitioning the incidents
+# of converting the original incidents and paritioning them into the correct
+# groups.
+removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
+  # Remove incidents that exceed the 90th percentile of rates for their feature
+  # type by more than 10x.
+  subIntervals = differentailIncidentsToSubIntervals(incidents)
+  incidentsByLocationCode = _.groupBy(incidents, (x) -> x.locations[0].featureCode)
+  incidentsToKeep = []
+  for locationCode, incidentGroup of incidentsByLocationCode
+    incidentGroup.forEach (incident) ->
+      incidentLength = (incident.endDate - incident.startDate)  / MILLIS_PER_DAY
+      incident.__rate = incident.count / incidentLength / incident.locations.length
+    if incidentGroup.length > 10
+      sortedIncidents = _.sortBy(incidentGroup, '__rate')
+      idx90thPercentile = Math.floor((sortedIncidents.length - 1) * .9)
+      incident90thPercentile = sortedIncidents[idx90thPercentile]
+      incidentsToKeep = incidentsToKeep.concat(sortedIncidents.slice(0, idx90thPercentile))
+      sortedIncidents.slice(idx90thPercentile).forEach (incident) ->
+        if incident.__rate < incident90thPercentile.__rate * 10
+          incidentsToKeep.push(incident)
+    else
+      incidentsToKeep = incidentsToKeep.concat(incidentGroup)
+  incidents = incidentsToKeep
   # When a constraining incident has more than one location this creates a
   # a clone of it with each location as the only location.
   # This makes the constraint weaker since the combined counts at all locations
@@ -410,11 +471,7 @@ removeOutlierIncidents = (originalIncidents, constrainingIncidents) ->
       break
     #console.log "excessCounts:", excessCounts
     incidents = incidents.filter (x) -> not outlierIncidentIds.has(x.id)
-  return _.chain(incidents)
-    .filter (x) -> not x.__virtualIncident
-    .pluck('originalIncidents')
-    .flatten(true)
-    .value()
+  return incidents
 
 # Merge adjacent sub-intervals.
 mergeSubIntervals = (subIntervals) ->
@@ -429,10 +486,21 @@ mergeSubIntervals = (subIntervals) ->
 
 # Create new differential incidents that when resolved with the original
 # incidents will produce counts equal to the target incidents.
-createSupplementalIncidents = (originalIncidents, targetIncidents) ->
-  supplementalIncidents = []
-  incidents = convertAllIncidentsToDifferentials(originalIncidents)
+createSupplementalIncidents = (incidents, targetIncidents) ->
+  incidents = convertAllIncidentsToDifferentials(incidents)
   targetIncidents = convertAllIncidentsToDifferentials(targetIncidents)
+  return createSupplementalIncidentsSingleType(
+      _.where(incidents, type: "cases"),
+      _.where(targetIncidents, type: "cases")
+  ).concat(
+    createSupplementalIncidentsSingleType(
+      _.where(incidents, type: "deaths"),
+      _.where(targetIncidents, type: "deaths")
+    )
+  )
+
+createSupplementalIncidentsSingleType = (incidents, targetIncidents) ->
+  supplementalIncidents = []
   incidents = incidents.concat(targetIncidents.map (x) ->
     x = Object.create(x)
     x.count = 0
@@ -458,7 +526,7 @@ createSupplementalIncidents = (originalIncidents, targetIncidents) ->
       sofar + subInt.value
     , 0
     remainingCountDifference = targetIncident.count - resolvedSum
-    if remainingCountDifference < 0
+    if remainingCountDifference <= 0
       return
     # Supplemental incidents are added by increasing the rates at the lowest
     # sub-intervals until there is not difference in counts between the
@@ -483,15 +551,16 @@ createSupplementalIncidents = (originalIncidents, targetIncidents) ->
       else
         remainingCountDifference -= nextRateDifference * totalNewSubIntDuration
         floorRate = nextSubInt.rate
-    supplementalIncidents = supplementalIncidents.concat(
-      mergeSubIntervals(supplementedSubIntervals).map (subInt) ->
-        {start, end} = subInt
-        baseIncident = Object.create(targetIncident)
-        baseIncident.count = floorRate * (end - start) / MILLIS_PER_DAY
-        baseIncident.startDate = new Date(start)
-        baseIncident.endDate = new Date(end)
-        baseIncident
-    )
+    if floorRate > 0
+      supplementalIncidents = supplementalIncidents.concat(
+        mergeSubIntervals(supplementedSubIntervals).map (subInt) ->
+          {start, end} = subInt
+          baseIncident = Object.create(targetIncident)
+          baseIncident.count = floorRate * (end - start) / MILLIS_PER_DAY
+          baseIncident.startDate = new Date(start)
+          baseIncident.endDate = new Date(end)
+          baseIncident
+      )
   return supplementalIncidents
 
 export intervalToEndpoints = intervalToEndpoints

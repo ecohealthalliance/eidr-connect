@@ -70,6 +70,10 @@ IncidentReportSchema = new SimpleSchema
   "dateRange.end":
     type: Date
     optional: true
+  # Cumulative counts have an undefined/implicit start date.
+  # They are running totals since the last cumulative count for the area and event.
+  # Cumulative counts are exhaustive counts that capture all the cases for the
+  # date range and location, but exhaustive counts are not necessarily cumulative.
   "dateRange.cumulative":
     type: Boolean
     optional: true
@@ -136,6 +140,9 @@ IncidentReportSchema = new SimpleSchema
     optional: true
   url:
     type: String
+    optional: true
+  constraining:
+    type: Boolean
     optional: true
 
 module.exports = IncidentReportSchema

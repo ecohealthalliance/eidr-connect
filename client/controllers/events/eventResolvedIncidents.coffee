@@ -2,7 +2,8 @@ import Rickshaw from 'meteor/eidr:rickshaw.min'
 import convertAllIncidentsToDifferentials from '/imports/incidentResolution/convertAllIncidentsToDifferentials'
 import {
   differentailIncidentsToSubIntervals,
-  extendSubIntervalsWithValues
+  extendSubIntervalsWithValues,
+  createSupplementalIncidents
 } from '/imports/incidentResolution/incidentResolution'
 import LocationTree from '/imports/incidentResolution/LocationTree'
 import EventIncidents from '/imports/collections/eventIncidents'
@@ -161,15 +162,22 @@ Template.eventResolvedIncidents.onRendered ->
     graph.render()
 
   @autorun =>
-    @incidents = EventIncidents.find(@data.filterQuery.get())
-    incidentType = @incidentType.get()
-    allIncidents = @incidents.fetch()
+    allIncidents = EventIncidents.find(@data.filterQuery.get()).fetch()
     allIncidents = allIncidents.filter (i) ->
       i.locations.every (l) -> l.featureCode
+    baseIncidents = []
+    constrainingIncidents = []
+    allIncidents.map (incident) ->
+      if incident.constraining
+        constrainingIncidents.push incident
+      else
+        baseIncidents.push incident
+    supplementalIncidents = createSupplementalIncidents(baseIncidents, constrainingIncidents)
+    console.log supplementalIncidents, constrainingIncidents
     differentialIncidents = convertAllIncidentsToDifferentials(
-      allIncidents,
+      baseIncidents,
       replaceRegionsWithCountries=false
-    )
+    ).concat(supplementalIncidents)
     @differentialIncidents.set(differentialIncidents)
 
   @autorun =>
@@ -200,7 +208,6 @@ Template.eventResolvedIncidents.onRendered ->
       for subInterval in subIntervals
         subInterval.incidents = subInterval.incidentIds.map (id) ->
           differentials[id]
-
       locationTree = LocationTree.from(subIntervals.map (x) -> x.location)
       topLocations = locationTree.children.map (x) -> x.value
       locToSubintervals = {}
