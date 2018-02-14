@@ -8,6 +8,8 @@ import PromedPosts from '/imports/collections/promedPosts'
 import convertAllIncidentsToDifferentials from '/imports/incidentResolution/convertAllIncidentsToDifferentials'
 import {
   differentailIncidentsToSubIntervals,
+  removeOutlierIncidents,
+  createSupplementalIncidents,
   extendSubIntervalsWithValues
 } from '/imports/incidentResolution/incidentResolution'
 import LocationTree from '/imports/incidentResolution/LocationTree'
@@ -304,8 +306,17 @@ Router.route("/api/events-with-resolved-data", where: "server")
   @response.statusCode = 200
   @response.end(JSON.stringify({
     events: events.map (event) ->
+      baseIncidents = []
+      constrainingIncidents = []
+      event.incidents.map (incident) ->
+        if incident.constraining
+          constrainingIncidents.push incident
+        else
+          baseIncidents.push incident
+      incidentsWithoutOutliers = removeOutlierIncidents(baseIncidents, constrainingIncidents)
       differentials = _.where(
-        convertAllIncidentsToDifferentials(event.incidents),
+        convertAllIncidentsToDifferentials(incidentsWithoutOutliers).concat(
+          createSupplementalIncidents(incidentsWithoutOutliers, constrainingIncidents)),
         type: 'cases'
       )
       subIntervals = differentailIncidentsToSubIntervals(differentials)
