@@ -27,8 +27,8 @@ class DifferentialIncident
       @startDate.setUTCMinutes(0)
       @startDate.setUTCSeconds(0)
       @startDate.setUTCMilliseconds(0)
-      # give the endDate a one hour offset before rounding it down to the start of
-      # the day incase it is right before the end of the day.
+      # Give the endDate a one hour offset before rounding it down to the start
+      # of the day incase it is right before the end of the day.
       @endDate = new Date(incident.dateRange.end)
       @endDate.setUTCMinutes(70)
       @endDate.setUTCHours(0)
@@ -38,11 +38,12 @@ class DifferentialIncident
       if @startDate > @endDate
         console.log(incident)
         throw new Error("Invalid incident")
-      else if Number(@startDate) == Number(@endDate)
+      else if Number(@startDate) == Number(@endDate) and not incident.dateRange.cumulative
+        # Convert single day incidents to one day long date ranges
         @endDate.setUTCDate(@endDate.getUTCDate() + 1)
       @count = incident.cases or incident.deaths
       @type = _.keys(_.pick(incident, 'cases', 'deaths'))[0]
-      # Remove duplicate/contained locations from loc array
+      # Remove duplicate/contained locations from location array
       @locations = LocationTree.from(incident.locations or []).children.map (x) ->
         x.value
       @cumulative = incident.dateRange.cumulative
@@ -97,7 +98,6 @@ convertAllIncidentsToDifferentials = (incidents, replaceRegionsWithCountries=tru
     .groupBy (i) ->
       i.type + "," + (i?.locations or []).map((l) -> l.id).sort()
     .forEach (incidentGroup, b) ->
-      console.log b, incidentGroup.length
       # If two incidents have the same time offset, use the one with the
       # greater count.
       incidentGroup = incidentGroup.reduce((sofar, incident)->

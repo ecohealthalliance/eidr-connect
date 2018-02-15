@@ -331,15 +331,15 @@ removeOutlierIncidents = (originalIncidents, constrainingIncidents) ->
   resultingIncidents = removeOutlierIncidentsSingleType(
     resultingIncidents.concat(partitions["deaths"]["confirmed"]),
     constrainingIncidents)
-  resultingIncidents = removeOutlierIncidentsSingleType(
+  resultingDeaths = removeOutlierIncidentsSingleType(
     resultingIncidents.concat(partitions["deaths"]["unconfirmed"]),
     constrainingIncidents.filter (x) -> x.status != "confirmed")
-  resultingIncidents = removeOutlierIncidentsSingleType(
+  resultingConfirmed = removeOutlierIncidentsSingleType(
     resultingIncidents.concat(partitions["cases"]["confirmed"]),
     constrainingIncidents.filter (x) -> x.type == "cases")
   resultingIncidents = removeOutlierIncidentsSingleType(
-    resultingIncidents.concat(partitions["cases"]["unconfirmed"]),
-    constrainingIncidents.filter (x) -> x.type == "cases" && x.status != "confirmed")
+    _.union(resultingDeaths, resultingConfirmed, partitions["cases"]["unconfirmed"]),
+    constrainingIncidents.filter (x) -> x.type == "cases" and x.status != "confirmed")
   return _.chain(resultingIncidents)
     .filter (x) -> not x.__virtualIncident
     .pluck('originalIncidents')
@@ -407,7 +407,7 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
       valuesByIncident = {}
       for incidentId in incidentIds
         incident = incidents[incidentId]
-        # Exclude virtual incidents from 
+        # Exclude virtual incidents from the incident value distribution.
         if incident.__virtualIncident
           continue
         valuesByIncident[incidentId] = incident.rate * duration

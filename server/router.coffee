@@ -351,25 +351,42 @@ Router.route("/api/events-with-resolved-data", where: "server")
         maxSubintervals = _.sortBy(maxSubintervals, (x) -> x.start)
         total = 0
         maxSubintervals.forEach (subInt) ->
-          # Prorate the count by how much it overlaps the date range
-          if dateRange and (subInt.end > Number(dateRange.start) and subInt.start < Number(dateRange.end))
-            [noop, overlapStart, overlapEnd, noop2] = [
-              subInt.end, subInt.start, Number(dateRange.start), Number(dateRange.end)
-            ].sort()
-            overlapRatio = (overlapEnd - overlapStart) / (subInt.end - subInt.start)
-            total += subInt.value * overlapRatio
+          if dateRange
+            # Prorate the count by how much it overlaps the date range
+            if subInt.end > Number(dateRange.start) and subInt.start < Number(dateRange.end)
+              [noop, overlapStart, overlapEnd, noop2] = [
+                subInt.end, subInt.start, Number(dateRange.start), Number(dateRange.end)
+              ].sort()
+              overlapRatio = (overlapEnd - overlapStart) / (subInt.end - subInt.start)
+              total += subInt.value * overlapRatio
+          else
+              total += subInt.value
         # If the country code appeared before, it is because the top locations
         # are not at the country level, so values with the same country code
         # can be combined to get the count for the country.
         prevTotal = countryCodeToCount[location.countryCode] or 0
         countryCodeToCount[location.countryCode] = prevTotal + total
-      groupedSubIntervals = _.groupBy(maxSubintervalsPerLocation, 'end')
-      overallTimeseries = _.chain(groupedSubIntervals)
+      overallTimeseries = _.chain(maxSubintervalsPerLocation)
+        .groupBy('end')
         .pairs()
-        .map ([end, group]) ->
-          date: new Date(parseInt(end))
-          value: group.reduce(((sofar, cur)-> sofar + cur.value), 0)
-        .sortBy('date')
+        .map ([end, group]) -> [new Date(parseInt(end)), group]
+        .sortBy (x) -> x[0]
+        .reduce((sofar, [endDate, group]) ->
+          value = group.reduce(((sofar, cur)-> sofar + cur.rate), 0)
+          if sofar
+            sofar.concat(
+              date: endDate
+              value: value
+            )
+          else
+            [
+              date: new Date(group[0].start)
+              value: value
+            ,
+              date: endDate
+              value: value
+            ]
+        , null)
         .value()
       return {
         eventName: event.eventName
