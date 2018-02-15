@@ -37,6 +37,25 @@ import convertAllIncidentsToDifferentials from './convertAllIncidentsToDifferent
 
 MILLIS_PER_DAY = 1000 * 60 * 60 * 24
 
+class SubInterval
+  constructor: (@id, @start, @end, @location, @incidentIds) ->
+    @locationId = @location.id
+    @__value = null
+    Object.defineProperty @, 'value',
+      get: =>
+        @__value
+      enumerable: true
+      configurable: true
+    Object.defineProperty @, 'duration',
+      get: =>
+        (@end - @start) / MILLIS_PER_DAY
+      enumerable: true
+      configurable: true
+  setValue: (@__value) ->
+    @rate = @__value / @duration
+  setRate: (@rate) ->
+    @__value = @rate * @duration
+
 class Endpoint
   constructor: (@isStart, @offset, @interval) ->
 
@@ -98,13 +117,13 @@ differentailIncidentsToSubIntervals = (incidents) ->
   idx = 0
   for key, incidentIds of SELToIncidents
     [start, end, locationId] = key.split(',')
-    SELs.push
-      id: idx
-      start: parseInt(start)
-      end: parseInt(end)
-      locationId: locationId
-      location: locationsById[locationId]
-      incidentIds: incidentIds
+    SELs.push(new SubInterval(
+      idx,
+      parseInt(start),
+      parseInt(end),
+      locationsById[locationId],
+      incidentIds
+    ))
     idx++
   return SELs
 
@@ -128,11 +147,9 @@ subIntervalsToLP = (incidents, subIntervals)->
     incidentSubs = IncidentToSELs[incidentId]
     if not incidentSubs
       console.log "Error: No subintervals for", incidentId
-    incidentLength = (Number(incident.endDate) - Number(incident.startDate)) / MILLIS_PER_DAY
-    incidentRate = incident.count / incidentLength
+    incidentRate = incident.count / incident.duration
     for subInterval in incidentSubs
-      { id, start, end } = subInterval
-      itervalLengthDays = (end - start) / MILLIS_PER_DAY
+      { id, start, end, duration } = subInterval
       # The absX variables are the absolute value of the max difference
       # between the subinterval's rate and the source incidents' overall rates.
       # The objective function will attempt to minimize this quantity.
@@ -140,8 +157,8 @@ subIntervalsToLP = (incidents, subIntervals)->
       # each incident sub-interval pair so the differences are all minimized
       # rather than only the max difference. However, it would increase the
       # number of variables and it would give more weight to repeated incidents.
-      constraints.push("#{(1 / itervalLengthDays).toFixed(12)} s#{id} -1 abs#{id} <= #{incidentRate}")
-      constraints.push("#{(1 / itervalLengthDays).toFixed(12)} s#{id} 1 abs#{id} >= #{incidentRate}")
+      constraints.push("#{(1 / duration).toFixed(12)} s#{id} -1 abs#{id} <= #{incidentRate}")
+      constraints.push("#{(1 / duration).toFixed(12)} s#{id} 1 abs#{id} >= #{incidentRate}")
       mainConstraintVars.push "1 s" + id
     # The sum of the counts over over all subintervals must be greater than
     # the count over the incident interval.
@@ -180,12 +197,12 @@ extendSubIntervalsWithValuesLP = (incidents, subIntervals)->
   solution = Solver.Solve(Solver.ReformatLP(model))
   # set default values for subintervals
   subIntervals.forEach (s)->
-    s.value = 0
+    s.setValue 0
   for key, value of solution
     if key.startsWith("s")
       subId = key.split("s")[1]
       subInterval = subIntervals[parseInt(subId)]
-      subInterval.value = value
+      subInterval.setValue value
 
 topologicalSort = (incomingNodesInit) ->
   # Copy incoming nodes
@@ -238,13 +255,8 @@ extendSubIntervalsWithValuesTS = (incidents, subIntervals) ->
     incidentSubs = IncidentToSELs[incidentId]
     if not incidentSubs
       console.log "Error: No subintervals for", incidentId
-    incidentLength = (Number(incident.endDate) - Number(incident.startDate)) / MILLIS_PER_DAY
-    # The case rate is divided by the number of locations in the incident
-    # so that a report of cases distributed in 3 states won't result in
-    # a count of triple that for the country.
-    incidentRate = incident.count / incidentLength / incident.locations.length
     for subInterval in incidentSubs
-      subIntervalRates[subInterval.id].push(incidentRate)
+      subIntervalRates[subInterval.id].push(incident.rate)
   )
   subIntervalRates = subIntervalRates.map (rates) ->
     _.max(rates.concat(0))
@@ -267,9 +279,8 @@ extendSubIntervalsWithValuesTS = (incidents, subIntervals) ->
       subLocationTotal += subIntervalRates[incomingNodeId]
     subIntervalRates[id] = Math.max(subIntervalRates[id], subLocationTotal)
   subIntervals.forEach (subInterval) ->
-    {start, end} = subInterval
-    itervalLengthDays = (end - start) / MILLIS_PER_DAY
-    subInterval.value = subIntervalRates[subInterval.id] * itervalLengthDays
+    {start, end, duration} = subInterval
+    subInterval.setRate(subIntervalRates[subInterval.id])
 
 extendSubIntervalsWithValues = (incidents, subIntervals, method="topologicalSort") ->
   if method is "topologicalSort"
@@ -347,16 +358,13 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
   incidentsByLocationCode = _.groupBy(incidents, (x) -> x.locations[0].featureCode)
   incidentsToKeep = []
   for locationCode, incidentGroup of incidentsByLocationCode
-    incidentGroup.forEach (incident) ->
-      incidentLength = (incident.endDate - incident.startDate)  / MILLIS_PER_DAY
-      incident.__rate = incident.count / incidentLength / incident.locations.length
     if incidentGroup.length > 10
-      sortedIncidents = _.sortBy(incidentGroup, '__rate')
+      sortedIncidents = _.sortBy(incidentGroup, 'rate')
       idx90thPercentile = Math.floor((sortedIncidents.length - 1) * .9)
       incident90thPercentile = sortedIncidents[idx90thPercentile]
       incidentsToKeep = incidentsToKeep.concat(sortedIncidents.slice(0, idx90thPercentile))
       sortedIncidents.slice(idx90thPercentile).forEach (incident) ->
-        if incident.__rate < incident90thPercentile.__rate * 10
+        if incident.rate < incident90thPercentile.rate * 10
           incidentsToKeep.push(incident)
     else
       incidentsToKeep = incidentsToKeep.concat(incidentGroup)
@@ -379,10 +387,9 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
   # bounds align with the constraining incidents. Counts are set to zero
   # so they do not alter the resolved count.
   incidents = incidents.concat(constrainingIncidents.map (x) ->
-    x = Object.create(x)
-    x.count = 0
-    x.__virtualIncident = true
-    x
+    x.clone
+      count: 0
+      __virtualIncident: true
   )
   # Iteratively remove incidents until the constraining incidents are not
   # exceeded by any counts.
@@ -396,17 +403,14 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
     # if the size of the set is even, the smaller of the middle values is used
     # rather than their mid-point.
     subIntervals.forEach (subInt) ->
-      {start, end, incidentIds} = subInt
-      subIntervalLength = (end - start)  / MILLIS_PER_DAY
+      { start, end, incidentIds, duration } = subInt
       valuesByIncident = {}
       for incidentId in incidentIds
         incident = incidents[incidentId]
         # Exclude virtual incidents from 
         if incident.__virtualIncident
           continue
-        incidentLength = (incident.endDate - incident.startDate)  / MILLIS_PER_DAY
-        incidentRate = incident.count / incidentLength / incident.locations.length
-        valuesByIncident[incidentId] = incidentRate * subIntervalLength
+        valuesByIncident[incidentId] = incident.rate * duration
       values = _.values(valuesByIncident).concat([0])
       lowerMedian = values.sort()[Math.ceil(values.length / 2) - 1]
       subInt.__valuesByIncident = valuesByIncident
@@ -502,17 +506,13 @@ createSupplementalIncidents = (incidents, targetIncidents) ->
 createSupplementalIncidentsSingleType = (incidents, targetIncidents) ->
   supplementalIncidents = []
   incidents = incidents.concat(targetIncidents.map (x) ->
-    x = Object.create(x)
-    x.count = 0
-    x.__virtualIncident = true
-    x
+    x.clone(
+      count: 0
+      __virtualIncident: true
+    )
   )
   subIntervals = differentailIncidentsToSubIntervals(incidents)
   extendSubIntervalsWithValues(incidents, subIntervals)
-  subIntervals.forEach (subInt) ->
-    {start, end, value} = subInt
-    subInt.duration = (end - start) / MILLIS_PER_DAY
-    subInt.rate = value / subInt.duration
   subIntsByStart = _.chain(subIntervals)
     .groupBy('start')
     .pairs()
@@ -554,12 +554,11 @@ createSupplementalIncidentsSingleType = (incidents, targetIncidents) ->
     if floorRate > 0
       supplementalIncidents = supplementalIncidents.concat(
         mergeSubIntervals(supplementedSubIntervals).map (subInt) ->
-          {start, end} = subInt
-          baseIncident = Object.create(targetIncident)
-          baseIncident.count = floorRate * (end - start) / MILLIS_PER_DAY
-          baseIncident.startDate = new Date(start)
-          baseIncident.endDate = new Date(end)
-          baseIncident
+          {start, end, duration} = subInt
+          targetIncident.clone
+            count: floorRate * duration
+            startDate: new Date(start)
+            endDate: new Date(end)
       )
   return supplementalIncidents
 

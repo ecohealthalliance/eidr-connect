@@ -52,6 +52,9 @@ describe 'Incident Resolution', ->
 
   it 'converts incidents to the correct number of differential incident intervals', ->
     differentialIncidents = convertAllIncidentsToDifferentials(incidents)
+    # console.log JSON.stringify(differentialIncidents.map((x) ->
+    #   _.pick(x, "startDate", "endDate", "count", "cumulative")
+    # ), 0, 2)
     chai.assert.equal(differentialIncidents.length, 286)
 
   it 'handles outlier cumulative counts', ->

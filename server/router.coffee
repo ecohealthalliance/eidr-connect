@@ -270,6 +270,8 @@ Router.route("/api/resolve-incidents", where: "server")
 Router.route("/api/events-with-resolved-data", where: "server")
 .get ->
   eventIds = @request.query.ids
+  if _.isString(@request.query.ids)
+    eventIds = [@request.query.ids]
   if @request.query.startDate
     dateRange =
       start: new Date(@request.query.startDate)
@@ -313,12 +315,18 @@ Router.route("/api/events-with-resolved-data", where: "server")
           constrainingIncidents.push incident
         else
           baseIncidents.push incident
-      incidentsWithoutOutliers = removeOutlierIncidents(baseIncidents, constrainingIncidents)
-      differentials = _.where(
-        convertAllIncidentsToDifferentials(incidentsWithoutOutliers).concat(
-          createSupplementalIncidents(incidentsWithoutOutliers, constrainingIncidents)),
-        type: 'cases'
+      incidentsWithoutOutliers = removeOutlierIncidents(
+        baseIncidents,
+        constrainingIncidents
       )
+      supplementalIncidents = createSupplementalIncidents(
+        incidentsWithoutOutliers,
+        constrainingIncidents
+      )
+      allDifferentials = convertAllIncidentsToDifferentials(
+        incidentsWithoutOutliers
+      ).concat(supplementalIncidents)
+      differentials = _.where(allDifferentials, type: 'cases')
       subIntervals = differentailIncidentsToSubIntervals(differentials)
       extendSubIntervalsWithValues(differentials, subIntervals)
       locationTree = LocationTree.from(subIntervals.map (x) -> x.location)
@@ -343,15 +351,13 @@ Router.route("/api/events-with-resolved-data", where: "server")
         maxSubintervals = _.sortBy(maxSubintervals, (x) -> x.start)
         total = 0
         maxSubintervals.forEach (subInt) ->
-          # Prorate the count if it is outside of the dateRange
-          if dateRange and (subInt.end > dateRange.end or subInt.start < dateRange.start)
+          # Prorate the count by how much it overlaps the date range
+          if dateRange and (subInt.end > Number(dateRange.start) and subInt.start < Number(dateRange.end))
             [noop, overlapStart, overlapEnd, noop2] = [
               subInt.end, subInt.start, Number(dateRange.start), Number(dateRange.end)
             ].sort()
             overlapRatio = (overlapEnd - overlapStart) / (subInt.end - subInt.start)
             total += subInt.value * overlapRatio
-          else
-            total += subInt.value
         # If the country code appeared before, it is because the top locations
         # are not at the country level, so values with the same country code
         # can be combined to get the count for the country.
