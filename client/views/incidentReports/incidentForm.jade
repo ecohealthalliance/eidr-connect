@@ -6,21 +6,26 @@ template(name="incidentForm")
       if documentId
         input(type="hidden" name="articleId" value=documentId)
       unless confirmation
-        if document
-          .form-group.form-group--full
-            +documentInputLabel
-            .document
-              a(href="{{formatUrl document.url}}" target="_blank") {{documentTitle document}}
-        if addUrl
-          .form-group.form-group--full.url-selector
-            +documentInputLabel
-            +articleSelect2(
-              selectId="articleSource"
-              articles=articles
-              placeholder="Select a Document"
-              errorContainer=".url-selector"
-              classHandler=".url-selector"
-              errorMessage="Please select a url.")
+        if incidentData.sourceFeed
+          label Source Data Feed
+          p
+            a(href="{{formatUrl incidentData.sourceFeed}}" target="_blank")= incidentData.sourceFeed
+        else
+          if document
+            .form-group.form-group--full
+              +documentInputLabel
+              .document
+                a(href="{{formatUrl document.url}}" target="_blank") {{documentTitle document}}
+          if addUrl
+            .form-group.form-group--full.url-selector
+              +documentInputLabel
+              +articleSelect2(
+                selectId="articleSource"
+                articles=articles
+                placeholder="Select a Document"
+                errorContainer=".url-selector"
+                classHandler=".url-selector"
+                errorMessage="Please select a url.")
 
       if incidentSnippet
         p.incident-snippet=incidentSnippet

@@ -41,6 +41,9 @@ Template.incidentModal.helpers
   edit: ->
     Template.instance().data.incident?._id
 
+  editable: ->
+    not Template.instance().data.incident.sourceFeed
+
 Template.incidentModal.events
   'click .save-incident, click .save-incident-duplicate': (event, instance) ->
     # Submit the form to trigger validation and to update the 'valid'

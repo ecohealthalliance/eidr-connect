@@ -6,6 +6,11 @@ import Constants from '/imports/constants.coffee'
 module.exports = ->
   # Import Cholera data
   WHOCholeraDataUrl = "http://apps.who.int/gho/athena/data/GHO/CHOLERA_0000000001.json?profile=simple&filter=COUNTRY:*;REGION:*"
+  priorImportIncident = Incidents.findOne(sourceFeed: WHOCholeraDataUrl)
+  if priorImportIncident
+    if moment().isBefore(moment(priorImportIncident.addedDate).add(20, 'days'))
+      # Only reimport the data if it hasn't been updated in at least 20 days
+      return
   HTTP.get WHOCholeraDataUrl, {}, (err, resp)->
     if err
       return console.log(err)
@@ -19,10 +24,10 @@ module.exports = ->
             q: country
         countryToGeoname[country] = geonamesResult.data.hits[0]._source
         delete countryToGeoname[country].alternateNames
-    Incidents.remove(url: WHOCholeraDataUrl)
+    Incidents.remove(sourceFeed: WHOCholeraDataUrl)
     resp.data.fact.forEach (fact) ->
       Incidents.insert
-        url: WHOCholeraDataUrl
+        sourceFeed: WHOCholeraDataUrl
         constraining: true
         dateRange:
           type: "precise"
