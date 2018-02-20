@@ -332,3 +332,68 @@ describe 'Incident Resolution', ->
         sofar + x.value
       , 0
     chai.assert.equal(Math.round(total), 30)
+
+  it 'can remove statistical outlier incidents', ->
+    baseIncidents = [{
+      cases: 9
+      dateRange:
+        start: new Date("Oct 3 2010 UTC")
+        end: new Date("Dec 10 2010 UTC")
+      locations: [lome]
+    }, {
+      cases: 6
+      dateRange:
+        start: new Date("Nov 3 2010 UTC")
+        end: new Date("Nov 19 2010 UTC")
+      locations: [lome]
+    }, {
+      cases: 1500000
+      dateRange:
+        start: new Date("Jan 3 2010 UTC")
+        end: new Date("Oct 10 2010 UTC")
+      locations: [lome]
+    }, {
+      cases: 15
+      dateRange:
+        start: new Date("Aug 3 2010 UTC")
+        end: new Date("Oct 10 2010 UTC")
+      locations: [lome]
+    }, {
+      cases: 1
+      dateRange:
+        start: new Date("Feb 20 2010 UTC")
+        end: new Date("Apr 10 2010 UTC")
+      locations: [lome]
+    }, {
+      cases: 2
+      dateRange:
+        start: new Date("Jan 20 2010 UTC")
+        end: new Date("Apr 10 2010 UTC")
+      locations: [lome]
+    }, {
+      cases: 50
+      dateRange:
+        start: new Date("Dec 31 2009 UTC")
+        end: new Date("Jan 1 2011 UTC")
+      locations: [lome]
+    }, {
+      cases: 50
+      dateRange:
+        start: new Date("Dec 31 2009 UTC")
+        end: new Date("Jan 1 2011 UTC")
+      locations: [lome]
+    }, {
+      cases: 45
+      dateRange:
+        start: new Date("Dec 31 2010 UTC")
+        end: new Date("Jan 1 2012 UTC")
+      locations: [lome]
+    }, {
+      cases: 45
+      dateRange:
+        start: new Date("Dec 1 2009 UTC")
+        end: new Date("Jan 1 2012 UTC")
+      locations: [lome]
+    }]
+    result = removeOutlierIncidents(baseIncidents, [])
+    chai.assert.equal(result.length, 9)

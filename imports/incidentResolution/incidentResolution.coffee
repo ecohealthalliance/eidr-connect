@@ -1,6 +1,15 @@
-# The resolver converts all incidents to intervals with a start and end
-# then divides the intervals into subintervals based on the locations
-# of the endpoints and locations. This is illustrated below:
+import LocationTree from './LocationTree'
+import Solver from './LPSolver'
+import convertAllIncidentsToDifferentials from './convertAllIncidentsToDifferentials'
+
+MILLIS_PER_DAY = 1000 * 60 * 60 * 24
+
+# The resolver divides incidents into subintervals non-overlapping start and
+# end points. Each sub-interval has only a single location, so several may
+# be created for incidents with multiple locations. If incidents have the same
+# date range and location, they will create only a single sub-interval.
+# This is illustrated below where the incidents I1, I2 and I3 are divided into
+# sub-intervals labeled A, B1, B2, C, D1, D2 and E:
 #
 # Cases
 #   +
@@ -20,32 +29,17 @@
 #   +-------------------------------------------------------------------------+
 #   +                         Time
 #
-# There are two resolution methods implemented. One is based on
-# linear programming. The other chooses the maximum incident case rates over
-# each sub-interval and uses a topological sort to ensure the larger of
-# the sub-interval or sum of the sub-location sub-interval counts is used.
-# The linear programming method is slower and cannot handle as many incidents.
-# Linear programming has a potential advantage when handling bi-directional
-# relationships between case rates. For instance, it may be desirable to
-# decrease the case rates of some of the sub-intervals that overlap an incident
-# interval if one of them has a rate that is greater than the incident's case
-# rate.
-
-import LocationTree from './LocationTree'
-import Solver from './LPSolver'
-import convertAllIncidentsToDifferentials from './convertAllIncidentsToDifferentials'
-
-MILLIS_PER_DAY = 1000 * 60 * 60 * 24
-
 class SubInterval
   constructor: (@id, @start, @end, @location, @incidentIds) ->
     @locationId = @location.id
     @__value = null
+    # The total number of cases that occured over the sub-interval.
     Object.defineProperty @, 'value',
       get: =>
         @__value
       enumerable: true
       configurable: true
+    # The duration in days.
     Object.defineProperty @, 'duration',
       get: =>
         (@end - @start) / MILLIS_PER_DAY
@@ -66,12 +60,12 @@ intervalToEndpoints = (interval) ->
     new Endpoint(false, Number(interval.endDate), interval)
   ]
 
-differentailIncidentsToSubIntervals = (incidents) ->
-  if incidents.length == 0
+differentailIncidentsToSubIntervals = (differentialIncidents) ->
+  if differentialIncidents.length == 0
     return []
   endpoints = []
   locationsById = {}
-  incidents.forEach (incident, idx) ->
+  differentialIncidents.forEach (incident, idx) ->
     incident.id = idx
     console.assert(incident.locations.length > 0)
     for location in incident.locations
@@ -93,12 +87,18 @@ differentailIncidentsToSubIntervals = (incidents) ->
   topLocations = locationTree.children.map (x)->x.value
   priorEndpoint = endpoints[0]
   console.assert priorEndpoint.isStart
+  # maps intervals by their unique start-end-location to their overlapping incidents.
   SELToIncidents = {}
+  # While iterating over the end-points, this tracks the intervals the current
+  # endpoint overlaps.
   activeIntervals = [priorEndpoint.interval]
   endpoints.slice(1).forEach (endpoint) ->
     if priorEndpoint.offset != endpoint.offset
       # Ensure a subinterval is created for the top level locations between
-      # every endpoint.
+      # every endpoint, even if no overlapping incident exists.
+      # This makes it so time-series data is easier to extract to top level
+      # locations since sub-locations don't need to be checked at points where
+      # the value is undefined.
       for location in topLocations
         key = "#{priorEndpoint.offset},#{endpoint.offset},#{location.id}"
         SELToIncidents[key] = SELToIncidents[key] or []
@@ -127,6 +127,7 @@ differentailIncidentsToSubIntervals = (incidents) ->
     idx++
   return SELs
 
+# Use the given sub-intervals to formulate a linear programming problem.
 subIntervalsToLP = (incidents, subIntervals)->
   IncidentToSELs = {}
   SEToLocations = {}
@@ -235,8 +236,9 @@ topologicalSort = (incomingNodesInit) ->
 # This resolves incidents using a method where the max incident over each
 # subinterval is selected as the subinterval's rate. The rate for each location
 # is the greater of the location's rate or the sum of its child location rates.
-# Toplological sorting is used to resolve the child location rates.
-extendSubIntervalsWithValuesTS = (incidents, subIntervals) ->
+# Toplological sorting is used to resolve the child location rates before
+# their parent locations' rates.
+extendSubIntervalsWithValuesTS = (differentialIncidents, subIntervals) ->
   IncidentToSELs = {}
   SEToLocations = {}
   SELToId = {}
@@ -251,7 +253,7 @@ extendSubIntervalsWithValuesTS = (incidents, subIntervals) ->
   for key, locations of SEToLocations
     SEToLocationTree[key] = LocationTree.from(locations)
   subIntervalRates = subIntervals.map(-> [])
-  incidents.forEach((incident, incidentId) ->
+  differentialIncidents.forEach((incident, incidentId) ->
     incidentSubs = IncidentToSELs[incidentId]
     if not incidentSubs
       console.log "Error: No subintervals for", incidentId
@@ -282,15 +284,25 @@ extendSubIntervalsWithValuesTS = (incidents, subIntervals) ->
     {start, end, duration} = subInterval
     subInterval.setRate(subIntervalRates[subInterval.id])
 
+# There are two resolution methods implemented. One is based on
+# linear programming. The other chooses the maximum incident case rates over
+# each sub-interval and uses a topological sort to ensure the larger of
+# the sub-interval or sum of the sub-location sub-interval counts is used.
+# The linear programming method is slower and cannot handle as many incidents.
+# Linear programming has a potential advantage when handling bi-directional
+# relationships between case rates. For instance, it may be desirable to
+# decrease the case rates of some of the sub-intervals that overlap an incident
+# interval if one of them has a rate that is greater than the incident's case
+# rate.
 extendSubIntervalsWithValues = (incidents, subIntervals, method="topologicalSort") ->
   if method is "topologicalSort"
     extendSubIntervalsWithValuesTS(incidents, subIntervals)
   else
     extendSubIntervalsWithValuesLP(incidents, subIntervals)
 
-getContainedSubIntervals = (containingIncident, subIntsByStart) ->
+getContainedSubIntervals = (containingIncident, subIntsGroupedAndSortedByStart) ->
   overlappingSubInts = []
-  for [start, subIntervalGroup] in subIntsByStart
+  for [start, subIntervalGroup] in subIntsGroupedAndSortedByStart
     if start < Number(containingIncident.startDate)
       continue
     if start >= Number(containingIncident.endDate)
@@ -299,7 +311,8 @@ getContainedSubIntervals = (containingIncident, subIntsByStart) ->
   overlappingSubInts.filter (subInt) ->
     LocationTree.locationContains(containingIncident.locations[0], subInt.location)
 
-getTopLevelSubInts = (subInts) ->
+# Get the sub-intervals for the top-level locations in their location tree.
+getTopLevelSubIntervals = (subInts) ->
   tree = LocationTree.from(subInts.map((x) -> x.location))
   locationToSubInts = _.groupBy(subInts, (subInt) -> subInt.location.id)
   tree.children.reduce((sofar, locationNode) ->
@@ -348,9 +361,9 @@ removeOutlierIncidents = (originalIncidents, constrainingIncidents) ->
 
 # This is the core of the outlier incident remove routine.
 # It is designed to work only on a single type of differential,
-# so the top main function takes care of partitioning the incidents
-# of converting the original incidents and paritioning them into the correct
-# groups.
+# so the calling removeOutlierIncidents function must
+# convert the original incidents into differential incidents and parition
+# them into the correct groups.
 removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
   # Remove incidents that exceed the 90th percentile of rates for their feature
   # type by more than 10x.
@@ -358,7 +371,7 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
   incidentsByLocationCode = _.groupBy(incidents, (x) -> x.locations[0].featureCode)
   incidentsToKeep = []
   for locationCode, incidentGroup of incidentsByLocationCode
-    if incidentGroup.length > 10
+    if incidentGroup.length >= 10
       sortedIncidents = _.sortBy(incidentGroup, 'rate')
       idx90thPercentile = Math.floor((sortedIncidents.length - 1) * .9)
       incident90thPercentile = sortedIncidents[idx90thPercentile]
@@ -431,7 +444,7 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
       # If it exceeds the constraining incident, remove the incidents with
       # the highest CASIM values.
       containedSubInts = getContainedSubIntervals(cIncident, subIntsByStart)
-      resolvedSum = getTopLevelSubInts(containedSubInts).reduce (sofar, subInt) ->
+      resolvedSum = getTopLevelSubIntervals(containedSubInts).reduce (sofar, subInt) ->
         sofar + subInt.value
       , 0
       difference = resolvedSum - cIncident.count
@@ -521,7 +534,7 @@ createSupplementalIncidentsSingleType = (incidents, targetIncidents) ->
     .value()
   targetIncidents.forEach (targetIncident) ->
     containedSubInts = getContainedSubIntervals(targetIncident, subIntsByStart)
-    containedTopLevelSubIntervals = getTopLevelSubInts(containedSubInts)
+    containedTopLevelSubIntervals = getTopLevelSubIntervals(containedSubInts)
     resolvedSum = containedTopLevelSubIntervals.reduce (sofar, subInt) ->
       sofar + subInt.value
     , 0
