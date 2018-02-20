@@ -53,9 +53,6 @@ Meteor.startup ->
         Meteor.clearInterval(interval)
     interval = Meteor.setInterval(validateIncidents, 20000)
 
-  if not Meteor.isAppTest
-    Meteor.setInterval(autoprocessArticles, 100000)
-
   # If a remote EIDR-C instance url is provided, periodically pull data from it.
   if process.env.ONE_WAY_SYNC_URL
     # Do initial sync on startup
@@ -66,13 +63,16 @@ Meteor.startup ->
   Meteor.setInterval updateAutoEvents, 60 * 60 * 1000
   updateAutoEvents()
 
-  Meteor.setInterval ->
-    # Pull in the latest ProMED posts for processing.
-    Meteor.call('fetchPromedPosts',
-      startDate: moment().subtract(2, 'days').toDate()
-      endDate: new Date()
-    )
-  , 5 * 60 * 60 * 1000
+  if not Meteor.isAppTest
+    Meteor.setInterval(autoprocessArticles, 100000)
 
-  console.log "Syncing structured data feeds"
-  syncStructuredFeeds()
+    Meteor.setInterval ->
+      # Pull in the latest ProMED posts for processing.
+      Meteor.call('fetchPromedPosts',
+        startDate: moment().subtract(2, 'days').toDate()
+        endDate: new Date()
+      )
+    , 5 * 60 * 60 * 1000
+
+    console.log "Syncing structured data feeds"
+    syncStructuredFeeds()
