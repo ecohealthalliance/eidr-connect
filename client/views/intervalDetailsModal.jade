@@ -34,6 +34,8 @@ template(name="componentTreeList")
             else
               each incident in originalIncidents
                 a.view-incident(data-id="{{incident._id}}") {{incidentToText incident}}
+                if incident.sourceFeed
+                  span &nbsp;(Constraining)
   if children
     h4 Subcomponents
     each children

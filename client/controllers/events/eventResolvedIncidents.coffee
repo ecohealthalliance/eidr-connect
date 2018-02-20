@@ -173,7 +173,6 @@ Template.eventResolvedIncidents.onRendered ->
       else
         baseIncidents.push incident
     supplementalIncidents = createSupplementalIncidents(baseIncidents, constrainingIncidents)
-    console.log supplementalIncidents, constrainingIncidents
     differentialIncidents = convertAllIncidentsToDifferentials(
       baseIncidents,
       replaceRegionsWithCountries=false
