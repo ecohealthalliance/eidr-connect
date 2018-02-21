@@ -36,15 +36,15 @@ do ->
     @When /^I select the "([^']*)" tab$/, (tab) ->
       switch tab
         when 'estimated epi curves'
-          @client.clickWhenVisible('.event nav ul li:nth-of-type(1) a')
+          @client.clickWhenVisible('.event nav .estimated-epi-curves')
         when 'incidents'
-          @client.clickWhenVisible('.event nav ul li:nth-of-type(2) a')
+          @client.clickWhenVisible('.event nav .incidents')
         when 'affected areas'
-          @client.clickWhenVisible('.event nav ul li:nth-of-type(3) a')
+          @client.clickWhenVisible('.event nav .affected-areas')
         when 'details'
-          @client.clickWhenVisible('.event nav ul li:nth-of-type(4) ul li:first-of-type a')
+          @client.clickWhenVisible('.event nav .details')
         when 'references'
-          @client.clickWhenVisible('.event nav ul li:nth-of-type(4) ul li:nth-of-type(2) a')
+          @client.clickWhenVisible('.event nav .references')
 
     @When /^I delete the event$/, ->
       @client.clickWhenVisible('.edit-event')
