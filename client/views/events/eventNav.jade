@@ -15,6 +15,11 @@ template(name="eventNav")
         span
           i.fa.fa-globe
           span Affected Areas
+    li(class="{{checkActive 'eventFeeds'}}")
+      a(href="{{pathFor route=route _id=id _view='eventFeeds'}}")
+        span
+          i.fa.fa-rss
+          span Feeds
     li.on-right
       ul.list-unstyled
         li(class="{{checkActive 'details'}}")

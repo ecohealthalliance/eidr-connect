@@ -42,7 +42,7 @@ Template.incidentModal.helpers
     Template.instance().data.incident?._id
 
   editable: ->
-    not Template.instance().data.incident.sourceFeed
+    not Template.instance().data.incident?.sourceFeed
 
 Template.incidentModal.events
   'click .save-incident, click .save-incident-duplicate': (event, instance) ->

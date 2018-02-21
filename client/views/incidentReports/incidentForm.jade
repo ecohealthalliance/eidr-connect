@@ -9,7 +9,7 @@ template(name="incidentForm")
         if incidentData.sourceFeed
           label Source Data Feed
           p
-            a(href="{{formatUrl incidentData.sourceFeed}}" target="_blank")= incidentData.sourceFeed
+            a(href="{{formatUrl sourceFeed.url}}" target="_blank")= sourceFeed.title
         else
           if document
             .form-group.form-group--full

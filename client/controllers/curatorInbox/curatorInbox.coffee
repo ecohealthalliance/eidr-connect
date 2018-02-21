@@ -65,7 +65,7 @@ Template.curatorInbox.onCreated ->
   @filtering = new ReactiveVar(false)
   @searching = new ReactiveVar(false)
   @selectedFeedId = new ReactiveVar(DEFAULT_FEED_ID)
-  @subscribe 'feeds', =>
+  @subscribe 'feeds', {structuredData: $in: [null, false]}, =>
     @selectedFeedId.set(Feeds.findOne(title: 'ProMED-mail')?._id or DEFAULT_FEED_ID)
 
 Template.curatorInbox.onRendered ->

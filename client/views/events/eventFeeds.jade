@@ -1,0 +1,6 @@
+template(name="eventFeeds")
+  section.event--feeds
+    if tableCollection.length
+      +reactiveTable collection=tableCollection settings=tableSettings
+    else
+      p.center-position No feeds are associated with this event.
