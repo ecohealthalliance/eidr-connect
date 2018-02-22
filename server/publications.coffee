@@ -130,8 +130,8 @@ Meteor.publish 'article', (sourceId) ->
 Meteor.publish 'incidentArticle', (articleId) ->
   Articles.find(articleId)
 
-Meteor.publish 'feeds', ->
-  Feeds.find()
+Meteor.publish 'feeds', (query={}) ->
+  Feeds.find(query)
 
 Meteor.publish "allUsers", ->
   if not Roles.userIsInRole(@userId, ['admin'])

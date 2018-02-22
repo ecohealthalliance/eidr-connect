@@ -4,6 +4,7 @@ import Articles from '/imports/collections/articles'
 import autoprocessArticles from '/server/autoprocess'
 import updateDatabase from '/server/updaters'
 import syncCollection from '/server/oneWaySync'
+import syncStructuredFeeds from '/server/syncStructuredFeeds'
 import updateAutoEvents from '/server/updateAutoEvents'
 import Feeds from '/imports/collections/feeds'
 import feedSchema from '/imports/schemas/feed'
@@ -52,9 +53,6 @@ Meteor.startup ->
         Meteor.clearInterval(interval)
     interval = Meteor.setInterval(validateIncidents, 20000)
 
-  if not Meteor.isAppTest
-    Meteor.setInterval(autoprocessArticles, 100000)
-
   # If a remote EIDR-C instance url is provided, periodically pull data from it.
   if process.env.ONE_WAY_SYNC_URL
     # Do initial sync on startup
@@ -65,10 +63,16 @@ Meteor.startup ->
   Meteor.setInterval updateAutoEvents, 60 * 60 * 1000
   updateAutoEvents()
 
-  Meteor.setInterval ->
-    # Pull in the latest ProMED posts for processing.
-    Meteor.call('fetchPromedPosts',
-      startDate: moment().subtract(2, 'days').toDate()
-      endDate: new Date()
-    )
-  , 5 * 60 * 60 * 1000
+  if not Meteor.isAppTest
+    Meteor.setInterval(autoprocessArticles, 100000)
+
+    Meteor.setInterval ->
+      # Pull in the latest ProMED posts for processing.
+      Meteor.call('fetchPromedPosts',
+        startDate: moment().subtract(2, 'days').toDate()
+        endDate: new Date()
+      )
+    , 5 * 60 * 60 * 1000
+
+    console.log "Syncing structured data feeds"
+    syncStructuredFeeds()

@@ -82,5 +82,8 @@ export default class LocationTree
   getLocationById: (locationId) ->
     @getNodeById(locationId)?.value
 
+  contains: (location) ->
+    locationContains(@value, location)
+
 LocationTree.from = locationsToLocationTree
 LocationTree.locationContains = locationContains

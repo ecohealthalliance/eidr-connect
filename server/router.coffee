@@ -7,11 +7,13 @@ import { createIncidentReportsFromEnhancements } from '/imports/nlp'
 import PromedPosts from '/imports/collections/promedPosts'
 import convertAllIncidentsToDifferentials from '/imports/incidentResolution/convertAllIncidentsToDifferentials'
 import {
-  differentailIncidentsToSubIntervals,
+  differentialIncidentsToSubIntervals,
+  removeOutlierIncidents,
+  createSupplementalIncidents,
   extendSubIntervalsWithValues
 } from '/imports/incidentResolution/incidentResolution'
 import LocationTree from '/imports/incidentResolution/LocationTree'
-
+import { _ } from 'meteor/underscore';
 
 fs = Npm.require('fs')
 path = Npm.require('path')
@@ -232,7 +234,7 @@ Router.route("/api/resolve-incidents", where: "server")
   if _.findWhere(differentials, type: 'cases') and _.findWhere(differentials, type: 'deaths')
     @response.statusCode = 400
     return @response.end("The submitted incidents must all be of a single type, either case counts or death counts.")
-  subIntervals = differentailIncidentsToSubIntervals(differentials)
+  subIntervals = differentialIncidentsToSubIntervals(differentials)
   extendSubIntervalsWithValues(differentials, subIntervals)
   @response.setHeader('Access-Control-Allow-Origin', '*')
   @response.statusCode = 200
@@ -268,6 +270,8 @@ Router.route("/api/resolve-incidents", where: "server")
 Router.route("/api/events-with-resolved-data", where: "server")
 .get ->
   eventIds = @request.query.ids
+  if _.isString(@request.query.ids)
+    eventIds = [@request.query.ids]
   if @request.query.startDate
     dateRange =
       start: new Date(@request.query.startDate)
@@ -307,11 +311,26 @@ Router.route("/api/events-with-resolved-data", where: "server")
   @response.statusCode = 200
   @response.end(JSON.stringify({
     events: events.map (event) ->
-      differentials = _.where(
-        convertAllIncidentsToDifferentials(event.incidents),
-        type: 'cases'
+      baseIncidents = []
+      constrainingIncidents = []
+      event.incidents.map (incident) ->
+        if incident.constraining
+          constrainingIncidents.push incident
+        else
+          baseIncidents.push incident
+      incidentsWithoutOutliers = removeOutlierIncidents(
+        baseIncidents,
+        constrainingIncidents
       )
-      subIntervals = differentailIncidentsToSubIntervals(differentials)
+      supplementalIncidents = createSupplementalIncidents(
+        incidentsWithoutOutliers,
+        constrainingIncidents
+      )
+      allDifferentials = convertAllIncidentsToDifferentials(
+        incidentsWithoutOutliers
+      ).concat(supplementalIncidents)
+      differentials = _.where(allDifferentials, type: 'cases')
+      subIntervals = differentialIncidentsToSubIntervals(differentials)
       extendSubIntervalsWithValues(differentials, subIntervals)
       locationTree = LocationTree.from(subIntervals.map (x) -> x.location)
       topLocations = locationTree.children.map (x) -> x.value
@@ -335,27 +354,42 @@ Router.route("/api/events-with-resolved-data", where: "server")
         maxSubintervals = _.sortBy(maxSubintervals, (x) -> x.start)
         total = 0
         maxSubintervals.forEach (subInt) ->
-          # Prorate the count if it is outside of the dateRange
-          if dateRange and (subInt.end > dateRange.end or subInt.start < dateRange.start)
-            [noop, overlapStart, overlapEnd, noop2] = [
-              subInt.end, subInt.start, Number(dateRange.start), Number(dateRange.end)
-            ].sort()
-            overlapRatio = (overlapEnd - overlapStart) / (subInt.end - subInt.start)
-            total += subInt.value * overlapRatio
+          if dateRange
+            # Prorate the count by how much it overlaps the date range
+            if subInt.end > Number(dateRange.start) and subInt.start < Number(dateRange.end)
+              [noop, overlapStart, overlapEnd, noop2] = [
+                subInt.end, subInt.start, Number(dateRange.start), Number(dateRange.end)
+              ].sort()
+              overlapRatio = (overlapEnd - overlapStart) / (subInt.end - subInt.start)
+              total += subInt.value * overlapRatio
           else
-            total += subInt.value
+              total += subInt.value
         # If the country code appeared before, it is because the top locations
         # are not at the country level, so values with the same country code
         # can be combined to get the count for the country.
         prevTotal = countryCodeToCount[location.countryCode] or 0
         countryCodeToCount[location.countryCode] = prevTotal + total
-      groupedSubIntervals = _.groupBy(maxSubintervalsPerLocation, 'end')
-      overallTimeseries = _.chain(groupedSubIntervals)
+      overallTimeseries = _.chain(maxSubintervalsPerLocation)
+        .groupBy('end')
         .pairs()
-        .map ([end, group]) ->
-          date: new Date(parseInt(end))
-          value: group.reduce(((sofar, cur)-> sofar + cur.value), 0)
-        .sortBy('date')
+        .map ([end, group]) -> [new Date(parseInt(end)), group]
+        .sortBy (x) -> x[0]
+        .reduce((sofar, [endDate, group]) ->
+          value = group.reduce(((sofar, cur)-> sofar + cur.rate), 0)
+          if sofar
+            sofar.concat(
+              date: endDate
+              value: value
+            )
+          else
+            [
+              date: new Date(group[0].start)
+              value: value
+            ,
+              date: endDate
+              value: value
+            ]
+        , null)
         .value()
       return {
         eventId: event._id

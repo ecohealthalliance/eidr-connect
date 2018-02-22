@@ -1,5 +1,6 @@
-import Articles from '/imports/collections/articles.coffee'
-import createInlineDateRangePicker from '/imports/ui/inlineDateRangePicker.coffee'
+import Articles from '/imports/collections/articles'
+import Feeds from '/imports/collections/feeds'
+import createInlineDateRangePicker from '/imports/ui/inlineDateRangePicker'
 import {
   formatLocation,
   keyboardSelect,
@@ -39,6 +40,9 @@ Template.incidentForm.onCreated ->
       type: 'day'
 
   if incident
+    if incident.sourceFeed
+      @subscribe('feeds', {_id: incident.sourceFeed})
+
     @incidentData = _.extend(@incidentData, incident)
     if incident.dateRange
       @incidentData.dateRange = incident.dateRange
@@ -227,6 +231,9 @@ Template.incidentForm.helpers
 
   isSelectedIncidentType: ->
     @id == Template.instance().incidentType.get()
+
+  sourceFeed: ->
+    Feeds.findOne()
 
 Template.incidentForm.events
   'change input[name=daterangepicker_start]': (event, instance) ->

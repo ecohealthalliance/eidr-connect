@@ -2,8 +2,9 @@ import EventIncidents from '/imports/collections/eventIncidents'
 import { formatLocation } from '/imports/utils'
 import convertAllIncidentsToDifferentials from '/imports/incidentResolution/convertAllIncidentsToDifferentials.coffee'
 import {
-  differentailIncidentsToSubIntervals,
-  extendSubIntervalsWithValues
+  differentialIncidentsToSubIntervals,
+  extendSubIntervalsWithValues,
+  createSupplementalIncidents
 } from '/imports/incidentResolution/incidentResolution.coffee'
 import LocationTree from '/imports/incidentResolution/LocationTree.coffee'
 import MapHelpers from '/imports/ui/mapMarkers.coffee'
@@ -78,19 +79,31 @@ Template.eventAffectedAreas.onRendered ->
     mapableIncidents = incidents.fetch().filter (i) ->
       i.locations.every (l) -> l.featureCode
     if incidentType and worldGeoJSON
-      differentials = convertAllIncidentsToDifferentials(mapableIncidents)
-      differentials = _.where(differentials, type: incidentType)
-      subIntervals = differentailIncidentsToSubIntervals(differentials)
+      baseIncidents = []
+      constrainingIncidents = []
+      mapableIncidents.map (incident) ->
+        if incident.constraining
+          constrainingIncidents.push incident
+        else
+          baseIncidents.push incident
+      supplementalIncidents = createSupplementalIncidents(baseIncidents, constrainingIncidents)
+      differentialIncidents = convertAllIncidentsToDifferentials(
+        baseIncidents
+      ).concat(supplementalIncidents)
+      differentialIncidents = _.where(
+        differentialIncidents, type: incidentType
+      )
+      subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
       if subIntervals.length > Constants.MAX_SUBINTERVALS
         @tooManyIncidents.set(true)
         @maxCount.set(0)
         return
       else
         @tooManyIncidents.set(false)
-      extendSubIntervalsWithValues(differentials, subIntervals)
+      extendSubIntervalsWithValues(differentialIncidents, subIntervals)
       for subInterval in subIntervals
         subInterval.incidents = subInterval.incidentIds.map (id) ->
-          differentials[id]
+          differentialIncidents[id]
 
       locationTree = LocationTree.from(subIntervals.map (x) -> x.location)
       topLocations = locationTree.children.map (x) -> x.value

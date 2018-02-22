@@ -8,10 +8,11 @@ template(name="incidentModal")
           +modalCloseButton
           .modal-header--title
             h4
-              if edit
-                | Edit
-              else
-                | Add
+              if editable
+                if edit
+                  | Edit
+                else
+                  | Add
               |  Incident
         .modal-body
           +incidentForm(
@@ -22,7 +23,8 @@ template(name="incidentModal")
 
         .modal-footer
           button.btn.btn-default.on-left(type="button" data-dismiss="modal") Cancel
-          if edit
-            button.btn.btn-danger.delete-incident(type="button") Delete
-          button.btn.btn-primary.btn-wide.save-incident(type="button"
-            disabled="{{#if submitting}} true {{/if}}") Save
+          if editable
+            if edit
+              button.btn.btn-danger.delete-incident(type="button") Delete
+            button.btn.btn-primary.btn-wide.save-incident(type="button"
+              disabled="{{#if submitting}} true {{/if}}") Save

@@ -17,5 +17,8 @@ feedSchema = new SimpleSchema
   default:
     type: Boolean
     optional: true
+  structuredData:
+    type: Boolean
+    optional: true
 
 module.exports = feedSchema

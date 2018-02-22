@@ -32,7 +32,7 @@ module.exports = {
   // you may run out of memory. Use browser.setViewportSize to make the
   // viewport size smaller.
   saveScreenshotsToReport: true,
-  jsonOutput: true,
+  jsonOutput: null,
   coffee: true,
   compiler: 'coffee:coffee-script/register',
   conditionOutput: true,

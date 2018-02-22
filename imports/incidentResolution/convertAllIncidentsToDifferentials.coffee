@@ -2,63 +2,102 @@ import LocationTree from './LocationTree'
 import regionToCountries from '/imports/regionToCountries.json'
 import countryISOToGeoname from '/imports/countryISOToGeoname.json'
 
+MILLIS_PER_DAY = 1000 * 60 * 60 * 24
+
+class DifferentialIncident
+  constructor: (incident) ->
+    # Check if the incident has all the properties needed to define a
+    # differential incident. If not default to converting a regular
+    # incident.
+    properties = [
+      'startDate',
+      'endDate',
+      'count',
+      'type',
+      'locations',
+      'cumulative',
+      'originalIncidents'
+    ]
+    if properties.every((p) -> p of incident)
+      for prop in properties
+        @[prop] = incident[prop]
+    else
+      @startDate = new Date(incident.dateRange.start)
+      @startDate.setUTCHours(0)
+      @startDate.setUTCMinutes(0)
+      @startDate.setUTCSeconds(0)
+      @startDate.setUTCMilliseconds(0)
+      # Give the endDate a one hour offset before rounding it down to the start
+      # of the day incase it is right before the end of the day.
+      @endDate = new Date(incident.dateRange.end)
+      @endDate.setUTCMinutes(70)
+      @endDate.setUTCHours(0)
+      @endDate.setUTCMinutes(0)
+      @endDate.setUTCSeconds(0)
+      @endDate.setUTCMilliseconds(0)
+      if @startDate > @endDate
+        console.log(incident)
+        throw new Error("Invalid incident")
+      else if Number(@startDate) == Number(@endDate) and not incident.dateRange.cumulative
+        # Convert single day incidents to one day long date ranges
+        @endDate.setUTCDate(@endDate.getUTCDate() + 1)
+      @count = incident.cases or incident.deaths
+      @type = _.keys(_.pick(incident, 'cases', 'deaths'))[0]
+      # Remove duplicate/contained locations from location array
+      @locations = LocationTree.from(incident.locations or []).children.map (x) ->
+        x.value
+      @cumulative = incident.dateRange.cumulative
+      @originalIncidents = [incident]
+    @initialize()
+  initialize: () ->
+    @duration = (Number(@endDate) - Number(@startDate)) / MILLIS_PER_DAY
+    # The case rate is divided by the number of locations in the incident
+    # so that a report of cases distributed in 3 states won't result in
+    # a count of triple that for the country.
+    @rate = @count / @duration / @locations.length
+    return @
+  clone: (extendProps={}) ->
+    clonedIncident = Object.create(@)
+    _.extend(clonedIncident, extendProps)
+    clonedIncident.initialize()
+
 # Replace cumulative incident reports with differential incident reports
 # created by taking the difference in counts between two subsequent cumulative
 # reports in the same location.
 convertAllIncidentsToDifferentials = (incidents, replaceRegionsWithCountries=true) ->
   cumulativeIncidents = []
-  differentailIncidents = []
+  differentialIncidents = []
+  # Replace regions with contained country geonames
+  if replaceRegionsWithCountries
+    incidents.forEach (incident) ->
+      if not incident.locations?.length
+        return
+      locations = []
+      incident.locations.forEach (location) ->
+        if regionToCountries[location.id]
+          regionToCountries[location.id].countryISOs.forEach (iso) ->
+            console.assert(countryISOToGeoname[iso])
+            locations.push(countryISOToGeoname[iso])
+        else
+          locations.push(location)
+      incident.locations = locations
   incidents.forEach (incident) ->
-    # Replace regions with contained country geonames
-    locations = []
-    incident.locations?.forEach (location) ->
-      if replaceRegionsWithCountries and regionToCountries[location.id]
-        regionToCountries[location.id].countryISOs.forEach (iso) ->
-          console.assert countryISOToGeoname[iso]
-          locations.push(countryISOToGeoname[iso])
-      else
-        locations.push(location)
-    # Remove duplicate/contained locations from loc array
-    locations = LocationTree.from(locations).children.map (x)->x.value
-    if not incident.dateRange or incident.specify
+    if not incident.dateRange
       return
-    if incident.type == 'activeCount'
+    if (incident.type in ['activeCount', 'specify']) or incident.specify
       return
-    simpleIncident =
-      startDate: new Date(incident.dateRange.start)
-      endDate: new Date(incident.dateRange.end)
-      count: incident.cases or incident.deaths
-      type: _.keys(_.pick(incident, 'cases', 'deaths', 'specify'))[0]
-      locations: locations
-      cumulative: incident.dateRange.cumulative
-      originalIncidents: [incident]
+    simpleIncident = new DifferentialIncident(incident)
     if not simpleIncident.count
       return
-    simpleIncident.startDate.setUTCHours(0)
-    simpleIncident.startDate.setUTCMinutes(0)
-    simpleIncident.startDate.setUTCSeconds(0)
-    simpleIncident.startDate.setUTCMilliseconds(0)
-    # give the endDate a one hour offset before rounding it down to the start of
-    # the day incase it is right before the end of the day.
-    simpleIncident.endDate.setUTCMinutes(70)
-    simpleIncident.endDate.setUTCHours(0)
-    simpleIncident.endDate.setUTCMinutes(0)
-    simpleIncident.endDate.setUTCSeconds(0)
-    simpleIncident.endDate.setUTCMilliseconds(0)
     if incident.dateRange.cumulative
       cumulativeIncidents.push(simpleIncident)
     else
-      if simpleIncident.startDate > simpleIncident.endDate
-        console.log(simpleIncident)
-        throw new Error("Invalid incident")
-      else if Number(simpleIncident.startDate) == Number(simpleIncident.endDate)
-        simpleIncident.endDate.setUTCDate(simpleIncident.endDate.getUTCDate() + 1)
-      differentailIncidents.push(simpleIncident)
+      differentialIncidents.push(simpleIncident)
   _.chain(cumulativeIncidents)
     .sortBy("endDate")
-    .groupBy (i)->
-      i.type + "," + (i?.locations or []).map((l)->l.id).sort()
-    .forEach (incidentGroup, b)->
+    .groupBy (i) ->
+      i.type + "," + (i?.locations or []).map((l) -> l.id).sort()
+    .forEach (incidentGroup, b) ->
       # If two incidents have the same time offset, use the one with the
       # greater count.
       incidentGroup = incidentGroup.reduce((sofar, incident)->
@@ -78,8 +117,8 @@ convertAllIncidentsToDifferentials = (incidents, replaceRegionsWithCountries=tru
       , [])
       prevIncident = incidentGroup[0]
       for [incident, nextIncident] in _.zip(incidentGroup.slice(1), incidentGroup.slice(2))
-        count = incident.count - prevIncident.count
-        if count < 0
+        countDifference = incident.count - prevIncident.count
+        if countDifference < 0
           # This cumulative count is less than prior counts.
           # A differential count cannot be created from it.
           if nextIncident and nextIncident.count < prevIncident.count
@@ -87,16 +126,18 @@ convertAllIncidentsToDifferentials = (incidents, replaceRegionsWithCountries=tru
             # so assume the cumulative counts have started over.
             prevIncident = incident
           continue
-        newDifferential =
+        newDifferential = new DifferentialIncident(
           type: incident.type
           locations: incident.locations
           cumulative: incident.cumulative
-          count: count
+          count: countDifference
           startDate: prevIncident.endDate
           endDate: incident.endDate
           originalIncidents: prevIncident.originalIncidents.concat(
-            incident.originalIncidents)
+            incident.originalIncidents
+          )
+        )
         prevIncident = incident
-        differentailIncidents.push(newDifferential)
-  return differentailIncidents
+        differentialIncidents.push(newDifferential)
+  return differentialIncidents
 module.exports = convertAllIncidentsToDifferentials

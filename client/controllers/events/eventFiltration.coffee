@@ -1,5 +1,8 @@
 import EventIncidents from '/imports/collections/eventIncidents'
 import regionToCountries from '/imports/regionToCountries.json'
+import {
+  removeOutlierIncidents
+} from '/imports/incidentResolution/incidentResolution'
 
 formatDateForInput = (date) ->
   unless date
@@ -16,16 +19,6 @@ propStates = (props) ->
     query.$in = positive
   if negative.length
     query.$nin = negative
-  query
-
-# Build query based on the state of the other prop button/prop
-otherPropStates = (props) ->
-  query = {}
-  props.forEach (prop) ->
-    if prop.state
-      query[prop.name] = prop.state
-    else
-      query[prop.name] = $in: [null, false]
   query
 
 inputState = (input) ->
@@ -218,9 +211,27 @@ Template.eventFiltration.onRendered ->
 
     # Other Properties
     otherProps = @properties.get()
-    if otherProps.length
-      filters = _.extend(filters, otherPropStates(otherProps))
+    travelRelated = _.findWhere(otherProps, name: "travelRelated")
+    if travelRelated
+      filters.travelRelated = travelRelated.state
 
+    outliers = _.findWhere(otherProps, name: "outlier")
+    if outliers
+      baseIncidents = []
+      constrainingIncidents = []
+      EventIncidents.find(filters).map (incident) ->
+        if incident.constraining
+          constrainingIncidents.push incident
+        else
+          baseIncidents.push incident
+      incidentsWithoutOutliers = removeOutlierIncidents(baseIncidents, constrainingIncidents)
+      inlierIds = _.pluck(incidentsWithoutOutliers, '_id')
+      if outliers.state
+        filters._id =
+          $in: _.difference(_.pluck(baseIncidents, '_id'), inlierIds)
+      else
+        filters._id =
+          $in: inlierIds.concat(_.pluck(constrainingIncidents, '_id'))
     # Set filterQuery used to filter EventIncidents collection
     # in child templates.
     @data.filterQuery.set(filters)
