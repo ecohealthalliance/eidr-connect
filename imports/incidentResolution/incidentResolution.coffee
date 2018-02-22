@@ -60,7 +60,7 @@ intervalToEndpoints = (interval) ->
     new Endpoint(false, Number(interval.endDate), interval)
   ]
 
-differentailIncidentsToSubIntervals = (differentialIncidents) ->
+differentialIncidentsToSubIntervals = (differentialIncidents) ->
   if differentialIncidents.length == 0
     return []
   endpoints = []
@@ -367,7 +367,7 @@ removeOutlierIncidents = (originalIncidents, constrainingIncidents) ->
 removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
   # Remove incidents that exceed the 90th percentile of rates for their feature
   # type by more than 10x.
-  subIntervals = differentailIncidentsToSubIntervals(incidents)
+  subIntervals = differentialIncidentsToSubIntervals(incidents)
   incidentsByLocationCode = _.groupBy(incidents, (x) -> x.locations[0].featureCode)
   incidentsToKeep = []
   for locationCode, incidentGroup of incidentsByLocationCode
@@ -408,7 +408,7 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
   # exceeded by any counts.
   loop
     outlierIncidentIds = new Set()
-    subIntervals = differentailIncidentsToSubIntervals(incidents)
+    subIntervals = differentialIncidentsToSubIntervals(incidents)
     # Compute CASIM for each sub-interval
     # CASIM = count above sub-interval median
     # The "lower" median is used so we have an upper bound on the cases that
@@ -524,7 +524,7 @@ createSupplementalIncidentsSingleType = (incidents, targetIncidents) ->
       __virtualIncident: true
     )
   )
-  subIntervals = differentailIncidentsToSubIntervals(incidents)
+  subIntervals = differentialIncidentsToSubIntervals(incidents)
   extendSubIntervalsWithValues(incidents, subIntervals)
   subIntsByStart = _.chain(subIntervals)
     .groupBy('start')
@@ -576,7 +576,7 @@ createSupplementalIncidentsSingleType = (incidents, targetIncidents) ->
   return supplementalIncidents
 
 export intervalToEndpoints = intervalToEndpoints
-export differentailIncidentsToSubIntervals = differentailIncidentsToSubIntervals
+export differentialIncidentsToSubIntervals = differentialIncidentsToSubIntervals
 export subIntervalsToLP = subIntervalsToLP
 export extendSubIntervalsWithValues = extendSubIntervalsWithValues
 export removeOutlierIncidents = removeOutlierIncidents

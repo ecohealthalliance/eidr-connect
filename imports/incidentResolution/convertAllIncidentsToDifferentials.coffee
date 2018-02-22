@@ -66,7 +66,7 @@ class DifferentialIncident
 # reports in the same location.
 convertAllIncidentsToDifferentials = (incidents, replaceRegionsWithCountries=true) ->
   cumulativeIncidents = []
-  differentailIncidents = []
+  differentialIncidents = []
   # Replace regions with contained country geonames
   if replaceRegionsWithCountries
     incidents.forEach (incident) ->
@@ -92,7 +92,7 @@ convertAllIncidentsToDifferentials = (incidents, replaceRegionsWithCountries=tru
     if incident.dateRange.cumulative
       cumulativeIncidents.push(simpleIncident)
     else
-      differentailIncidents.push(simpleIncident)
+      differentialIncidents.push(simpleIncident)
   _.chain(cumulativeIncidents)
     .sortBy("endDate")
     .groupBy (i) ->
@@ -138,6 +138,6 @@ convertAllIncidentsToDifferentials = (incidents, replaceRegionsWithCountries=tru
           )
         )
         prevIncident = incident
-        differentailIncidents.push(newDifferential)
-  return differentailIncidents
+        differentialIncidents.push(newDifferential)
+  return differentialIncidents
 module.exports = convertAllIncidentsToDifferentials

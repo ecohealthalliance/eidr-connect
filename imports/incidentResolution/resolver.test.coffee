@@ -3,7 +3,7 @@ import Solver from './LPSolver'
 import incidents from './incidents'
 import convertAllIncidentsToDifferentials from './convertAllIncidentsToDifferentials'
 import {
-  differentailIncidentsToSubIntervals,
+  differentialIncidentsToSubIntervals,
   subIntervalsToLP,
   intervalToEndpoints,
   removeOutlierIncidents,
@@ -85,7 +85,7 @@ describe 'Incident Resolution', ->
 
   it 'creates 3 subintervals for two overlapping incidents', ->
     differentialIncidents = convertAllIncidentsToDifferentials(overlappingIncidents)
-    subIntervals = differentailIncidentsToSubIntervals(differentialIncidents)
+    subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
     chai.assert.sameMembers(subIntervals[0].incidentIds, [0])
     chai.assert.sameMembers(subIntervals[1].incidentIds, [0, 1])
     chai.assert.sameMembers(subIntervals[2].incidentIds, [1])
@@ -106,13 +106,13 @@ describe 'Incident Resolution', ->
       locations: [lome]
     }]
     differentialIncidents = convertAllIncidentsToDifferentials(overlappingIncidentsSharedStart)
-    subIntervals = differentailIncidentsToSubIntervals(differentialIncidents)
+    subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
     chai.assert.sameMembers(subIntervals[0].incidentIds, [0, 1])
     chai.assert.equal(subIntervals.length, 1)
 
   it 'allocates counts proportionately', ->
     differentialIncidents = convertAllIncidentsToDifferentials(overlappingIncidents)
-    subIntervals = differentailIncidentsToSubIntervals(differentialIncidents)
+    subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
     model = subIntervalsToLP(differentialIncidents, subIntervals)
     solution = Solver.Solve(Solver.ReformatLP(model))
     chai.assert(solution.s0 < 50)
@@ -144,7 +144,7 @@ describe 'Incident Resolution', ->
         end: new Date("Jan 1 2012 UTC")
       locations: [lome]
     }])
-    subIntervals = differentailIncidentsToSubIntervals(differentialIncidents)
+    subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
     model = subIntervalsToLP(differentialIncidents, subIntervals)
     solution = Solver.Solve(Solver.ReformatLP(model))
     lomeIntervalIds = subIntervals
@@ -157,7 +157,7 @@ describe 'Incident Resolution', ->
 
   it 'handles inconsistent counts', ->
     differentialIncidents = convertAllIncidentsToDifferentials(inconsistentIncidents)
-    subIntervals = differentailIncidentsToSubIntervals(differentialIncidents)
+    subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
     model = subIntervalsToLP(differentialIncidents, subIntervals)
     solution = Solver.Solve(Solver.ReformatLP(model))
     chai.assert(solution.s1 < 50)
@@ -189,7 +189,7 @@ describe 'Incident Resolution', ->
     }]
     allIncidents = initialIncidents6Subintervals.concat(inconsistentIncidents)
     differentialIncidents = convertAllIncidentsToDifferentials(allIncidents)
-    subIntervals = differentailIncidentsToSubIntervals(differentialIncidents)
+    subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
     model = subIntervalsToLP(differentialIncidents, subIntervals)
     solution = Solver.Solve(Solver.ReformatLP(model))
     chai.assert(solution.s7 < 50)
@@ -199,7 +199,7 @@ describe 'Incident Resolution', ->
   it 'can resolve a large number of incidents', ->
     @timeout(5000)
     differentialIncidents = convertAllIncidentsToDifferentials(incidents).filter (i)->i.type == "deaths"
-    subIntervals = differentailIncidentsToSubIntervals(differentialIncidents)
+    subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
     model = subIntervalsToLP(differentialIncidents, subIntervals)
     solution = Solver.Solve(Solver.ReformatLP(model))
     for key, value of solution
@@ -324,7 +324,7 @@ describe 'Incident Resolution', ->
     supplementalIncidents = createSupplementalIncidents(incidentsWithoutOutliers, constrainingIncidents)
     combinedIncidents = convertAllIncidentsToDifferentials(incidentsWithoutOutliers)
      .concat(supplementalIncidents)
-    subIntervals = differentailIncidentsToSubIntervals(combinedIncidents)
+    subIntervals = differentialIncidentsToSubIntervals(combinedIncidents)
     extendSubIntervalsWithValues(combinedIncidents, subIntervals)
     total = subIntervals
       .filter (x) -> x.location == tongo

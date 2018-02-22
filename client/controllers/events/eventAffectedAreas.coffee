@@ -2,7 +2,7 @@ import EventIncidents from '/imports/collections/eventIncidents'
 import { formatLocation } from '/imports/utils'
 import convertAllIncidentsToDifferentials from '/imports/incidentResolution/convertAllIncidentsToDifferentials.coffee'
 import {
-  differentailIncidentsToSubIntervals,
+  differentialIncidentsToSubIntervals,
   extendSubIntervalsWithValues,
   createSupplementalIncidents
 } from '/imports/incidentResolution/incidentResolution.coffee'
@@ -93,7 +93,7 @@ Template.eventAffectedAreas.onRendered ->
       differentialIncidents = _.where(
         differentialIncidents, type: incidentType
       )
-      subIntervals = differentailIncidentsToSubIntervals(differentialIncidents)
+      subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
       if subIntervals.length > Constants.MAX_SUBINTERVALS
         @tooManyIncidents.set(true)
         @maxCount.set(0)

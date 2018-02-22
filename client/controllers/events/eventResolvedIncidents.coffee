@@ -1,7 +1,7 @@
 import Rickshaw from 'meteor/eidr:rickshaw.min'
 import convertAllIncidentsToDifferentials from '/imports/incidentResolution/convertAllIncidentsToDifferentials'
 import {
-  differentailIncidentsToSubIntervals,
+  differentialIncidentsToSubIntervals,
   extendSubIntervalsWithValues,
   createSupplementalIncidents
 } from '/imports/incidentResolution/incidentResolution'
@@ -194,7 +194,7 @@ Template.eventResolvedIncidents.onRendered ->
     @loading.set(true)
     @highlightedLocations.remove({})
     differentials = _.where(differentialIncidents, type: incidentType)
-    subIntervals = differentailIncidentsToSubIntervals(differentials)
+    subIntervals = differentialIncidentsToSubIntervals(differentials)
     if subIntervals.length > Constants.MAX_SUBINTERVALS
       @tooManyIncidents.set(true)
       @loading.set(false)

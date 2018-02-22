@@ -7,7 +7,7 @@ import { createIncidentReportsFromEnhancements } from '/imports/nlp'
 import PromedPosts from '/imports/collections/promedPosts'
 import convertAllIncidentsToDifferentials from '/imports/incidentResolution/convertAllIncidentsToDifferentials'
 import {
-  differentailIncidentsToSubIntervals,
+  differentialIncidentsToSubIntervals,
   removeOutlierIncidents,
   createSupplementalIncidents,
   extendSubIntervalsWithValues
@@ -234,7 +234,7 @@ Router.route("/api/resolve-incidents", where: "server")
   if _.findWhere(differentials, type: 'cases') and _.findWhere(differentials, type: 'deaths')
     @response.statusCode = 400
     return @response.end("The submitted incidents must all be of a single type, either case counts or death counts.")
-  subIntervals = differentailIncidentsToSubIntervals(differentials)
+  subIntervals = differentialIncidentsToSubIntervals(differentials)
   extendSubIntervalsWithValues(differentials, subIntervals)
   @response.setHeader('Access-Control-Allow-Origin', '*')
   @response.statusCode = 200
@@ -327,7 +327,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
         incidentsWithoutOutliers
       ).concat(supplementalIncidents)
       differentials = _.where(allDifferentials, type: 'cases')
-      subIntervals = differentailIncidentsToSubIntervals(differentials)
+      subIntervals = differentialIncidentsToSubIntervals(differentials)
       extendSubIntervalsWithValues(differentials, subIntervals)
       locationTree = LocationTree.from(subIntervals.map (x) -> x.location)
       topLocations = locationTree.children.map (x) -> x.value
