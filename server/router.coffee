@@ -38,7 +38,10 @@ Router.route("/api/events", {where: "server"})
 .get ->
   @response.setHeader('Content-Type', 'application/ejson')
   @response.statusCode = 200
-  @response.end(EJSON.stringify(UserEvents.find({}, {
+  query = {}
+  if @request.query
+    query = JSON.parse(@request.query.query)
+  @response.end(EJSON.stringify(UserEvents.find(query, {
     skip: parseInt(@request.query.skip or 0)
     limit: parseInt(@request.query.limit or 100)
   }).fetch()))
@@ -47,7 +50,10 @@ Router.route("/api/auto-events", {where: "server"})
 .get ->
   @response.setHeader('Content-Type', 'application/ejson')
   @response.statusCode = 200
-  @response.end(EJSON.stringify(AutoEvents.find({}, {
+  query = {}
+  if @request.query
+    query = JSON.parse(@request.query.query)
+  @response.end(EJSON.stringify(AutoEvents.find(query, {
     skip: parseInt(@request.query.skip or 0)
     limit: parseInt(@request.query.limit or 100)
   }).fetch()))
@@ -56,7 +62,10 @@ Router.route("/api/incidents", {where: "server"})
 .get ->
   @response.setHeader('Content-Type', 'application/ejson')
   @response.statusCode = 200
-  @response.end(EJSON.stringify(Incidents.find({}, {
+  query = {}
+  if @request.query
+    query = JSON.parse(@request.query.query)
+  @response.end(EJSON.stringify(Incidents.find(query, {
     skip: parseInt(@request.query.skip or 0)
     limit: parseInt(@request.query.limit or 100)
   }).fetch()))
@@ -65,7 +74,10 @@ Router.route("/api/articles", {where: "server"})
 .get ->
   @response.setHeader('Content-Type', 'application/ejson')
   @response.statusCode = 200
-  @response.end(EJSON.stringify(Articles.find({}, {
+  query = {}
+  if @request.query
+    query = JSON.parse(@request.query.query)
+  @response.end(EJSON.stringify(Articles.find(query, {
     skip: parseInt(@request.query.skip or 0)
     limit: parseInt(@request.query.limit or 100)
   }).fetch()))

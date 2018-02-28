@@ -29,8 +29,11 @@ module.exports = ->
   for id, diseaseGroup of diseaseGroups
     disease = diseaseGroup.resolvedDisease
     species = diseaseGroup.species
-    eventName = capitalize(if species.id is 'tsn:180092' then 'Human' else species.text)
-    eventName += ' ' + capitalize(disease.text)
+    if capitalize(disease.text).startsWith('Human')
+      eventName += capitalize(disease.text)
+    else
+      eventName = capitalize(if species.id is 'tsn:180092' then 'Human' else species.text)
+      eventName += ' ' + capitalize(disease.text)
     AutoEvents.upsert 'diseases.id': disease.id,
       eventName: eventName
       diseases: [disease]
