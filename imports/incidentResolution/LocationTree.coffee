@@ -85,5 +85,19 @@ export default class LocationTree
   contains: (location) ->
     locationContains(@value, location)
 
+  locations: (location) ->
+    result = [@value]
+    if @value == "ROOT"
+      result = []
+    for subTree in @children
+      result = result.concat(subTree.locations())
+    return result
+
+  toJSON: (transformationFunction=(x) -> x) ->
+    transformationFunction(
+      value: @value
+      children: @children.map (child) -> child.toJSON(transformationFunction)
+    )
+
 LocationTree.from = locationsToLocationTree
 LocationTree.locationContains = locationContains
