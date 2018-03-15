@@ -326,6 +326,8 @@ Router.route("/api/events-with-resolved-data", where: "server")
   @response.statusCode = 200
   @response.end(JSON.stringify({
     events: events.map (event) =>
+      if not event
+        return null
       baseIncidents = []
       constrainingIncidents = []
       event.incidents.map (incident) ->
@@ -365,7 +367,14 @@ Router.route("/api/events-with-resolved-data", where: "server")
         groupedLocSubIntervals = _.groupBy(locSubIntervals, 'start')
         maxSubintervals = []
         for group, subIntervalGroup of groupedLocSubIntervals
-          maxSubintervals.push(_.max(subIntervalGroup, (x) -> x.value))
+          subIntervalGroupTree = LocationTree.from(subIntervalGroup.map (x) -> x.location)
+          subIntervalGroupTree.children.forEach (locationNode) ->
+            maxSubintervals.push(_.max(subIntervalGroup, (subInterval) ->
+              if locationNode.value.id == subInterval.location.id
+                subInterval.value
+              else
+                0
+            ))
         if location in topLocations
           maxSubintervalsPerTopLocation = maxSubintervalsPerTopLocation.concat(maxSubintervals)
         maxSubintervals = _.sortBy(maxSubintervals, (x) -> x.start)
