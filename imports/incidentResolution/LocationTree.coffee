@@ -52,8 +52,10 @@ locationsToLocationTree = (locations) ->
 export default class LocationTree
   constructor: (@value, @children=[]) ->
     if @value != "ROOT"
-      console.assert @value.id
-      console.assert @value.featureCode
+      if not @value.featureCode or not @value.id
+        console.log @value.id
+        console.log @value
+        throw new Error("Invalid location")
 
   # Return the location's node or the node that should be its parent.
   search: (location) ->
