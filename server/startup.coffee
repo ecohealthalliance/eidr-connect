@@ -2,6 +2,7 @@ import incidentReportSchema from '/imports/schemas/incidentReport'
 import Incidents from '/imports/collections/incidentReports'
 import Articles from '/imports/collections/articles'
 import autoprocessArticles from '/server/autoprocess'
+import reprocessArticlesWithErrors from '/server/reprocessArticlesWithErrors'
 import updateDatabase from '/server/updaters'
 import syncCollection from '/server/oneWaySync'
 import syncStructuredFeeds from '/server/syncStructuredFeeds'
@@ -64,6 +65,7 @@ Meteor.startup ->
   updateAutoEvents()
 
   if not Meteor.isAppTest
+    reprocessArticlesWithErrors()
     Meteor.setInterval(autoprocessArticles, 100000)
 
     Meteor.setInterval ->

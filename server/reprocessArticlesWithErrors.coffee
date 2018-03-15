@@ -1,26 +1,17 @@
 import Articles from '/imports/collections/articles.coffee'
 import { forEachAsync } from '/imports/utils'
 
-busyProcessing = false
 module.exports = ->
-  if busyProcessing
-    return
-  else
-    busyProcessing = true
-  count = 0
+  successes = 0
   batch = Articles.find({
-    $or: [
-      enhancements: $exists: false
-    ,
-      'enhancements.diagnoserVersion': $lt: '0.4.2'
-    ]
+    'enhancements.error':
+      $exists: true
   }, {
-    limit: 20
+    limit: 200
     sort:
       addedDate: -1
   }).fetch()
   forEachAsync(batch, (article, next, done) ->
-    count++
     Meteor.call('getArticleEnhancementsAndUpdate', article._id, {
       hideLogs: true
       priority: false
@@ -29,11 +20,11 @@ module.exports = ->
       if error
         console.log article
         console.log error
-        done()
       else
-        next()
+        successes++
+      console.log "#{successes} / #{batch.length} airticles with errors successfully processed"
+      next()
     )
   , ->
-    console.log "processed #{count} articles"
-    busyProcessing = false
+    console.log "Done"
   )

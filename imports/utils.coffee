@@ -347,3 +347,11 @@ export eventToIncidentQuery = (event) ->
   if event.species and event.species.length > 0
     query['species.id'] = $in: event.species.map (x) -> x.id
   query
+
+export forEachAsync = (list, func, done)->
+  if list.length > 0
+    func(list[0], ->
+      forEachAsync(list.slice(1), func, done)
+    , done)
+  else
+    done()
