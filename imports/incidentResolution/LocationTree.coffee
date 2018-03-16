@@ -12,7 +12,7 @@ locationContains = (locationA, locationB) ->
     return true
   if locationA.id of regionToCountries
     return locationB.countryCode in regionToCountries[locationA.id].countryISOs
-  featureCode = locationA.featureCode
+  featureCode = locationA.featureCode or ""
   if featureCode.startsWith("PCL")
     containmentLevel = 1
   else if featureCode.endsWith("1")
@@ -52,8 +52,7 @@ locationsToLocationTree = (locations) ->
 export default class LocationTree
   constructor: (@value, @children=[]) ->
     if @value != "ROOT"
-      if not @value.featureCode or not @value.id
-        console.log @value.id
+      if not @value?.id
         console.log @value
         throw new Error("Invalid location")
 
