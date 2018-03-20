@@ -30,7 +30,7 @@ module.exports = ->
     disease = diseaseGroup.resolvedDisease
     species = diseaseGroup.species
     if capitalize(disease.text).startsWith('Human')
-      eventName += capitalize(disease.text)
+      eventName = capitalize(disease.text)
     else
       eventName = capitalize(if species.id is 'tsn:180092' then 'Human' else species.text)
       eventName += ' ' + capitalize(disease.text)
