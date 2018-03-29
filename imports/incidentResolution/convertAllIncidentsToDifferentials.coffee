@@ -37,7 +37,7 @@ class DifferentialIncident
       @endDate.setUTCMilliseconds(0)
       if @startDate > @endDate
         console.log(incident)
-        throw new Error("Invalid incident")
+        throw new Error("Invalid incident: Dates out of order.")
       else if Number(@startDate) == Number(@endDate) and not incident.dateRange.cumulative
         # Convert single day incidents to one day long date ranges
         @endDate.setUTCDate(@endDate.getUTCDate() + 1)

@@ -444,9 +444,7 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
       # If it exceeds the constraining incident, remove the incidents with
       # the highest CASIM values.
       containedSubInts = getContainedSubIntervals(cIncident, subIntsByStart)
-      resolvedSum = getTopLevelSubIntervals(containedSubInts).reduce (sofar, subInt) ->
-        sofar + subInt.value
-      , 0
+      resolvedSum = sum(getTopLevelSubIntervals(containedSubInts).map (subInt) -> subInt.value)
       difference = resolvedSum - cIncident.count
       if difference > 0
         excessCounts += 1
@@ -535,9 +533,7 @@ createSupplementalIncidentsSingleType = (incidents, targetIncidents) ->
   targetIncidents.forEach (targetIncident) ->
     containedSubInts = getContainedSubIntervals(targetIncident, subIntsByStart)
     containedTopLevelSubIntervals = getTopLevelSubIntervals(containedSubInts)
-    resolvedSum = containedTopLevelSubIntervals.reduce (sofar, subInt) ->
-      sofar + subInt.value
-    , 0
+    resolvedSum = sum(containedTopLevelSubIntervals.map (subInt) -> subInt.value)
     remainingCountDifference = targetIncident.count - resolvedSum
     if remainingCountDifference <= 0
       return
@@ -551,9 +547,7 @@ createSupplementalIncidentsSingleType = (incidents, targetIncidents) ->
     floorRate = 0
     for [subInt, nextSubInt] in _.zip(subIntsSortedByRate, subIntsSortedByRate.slice(1))
       supplementedSubIntervals.push(subInt)
-      totalNewSubIntDuration = supplementedSubIntervals.reduce (sofar, supSubInt) ->
-        sofar + supSubInt.duration
-      , 0
+      totalNewSubIntDuration = sum(supplementedSubIntervals.map (supSubInt) -> supSubInt.duration)
       if not nextSubInt
         floorRate += remainingCountDifference / totalNewSubIntDuration
         break
@@ -575,9 +569,51 @@ createSupplementalIncidentsSingleType = (incidents, targetIncidents) ->
       )
   return supplementalIncidents
 
+sum = (list) ->
+  list.reduce((sofar, x) ->
+    sofar + x
+  , 0)
+
+enumerateDateRange = (start, end) ->
+  start = new Date(start)
+  end = new Date(end)
+  current = start
+  result = []
+  while current < end
+    result.push(current)
+    current = new Date(current)
+    current.setDate(current.getDate() + 1)
+  return result
+
+subIntervalsToDailyRates = (subIntervals) ->
+  _.chain(subIntervals)
+    .map (subInterval)->
+      enumerateDateRange(subInterval.start, subInterval.end).map (date) ->
+        date: date
+        rate: subInterval.rate
+    .flatten()
+    .groupBy('date')
+    .pairs()
+    .map ([date, group]) -> [new Date(date), sum(group.map (x)-> x.rate)]
+    .sortBy (x) -> x[0]
+    .value()
+
+dailyRatesToActiveCases = (dailyRates, dailyDecayRate) ->  
+  activeCases = 0
+  activeCasesByDay = dailyRates.map ([day, rate]) ->
+    activeCases = activeCases * dailyDecayRate + rate
+    [day, activeCases]
+
+subIntervalsToActiveCases = (subIntervals, dailyDecayRate) ->
+  dailyRatesToActiveCases(subIntervalsToDailyRates(subIntervals), dailyDecayRate)
+
 export intervalToEndpoints = intervalToEndpoints
 export differentialIncidentsToSubIntervals = differentialIncidentsToSubIntervals
 export subIntervalsToLP = subIntervalsToLP
 export extendSubIntervalsWithValues = extendSubIntervalsWithValues
 export removeOutlierIncidents = removeOutlierIncidents
 export createSupplementalIncidents = createSupplementalIncidents
+export subIntervalsToActiveCases = subIntervalsToActiveCases
+export dailyRatesToActiveCases = dailyRatesToActiveCases
+export subIntervalsToDailyRates = subIntervalsToDailyRates
+export enumerateDateRange =  enumerateDateRange

@@ -202,10 +202,6 @@ describe 'Incident Resolution', ->
     subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
     model = subIntervalsToLP(differentialIncidents, subIntervals)
     solution = Solver.Solve(Solver.ReformatLP(model))
-    for key, value of solution
-      if key.startsWith("s")
-        subId = key.split("s")[1]
-        subInterval = subIntervals[parseInt(subId)]
 
   it 'creates end points', ->
     differentialIncidents = convertAllIncidentsToDifferentials(incidents)
