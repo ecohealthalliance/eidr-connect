@@ -329,6 +329,11 @@ Router.route("/api/events-with-resolved-data", where: "server")
     events: events.map (event) =>
       if not event
         return null
+      dailyDecayRate = 1.0
+      if (@request.query.activeCases + "").toLowerCase() == "true"
+        # TODO: look up disease specific stat
+        caseLengthDays = 14
+        dailyDecayRate = Math.pow(.5, (1 / caseLengthDays))
       baseIncidents = []
       constrainingIncidents = []
       event.incidents.map (incident) ->
@@ -363,7 +368,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
       maxSubintervalsPerTopLocation = []
       locationToTotals = _.chain(locToSubintervals)
       .pairs()
-      .map ([key, locSubIntervals]) ->
+      .map ([key, locSubIntervals]) =>
         location = locationTree.getLocationById(key)
         groupedLocSubIntervals = _.groupBy(locSubIntervals, 'start')
         maxSubintervals = []
@@ -379,25 +384,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
         if location in topLocations
           maxSubintervalsPerTopLocation = maxSubintervalsPerTopLocation.concat(maxSubintervals)
         maxSubintervals = _.sortBy(maxSubintervals, (x) -> x.start)
-        if (@request.query.activeCases + "").toLowerCase() == "true"
-          # TODO: look up disease specific stat
-          caseLengthDays = 14
-          dailyDecayRate = Math.pow(.5, (1 / caseLengthDays))
-        else
-          dailyDecayRate = 1.0
         total = subIntervalsToActiveCases(maxSubintervals, dailyDecayRate).slice(-1)[0][1]
-        # TODO Crop duration
-        # maxSubintervals.forEach (subInt) ->
-        #   if dateRange
-        #     # Prorate the count by how much it overlaps the date range
-        #     if subInt.end > Number(dateRange.start) and subInt.start < Number(dateRange.end)
-        #       [noop, overlapStart, overlapEnd, noop2] = [
-        #         subInt.end, subInt.start, Number(dateRange.start), Number(dateRange.end)
-        #       ].sort()
-        #       overlapRatio = (overlapEnd - overlapStart) / (subInt.end - subInt.start)
-        #       total += subInt.value * overlapRatio
-        #   else
-        #     total += subInt.value
         return [key, total]
       .object()
       .value()
@@ -410,7 +397,11 @@ Router.route("/api/events-with-resolved-data", where: "server")
         countryCodeToCount[topLocation.countryCode] = prevTotal + locationToTotals[topLocation.id]
 
       if (@request.query.activeCases + "").toLowerCase() == "true"
-        overallTimeseries = subIntervalsToActiveCases(maxSubintervalsPerTopLocation, dailyDecayRate)
+        startDate = new Date(@request.query.startDate)
+        overallTimeseries = subIntervalsToActiveCases(
+          maxSubintervalsPerTopLocation,
+          dailyDecayRate
+        ).filter ([date, rate]) => date >= startDate
       else
         overallTimeseries = _.chain(maxSubintervalsPerTopLocation)
           .groupBy('end')
