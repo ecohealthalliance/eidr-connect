@@ -10,7 +10,8 @@ import {
   differentialIncidentsToSubIntervals,
   removeOutlierIncidents,
   createSupplementalIncidents,
-  extendSubIntervalsWithValues
+  extendSubIntervalsWithValues,
+  subIntervalsToActiveCases
 } from '/imports/incidentResolution/incidentResolution'
 import LocationTree from '/imports/incidentResolution/LocationTree'
 import { _ } from 'meteor/underscore';
@@ -328,6 +329,11 @@ Router.route("/api/events-with-resolved-data", where: "server")
     events: events.map (event) =>
       if not event
         return null
+      dailyDecayRate = 1.0
+      if (@request.query.activeCases + "").toLowerCase() == "true"
+        # TODO: look up disease specific stat
+        caseLengthDays = 14
+        dailyDecayRate = Math.pow(.5, (1 / caseLengthDays))
       baseIncidents = []
       constrainingIncidents = []
       event.incidents.map (incident) ->
@@ -362,7 +368,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
       maxSubintervalsPerTopLocation = []
       locationToTotals = _.chain(locToSubintervals)
       .pairs()
-      .map ([key, locSubIntervals]) ->
+      .map ([key, locSubIntervals]) =>
         location = locationTree.getLocationById(key)
         groupedLocSubIntervals = _.groupBy(locSubIntervals, 'start')
         maxSubintervals = []
@@ -378,18 +384,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
         if location in topLocations
           maxSubintervalsPerTopLocation = maxSubintervalsPerTopLocation.concat(maxSubintervals)
         maxSubintervals = _.sortBy(maxSubintervals, (x) -> x.start)
-        total = 0
-        maxSubintervals.forEach (subInt) ->
-          if dateRange
-            # Prorate the count by how much it overlaps the date range
-            if subInt.end > Number(dateRange.start) and subInt.start < Number(dateRange.end)
-              [noop, overlapStart, overlapEnd, noop2] = [
-                subInt.end, subInt.start, Number(dateRange.start), Number(dateRange.end)
-              ].sort()
-              overlapRatio = (overlapEnd - overlapStart) / (subInt.end - subInt.start)
-              total += subInt.value * overlapRatio
-          else
-            total += subInt.value
+        total = subIntervalsToActiveCases(maxSubintervals, dailyDecayRate).slice(-1)[0][1]
         return [key, total]
       .object()
       .value()
@@ -400,28 +395,36 @@ Router.route("/api/events-with-resolved-data", where: "server")
         # can be combined to get the count for the country.
         prevTotal = countryCodeToCount[topLocation.countryCode] or 0
         countryCodeToCount[topLocation.countryCode] = prevTotal + locationToTotals[topLocation.id]
-      overallTimeseries = _.chain(maxSubintervalsPerTopLocation)
-        .groupBy('end')
-        .pairs()
-        .map ([end, group]) -> [new Date(parseInt(end)), group]
-        .sortBy (x) -> x[0]
-        .reduce((sofar, [endDate, group]) ->
-          value = group.reduce(((sofar, cur) -> sofar + cur.rate), 0)
-          if sofar
-            sofar.concat(
-              date: endDate
-              value: value
-            )
-          else
-            [
-              date: new Date(group[0].start)
-              value: value
-            ,
-              date: endDate
-              value: value
-            ]
-        , null)
-        .value()
+
+      if (@request.query.activeCases + "").toLowerCase() == "true"
+        startDate = new Date(@request.query.startDate)
+        overallTimeseries = subIntervalsToActiveCases(
+          maxSubintervalsPerTopLocation,
+          dailyDecayRate
+        ).filter ([date, rate]) => date >= startDate
+      else
+        overallTimeseries = _.chain(maxSubintervalsPerTopLocation)
+          .groupBy('end')
+          .pairs()
+          .map ([end, group]) -> [new Date(parseInt(end)), group]
+          .sortBy (x) -> x[0]
+          .reduce((sofar, [endDate, group]) ->
+            value = group.reduce(((sofar, cur) -> sofar + cur.rate), 0)
+            if sofar
+              sofar.concat(
+                date: endDate
+                value: value
+              )
+            else
+              [
+                date: new Date(group[0].start)
+                value: value
+              ,
+                date: endDate
+                value: value
+              ]
+          , null)
+          .value()
       result = {
         eventId: event._id
         eventName: event.eventName
