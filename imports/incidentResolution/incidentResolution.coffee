@@ -575,14 +575,13 @@ sum = (list) ->
   , 0)
 
 enumerateDateRange = (start, end) ->
-  start = new Date(start)
+  current = new Date(start)
   end = new Date(end)
-  current = start
   result = []
   while current < end
-    result.push(current)
-    current = new Date(current)
+    result.push(new Date(current))
     current.setDate(current.getDate() + 1)
+    current = new Date(current.toISOString().split('T')[0])
   return result
 
 subIntervalsToDailyRates = (subIntervals) ->

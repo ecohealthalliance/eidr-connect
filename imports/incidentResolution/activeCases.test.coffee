@@ -35,7 +35,7 @@ overlappingIncidents = [{
     end: new Date("Jan 5 2011 UTC")
   locations: [lome]
 }, {
-  cases: 45
+  cases: 10
   dateRange:
     start: new Date("Jan 3 2011 UTC")
     end: new Date("Jan 7 2011 UTC")
@@ -54,10 +54,15 @@ describe 'Active Case Utils', ->
     differentialIncidents = convertAllIncidentsToDifferentials(overlappingIncidents)
     subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
     extendSubIntervalsWithValues(differentialIncidents, subIntervals)
-    console.log subIntervalsToDailyRates(subIntervals)
+    total = subIntervalsToDailyRates(subIntervals).slice(0, 5).reduce (sofar, [date, rate]) ->
+      sofar + rate
+    , 0
+    chai.assert.equal(total, 40)
 
   it 'can convert sub-intervals to active cases', ->
     differentialIncidents = convertAllIncidentsToDifferentials(overlappingIncidents)
     subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
     extendSubIntervalsWithValues(differentialIncidents, subIntervals)
-    console.log dailyRatesToActiveCases(subIntervalsToDailyRates(subIntervals), .9)
+    chai.assert.equal("" + _.max(dailyRatesToActiveCases(subIntervalsToDailyRates(subIntervals), .9), ([date, rate])->
+      rate
+    )[0].toISOString().split('T')[0], "2011-01-04")
