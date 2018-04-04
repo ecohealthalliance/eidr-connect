@@ -307,7 +307,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
   # sort events so they are returned in same order as the ids
   events = eventIds.map (eventId)->
     _.findWhere(events, _id: eventId)
-  events.forEach (event) ->
+  events.forEach (event) =>
     if not event
       return
     if event.incidents
@@ -318,6 +318,17 @@ Router.route("/api/events-with-resolved-data", where: "server")
         locations: $not: $size: 0
     else
       query = utils.eventToIncidentQuery(event)
+    if (@request.query.activeCases + "").toLowerCase() == "true"
+      # TODO: look up disease specific stat
+      event.caseLengthDays = 14
+      extendedStartDate = new Date(dateRange.start)
+      # Incidents from an extended date range are included to determine the
+      # initial number of active cases at the beginning of the intended date range.
+      # Assuming the half life of all cases is the case length, less than 10%
+      # of the cases from before the extended date range would still be active
+      # in the original date range.
+      extendedStartDate.setDate(extendedStartDate.getDate() - (4 * event.caseLengthDays))
+      dateRange.start = extendedStartDate
     if dateRange
       query['dateRange.start'] = $lte: dateRange.end
       query['dateRange.end'] = $gte: dateRange.start
@@ -331,9 +342,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
         return null
       dailyDecayRate = 1.0
       if (@request.query.activeCases + "").toLowerCase() == "true"
-        # TODO: look up disease specific stat
-        caseLengthDays = 14
-        dailyDecayRate = Math.pow(.5, (1 / caseLengthDays))
+        dailyDecayRate = Math.pow(.5, (1 / event.caseLengthDays))
       baseIncidents = []
       constrainingIncidents = []
       event.incidents.map (incident) ->
