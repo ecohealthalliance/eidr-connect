@@ -336,8 +336,8 @@ Router.route("/api/events-with-resolved-data", where: "server")
       # The resolved date range is used to truncate those incidents to only include
       # the overlapping date range.
       event.resolvedDateRange = dateRange
-      query['dateRange.start'] = $lte: dateRange.end
-      query['dateRange.end'] = $gte: dateRange.start
+      query['dateRange.start'] = $lt: dateRange.end
+      query['dateRange.end'] = $gt: dateRange.start
     console.time('fetch incidents') if ENABLE_PROFILING
     event.incidents = Incidents.find(query).fetch()
     console.timeEnd('fetch incidents') if ENABLE_PROFILING

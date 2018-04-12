@@ -54,7 +54,9 @@ class Endpoint
   constructor: (@isStart, @offset, @interval) ->
 
 intervalToEndpoints = (interval) ->
-  console.assert Number(interval.startDate) < Number(interval.endDate)
+  if Number(interval.startDate) < Number(interval.endDate)
+    console.log interval
+    throw new Exception("Invalid interval: " + interval)
   [
     new Endpoint(true, Number(interval.startDate), interval)
     new Endpoint(false, Number(interval.endDate), interval)
