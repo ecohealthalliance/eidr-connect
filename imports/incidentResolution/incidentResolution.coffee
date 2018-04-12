@@ -580,22 +580,17 @@ enumerateDateRange = (start, end) ->
   result = []
   while current < end
     result.push(new Date(current))
-    current.setDate(current.getDate() + 1)
+    current.setUTCDate(current.getUTCDate() + 1)
     current = new Date(current.toISOString().split('T')[0])
   return result
 
 subIntervalsToDailyRates = (subIntervals) ->
-  _.chain(subIntervals)
-    .map (subInterval)->
-      enumerateDateRange(subInterval.start, subInterval.end).map (date) ->
-        date: date
-        rate: subInterval.rate
-    .flatten()
-    .groupBy('date')
-    .pairs()
-    .map ([date, group]) -> [new Date(date), sum(group.map (x)-> x.rate)]
-    .sortBy (x) -> x[0]
-    .value()
+  dailyRates = {}
+  subIntervals.forEach (subInterval)->
+    enumerateDateRange(subInterval.start, subInterval.end).forEach (date) ->
+      day = date.toISOString().split('T')[0]
+      dailyRates[day] = (dailyRates[day] or 0) + subInterval.rate
+  _.sortBy(_.pairs(dailyRates), (x) -> x[0])
 
 dailyRatesToActiveCases = (dailyRates, dailyDecayRate) ->  
   activeCases = 0
