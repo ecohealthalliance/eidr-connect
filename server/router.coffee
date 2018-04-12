@@ -332,6 +332,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
         # in the original date range.
         extendedStartDate.setDate(extendedStartDate.getDate() - (4 * event.caseLengthDays))
         dateRange.start = extendedStartDate
+      event.resolvedDateRange = dateRange
       query['dateRange.start'] = $lte: dateRange.end
       query['dateRange.end'] = $gte: dateRange.start
     console.time('fetch incidents') if ENABLE_PROFILING
@@ -366,8 +367,11 @@ Router.route("/api/events-with-resolved-data", where: "server")
       allDifferentials = convertAllIncidentsToDifferentials(
         incidentsWithoutOutliers
       ).concat(supplementalIncidents)
-      differentials = _.where(allDifferentials, type: 'cases')
-      subIntervals = differentialIncidentsToSubIntervals(differentials)
+      differentials = _.where(allDifferentials, type: 'cases').map (differential) ->
+        if event.resolvedDateRange
+          differential = differential.truncated(event.resolvedDateRange)
+        differential
+      subIntervals = differentialIncidentsToSubIntervals(differentials
       console.timeEnd('create differentials') if ENABLE_PROFILING
       console.time('resolve') if ENABLE_PROFILING
       extendSubIntervalsWithValues(differentials, subIntervals)
@@ -417,10 +421,12 @@ Router.route("/api/events-with-resolved-data", where: "server")
 
       if (@request.query.activeCases + "").toLowerCase() == "true"
         startDate = new Date(@request.query.startDate)
+        console.time('compute active cases for overall timeseries') if ENABLE_PROFILING
         overallTimeseries = subIntervalsToActiveCases(
           maxSubintervalsPerTopLocation,
           dailyDecayRate
         ).filter ([date, rate]) => date >= startDate
+        console.time('compute active cases for overall timeseries') if ENABLE_PROFILING
       else
         overallTimeseries = _.chain(maxSubintervalsPerTopLocation)
           .groupBy('end')

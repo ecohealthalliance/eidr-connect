@@ -56,6 +56,19 @@ class DifferentialIncident
     # a count of triple that for the country.
     @rate = @count / @duration / @locations.length
     return @
+  truncated: (dateRange) ->
+    newStartDate = new Date(@startDate)
+    newEndDate = new Date(@endDate)
+    if @startDate < dateRange.start
+      newStartDate = dateRange.start
+    if @endDate > dateRange.end
+      newEndDate = dateRange.end
+    newDuration = (Number(newEndDate) - Number(newStartDate)) / MILLIS_PER_DAY
+    @clone({
+      startDate: newStartDate
+      endDate: newEndDate
+      count: @count * newDuration / @duration
+    })
   clone: (extendProps={}) ->
     clonedIncident = Object.create(@)
     _.extend(clonedIncident, extendProps)
