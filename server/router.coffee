@@ -19,6 +19,8 @@ import { _ } from 'meteor/underscore';
 fs = Npm.require('fs')
 path = Npm.require('path')
 
+ENABLE_PROFILING = true
+
 Router.configureBodyParsers = ->
   # The resolve-incidents endpoint may have files larger than the default limit
   # sent to it.
@@ -318,21 +320,23 @@ Router.route("/api/events-with-resolved-data", where: "server")
         locations: $not: $size: 0
     else
       query = utils.eventToIncidentQuery(event)
-    if (@request.query.activeCases + "").toLowerCase() == "true"
-      # TODO: look up disease specific stat
-      event.caseLengthDays = 14
-      extendedStartDate = new Date(dateRange.start)
-      # Incidents from an extended date range are included to determine the
-      # initial number of active cases at the beginning of the intended date range.
-      # Assuming the half life of all cases is the case length, less than 10%
-      # of the cases from before the extended date range would still be active
-      # in the original date range.
-      extendedStartDate.setDate(extendedStartDate.getDate() - (4 * event.caseLengthDays))
-      dateRange.start = extendedStartDate
     if dateRange
+      if (@request.query.activeCases + "").toLowerCase() == "true"
+        # TODO: look up disease specific stat
+        event.caseLengthDays = 14
+        extendedStartDate = new Date(dateRange.start)
+        # Incidents from an extended date range are included to determine the
+        # initial number of active cases at the beginning of the intended date range.
+        # Assuming the half life of all cases is the case length, less than 10%
+        # of the cases from before the extended date range would still be active
+        # in the original date range.
+        extendedStartDate.setDate(extendedStartDate.getDate() - (4 * event.caseLengthDays))
+        dateRange.start = extendedStartDate
       query['dateRange.start'] = $lte: dateRange.end
       query['dateRange.end'] = $gte: dateRange.start
+    console.time('fetch incidents') if ENABLE_PROFILING
     event.incidents = Incidents.find(query).fetch()
+    console.timeEnd('fetch incidents') if ENABLE_PROFILING
   @response.setHeader('Access-Control-Allow-Origin', '*')
   @response.setHeader('Content-Type', 'application/json')
   @response.statusCode = 200
@@ -343,6 +347,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
       dailyDecayRate = 1.0
       if (@request.query.activeCases + "").toLowerCase() == "true"
         dailyDecayRate = Math.pow(.5, (1 / event.caseLengthDays))
+      console.time('create differentials') if ENABLE_PROFILING
       baseIncidents = []
       constrainingIncidents = []
       event.incidents.map (incident) ->
@@ -363,7 +368,10 @@ Router.route("/api/events-with-resolved-data", where: "server")
       ).concat(supplementalIncidents)
       differentials = _.where(allDifferentials, type: 'cases')
       subIntervals = differentialIncidentsToSubIntervals(differentials)
+      console.timeEnd('create differentials') if ENABLE_PROFILING
+      console.time('resolve') if ENABLE_PROFILING
       extendSubIntervalsWithValues(differentials, subIntervals)
+      console.timeEnd('resolve') if ENABLE_PROFILING
       locationTree = LocationTree.from(subIntervals.map (x) -> x.location)
       topLocations = locationTree.children.map (x) -> x.value
       locToSubintervals = {}
@@ -393,7 +401,9 @@ Router.route("/api/events-with-resolved-data", where: "server")
         if location in topLocations
           maxSubintervalsPerTopLocation = maxSubintervalsPerTopLocation.concat(maxSubintervals)
         maxSubintervals = _.sortBy(maxSubintervals, (x) -> x.start)
+        console.time('compute active cases') if ENABLE_PROFILING
         total = subIntervalsToActiveCases(maxSubintervals, dailyDecayRate).slice(-1)[0][1]
+        console.timeEnd('compute active cases') if ENABLE_PROFILING
         return [key, total]
       .object()
       .value()
