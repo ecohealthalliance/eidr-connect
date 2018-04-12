@@ -19,7 +19,7 @@ import { _ } from 'meteor/underscore';
 fs = Npm.require('fs')
 path = Npm.require('path')
 
-ENABLE_PROFILING = true
+ENABLE_PROFILING = false
 
 Router.configureBodyParsers = ->
   # The resolve-incidents endpoint may have files larger than the default limit
@@ -429,7 +429,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
           maxSubintervalsPerTopLocation,
           dailyDecayRate
         ).filter ([date, rate]) => date >= startDate
-        console.time('compute active cases for overall timeseries') if ENABLE_PROFILING
+        console.timeEnd('compute active cases for overall timeseries') if ENABLE_PROFILING
       else
         overallTimeseries = _.chain(maxSubintervalsPerTopLocation)
           .groupBy('end')
