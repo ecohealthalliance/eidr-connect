@@ -330,8 +330,11 @@ Router.route("/api/events-with-resolved-data", where: "server")
         # Assuming the half life of all cases is the case length, less than 10%
         # of the cases from before the extended date range would still be active
         # in the original date range.
-        extendedStartDate.setDate(extendedStartDate.getDate() - (4 * event.caseLengthDays))
+        extendedStartDate.setUTCDate(extendedStartDate.getUTCDate() - (4 * event.caseLengthDays))
         dateRange.start = extendedStartDate
+      # The query will return incidents that only partially overlap the date range.
+      # The resolved date range is used to truncate those incidents to only include
+      # the overlapping date range.
       event.resolvedDateRange = dateRange
       query['dateRange.start'] = $lte: dateRange.end
       query['dateRange.end'] = $gte: dateRange.start
@@ -371,7 +374,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
         if event.resolvedDateRange
           differential = differential.truncated(event.resolvedDateRange)
         differential
-      subIntervals = differentialIncidentsToSubIntervals(differentials
+      subIntervals = differentialIncidentsToSubIntervals(differentials)
       console.timeEnd('create differentials') if ENABLE_PROFILING
       console.time('resolve') if ENABLE_PROFILING
       extendSubIntervalsWithValues(differentials, subIntervals)
