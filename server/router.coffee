@@ -370,7 +370,16 @@ Router.route("/api/events-with-resolved-data", where: "server")
       allDifferentials = convertAllIncidentsToDifferentials(
         incidentsWithoutOutliers
       ).concat(supplementalIncidents)
-      differentials = _.where(allDifferentials, type: 'cases').map (differential) ->
+      differentials = _.where(allDifferentials, type: 'cases')
+      .filter (differential) ->
+        if differential.startDate > event.resolvedDateRange.end
+          console.log "Incident outside of date range:", differential
+          return false
+        if differential.endDate < event.resolvedDateRange.start
+          console.log "Incident outside of date range:", differential
+          return false
+        return true
+      .map (differential) ->
         if event.resolvedDateRange
           differential = differential.truncated(event.resolvedDateRange)
         differential
