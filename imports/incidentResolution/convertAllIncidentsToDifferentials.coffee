@@ -60,9 +60,9 @@ class DifferentialIncident
     newStartDate = new Date(@startDate)
     newEndDate = new Date(@endDate)
     if @startDate < dateRange.start
-      newStartDate = dateRange.start
+      newStartDate = new Date(dateRange.start)
     if @endDate > dateRange.end
-      newEndDate = dateRange.end
+      newEndDate = new Date(dateRange.end)
     newDuration = (Number(newEndDate) - Number(newStartDate)) / MILLIS_PER_DAY
     @clone({
       startDate: newStartDate
