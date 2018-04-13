@@ -594,14 +594,51 @@ subIntervalsToDailyRates = (subIntervals) ->
       dailyRates[day] = (dailyRates[day] or 0) + subInterval.rate
   _.sortBy(_.pairs(dailyRates), (x) -> x[0])
 
-dailyRatesToActiveCases = (dailyRates, dailyDecayRate) ->  
+dailyRatesToActiveCases = (dailyRates, dailyDecayRate, dateWindow) ->
+  startDate = new Date(dateWindow.startDate).toISOString().split('T')[0]
   activeCases = 0
   activeCasesByDay = dailyRates.map ([day, rate]) ->
     activeCases = activeCases * dailyDecayRate + rate
     [day, activeCases]
+  futureActiveCasesByDay = enumerateDateRange(
+    dailyRates.slice(-1)[0][0], dateWindow.endDate
+  ).slice(1).map (day) ->
+    activeCases *= dailyDecayRate
+    [day.toISOString().split('T')[0], activeCases]
+  result = activeCasesByDay.concat(futureActiveCasesByDay).filter ([day, rate]) ->
+    day >= startDate
+  result
 
-subIntervalsToActiveCases = (subIntervals, dailyDecayRate) ->
-  dailyRatesToActiveCases(subIntervalsToDailyRates(subIntervals), dailyDecayRate)
+subIntervalsToActiveCases = (subIntervals, dailyDecayRate, dateWindow) ->
+  dailyRatesToActiveCases(subIntervalsToDailyRates(subIntervals), dailyDecayRate, dateWindow)
+
+mapLocationsToMaxSubIntervals = (locationTree, subIntervals) ->
+  locToSubintervals = {}
+  for location in locationTree.locations()
+    locToSubintervals[location.id] = []
+  for location in locationTree.locations()
+    for subInterval in subIntervals
+      subLocation = subInterval.location
+      if LocationTree.locationContains(location, subLocation)
+        locToSubintervals[location.id].push(subInterval)
+  return _.chain(locToSubintervals)
+    .pairs()
+    .map ([locId, locSubIntervals]) =>
+      location = locationTree.getLocationById(locId)
+      groupedLocSubIntervals = _.groupBy(locSubIntervals, 'start')
+      maxSubintervals = []
+      for group, subIntervalGroup of groupedLocSubIntervals
+        subIntervalGroupTree = LocationTree.from(subIntervalGroup.map (x) -> x.location)
+        subIntervalGroupTree.children.forEach (locationNode) ->
+          maxSubintervals.push(_.max(subIntervalGroup, (subInterval) ->
+            if locationNode.value.id == subInterval.location.id
+              subInterval.value
+            else
+              0
+          ))
+      return [locId, maxSubintervals]
+    .object()
+    .value()
 
 export intervalToEndpoints = intervalToEndpoints
 export differentialIncidentsToSubIntervals = differentialIncidentsToSubIntervals
@@ -613,3 +650,4 @@ export subIntervalsToActiveCases = subIntervalsToActiveCases
 export dailyRatesToActiveCases = dailyRatesToActiveCases
 export subIntervalsToDailyRates = subIntervalsToDailyRates
 export enumerateDateRange =  enumerateDateRange
+export mapLocationsToMaxSubIntervals = mapLocationsToMaxSubIntervals

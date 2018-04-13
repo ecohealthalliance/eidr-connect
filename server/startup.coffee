@@ -64,7 +64,7 @@ Meteor.startup ->
   Meteor.setInterval updateAutoEvents, 60 * 60 * 1000
   updateAutoEvents()
 
-  if not Meteor.isAppTest
+  if not Meteor.isAppTest and not Meteor.isDevelopment
     reprocessArticlesWithErrors()
     Meteor.setInterval(autoprocessArticles, 100000)
 

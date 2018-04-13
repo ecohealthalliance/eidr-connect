@@ -11,10 +11,16 @@ import {
   removeOutlierIncidents,
   createSupplementalIncidents,
   extendSubIntervalsWithValues,
-  subIntervalsToActiveCases
+  subIntervalsToActiveCases,
+  mapLocationsToMaxSubIntervals
 } from '/imports/incidentResolution/incidentResolution'
 import LocationTree from '/imports/incidentResolution/LocationTree'
 import { _ } from 'meteor/underscore';
+
+sum = (list) ->
+  list.reduce((sofar, x) ->
+    sofar + x
+  , 0)
 
 fs = Npm.require('fs')
 path = Npm.require('path')
@@ -388,42 +394,44 @@ Router.route("/api/events-with-resolved-data", where: "server")
       console.time('resolve') if ENABLE_PROFILING
       extendSubIntervalsWithValues(differentials, subIntervals)
       console.timeEnd('resolve') if ENABLE_PROFILING
+
+      maxDate = null
+      minDate = null
+      subIntervals.forEach (subInt) ->
+        if subInt.start < minDate
+          minDate = subInt.start
+        if subInt.end > maxDate
+          maxDate = subInt.end
+      dateWindow = {
+        startDate: @request.query.startDate or minDate
+        endDate: @request.query.endDate or maxDate
+      }
+
       locationTree = LocationTree.from(subIntervals.map (x) -> x.location)
+      locToMaxSubIntervals = mapLocationsToMaxSubIntervals(locationTree, subIntervals)
+
       topLocations = locationTree.children.map (x) -> x.value
-      locToSubintervals = {}
-      for location in locationTree.locations()
-        locToSubintervals[location.id] = []
-      for location in locationTree.locations()
-        for subInterval in subIntervals
-          subLocation = subInterval.location
-          if LocationTree.locationContains(location, subLocation)
-            locToSubintervals[location.id].push(subInterval)
-      maxSubintervalsPerTopLocation = []
-      locationToTotals = _.chain(locToSubintervals)
-      .pairs()
-      .map ([key, locSubIntervals]) =>
-        location = locationTree.getLocationById(key)
-        groupedLocSubIntervals = _.groupBy(locSubIntervals, 'start')
-        maxSubintervals = []
-        for group, subIntervalGroup of groupedLocSubIntervals
-          subIntervalGroupTree = LocationTree.from(subIntervalGroup.map (x) -> x.location)
-          subIntervalGroupTree.children.forEach (locationNode) ->
-            maxSubintervals.push(_.max(subIntervalGroup, (subInterval) ->
-              if locationNode.value.id == subInterval.location.id
-                subInterval.value
-              else
-                0
-            ))
+      maxSubintervalsForTopLocations = []
+      for locId, maxSubintervals of locToMaxSubIntervals
+        location = locationTree.getLocationById(locId)
         if location in topLocations
-          maxSubintervalsPerTopLocation = maxSubintervalsPerTopLocation.concat(maxSubintervals)
-        maxSubintervals = _.sortBy(maxSubintervals, (x) -> x.start)
-        console.time('compute active cases') if ENABLE_PROFILING
-        total = subIntervalsToActiveCases(maxSubintervals, dailyDecayRate).slice(-1)[0][1]
-        console.timeEnd('compute active cases') if ENABLE_PROFILING
-        return [key, total]
-      .object()
-      .value()
+          maxSubintervalsForTopLocations = maxSubintervalsForTopLocations.concat(maxSubintervals)
+
+      locationToTotals = _.chain(locToMaxSubIntervals)
+        .pairs()
+        .map ([locId, maxSubintervals]) =>
+          location = locationTree.getLocationById(locId)
+          maxSubintervals = _.sortBy(maxSubintervals, (x) -> x.start)
+          console.time('compute active cases') if ENABLE_PROFILING
+          total = subIntervalsToActiveCases(
+            maxSubintervals, dailyDecayRate, dateWindow
+          ).slice(-1)[0][1]
+          console.timeEnd('compute active cases') if ENABLE_PROFILING
+          return [locId, total]
+        .object()
+        .value()
       countryCodeToCount = {}
+
       for topLocation in topLocations
         # If the country code appeared before, it is because the top locations
         # are not at the country level, so values with the same country code
@@ -432,15 +440,15 @@ Router.route("/api/events-with-resolved-data", where: "server")
         countryCodeToCount[topLocation.countryCode] = prevTotal + locationToTotals[topLocation.id]
 
       if (@request.query.activeCases + "").toLowerCase() == "true"
-        startDate = new Date(@request.query.startDate)
         console.time('compute active cases for overall timeseries') if ENABLE_PROFILING
         overallTimeseries = subIntervalsToActiveCases(
-          maxSubintervalsPerTopLocation,
-          dailyDecayRate
-        ).filter ([date, rate]) => date >= startDate
+          maxSubintervalsForTopLocations,
+          dailyDecayRate,
+          dateWindow
+        )
         console.timeEnd('compute active cases for overall timeseries') if ENABLE_PROFILING
       else
-        overallTimeseries = _.chain(maxSubintervalsPerTopLocation)
+        overallTimeseries = _.chain(maxSubintervalsForTopLocations)
           .groupBy('end')
           .pairs()
           .map ([end, group]) -> [new Date(parseInt(end)), group]
@@ -469,6 +477,18 @@ Router.route("/api/events-with-resolved-data", where: "server")
       }
       if (@request.query.fullLocations + "").toLowerCase() == "true"
         result.fullLocations = locationTree.toJSON ({value, children}) ->
+          childSum = sum(children.map (child) -> child.value)
+          if locationToTotals[value.id] + 0.1 < childSum
+            console.log "Invalid tree info:"
+            console.log value
+            console.log children
+            console.log "---"
+            console.log locToMaxSubIntervals[value.id]
+            console.log subIntervalsToActiveCases(locToMaxSubIntervals[value.id], dailyDecayRate)
+            console.log "---"
+            console.log locToMaxSubIntervals[children[0].location.id]
+            console.log subIntervalsToActiveCases(locToMaxSubIntervals[children[0].location.id], dailyDecayRate)
+            throw new Error("Invalid Tree")
           return {
             location: value
             value: locationToTotals[value.id]
