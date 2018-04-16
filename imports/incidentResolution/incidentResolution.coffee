@@ -597,23 +597,14 @@ subIntervalsToDailyRates = (subIntervals) ->
 dailyRatesToActiveCases = (dailyRates, dailyDecayRate, dateWindow) ->
   startDate = new Date(dateWindow.startDate).toISOString().split('T')[0]
   activeCases = 0
-  activeCasesByDay = dailyRates.map ([day, rate]) ->
+  dailyRates = _.object(dailyRates)
+  activeCasesByDay = enumerateDateRange(
+    dateWindow.startDate, dateWindow.endDate
+  ).map (date) ->
+    day = date.toISOString().split('T')[0]
+    rate = dailyRates[day] or 0
     activeCases = activeCases * dailyDecayRate + rate
     [day, activeCases]
-  if dailyRates.length > 0
-    futureDates = enumerateDateRange(
-      dailyRates.slice(-1)[0][0], dateWindow.endDate
-    ).slice(1)
-  else
-    futureDates = enumerateDateRange(
-      dateWindow.startDate, dateWindow.endDate
-    )
-  futureActiveCasesByDay = futureDates.map (day) ->
-    activeCases *= dailyDecayRate
-    [day.toISOString().split('T')[0], activeCases]
-  result = activeCasesByDay.concat(futureActiveCasesByDay).filter ([day, rate]) ->
-    day >= startDate
-  result
 
 subIntervalsToActiveCases = (subIntervals, dailyDecayRate, dateWindow) ->
   dailyRatesToActiveCases(subIntervalsToDailyRates(subIntervals), dailyDecayRate, dateWindow)

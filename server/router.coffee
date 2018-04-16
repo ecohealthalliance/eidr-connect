@@ -12,6 +12,8 @@ import {
   createSupplementalIncidents,
   extendSubIntervalsWithValues,
   subIntervalsToActiveCases,
+  dailyRatesToActiveCases,
+  subIntervalsToDailyRates,
   mapLocationsToMaxSubIntervals
 } from '/imports/incidentResolution/incidentResolution'
 import LocationTree from '/imports/incidentResolution/LocationTree'
@@ -482,16 +484,6 @@ Router.route("/api/events-with-resolved-data", where: "server")
             console.log "Invalid tree info:"
             console.log value
             console.log children
-            console.log "---"
-            console.log locToMaxSubIntervals[value.id].length
-            console.log subIntervalsToActiveCases(
-              locToMaxSubIntervals[value.id], dailyDecayRate, dateWindow
-            ).slice(-5)
-            console.log "---"
-            console.log locToMaxSubIntervals[children[0].location.id].length
-            console.log subIntervalsToActiveCases(
-              locToMaxSubIntervals[children[0].location.id], dailyDecayRate, dateWindow
-            ).slice(-5)
             throw new Error("Invalid Tree")
           return {
             location: value
