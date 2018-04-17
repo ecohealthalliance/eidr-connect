@@ -15,9 +15,9 @@ locationContains = (locationA, locationB) ->
   featureCode = locationA.featureCode or ""
   if featureCode.startsWith("PCL")
     containmentLevel = 1
-  else if featureCode.endsWith("1")
+  else if featureCode.startsWith("ADM1")
     containmentLevel = 2
-  else if featureCode.endsWith("2")
+  else if featureCode.startsWith("ADM2")
     containmentLevel = 3
   else
     return false

@@ -93,3 +93,50 @@ describe 'LocationTree', ->
     myTree = LocationTree.from(locations)
     chai.assert.equal(myTree.children[0].value.id, "6295630")
     chai.assert.equal(myTree.children.length, 1)
+
+  it 'does not place administrative divisions inside their seats', ->
+    locations = [{
+      "name": "Washoe County",
+      "asciiName": "Washoe County"
+      "id": "5709906",
+      "latitude": 40.66542,
+      "longitude": -119.6643,
+      "featureClass": "A",
+      "featureCode": "ADM2",
+      "countryCode": "US",
+      "cc2": "",
+      "admin1Code": "NV",
+      "admin2Code": "031",
+      "admin3Code": "",
+      "admin4Code": "",
+      "population": 421407,
+      "elevation": "1635",
+      "dem": "1640",
+      "timezone": "America/Los_Angeles",
+      "admin2Name": "Washoe County",
+      "admin1Name": "Nevada",
+      "countryName": "United States"
+    }, {
+      "id": "5511077",
+      "name": "Reno",
+      "asciiName": "Reno",
+      "latitude": 39.52963,
+      "longitude": -119.8138,
+      "featureClass": "P",
+      "featureCode": "PPLA2",
+      "countryCode": "US",
+      "cc2": "",
+      "admin1Code": "NV",
+      "admin2Code": "031",
+      "admin3Code": "",
+      "admin4Code": "",
+      "population": 241445,
+      "elevation": "1373",
+      "dem": "1380",
+      "timezone": "America/Los_Angeles",
+      "admin2Name": "Washoe County",
+      "admin1Name": "Nevada",
+      "countryName": "United States"
+    }]
+    chai.assert(LocationTree.locationContains(locations[0], locations[1]))
+    chai.assert(not LocationTree.locationContains(locations[1], locations[0]))
