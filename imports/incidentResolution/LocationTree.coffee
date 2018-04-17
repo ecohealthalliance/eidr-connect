@@ -22,7 +22,7 @@ locationContains = (locationA, locationB) ->
   else
     return false
   for prop in props.slice(0, containmentLevel)
-    if locationB[prop] == ''
+    if prop not of locationB or locationB[prop] == ''
       return false
     if locationA[prop] != locationB[prop]
       return false

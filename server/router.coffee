@@ -484,6 +484,37 @@ Router.route("/api/events-with-resolved-data", where: "server")
             console.log "Invalid tree info:"
             console.log value
             console.log children
+            console.log "---"
+            data = [{
+              location: value
+              value: locationToTotals[value.id]
+            }].concat(children)
+            dailyRates = data.map (x) ->
+              subIntervalsToDailyRates(locToMaxSubIntervals[x.location.id])
+            dailyActiveCases = data.map (x) ->
+              result = subIntervalsToActiveCases(
+                locToMaxSubIntervals[x.location.id], dailyDecayRate, {
+                  startDate: minDate
+                  endDate: maxDate
+                }
+              )
+              result
+
+            dailyRates[0].forEach ([day, rate]) ->
+              childSum = sum(dailyRates.slice(1).map (ratesForLocation2) ->
+                for [day2, rate2] in ratesForLocation2
+                  if day == day2
+                    return rate2
+                return 0
+              )
+              # acSum = sum(dailyActiveCases.slice(1).map (ratesForLocation2) ->
+              #   for [day2, rate2] in ratesForLocation2
+              #     if day == day2
+              #       return rate2
+              #   return 0
+              # )
+              console.log day, "top location rate:", rate, "total child rate:", childSum
+
             throw new Error("Invalid Tree")
           return {
             location: value

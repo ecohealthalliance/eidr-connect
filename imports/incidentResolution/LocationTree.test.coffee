@@ -24,7 +24,7 @@ describe 'LocationTree', ->
     chai.assert.equal(myTree.children[0].children.length, 0)
 
   it 'can build location trees from locations', ->
-    myTree = LocationTree.from([{
+    locations = [{
       admin1Name: "Maritime"
       countryName: "Togolese Republic"
       featureClass: "P"
@@ -37,12 +37,13 @@ describe 'LocationTree', ->
       name: "Togolese Republic"
       id: "2363686"
       countryName: "Togolese Republic"
-    }])
+    }]
+    myTree = LocationTree.from(locations)
     chai.assert.equal(myTree.children[0].value.id, "2363686")
     chai.assert.equal(myTree.children.length, 1)
     chai.assert.equal(myTree.getNodeById("2365267").value.id, "2365267")
 
-  it 'can build build location trees from many locations', ->
+  it 'can build location trees from many locations', ->
     myTree = LocationTree.from([{
       admin1Name: "Tripura"
       countryName: "Republic of India"
@@ -68,3 +69,27 @@ describe 'LocationTree', ->
     chai.assert.equal(myTree.children.length, 1)
     chai.assert.equal(myTree.children[0].children.length, 2)
 
+  it 'can build handle the earth', ->
+    locations = [{
+      id: "2080185",
+      name: "Republic of the Marshall Islands",
+      alternateNames: [],
+      latitude: 7.113,
+      longitude: 171.236,
+      featureClass: "A",
+      featureCode: "PCLF",
+      countryCode: "MH",
+      admin1Code: "00",
+      population: 65859
+    }, {
+      id: "6295630",
+      name: "Earth",
+      alternateNames: [],
+      latitude: 0,
+      longitude: 0,
+      featureClass: "L",
+      featureCode: "AREA",
+      population: 6814400000 }]
+    myTree = LocationTree.from(locations)
+    chai.assert.equal(myTree.children[0].value.id, "6295630")
+    chai.assert.equal(myTree.children.length, 1)
