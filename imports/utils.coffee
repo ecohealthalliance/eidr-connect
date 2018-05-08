@@ -140,6 +140,11 @@ export UTCOffsets =
 export capitalize = (s) ->
   s.charAt(0).toUpperCase() + s.substring(1)
 
+export camelize = (s) ->
+  s.split("_").map((word, idx) ->
+    if idx == 0 then word else capitalize(word)
+  ).join("")
+
 export regexEscape = (s) ->
   # Based on bobince's regex escape function.
   # source: http://stackoverflow.com/questions/3561493/is-there-a-regexp-escape-function-in-javascript/3561711#3561711
