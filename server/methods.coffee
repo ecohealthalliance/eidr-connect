@@ -145,9 +145,6 @@ Meteor.methods
     if result.data.error
       throw new Meteor.Error("grits-error", result.data.error)
     enhancements = result.data
-    # Normalize geoname data in GRITS annotations to match incident schema.
-    # The geoname lookup service is queried to get admin names.
-    # The GRITS api reponse only includes admin codes at the moment.
     enhancements.features.forEach (f) ->
       if f.type == 'location'
         f.geoname = formatGeoname(f.geoname)
