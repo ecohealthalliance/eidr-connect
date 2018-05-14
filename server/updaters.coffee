@@ -10,7 +10,7 @@ import Feeds from '/imports/collections/feeds'
 import Constants from '/imports/constants.coffee'
 import { regexEscape } from '/imports/utils'
 
-DATA_VERSION = 19
+DATA_VERSION = 20
 AppMetadata = new Meteor.Collection('appMetadata')
 priorDataVersion = AppMetadata.findOne(property: "dataVersion")?.value
 
@@ -59,7 +59,12 @@ module.exports = ->
       invalidDateIncidents.push(incident._id)
   console.log "Removing #{invalidDateIncidents.length} incidents"
   Incidents.remove(_id: $in: invalidDateIncidents)
-  AppMetadata.upsert({property: "dataVersion"}, $set: {value: DATA_VERSION})
+
+  console.log 'Removing articles with invalid urls'
+  Articles.find(
+    url: /^([^\.]*|promedmail\.org\/post\/undefined)$/
+  ).forEach (art) ->
+    Articles.remove(_id: art._id)
 
   console.log 'Disassociating deleted incidents from events...'
   incidentCount = 0
@@ -144,4 +149,5 @@ module.exports = ->
       'resolvedDisease.text': 'Lassa fever'
   }, multi: true)
 
+  AppMetadata.upsert({property: "dataVersion"}, $set: {value: DATA_VERSION})
   console.log "database update complete"
