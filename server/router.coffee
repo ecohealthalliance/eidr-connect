@@ -441,41 +441,42 @@ Router.route("/api/events-with-resolved-data", where: "server")
         prevTotal = countryCodeToCount[topLocation.countryCode] or 0
         countryCodeToCount[topLocation.countryCode] = prevTotal + locationToTotals[topLocation.id]
 
-      if (@request.query.activeCases + "").toLowerCase() == "true"
-        console.time('compute active cases for overall timeseries') if ENABLE_PROFILING
-        overallTimeseries = subIntervalsToActiveCases(
-          maxSubintervalsForTopLocations,
-          dailyDecayRate,
-          dateWindow
-        )
-        console.timeEnd('compute active cases for overall timeseries') if ENABLE_PROFILING
-      else
-        overallTimeseries = _.chain(maxSubintervalsForTopLocations)
-          .groupBy('end')
-          .pairs()
-          .map ([end, group]) -> [new Date(parseInt(end)), group]
-          .sortBy (x) -> x[0]
-          .reduce((sofar, [endDate, group]) ->
-            value = group.reduce(((sofar, cur) -> sofar + cur.rate), 0)
-            if sofar
-              sofar.concat(
-                date: endDate
-                value: value
-              )
-            else
-              [
-                date: new Date(group[0].start)
-                value: value
-              ,
-                date: endDate
-                value: value
-              ]
-          , null)
-          .value()
+      console.time('compute active cases for overall timeseries') if ENABLE_PROFILING
+      overallTimeseries = subIntervalsToActiveCases(
+        maxSubintervalsForTopLocations,
+        dailyDecayRate,
+        dateWindow
+      )
+      console.timeEnd('compute active cases for overall timeseries') if ENABLE_PROFILING
+      dailyRateTimeseries = _.chain(maxSubintervalsForTopLocations)
+        .groupBy('end')
+        .pairs()
+        .map ([end, group]) -> [new Date(parseInt(end)), group]
+        .sortBy (x) -> x[0]
+        .reduce((sofar, [endDate, group]) ->
+          value = group.reduce(((sofar, cur) -> sofar + cur.rate), 0)
+          if sofar
+            sofar.concat(
+              date: endDate
+              value: value
+            )
+          else
+            [
+              date: new Date(group[0].start)
+              value: value
+            ,
+              date: endDate
+              value: value
+            ]
+        , null)
+        .filter ({date, value}) ->
+          date >= new Date(dateWindow.startDate)
+        .value()
       result = {
         eventId: event._id
         eventName: event.eventName
         timeseries: overallTimeseries
+        dailyRateTimeseries: dailyRateTimeseries
       }
       if (@request.query.fullLocations + "").toLowerCase() == "true"
         result.fullLocations = locationTree.toJSON ({value, children}) ->
