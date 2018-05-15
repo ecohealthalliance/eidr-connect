@@ -108,7 +108,11 @@ Template.eventFiltration.onRendered ->
         _.max(incidents.map (i) -> i.dateRange.end)
       ]
       @eventDateRange.set(range)
-      @selectedDateRange.set(range)
+      @selectedDateRange.set([
+        # Limit default date range length to 1 month
+        new Date(Math.max(range[0], moment(range[1]).subtract(1, 'month').toDate()))
+        range[1]
+      ])
     else
       # Set range as Numbers so range slider will not error out and will appear
       @eventDateRange.set([1, 100])

@@ -456,21 +456,17 @@ Router.route("/api/events-with-resolved-data", where: "server")
         .reduce((sofar, [endDate, group]) ->
           value = group.reduce(((sofar, cur) -> sofar + cur.rate), 0)
           if sofar
-            sofar.concat(
-              date: endDate
-              value: value
-            )
+            sofar.concat([endDate, value])
           else
             [
-              date: new Date(group[0].start)
-              value: value
+              [new Date(group[0].start), value]
             ,
-              date: endDate
-              value: value
+              [endDate, value]
             ]
         , null)
-        .filter ({date, value}) ->
+        .filter ([date, value]) ->
           date >= new Date(dateWindow.startDate)
+        .map ([date, value]) -> [("" + date).split('T')[0], value]
         .value()
       result = {
         eventId: event._id
