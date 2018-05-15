@@ -300,6 +300,8 @@ Router.route("/api/events-with-resolved-data", where: "server")
     dateRange =
       start: new Date(@request.query.startDate)
       end: new Date(@request.query.endDate)
+    if dateRange.start >= dateRange.end
+      throw new Error("Invalid date range") 
   if @request.query.eventType == 'user'
     events = UserEvents.find(
       _id:
@@ -453,20 +455,23 @@ Router.route("/api/events-with-resolved-data", where: "server")
         .pairs()
         .map ([end, group]) -> [new Date(parseInt(end)), group]
         .sortBy (x) -> x[0]
+        .filter ([date, noop]) ->
+          date > new Date(dateWindow.startDate)
         .reduce((sofar, [endDate, group]) ->
           value = group.reduce(((sofar, cur) -> sofar + cur.rate), 0)
           if sofar
-            sofar.concat([endDate, value])
+            sofar.concat([[endDate, value]])
           else
             [
-              [new Date(group[0].start), value]
+              [
+                new Date(Math.max(new Date(group[0].start), new Date(dateWindow.startDate)))
+                value
+              ]
             ,
               [endDate, value]
             ]
         , null)
-        .filter ([date, value]) ->
-          date >= new Date(dateWindow.startDate)
-        .map ([date, value]) -> [("" + date).split('T')[0], value]
+        .map ([date, value]) -> [date.toISOString().split('T')[0], value]
         .value()
       result = {
         eventId: event._id
