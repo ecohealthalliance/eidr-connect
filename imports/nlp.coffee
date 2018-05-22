@@ -100,13 +100,9 @@ export createIncidentReportsFromEnhancements = (enhancements, options={}) ->
   locationAnnotations = features.filter (f) -> f.type == 'location'
   datetimeAnnotations = features.filter (f) -> f.type == 'datetime'
   diseaseAnnotations = features.filter (f) ->
-    f.type == 'resolvedKeyword' and f.resolutions.some((r) ->
-      r.entity.type == 'disease'
-    )
+    f.type == 'resolvedKeyword' and f.resolutions[0].entity.type == 'disease'
   speciesAnnotations = features.filter (f) ->
-    f.type == 'resolvedKeyword' and f.resolutions.some((r) ->
-      r.entity.type == 'species'
-    )
+    f.type == 'resolvedKeyword' and f.resolutions[0].entity.type == 'species'
   if not countAnnotations
     countAnnotations = features.filter (f) -> f.type == 'count'
   sents = parseSents(enhancements.source.cleanContent.content)
