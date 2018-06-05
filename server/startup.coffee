@@ -18,15 +18,58 @@ Meteor.startup ->
 
   # Ensure promed feed exists
   promedFeed = Feeds.findOne(url: 'promedmail.org/post/')
-  if not promedFeed?.title
+  if not promedFeed?.promedId
     newFeedProps =
       title: 'ProMED-mail'
       url: 'promedmail.org/post/'
+      promedId: '1'
     feedSchema.validate(newFeedProps)
     Feeds.upsert promedFeed?._id,
       $set: newFeedProps
       $setOnInsert:
         addedDate: new Date()
+
+  # Ensure feeds for foreign language promed feeds exist
+  [
+    url: 'promedmail.org/es'
+    promedId: '7'
+    title: 'ProMED-mail Español'
+  ,
+    url: 'promedmail.org/ru'
+    promedId: '12'
+    title: 'ProMED-mail Русский (Russian)'
+  ,
+    url: 'promedmail.org/mbds'
+    promedId: '15'
+    title: 'ProMED-mail Mekong Basin'
+  ,
+    url: 'promedmail.org/fr'
+    promedId: '18'
+    title: 'ProMED-mail Afrique Francophone'
+  ,
+    url: 'promedmail.org/eafr'
+    promedId: '24'
+    title: 'ProMED-mail Anglophone Africa'
+  ,
+    url: 'promedmail.org/pt'
+    promedId: '26'
+    title: 'ProMED-mail Português'
+  ,
+    url: 'promedmail.org/soas'
+    promedId: '170'
+    title: 'ProMED-mail South Asia'
+  ,
+    url: 'promedmail.org/mena'
+    promedId: '171'
+    title: 'ProMED-mail Middle East/North Africa'
+  ].forEach (newFeedProps)->
+    promedFeed = Feeds.findOne(url: newFeedProps.url)
+    if not promedFeed?.title
+      feedSchema.validate(newFeedProps)
+      Feeds.upsert promedFeed?._id,
+        $set: newFeedProps
+        $setOnInsert:
+          addedDate: new Date()
 
   updateDatabase()
 

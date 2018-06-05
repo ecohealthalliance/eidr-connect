@@ -8,6 +8,9 @@ feedSchema = new SimpleSchema
   url:
     type: String
     optional: true
+  promedId:
+    type: String
+    optional: true
   addedByUserId:
     type: String
     optional: true

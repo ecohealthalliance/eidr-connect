@@ -11,8 +11,6 @@ if Meteor.isServer
       if range?.startDate
         startDate = range.startDate
       query =
-        feedId:
-          $eq: '1'
         promedDate:
           $gte: new Date(startDate)
           $lte: new Date(endDate)
@@ -30,15 +28,16 @@ if Meteor.isServer
       recordNewPosts(posts)
 
   recordNewPosts = (posts) ->
-    promedFeedId = Feeds.findOne(url: 'promedmail.org/post/')?._id
     for post in posts
-      # Normalize post for display/subscription
-      normalizedPost =
-        url: "promedmail.org/post/#{post.promedId}"
-        addedDate: new Date()
-        publishDate: post.promedDate
-        publishDateTZ: "EDT"
-        title: post.subject.raw
-        reviewed: false
-        feedId: promedFeedId
-      Articles.upsert({_id: post._id._str}, {$setOnInsert: normalizedPost})
+      feedId = Feeds.findOne(promedId: post.feedId)?._id
+      if feedId
+        # Normalize post for display/subscription
+        normalizedPost =
+          url: "promedmail.org/post/#{post.promedId}"
+          addedDate: new Date()
+          publishDate: post.promedDate
+          publishDateTZ: "EDT"
+          title: post.subject.raw
+          reviewed: false
+          feedId: feedId
+        Articles.upsert({_id: post._id._str}, {$setOnInsert: normalizedPost})

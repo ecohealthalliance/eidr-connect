@@ -301,7 +301,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
       start: new Date(@request.query.startDate)
       end: new Date(@request.query.endDate)
     if dateRange.start >= dateRange.end
-      throw new Error("Invalid date range") 
+      throw new Error("Invalid date range")
   if @request.query.eventType == 'user'
     events = UserEvents.find(
       _id:
