@@ -36,6 +36,10 @@ template(name="componentTreeList")
                 a.view-incident(data-id="{{incident._id}}") {{incidentToText incident}}
                 if incident.sourceFeed
                   span &nbsp;(Constraining)
+                if incident.min
+                  span &nbsp;(Minimum)
+                if incident.max
+                  span &nbsp;(Maximum)
   if children
     h4 Subcomponents
     each children

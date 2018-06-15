@@ -15,40 +15,59 @@ module.exports = ->
         nameToGeoname[country] = geonamesResult.data.hits[0]._source
         delete nameToGeoname[country].alternateNames
 
-  # Import Cholera data
-  WHOCholeraDataUrl = "http://apps.who.int/gho/athena/data/GHO/CHOLERA_0000000001.json?profile=simple&filter=COUNTRY:*;REGION:*"
-  feed = Feeds.findOne(url: WHOCholeraDataUrl)
-  if not (feed and moment().isBefore(moment(feed.addedDate).add(20, 'days')))
-    # Only reimport the data if it hasn't been updated in at least 20 days
-    Feeds.upsert({
-      url: WHOCholeraDataUrl
-    }, {
-      $set:
-        title: "WHO Annual Cholera Cases by Country"
-        addedDate: new Date()
-        structuredData: true
-    })
-    feedId = Feeds.findOne(url: WHOCholeraDataUrl)._id
-    resp = HTTP.get(WHOCholeraDataUrl, {})
-    getGeonames(resp.data.fact.map (fact)-> fact.dim.COUNTRY)
-    Incidents.remove(sourceFeed: feedId)
-    resp.data.fact.forEach (fact) ->
-      Incidents.insert
-        sourceFeed: feedId
-        constraining: true
-        dateRange:
-          type: "precise"
-          start: new Date(fact.dim.YEAR + "")
-          end: new Date(parseInt(fact.dim.YEAR) + 1 + "")
-        locations: [nameToGeoname[fact.dim.COUNTRY]]
-        cases: parseInt(fact.Value)
-        resolvedDisease:
-          id: "http://purl.obolibrary.org/obo/DOID_1498"
-          text: "Cholera"
-        species:
-          id: "tsn:180092"
-          text: "Homo sapiens"
-        addedDate: new Date()
+  # Import WHO datasets:
+  WHODataUrls = [
+    url: "http://apps.who.int/gho/athena/data/GHO/CHOLERA_0000000001.json?profile=simple&filter=COUNTRY:*;REGION:*"
+    title: "WHO Annual Cholera Cases by Country"
+    diseases:
+      id: "http://purl.obolibrary.org/obo/DOID_1498"
+      text: "Cholera"
+  ,
+    url: "http://apps.who.int/gho/athena/data/GHO/WHS3_50.json?profile=simple&filter=COUNTRY:*;REGION:*"
+    title: "WHO Annual Yellow Fever Cases by Country"
+    disease:
+      id: "http://purl.obolibrary.org/obo/DOID_9682"
+      text: "Yellow Fever"
+  ,
+    url: "http://apps.who.int/gho/athena/data/GHO/WHS3_42.json?profile=simple&filter=COUNTRY:*;REGION:*"
+    title: "WHO Annual Japanese Encephalitis Cases by Country"
+    disease:
+      id: "http://purl.obolibrary.org/obo/DOID_10844"
+      text: "Japanese Encephalitis"
+  ]
+  WHODataUrls.forEach (WHOItem)->
+    feed = Feeds.findOne(url: WHOItem.url)
+    if not (feed and moment().isBefore(moment(feed.addedDate).add(20, 'days')))
+      # Only reimport the data if it hasn't been updated in at least 20 days
+      Feeds.upsert({
+        url: WHOItem.url
+      }, {
+        $set:
+          title: WHOItem.title
+          addedDate: new Date()
+          structuredData: true
+      })
+      feedId = Feeds.findOne(url: WHOItem.url)._id
+      resp = HTTP.get(WHOItem.url, {})
+      getGeonames(resp.data.fact.map (fact)-> fact.dim.COUNTRY)
+      Incidents.remove(sourceFeed: feedId)
+      resp.data.fact.forEach (fact) ->
+        value = parseInt(fact.Value)
+        if value.toString() != "NaN"
+          Incidents.insert
+            sourceFeed: feedId
+            constraining: true
+            dateRange:
+              type: "precise"
+              start: new Date(fact.dim.YEAR + "")
+              end: new Date(parseInt(fact.dim.YEAR) + 1 + "")
+            locations: [nameToGeoname[fact.dim.COUNTRY]]
+            cases: value
+            resolvedDisease: WHOItem.disease
+            species:
+              id: "tsn:180092"
+              text: "Homo sapiens"
+            addedDate: new Date()
 
   # Import TB data
   WHOTBDataUrl = "http://apps.who.int/gho/athena/data/GHO/MDG_0000000020,TB_e_inc_num,TB_e_inc_tbhiv_100k,TB_e_inc_tbhiv_num.json?profile=simple&filter=COUNTRY:*;REGION:*"
@@ -64,28 +83,32 @@ module.exports = ->
     })
     feedId = Feeds.findOne(url: WHOTBDataUrl)._id
     resp = HTTP.get(WHOTBDataUrl, {})
-    getGeonames(resp.data.fact.map (fact)-> fact.dim.COUNTRY)
+    getGeonames(resp.data.fact.map (fact) -> fact.dim.COUNTRY)
     Incidents.remove(sourceFeed: feedId)
     resp.data.fact.forEach (fact) ->
       if fact.dim.GHO == "Number of incident tuberculosis cases"
-        parsedValue = /(\d+) \[(\d+)\-(\d+)\]/.exec(fact.Value)
-        maxValue = parsedValue[3]
-        Incidents.insert
-          sourceFeed: feedId
-          constraining: true
-          dateRange:
-            type: "precise"
-            start: new Date(fact.dim.YEAR + "")
-            end: new Date(parseInt(fact.dim.YEAR) + 1 + "")
-          locations: [nameToGeoname[fact.dim.COUNTRY]]
-          cases: parseInt(maxValue)
-          resolvedDisease:
-            id: "http://purl.obolibrary.org/obo/DOID_399"
-            text: "Tuberculosis"
-          species:
-            id: "tsn:180092"
-            text: "Homo sapiens"
-          addedDate: new Date()
+        parsedValues = /(\d+) \[(\d+)\-(\d+)\]/.exec(fact.Value)
+        if parsedValues.length == 4
+          [noop1, noop2, minValue, maxValue] = parsedValues
+          [true, false].forEach (useMin) ->
+            Incidents.insert
+              sourceFeed: feedId
+              constraining: true
+              dateRange:
+                type: "precise"
+                start: new Date(fact.dim.YEAR + "")
+                end: new Date(parseInt(fact.dim.YEAR) + 1 + "")
+              locations: [nameToGeoname[fact.dim.COUNTRY]]
+              cases: if useMin then parseInt(minValue) else parseInt(maxValue)
+              max: not useMin
+              min: useMin
+              resolvedDisease:
+                id: "http://purl.obolibrary.org/obo/DOID_399"
+                text: "Tuberculosis"
+              species:
+                id: "tsn:180092"
+                text: "Homo sapiens"
+              addedDate: new Date()
 
   # Import CDC NNDSS data
   CDCDataURLs = [

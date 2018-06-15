@@ -83,6 +83,12 @@ IncidentReportSchema = new SimpleSchema
   approximate:
     type: Boolean
     optional: true
+  min:
+    type: Boolean
+    optional: true
+  max:
+    type: Boolean
+    optional: true
   # Deprecated
   disease:
     type: String

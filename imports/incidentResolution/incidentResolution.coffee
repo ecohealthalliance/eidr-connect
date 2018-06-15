@@ -326,7 +326,9 @@ getTopLevelSubIntervals = (subInts) ->
 # that are inconsistent, and incidents that far exceed the typical case rate.
 removeOutlierIncidents = (originalIncidents, constrainingIncidents) ->
   incidents = convertAllIncidentsToDifferentials(originalIncidents)
-  constrainingIncidents = convertAllIncidentsToDifferentials(constrainingIncidents)
+  constrainingIncidents = convertAllIncidentsToDifferentials(constrainingIncidents.filter (incident)->
+    not incident.min
+  )
   # Incidents are partitioned so that confirmed incidents only constrain
   # confirmed incidents and deaths only constrain deaths
   partitions = {
@@ -505,10 +507,12 @@ mergeSubIntervals = (subIntervals) ->
 # incidents will produce counts equal to the target incidents.
 createSupplementalIncidents = (incidents, targetIncidents) ->
   incidents = convertAllIncidentsToDifferentials(incidents)
-  targetIncidents = convertAllIncidentsToDifferentials(targetIncidents)
+  targetIncidents = convertAllIncidentsToDifferentials(targetIncidents.filter (incident)->
+    not incident.max
+  )
   return createSupplementalIncidentsSingleType(
-      _.where(incidents, type: "cases"),
-      _.where(targetIncidents, type: "cases")
+    _.where(incidents, type: "cases"),
+    _.where(targetIncidents, type: "cases")
   ).concat(
     createSupplementalIncidentsSingleType(
       _.where(incidents, type: "deaths"),
