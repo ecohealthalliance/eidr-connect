@@ -601,7 +601,7 @@ subIntervalsToDailyRates = (subIntervals) ->
 dailyRatesToActiveCases = (dailyRates, dailyDecayRate, dateWindow) ->
   startDate = new Date(dateWindow.startDate).toISOString().split('T')[0]
   activeCases = 0
-  firstRateDay = dailyRates[0][0]
+  firstRateDay = if dailyRates.length > 0 then dailyRates[0][0] else startDate
   dailyRates = _.object(dailyRates)
   activeCasesByDay = enumerateDateRange(
     # If the daily rates go outside of the date window, we still iterate over

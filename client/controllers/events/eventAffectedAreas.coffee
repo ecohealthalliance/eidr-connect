@@ -104,7 +104,9 @@ Template.eventAffectedAreas.onRendered ->
       for subInterval in subIntervals
         subInterval.incidents = subInterval.incidentIds.map (id) ->
           differentialIncidents[id]
-
+      subIntervals = subIntervals.filter (subI) ->
+        # Filter out sub-intervals that don't have country level resolution or better.
+        subI.locationId != "6295630"
       locationTree = LocationTree.from(subIntervals.map (x) -> x.location)
       topLocations = locationTree.children.map (x) -> x.value
       locToSubintervals = {}
