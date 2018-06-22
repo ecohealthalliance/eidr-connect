@@ -120,7 +120,7 @@ module.exports = ->
       valProp: "meningococcal_disease_all_serogroups_current_week"
     ,
       id: "http://purl.obolibrary.org/obo/DOID_1116"
-      text: "pertussis"
+      text: "Pertussis"
       valProp: "pertussis_current_week"
     ,
       id: "http://purl.obolibrary.org/obo/DOID_10264"
@@ -204,7 +204,7 @@ module.exports = ->
     title: "NNDSS Hepatitis (viral, acute, by type) C"
     diseases: [
       id: "http://purl.obolibrary.org/obo/DOID_1883"
-      text: "hepatitis C"
+      text: "Hepatitis C"
       valProp: "hepatitis_viral_acute_by_type_c_confirmed_current_week"
     ]
   ,
@@ -212,11 +212,11 @@ module.exports = ->
     title: "NNDSS - Table II. Hepatitis (viral, acute, by type) A & B"
     diseases: [
       id: "http://purl.obolibrary.org/obo/DOID_12549"
-      text: "hepatitis A"
+      text: "Hepatitis A"
       valProp: "hepatitis_viral_acute_by_type_a_current_week"
     ,
       id: "http://purl.obolibrary.org/obo/DOID_2043"
-      text: "hepatitis B"
+      text: "Hepatitis B"
       valProp: "hepatitis_viral_acute_by_type_b_current_week"
     ]
   ,

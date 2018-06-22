@@ -17,7 +17,27 @@ import {
   mapLocationsToMaxSubIntervals
 } from '/imports/incidentResolution/incidentResolution'
 import LocationTree from '/imports/incidentResolution/LocationTree'
-import { _ } from 'meteor/underscore';
+import { _ } from 'meteor/underscore'
+
+# Active period is based on the post symptom period of contagiousness.
+# Median values are preferred. If a range is given the midpoint is used.
+ACTIVE_PERIOD_BY_DISEASE =
+  # Cholera
+  'http://purl.obolibrary.org/obo/DOID_1498': 3
+  # Yellow Fever
+  'http://purl.obolibrary.org/obo/DOID_9682': 5
+  # Listeriosis
+  'http://purl.obolibrary.org/obo/DOID_11573': 21
+  # Poliomyelitis
+  'http://purl.obolibrary.org/obo/DOID_4953': 9
+  # Measles
+  'http://purl.obolibrary.org/obo/DOID_8622': 4
+  # HIV
+  'http://purl.obolibrary.org/obo/DOID_526': 90
+  # Ebola
+  'http://purl.obolibrary.org/obo/DOID_4325': 14
+  # Marburg
+  'http://purl.obolibrary.org/obo/DOID_4327': 14
 
 sum = (list) ->
   list.reduce((sofar, x) ->
@@ -332,8 +352,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
       query = utils.eventToIncidentQuery(event)
     if dateRange
       if (@request.query.activeCases + "").toLowerCase() == "true"
-        # TODO: look up disease specific stat
-        event.caseLengthDays = 14
+        event.caseLengthDays = ACTIVE_PERIOD_BY_DISEASE[event.diseases?[0]?.id] or 7
         extendedStartDate = new Date(dateRange.start)
         # Incidents from an extended date range are included to determine the
         # initial number of active cases at the beginning of the intended date range.
@@ -402,9 +421,9 @@ Router.route("/api/events-with-resolved-data", where: "server")
       maxDate = null
       minDate = null
       subIntervals.forEach (subInt) ->
-        if subInt.start < minDate
+        if not minDate or subInt.start < minDate
           minDate = subInt.start
-        if subInt.end > maxDate
+        if not maxDate or subInt.end > maxDate
           maxDate = subInt.end
       dateWindow = {
         startDate: @request.query.startDate or minDate

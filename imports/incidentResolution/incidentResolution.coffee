@@ -601,14 +601,21 @@ subIntervalsToDailyRates = (subIntervals) ->
 dailyRatesToActiveCases = (dailyRates, dailyDecayRate, dateWindow) ->
   startDate = new Date(dateWindow.startDate).toISOString().split('T')[0]
   activeCases = 0
+  firstRateDay = dailyRates[0][0]
   dailyRates = _.object(dailyRates)
   activeCasesByDay = enumerateDateRange(
-    dateWindow.startDate, dateWindow.endDate
+    # If the daily rates go outside of the date window, we still iterate over
+    # them to determine the initial active cases on the first day of the
+    # date window.
+    Math.min(new Date(startDate), new Date(firstRateDay)),
+    dateWindow.endDate
   ).map (date) ->
     day = date.toISOString().split('T')[0]
     rate = dailyRates[day] or 0
     activeCases = activeCases * dailyDecayRate + rate
     [day, activeCases]
+  .filter ([day, noop]) ->
+    day >= startDate
 
 subIntervalsToActiveCases = (subIntervals, dailyDecayRate, dateWindow) ->
   dailyRatesToActiveCases(subIntervalsToDailyRates(subIntervals), dailyDecayRate, dateWindow)
