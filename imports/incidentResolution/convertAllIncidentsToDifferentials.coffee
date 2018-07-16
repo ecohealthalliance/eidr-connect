@@ -124,7 +124,7 @@ convertAllIncidentsToDifferentials = (incidents, replaceRegionsWithCountries=tru
           if prevIncident.count >= incident.count
             return sofar
           else
-            return sofar.slice(0,-1).concat(incident)
+            return sofar.slice(0, -1).concat(incident)
         else
           throw Error("endDates are not sorted.")
       , [])
@@ -153,4 +153,5 @@ convertAllIncidentsToDifferentials = (incidents, replaceRegionsWithCountries=tru
         prevIncident = incident
         differentialIncidents.push(newDifferential)
   return differentialIncidents
+
 module.exports = convertAllIncidentsToDifferentials

@@ -412,6 +412,8 @@ Router.route("/api/events-with-resolved-data", where: "server")
         if event.resolvedDateRange
           differential = differential.truncated(event.resolvedDateRange)
         differential
+      .filter (differential) ->
+        differential.duration > 0
       subIntervals = differentialIncidentsToSubIntervals(differentials)
       console.timeEnd('create differentials') if ENABLE_PROFILING
       console.time('resolve') if ENABLE_PROFILING
