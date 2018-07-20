@@ -22,7 +22,7 @@ module.exports = ->
         console.log error
       else
         successes++
-      console.log "#{successes} / #{batch.length} airticles with errors successfully processed"
+      console.log "#{successes} / #{batch.length} articles with errors successfully processed"
       next()
     )
   , ->

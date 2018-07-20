@@ -151,6 +151,8 @@ Meteor.methods
     enhancements.structuredIncidents = enhancements.structuredIncidents
       .filter (incident) ->
         incident.location and incident.dateRange
+      .filter (incident) ->
+        "Cannot parse" not in [incident.type, incident.dateRange, incident.location, incident.value]
       .map (incident) ->
         incident.location = formatGeoname(incident.location)
         incident
