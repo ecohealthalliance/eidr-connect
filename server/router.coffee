@@ -351,6 +351,13 @@ Router.route("/api/events-with-resolved-data", where: "server")
     else
       query = utils.eventToIncidentQuery(event)
     if dateRange
+      # The query will return incidents that only partially overlap the date range.
+      # The resolved date range is used to truncate those incidents to only include
+      # the overlapping date range.
+      event.resolvedDateRange = {
+        start: dateRange.start
+        end: dateRange.end
+      }
       if (@request.query.activeCases + "").toLowerCase() == "true"
         event.caseLengthDays = ACTIVE_PERIOD_BY_DISEASE[event.diseases?[0]?.id] or 7
         extendedStartDate = new Date(dateRange.start)
@@ -360,13 +367,9 @@ Router.route("/api/events-with-resolved-data", where: "server")
         # of the cases from before the extended date range would still be active
         # in the original date range.
         extendedStartDate.setUTCDate(extendedStartDate.getUTCDate() - (4 * event.caseLengthDays))
-        dateRange.start = extendedStartDate
-      # The query will return incidents that only partially overlap the date range.
-      # The resolved date range is used to truncate those incidents to only include
-      # the overlapping date range.
-      event.resolvedDateRange = dateRange
-      query['dateRange.start'] = $lt: dateRange.end
-      query['dateRange.end'] = $gt: dateRange.start
+        event.resolvedDateRange.start = extendedStartDate
+      query['dateRange.start'] = $lt: event.resolvedDateRange.end
+      query['dateRange.end'] = $gt: event.resolvedDateRange.start
     console.time('fetch incidents') if ENABLE_PROFILING
     event.incidents = Incidents.find(query).fetch()
     console.timeEnd('fetch incidents') if ENABLE_PROFILING
