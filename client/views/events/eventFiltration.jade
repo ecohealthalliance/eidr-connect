@@ -75,12 +75,20 @@ template(name="eventFiltration")
         type="checkbox"
         name="travelRelated"
         propPrex=propPrex
-        title= "Travel Related"
+        title="Travel Related"
+        showTooltip=true)
+
+      +filterCheckButton(
+        initialState=2
+        type="checkbox"
+        name="outlier"
+        propPrex=propPrex
+        title="Outlier"
         showTooltip=true)
 
       +filterCheckButton(
         type="checkbox"
-        name="outlier"
+        name="structured"
         propPrex=propPrex
-        title= "Outlier"
+        title="Structured Source"
         showTooltip=true)

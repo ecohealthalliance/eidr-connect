@@ -233,7 +233,7 @@ Template.incidentForm.helpers
     @id == Template.instance().incidentType.get()
 
   sourceFeed: ->
-    Feeds.findOne()
+    Feeds.findOne(_id: Template.instance().incidentData.sourceFeed)
 
 Template.incidentForm.events
   'change input[name=daterangepicker_start]': (event, instance) ->

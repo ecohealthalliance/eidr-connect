@@ -48,7 +48,10 @@ Template.eventFiltration.onCreated ->
   ]
   @types = new ReactiveVar([])
   @status = new ReactiveVar([])
-  @properties = new ReactiveVar([])
+  @properties = new ReactiveVar([
+    name: 'outlier'
+    state: false
+  ])
   @countryLevel = new ReactiveVar(@locationLevels[0].prop)
   @selectedLocations = new Meteor.Collection(null)
   @locations = new Meteor.Collection(null)
@@ -219,6 +222,11 @@ Template.eventFiltration.onRendered ->
     if travelRelated
       filters.travelRelated = travelRelated.state
 
+    structured = _.findWhere(otherProps, name: "structured")
+    if structured
+      filters.sourceFeed =
+        $exists: structured.state
+
     outliers = _.findWhere(otherProps, name: "outlier")
     if outliers
       baseIncidents = []
@@ -334,6 +342,6 @@ Template.eventFiltration.events
     instance.types.set([])
     instance.data.selectedIncidentTypes.set([])
     instance.status.set([])
-    instance.properties.set({})
+    instance.properties.set([])
     instance.selectedLocations.remove({})
     instance.selectedDateRange.set(instance.eventDateRange.get())

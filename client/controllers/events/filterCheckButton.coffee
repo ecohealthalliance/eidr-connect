@@ -1,5 +1,5 @@
 Template.filterCheckButton.onCreated ->
-  @state = new ReactiveVar(0)
+  @state = new ReactiveVar(this.data?.initialState or 0)
   @tooltipsSeen = new ReactiveVar(false)
 
   @textBasedOnState = (text) ->
