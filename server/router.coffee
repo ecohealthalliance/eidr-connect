@@ -38,6 +38,24 @@ ACTIVE_PERIOD_BY_DISEASE =
   'http://purl.obolibrary.org/obo/DOID_4325': 14
   # Marburg
   'http://purl.obolibrary.org/obo/DOID_4327': 14
+  # SARS
+  'http://purl.obolibrary.org/obo/DOID_2945': 25
+  # MERS
+  'https://www.wikidata.org/wiki/Q16654806': 12
+  # Smallpox
+  'http://purl.obolibrary.org/obo/DOID_8736': (5 * 7)
+  # Monkeypox
+  'http://purl.obolibrary.org/obo/DOID_3292': (3 * 7)
+  # Varicella
+  'http://purl.obolibrary.org/obo/DOID_8659': 8
+  # Anthrax
+  'http://purl.obolibrary.org/obo/DOID_7427': 7
+  # Plague (pneumonic form)
+  'http://purl.obolibrary.org/obo/DOID_10398': 5
+  # Typhoid
+  'http://purl.obolibrary.org/obo/DOID_13258': 85
+  # Human Influenza (information not seperate for A and B)
+  'http://purl.obolibrary.org/obo/DOID_8469': 7
 
 sum = (list) ->
   list.reduce((sofar, x) ->

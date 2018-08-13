@@ -219,6 +219,14 @@ template(name="incidentForm")
 
       button.hidden(type="submit" aria-hidden="true")
 
+    if incidentData.addedDate
+      .modification-date
+        i Last Modified:
+        if incidentData.modifiedDate
+          span #{incidentData.modifiedDate}
+        else
+          span #{incidentData.addedDate}
+
 template(name="documentInputLabel")
   label.control-label.with-info-tooltip(
     data-toggle="tooltip"
