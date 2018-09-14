@@ -1,7 +1,8 @@
-import Constants from '/imports/constants.coffee'
-import Articles from '/imports/collections/articles.coffee'
+import Constants from '/imports/constants'
+import Articles from '/imports/collections/articles'
 import notify from '/imports/ui/notification'
 import regionToCountries from '/imports/regionToCountries.json'
+import diseaseToSubtypes from '/imports/diseaseToSubtypes.json'
 
 ###
 # cleanUrl - takes an existing url and removes the last match of the applied
@@ -314,7 +315,10 @@ export eventToIncidentQuery = (event) ->
     deleted: $in: [null, false]
     locations: $not: $size: 0
   if event.diseases and event.diseases.length > 0
-    query['resolvedDisease.id'] = $in: event.diseases.map (x) -> x.id
+    query['resolvedDisease.id'] =
+      $in: _.flatten(event.diseases.map (x) ->
+        (diseaseToSubtypes[x.id] or []).concat([x.id])
+      )
   eventDateRange = event.dateRange
   if eventDateRange
     if eventDateRange.end
