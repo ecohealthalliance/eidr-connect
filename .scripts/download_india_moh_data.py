@@ -80,7 +80,11 @@ if __name__ == "__main__":
                 result = subprocess.call(["wget", url, "-O", filepath])
                 if result != 0:
                     break
-                subprocess.call(["pdftotext", filepath])
+                pdftotext_result = subprocess.call(["pdftotext", filepath])
+                if pdftotext_result != 0:
+                    print("Removing invalid pdf: " + filepath)
+                    os.remove(filepath)
+                    break
             with open(filepath.replace(".pdf", ".txt")) as f:
                 regex = re.compile(
                     r"(\w{2,}\/\w{2,}\/\d{4}/\d+/\d+)\s+"
