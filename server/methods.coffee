@@ -116,18 +116,21 @@ Meteor.methods
       """, $term: "%" + term.toUpperCase() + "%", callback)
     wrappedFn()
 
-  getArticleEnhancements: (article, options={}) ->
+  getArticleEnhancements: (article, options=null) ->
     @unblock()
     check article.url, Match.Maybe(String)
     check article.content, Match.Maybe(String)
     check article.publishDate, Match.Maybe(Date)
     check article.addedDate, Match.Maybe(Date)
+    if not options
+      options = {}
     if not options.hideLogs
       console.log "Calling GRITS API @ " + Constants.GRITS_URL
     params =
       api_key: Constants.GRITS_API_KEY
       returnSourceContent: true
       priority: options.priority != false
+      use_infection_annotator: options.useInfectionAnnotator or false
     if article.publishDate or article.addedDate
       params.content_date = moment.utc(
         article.publishDate or article.addedDate

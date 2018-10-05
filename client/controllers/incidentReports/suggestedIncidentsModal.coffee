@@ -84,7 +84,7 @@ Template.suggestedIncidentsModal.onRendered ->
     $('body').addClass('modal-open')
 
   source = @data.article
-  Meteor.call 'getArticleEnhancements', source, (error, enhancements) =>
+  Meteor.call 'getArticleEnhancements', source, Router.current().params?.query, (error, enhancements) =>
     if error
       Modal.hide(@)
       notify('error', error.reason)
