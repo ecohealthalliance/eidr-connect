@@ -287,7 +287,8 @@ Router.route("/api/process-document", {where: "server"})
 Router.route("/api/resolve-incidents", where: "server")
 .post ->
   try
-    differentials = convertAllIncidentsToDifferentials(@request.body)
+    incidentsWithoutOutliers = removeOutlierIncidents(@request.body, [])
+    differentials = convertAllIncidentsToDifferentials(incidentsWithoutOutliers)
   catch e
     @response.statusCode = 400
     return @response.end("Invalid incidents: " + e)

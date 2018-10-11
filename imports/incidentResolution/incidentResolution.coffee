@@ -325,6 +325,21 @@ getTopLevelSubIntervals = (subInts) ->
 # the numbers given in the constraining incidents, cumulative incidents
 # that are inconsistent, and incidents that far exceed the typical case rate.
 removeOutlierIncidents = (originalIncidents, constrainingIncidents) ->
+  result = []
+  diseases = _.chain(originalIncidents)
+    .map (x) -> x.resolvedDisease.id
+    .uniq()
+    .value()
+  diseases.forEach (disease) ->
+    diseaseMatch = (x) -> x.resolvedDisease.id == disease
+    result = result.concat(
+      removeOutlierIncidentsSingleDisease(
+        originalIncidents.filter(diseaseMatch),
+        constrainingIncidents.filter(diseaseMatch))
+    )
+  return result
+
+removeOutlierIncidentsSingleDisease = (originalIncidents, constrainingIncidents) ->
   incidents = convertAllIncidentsToDifferentials(originalIncidents)
   constrainingIncidents = convertAllIncidentsToDifferentials(constrainingIncidents.filter (incident)->
     not incident.min
@@ -386,6 +401,15 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
     else
       incidentsToKeep = incidentsToKeep.concat(incidentGroup)
   incidents = incidentsToKeep
+  # Create constraining incidents from differences in cumulative incidents + 20%
+  constrainingIncidents = constrainingIncidents.concat(
+    subIntervals
+      .filter (x) -> x.cumulative and x.count >= 1
+      .map (x) ->
+        result = Object.create(x)
+        result.count = Math.floor(x.count * 1.2)
+        result
+  )
   # When a constraining incident has more than one location this creates a
   # a clone of it with each location as the only location.
   # This makes the constraint weaker since the combined counts at all locations
