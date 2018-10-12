@@ -30,9 +30,8 @@ MILLIS_PER_DAY = 1000 * 60 * 60 * 24
 #   +                         Time
 #
 class SubInterval
-  constructor: (@id, @start, @end, @location, @incidentIds) ->
+  constructor: (@id, @start, @end, @location, @incidentIds, @__value=null) ->
     @locationId = @location.id
-    @__value = null
     # The total number of cases that occured over the sub-interval.
     Object.defineProperty @, 'value',
       get: =>
@@ -325,8 +324,19 @@ getTopLevelSubIntervals = (subInts) ->
 # the numbers given in the constraining incidents, cumulative incidents
 # that are inconsistent, and incidents that far exceed the typical case rate.
 removeOutlierIncidents = (originalIncidents, constrainingIncidents) ->
+  nonAnalysableIncidents = []
+  analysableIncidents = []
+  originalIncidents.forEach (incident)->
+    analysable = incident.dateRange and\
+      (incident.cases or incident.deaths) > 0 and\
+      incident.type != 'activeCount' and\
+      incident.locations.length > 0
+    if analysable
+      analysableIncidents.push(incident)
+    else
+      nonAnalysableIncidents.push(incident)
   result = []
-  diseases = _.chain(originalIncidents)
+  diseases = _.chain(analysableIncidents)
     .map (x) -> x.resolvedDisease.id
     .uniq()
     .value()
@@ -334,10 +344,10 @@ removeOutlierIncidents = (originalIncidents, constrainingIncidents) ->
     diseaseMatch = (x) -> x.resolvedDisease.id == disease
     result = result.concat(
       removeOutlierIncidentsSingleDisease(
-        originalIncidents.filter(diseaseMatch),
+        analysableIncidents.filter(diseaseMatch),
         constrainingIncidents.filter(diseaseMatch))
     )
-  return result
+  return result.concat(nonAnalysableIncidents)
 
 removeOutlierIncidentsSingleDisease = (originalIncidents, constrainingIncidents) ->
   incidents = convertAllIncidentsToDifferentials(originalIncidents)
@@ -386,7 +396,6 @@ removeOutlierIncidentsSingleDisease = (originalIncidents, constrainingIncidents)
 removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
   # Remove incidents that exceed the 90th percentile of rates for their feature
   # type by more than 10x.
-  subIntervals = differentialIncidentsToSubIntervals(incidents)
   incidentsByLocationCode = _.groupBy(incidents, (x) -> x.locations[0].featureCode)
   incidentsToKeep = []
   for locationCode, incidentGroup of incidentsByLocationCode
@@ -402,6 +411,7 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
       incidentsToKeep = incidentsToKeep.concat(incidentGroup)
   incidents = incidentsToKeep
   # Create constraining incidents from differences in cumulative incidents + 20%
+  subIntervals = differentialIncidentsToSubIntervals(incidents)
   constrainingIncidents = constrainingIncidents.concat(
     subIntervals
       .filter (x) -> x.cumulative and x.count >= 1
@@ -530,6 +540,21 @@ mergeSubIntervals = (subIntervals) ->
 # Create new differential incidents that when resolved with the original
 # incidents will produce counts equal to the target incidents.
 createSupplementalIncidents = (incidents, targetIncidents) ->
+  result = []
+  diseases = _.chain(incidents.concat(targetIncidents))
+    .map (x) -> x.resolvedDisease.id
+    .uniq()
+    .value()
+  diseases.forEach (disease) ->
+    diseaseMatch = (x) -> x.resolvedDisease.id == disease
+    result = result.concat(
+      createSupplementalIncidentsSingleDisease(
+        incidents.filter(diseaseMatch),
+        targetIncidents.filter(diseaseMatch))
+    )
+  return result
+
+createSupplementalIncidentsSingleDisease = (incidents, targetIncidents) ->
   incidents = convertAllIncidentsToDifferentials(incidents)
   targetIncidents = convertAllIncidentsToDifferentials(targetIncidents.filter (incident)->
     not incident.max
@@ -562,6 +587,39 @@ createSupplementalIncidentsSingleType = (incidents, targetIncidents) ->
     .value()
   targetIncidents.forEach (targetIncident) ->
     containedSubInts = getContainedSubIntervals(targetIncident, subIntsByStart)
+    # Create sub-intervals to fill any gaps between the start and end of the
+    # target incident and the sub-intervals it contains.
+    supplementedSubIntervals = []
+    if containedSubInts.length == 0
+      targetIncident.locations.forEach (TILocation)->
+        supplementedSubIntervals.push(new SubInterval(
+          Number(targetIncident.startDate),
+          Number(targetIncident.endDate),
+          [TILocation],
+          [targetIncident._id],
+          targetIncident.count / targetIncident.locations.length
+        ))
+    else
+      firstStartDate = _.max(containedSubInts, (s)->Number(s.endDate))
+      if Number(targetIncident.startDate) < firstStartDate
+        targetIncident.locations.forEach (TILocation)->
+          supplementedSubIntervals.push(new SubInterval(
+            Number(targetIncident.startDate),
+            firstStartDate,
+            [TILocation],
+            [targetIncident._id],
+            0
+          ))
+      lastEndDate = _.min(containedSubInts, (s)->Number(s.startDate))
+      if Number(targetIncident.endDate) > lastEndDate
+        targetIncident.locations.forEach (TILocation)->
+          supplementedSubIntervals.push(new SubInterval(
+            lastEndDate,
+            Number(targetIncident.endDate),
+            [TILocation],
+            [targetIncident._id],
+            0
+          ))
     containedTopLevelSubIntervals = getTopLevelSubIntervals(containedSubInts)
     resolvedSum = sum(containedTopLevelSubIntervals.map (subInt) -> subInt.value)
     remainingCountDifference = targetIncident.count - resolvedSum
@@ -573,7 +631,6 @@ createSupplementalIncidentsSingleType = (incidents, targetIncidents) ->
     # a pool where the water is the supplemental incidents and the floor
     # rate is its level.
     subIntsSortedByRate = _.sortBy(containedTopLevelSubIntervals, 'rate')
-    supplementedSubIntervals = []
     floorRate = 0
     for [subInt, nextSubInt] in _.zip(subIntsSortedByRate, subIntsSortedByRate.slice(1))
       supplementedSubIntervals.push(subInt)

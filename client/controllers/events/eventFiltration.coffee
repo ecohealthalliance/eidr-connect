@@ -181,11 +181,13 @@ Template.eventFiltration.onRendered ->
     types = @types.get()
     if types.length
       @data.selectedIncidentTypes.set(types)
-      filters.$or =
-        types.map (type) ->
-          query = {}
-          query[type] = $exists: true
-          query
+      filters.$and = [
+        $or:
+          types.map (type) ->
+            query = {}
+            query[type] = $exists: true
+            query
+      ]
     else
       @data.selectedIncidentTypes.set(@typeProps)
 
@@ -208,7 +210,7 @@ Template.eventFiltration.onRendered ->
           break
       query
     if selectedLocations.length
-      filters.$or = (filters.$or or []).concat(selectedLocations)
+      filters.$and = (filters.$and or []).concat($or: selectedLocations)
 
     # Species
     selectedSpeciesIds = @selectedSpecies.find().map (x) ->
@@ -237,13 +239,13 @@ Template.eventFiltration.onRendered ->
         else
           baseIncidents.push incident
       incidentsWithoutOutliers = removeOutlierIncidents(baseIncidents, constrainingIncidents)
-      inlierIds = _.pluck(incidentsWithoutOutliers, '_id')
+      inlierIds = _.pluck(incidentsWithoutOutliers, '_id').concat(_.pluck(constrainingIncidents, '_id'))
       if outliers.state
         filters._id =
-          $in: _.difference(_.pluck(baseIncidents, '_id'), inlierIds)
+          $nin: inlierIds
       else
         filters._id =
-          $in: inlierIds.concat(_.pluck(constrainingIncidents, '_id'))
+          $in: inlierIds
     # Set filterQuery used to filter EventIncidents collection
     # in child templates.
     @data.filterQuery.set(filters)
