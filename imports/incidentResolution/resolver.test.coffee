@@ -52,10 +52,7 @@ describe 'Incident Resolution', ->
 
   it 'converts incidents to the correct number of differential incident intervals', ->
     differentialIncidents = convertAllIncidentsToDifferentials(incidents)
-    # console.log JSON.stringify(differentialIncidents.map((x) ->
-    #   _.pick(x, "startDate", "endDate", "count", "cumulative")
-    # ), 0, 2)
-    chai.assert.equal(differentialIncidents.length, 286)
+    chai.assert.equal(differentialIncidents.length, 285)
 
   it 'handles outlier cumulative counts', ->
     differentialIncidents = convertAllIncidentsToDifferentials([
@@ -328,6 +325,8 @@ describe 'Incident Resolution', ->
         sofar + x.value
       , 0
     chai.assert.equal(Math.round(total), 30)
+    chai.assert.equal(subIntervals[0].start, Number(new Date("Jan 1 2008 UTC")))
+    chai.assert.equal(subIntervals.slice(-1)[0].end, Number(new Date("Jan 1 2010 UTC")))
 
   it 'can remove statistical outlier incidents', ->
     baseIncidents = [{
@@ -393,3 +392,51 @@ describe 'Incident Resolution', ->
     }]
     result = removeOutlierIncidents(baseIncidents, [])
     chai.assert.equal(result.length, 9)
+
+  it 'can use cumulative incidents to remove outliers', ->
+    baseIncidents = [{
+      cases: 9
+      dateRange:
+        start: new Date("Oct 3 2010 UTC")
+        end: new Date("Dec 10 2010 UTC")
+      locations: [lome]
+    }, {
+      cases: 6
+      dateRange:
+        start: new Date("Nov 3 2010 UTC")
+        end: new Date("Nov 19 2010 UTC")
+      locations: [lome]
+    }, {
+      cases: 1500000
+      dateRange:
+        start: new Date("Jan 3 2010 UTC")
+        end: new Date("Oct 10 2010 UTC")
+      locations: [lome]
+    }, {
+      cases: 11
+      dateRange:
+        start: new Date("Aug 3 2010 UTC")
+        end: new Date("Oct 10 2010 UTC")
+      locations: [lome]
+    }, {
+      cases: 2
+      dateRange:
+        start: new Date("Jan 20 2010 UTC")
+        end: new Date("Apr 10 2010 UTC")
+      locations: [lome]
+    }, {
+      cases: 5
+      dateRange:
+        end: new Date("Jan 1 2009 UTC")
+        cumulative: true
+      locations: [lome]
+    }, {
+      cases: 65
+      dateRange:
+        end: new Date("Jan 1 2011 UTC")
+        cumulative: true
+      locations: [lome]
+    }]
+    result = removeOutlierIncidents(baseIncidents, [])
+    console.log(result)
+    chai.assert.equal(result.length, 6)

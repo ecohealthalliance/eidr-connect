@@ -337,11 +337,11 @@ removeOutlierIncidents = (originalIncidents, constrainingIncidents) ->
       nonAnalysableIncidents.push(incident)
   result = []
   diseases = _.chain(analysableIncidents)
-    .map (x) -> x.resolvedDisease.id
+    .map (x) -> x.resolvedDisease?.id
     .uniq()
     .value()
   diseases.forEach (disease) ->
-    diseaseMatch = (x) -> x.resolvedDisease.id == disease
+    diseaseMatch = (x) -> x.resolvedDisease?.id == disease
     result = result.concat(
       removeOutlierIncidentsSingleDisease(
         analysableIncidents.filter(diseaseMatch),
@@ -410,14 +410,25 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
     else
       incidentsToKeep = incidentsToKeep.concat(incidentGroup)
   incidents = incidentsToKeep
-  # Create constraining incidents from differences in cumulative incidents + 20%
-  subIntervals = differentialIncidentsToSubIntervals(incidents)
+  # Create constraining incidents from differences in cumulative incidents + 30%
+  # A hightened threshold is used to account for error in cumulative incident
+  # counts.
+  # A constraining incidents may cause the cumulative incident it was created
+  # from to be removed as an outlier. This behaviour may be suprising, but it
+  # is intentional. If a cumulative incident contains incidents that exceed
+  # its case rate for even short intervals, then the sum of the resolved cases
+  # over the duration of the cumulative incident will be greater than the
+  # number of cases specified by the incident. It is likely that short duration
+  # incidents contained by the cumulative incident provide a higher granularily
+  # accounting of the cases that occurred, so using them rather than the
+  # cumulative incident can make sense as long as they have lower CASIM scores
+  # (see CASIM definition below).
   constrainingIncidents = constrainingIncidents.concat(
-    subIntervals
+    incidents
       .filter (x) -> x.cumulative and x.count >= 1
       .map (x) ->
         result = Object.create(x)
-        result.count = Math.floor(x.count * 1.2)
+        result.count = Math.floor(x.count * 1.3)
         result
   )
   # When a constraining incident has more than one location this creates a
@@ -542,11 +553,11 @@ mergeSubIntervals = (subIntervals) ->
 createSupplementalIncidents = (incidents, targetIncidents) ->
   result = []
   diseases = _.chain(incidents.concat(targetIncidents))
-    .map (x) -> x.resolvedDisease.id
+    .map (x) -> x.resolvedDisease?.id
     .uniq()
     .value()
   diseases.forEach (disease) ->
-    diseaseMatch = (x) -> x.resolvedDisease.id == disease
+    diseaseMatch = (x) -> x.resolvedDisease?.id == disease
     result = result.concat(
       createSupplementalIncidentsSingleDisease(
         incidents.filter(diseaseMatch),
