@@ -17,6 +17,10 @@ module.exports = ->
     incident.species.id == 'tsn:180092'
   myIncidents.forEach (incident) ->
     disease = incident.resolvedDisease
+    if disease.id == 'http://purl.obolibrary.org/obo/DOID_0050117'
+      # Do not create event for disease by infectious agent because it will
+      # contain too many incidents.
+      return
     diseaseGroups[disease.id + ":" + incident.species.id] = {
       resolvedDisease: disease
       species: incident.species

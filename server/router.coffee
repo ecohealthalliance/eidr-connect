@@ -65,7 +65,7 @@ sum = (list) ->
 fs = Npm.require('fs')
 path = Npm.require('path')
 
-ENABLE_PROFILING = false
+ENABLE_PROFILING = process.env.ENABLE_PROFILING or false
 
 Router.configureBodyParsers = ->
   # The resolve-incidents endpoint may have files larger than the default limit
@@ -410,14 +410,18 @@ Router.route("/api/events-with-resolved-data", where: "server")
           constrainingIncidents.push incident
         else
           baseIncidents.push incident
+      console.time('remove outliers') if ENABLE_PROFILING
       incidentsWithoutOutliers = removeOutlierIncidents(
         baseIncidents,
         constrainingIncidents
       )
+      console.timeEnd('remove outliers') if ENABLE_PROFILING
+      console.time('create supplemental incidents') if ENABLE_PROFILING
       supplementalIncidents = createSupplementalIncidents(
         incidentsWithoutOutliers,
         constrainingIncidents
       )
+      console.timeEnd('create supplemental incidents') if ENABLE_PROFILING
       allDifferentials = convertAllIncidentsToDifferentials(
         incidentsWithoutOutliers
       ).concat(supplementalIncidents)

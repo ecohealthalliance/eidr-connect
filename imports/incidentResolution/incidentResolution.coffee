@@ -474,7 +474,7 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
   )
   # Iteratively remove incidents until the constraining incidents are not
   # exceeded by any counts.
-  loop
+  while incidents.length > 0
     outlierIncidentIds = new Set()
     subIntervals = differentialIncidentsToSubIntervals(incidents)
     # Compute CASIM for each sub-interval
@@ -552,7 +552,6 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
             break
     if excessCounts == 0
       break
-    #console.log "excessCounts:", excessCounts
     incidents = incidents.filter (x) -> not outlierIncidentIds.has(x.id)
   return incidents
 
