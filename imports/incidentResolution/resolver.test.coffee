@@ -334,13 +334,13 @@ describe 'Incident Resolution', ->
       dateRange:
         start: new Date("Oct 3 2010 UTC")
         end: new Date("Dec 10 2010 UTC")
-      locations: [lome]
+      locations: [tongo]
     }, {
       cases: 6
       dateRange:
         start: new Date("Nov 3 2010 UTC")
         end: new Date("Nov 19 2010 UTC")
-      locations: [lome]
+      locations: [tongo]
     }, {
       cases: 1500000
       dateRange:
@@ -370,7 +370,7 @@ describe 'Incident Resolution', ->
       dateRange:
         start: new Date("Dec 31 2009 UTC")
         end: new Date("Jan 1 2011 UTC")
-      locations: [lome]
+      locations: [tongo]
     }, {
       cases: 50
       dateRange:
@@ -382,7 +382,7 @@ describe 'Incident Resolution', ->
       dateRange:
         start: new Date("Dec 31 2010 UTC")
         end: new Date("Jan 1 2012 UTC")
-      locations: [lome]
+      locations: [tongo]
     }, {
       cases: 45
       dateRange:

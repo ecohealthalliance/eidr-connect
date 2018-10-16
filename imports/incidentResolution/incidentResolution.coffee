@@ -396,20 +396,39 @@ removeOutlierIncidentsSingleDisease = (originalIncidents, constrainingIncidents)
 removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
   # Remove incidents that exceed the 90th percentile of rates for their feature
   # type by more than 10x.
-  incidentsByLocationCode = _.groupBy(incidents, (x) -> x.locations[0].featureCode)
-  incidentsToKeep = []
-  for locationCode, incidentGroup of incidentsByLocationCode
-    if incidentGroup.length >= 10
-      sortedIncidents = _.sortBy(incidentGroup, 'rate')
-      idx90thPercentile = Math.floor((sortedIncidents.length - 1) * .9)
-      incident90thPercentile = sortedIncidents[idx90thPercentile]
-      incidentsToKeep = incidentsToKeep.concat(sortedIncidents.slice(0, idx90thPercentile))
-      sortedIncidents.slice(idx90thPercentile).forEach (incident) ->
-        if incident.rate < incident90thPercentile.rate * 10
-          incidentsToKeep.push(incident)
-    else
-      incidentsToKeep = incidentsToKeep.concat(incidentGroup)
-  incidents = incidentsToKeep
+  incidentsByLocationId = _.groupBy(incidents, (x) -> x.locations[0].id)
+  myLocationTree = LocationTree.from(incidents.map (x) -> x.locations[0])
+  locationIdToParent = myLocationTree.makeIdToParentMap()
+  nodeLayer = myLocationTree.children
+  while nodeLayer.length > 0
+    nextLayer = []
+    nodeLayer.forEach (node) ->
+      nextLayer = nextLayer.concat(node.children)
+      locationId = node.value.id
+      incidentGroup = incidentsByLocationId[locationId]
+      loop
+        if incidentGroup.length >= 10
+          sortedIncidents = _.sortBy(incidentGroup, 'rate')
+          idx90thPercentile = Math.floor((sortedIncidents.length - 1) * .9)
+          incident90thPercentile = sortedIncidents[idx90thPercentile]
+          incidentsToKeep = sortedIncidents.slice(0, idx90thPercentile)
+          sortedIncidents.slice(idx90thPercentile).forEach (incident) ->
+            if incident.rate < incident90thPercentile.rate * 10
+              incidentsToKeep.push(incident)
+          incidentsByLocationId[node.value.id] = incidentsToKeep
+          break
+        parent = locationIdToParent[locationId]
+        if parent.value == 'ROOT'
+          break
+        else
+          locationId = parent.value.id
+          incidentGroup = incidentGroup.concat(incidentsByLocationId[locationId])
+    nodeLayer = nextLayer
+  incidents = _.chain(incidentsByLocationId)
+    .values()
+    .flatten(true)
+    .uniq()
+    .value()
   # Create constraining incidents from differences in cumulative incidents + 30%
   # A hightened threshold is used to account for error in cumulative incident
   # counts.
