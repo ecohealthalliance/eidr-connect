@@ -14,6 +14,13 @@ module.exports = ->
             q: country
         nameToGeoname[country] = geonamesResult.data.hits[0]._source
         delete nameToGeoname[country].alternateNames
+        delete nameToGeoname[country].rawNames
+        delete nameToGeoname[country].asciiName
+        delete nameToGeoname[country].cc2
+        delete nameToGeoname[country].elevation
+        delete nameToGeoname[country].dem
+        delete nameToGeoname[country].timezone
+        delete nameToGeoname[country].modificationDate
 
   # Import WHO datasets:
   WHODataUrls = [

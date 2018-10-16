@@ -65,7 +65,7 @@ sum = (list) ->
 fs = Npm.require('fs')
 path = Npm.require('path')
 
-ENABLE_PROFILING = false
+ENABLE_PROFILING = process.env.ENABLE_PROFILING or false
 
 Router.configureBodyParsers = ->
   # The resolve-incidents endpoint may have files larger than the default limit
@@ -410,14 +410,18 @@ Router.route("/api/events-with-resolved-data", where: "server")
           constrainingIncidents.push incident
         else
           baseIncidents.push incident
+      console.time('remove outliers') if ENABLE_PROFILING
       incidentsWithoutOutliers = removeOutlierIncidents(
         baseIncidents,
         constrainingIncidents
       )
+      console.timeEnd('remove outliers') if ENABLE_PROFILING
+      console.time('create supplemental incidents') if ENABLE_PROFILING
       supplementalIncidents = createSupplementalIncidents(
         incidentsWithoutOutliers,
         constrainingIncidents
       )
+      console.timeEnd('create supplemental incidents') if ENABLE_PROFILING
       allDifferentials = convertAllIncidentsToDifferentials(
         incidentsWithoutOutliers
       ).concat(supplementalIncidents)
@@ -570,3 +574,34 @@ Router.route("/api/events-with-resolved-data", where: "server")
         result.locations = countryCodeToCount
       return result
   }))
+
+
+###
+@api {post} reprocess-article-date-range
+@apiParam {ISODateString} startDate
+@apiParam {ISODateString} endDate
+###
+Router.route("/api/reprocess-article-date-range", where: "server")
+.get ->
+  console.log("reprocessing articles...")
+  articles = Articles.find({
+    $and: [
+      publishDate: $gt: new Date(@request.query.startDate)
+    ,
+      publishDate: $lt: new Date(@request.query.endDate)
+    ]
+  }).fetch()
+  if articles.length > 1000
+    return @response.end("Too many articles to process.")
+  articles.forEach (article)->
+    Meteor.call('getArticleEnhancementsAndUpdate', article._id, {
+      hideLogs: true
+      priority: false
+      reprocess: true
+    }, (error)->
+      if error
+        console.log article
+        console.log error
+    )
+  @response.statusCode = 200
+  @response.end("Processing #{articles.length} articles...")

@@ -94,6 +94,13 @@ export default class LocationTree
       result = result.concat(subTree.locations())
     return result
 
+  makeIdToParentMap: (sofar=null) ->
+    result = sofar or {}
+    @children.map (child) =>
+      result = child.makeIdToParentMap(result)
+      result[child.value.id] = @
+    return result
+
   toJSON: (transformationFunction=(x) -> x) ->
     transformationFunction(
       value: @value

@@ -30,9 +30,8 @@ MILLIS_PER_DAY = 1000 * 60 * 60 * 24
 #   +                         Time
 #
 class SubInterval
-  constructor: (@id, @start, @end, @location, @incidentIds) ->
+  constructor: (@id, @start, @end, @location, @incidentIds, @__value=null) ->
     @locationId = @location.id
-    @__value = null
     # The total number of cases that occured over the sub-interval.
     Object.defineProperty @, 'value',
       get: =>
@@ -325,19 +324,30 @@ getTopLevelSubIntervals = (subInts) ->
 # the numbers given in the constraining incidents, cumulative incidents
 # that are inconsistent, and incidents that far exceed the typical case rate.
 removeOutlierIncidents = (originalIncidents, constrainingIncidents) ->
+  nonAnalysableIncidents = []
+  analysableIncidents = []
+  originalIncidents.forEach (incident)->
+    analysable = incident.dateRange and\
+      (incident.cases or incident.deaths) > 0 and\
+      incident.type != 'activeCount' and\
+      incident.locations.length > 0
+    if analysable
+      analysableIncidents.push(incident)
+    else
+      nonAnalysableIncidents.push(incident)
   result = []
-  diseases = _.chain(originalIncidents)
-    .map (x) -> x.resolvedDisease.id
+  diseases = _.chain(analysableIncidents)
+    .map (x) -> x.resolvedDisease?.id
     .uniq()
     .value()
   diseases.forEach (disease) ->
-    diseaseMatch = (x) -> x.resolvedDisease.id == disease
+    diseaseMatch = (x) -> x.resolvedDisease?.id == disease
     result = result.concat(
       removeOutlierIncidentsSingleDisease(
-        originalIncidents.filter(diseaseMatch),
+        analysableIncidents.filter(diseaseMatch),
         constrainingIncidents.filter(diseaseMatch))
     )
-  return result
+  return result.concat(nonAnalysableIncidents)
 
 removeOutlierIncidentsSingleDisease = (originalIncidents, constrainingIncidents) ->
   incidents = convertAllIncidentsToDifferentials(originalIncidents)
@@ -386,28 +396,58 @@ removeOutlierIncidentsSingleDisease = (originalIncidents, constrainingIncidents)
 removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
   # Remove incidents that exceed the 90th percentile of rates for their feature
   # type by more than 10x.
-  subIntervals = differentialIncidentsToSubIntervals(incidents)
-  incidentsByLocationCode = _.groupBy(incidents, (x) -> x.locations[0].featureCode)
-  incidentsToKeep = []
-  for locationCode, incidentGroup of incidentsByLocationCode
-    if incidentGroup.length >= 10
-      sortedIncidents = _.sortBy(incidentGroup, 'rate')
-      idx90thPercentile = Math.floor((sortedIncidents.length - 1) * .9)
-      incident90thPercentile = sortedIncidents[idx90thPercentile]
-      incidentsToKeep = incidentsToKeep.concat(sortedIncidents.slice(0, idx90thPercentile))
-      sortedIncidents.slice(idx90thPercentile).forEach (incident) ->
-        if incident.rate < incident90thPercentile.rate * 10
-          incidentsToKeep.push(incident)
-    else
-      incidentsToKeep = incidentsToKeep.concat(incidentGroup)
-  incidents = incidentsToKeep
-  # Create constraining incidents from differences in cumulative incidents + 20%
+  incidentsByLocationId = _.groupBy(incidents, (x) -> x.locations[0].id)
+  myLocationTree = LocationTree.from(incidents.map (x) -> x.locations[0])
+  locationIdToParent = myLocationTree.makeIdToParentMap()
+  nodeLayer = myLocationTree.children
+  while nodeLayer.length > 0
+    nextLayer = []
+    nodeLayer.forEach (node) ->
+      nextLayer = nextLayer.concat(node.children)
+      locationId = node.value.id
+      incidentGroup = incidentsByLocationId[locationId]
+      loop
+        if incidentGroup.length >= 10
+          sortedIncidents = _.sortBy(incidentGroup, 'rate')
+          idx90thPercentile = Math.floor((sortedIncidents.length - 1) * .9)
+          incident90thPercentile = sortedIncidents[idx90thPercentile]
+          incidentsToKeep = sortedIncidents.slice(0, idx90thPercentile)
+          sortedIncidents.slice(idx90thPercentile).forEach (incident) ->
+            if incident.rate < incident90thPercentile.rate * 10
+              incidentsToKeep.push(incident)
+          incidentsByLocationId[node.value.id] = incidentsToKeep
+          break
+        parent = locationIdToParent[locationId]
+        if parent.value == 'ROOT'
+          break
+        else
+          locationId = parent.value.id
+          incidentGroup = incidentGroup.concat(incidentsByLocationId[locationId])
+    nodeLayer = nextLayer
+  incidents = _.chain(incidentsByLocationId)
+    .values()
+    .flatten(true)
+    .uniq()
+    .value()
+  # Create constraining incidents from differences in cumulative incidents + 30%
+  # A hightened threshold is used to account for error in cumulative incident
+  # counts.
+  # A constraining incidents may cause the cumulative incident it was created
+  # from to be removed as an outlier. This behaviour may be suprising, but it
+  # is intentional. If a cumulative incident contains incidents that exceed
+  # its case rate for even short intervals, then the sum of the resolved cases
+  # over the duration of the cumulative incident will be greater than the
+  # number of cases specified by the incident. It is likely that short duration
+  # incidents contained by the cumulative incident provide a higher granularily
+  # accounting of the cases that occurred, so using them rather than the
+  # cumulative incident can make sense as long as they have lower CASIM scores
+  # (see CASIM definition below).
   constrainingIncidents = constrainingIncidents.concat(
-    subIntervals
+    incidents
       .filter (x) -> x.cumulative and x.count >= 1
       .map (x) ->
         result = Object.create(x)
-        result.count = Math.floor(x.count * 1.2)
+        result.count = Math.floor(x.count * 1.3)
         result
   )
   # When a constraining incident has more than one location this creates a
@@ -434,7 +474,7 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
   )
   # Iteratively remove incidents until the constraining incidents are not
   # exceeded by any counts.
-  loop
+  while incidents.length > 0
     outlierIncidentIds = new Set()
     subIntervals = differentialIncidentsToSubIntervals(incidents)
     # Compute CASIM for each sub-interval
@@ -512,7 +552,6 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
             break
     if excessCounts == 0
       break
-    #console.log "excessCounts:", excessCounts
     incidents = incidents.filter (x) -> not outlierIncidentIds.has(x.id)
   return incidents
 
@@ -530,6 +569,21 @@ mergeSubIntervals = (subIntervals) ->
 # Create new differential incidents that when resolved with the original
 # incidents will produce counts equal to the target incidents.
 createSupplementalIncidents = (incidents, targetIncidents) ->
+  result = []
+  diseases = _.chain(incidents.concat(targetIncidents))
+    .map (x) -> x.resolvedDisease?.id
+    .uniq()
+    .value()
+  diseases.forEach (disease) ->
+    diseaseMatch = (x) -> x.resolvedDisease?.id == disease
+    result = result.concat(
+      createSupplementalIncidentsSingleDisease(
+        incidents.filter(diseaseMatch),
+        targetIncidents.filter(diseaseMatch))
+    )
+  return result
+
+createSupplementalIncidentsSingleDisease = (incidents, targetIncidents) ->
   incidents = convertAllIncidentsToDifferentials(incidents)
   targetIncidents = convertAllIncidentsToDifferentials(targetIncidents.filter (incident)->
     not incident.max
@@ -562,6 +616,39 @@ createSupplementalIncidentsSingleType = (incidents, targetIncidents) ->
     .value()
   targetIncidents.forEach (targetIncident) ->
     containedSubInts = getContainedSubIntervals(targetIncident, subIntsByStart)
+    # Create sub-intervals to fill any gaps between the start and end of the
+    # target incident and the sub-intervals it contains.
+    supplementedSubIntervals = []
+    if containedSubInts.length == 0
+      targetIncident.locations.forEach (TILocation)->
+        supplementedSubIntervals.push(new SubInterval(
+          Number(targetIncident.startDate),
+          Number(targetIncident.endDate),
+          [TILocation],
+          [targetIncident._id],
+          targetIncident.count / targetIncident.locations.length
+        ))
+    else
+      firstStartDate = _.max(containedSubInts, (s)->Number(s.endDate))
+      if Number(targetIncident.startDate) < firstStartDate
+        targetIncident.locations.forEach (TILocation)->
+          supplementedSubIntervals.push(new SubInterval(
+            Number(targetIncident.startDate),
+            firstStartDate,
+            [TILocation],
+            [targetIncident._id],
+            0
+          ))
+      lastEndDate = _.min(containedSubInts, (s)->Number(s.startDate))
+      if Number(targetIncident.endDate) > lastEndDate
+        targetIncident.locations.forEach (TILocation)->
+          supplementedSubIntervals.push(new SubInterval(
+            lastEndDate,
+            Number(targetIncident.endDate),
+            [TILocation],
+            [targetIncident._id],
+            0
+          ))
     containedTopLevelSubIntervals = getTopLevelSubIntervals(containedSubInts)
     resolvedSum = sum(containedTopLevelSubIntervals.map (subInt) -> subInt.value)
     remainingCountDifference = targetIncident.count - resolvedSum
@@ -573,7 +660,6 @@ createSupplementalIncidentsSingleType = (incidents, targetIncidents) ->
     # a pool where the water is the supplemental incidents and the floor
     # rate is its level.
     subIntsSortedByRate = _.sortBy(containedTopLevelSubIntervals, 'rate')
-    supplementedSubIntervals = []
     floorRate = 0
     for [subInt, nextSubInt] in _.zip(subIntsSortedByRate, subIntsSortedByRate.slice(1))
       supplementedSubIntervals.push(subInt)

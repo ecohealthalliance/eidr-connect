@@ -55,6 +55,7 @@ class DifferentialIncident
     # so that a report of cases distributed in 3 states won't result in
     # a count of triple that for the country.
     @rate = @count / @duration / @locations.length
+    @diseaseId = @originalIncidents[0].resolvedDisease?.id
     return @
   truncated: (dateRange) ->
     newStartDate = new Date(@startDate)
@@ -78,6 +79,21 @@ class DifferentialIncident
 # created by taking the difference in counts between two subsequent cumulative
 # reports in the same location.
 convertAllIncidentsToDifferentials = (incidents, replaceRegionsWithCountries=true) ->
+  result = []
+  diseases = _.chain(incidents)
+    .map (x) -> x.resolvedDisease?.id
+    .uniq()
+    .value()
+  diseases.forEach (disease) ->
+    diseaseMatch = (x) -> x.resolvedDisease?.id == disease
+    result = result.concat(
+      convertAllIncidentsToDifferentialsSingleDisease(
+        incidents.filter(diseaseMatch),
+        replaceRegionsWithCountries)
+    )
+  return result
+
+convertAllIncidentsToDifferentialsSingleDisease = (incidents, replaceRegionsWithCountries) ->
   cumulativeIncidents = []
   differentialIncidents = []
   # Replace regions with contained country geonames
