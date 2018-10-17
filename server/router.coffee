@@ -392,10 +392,10 @@ Router.route("/api/events-with-resolved-data", where: "server")
     console.time('fetch incidents') if ENABLE_PROFILING
     event.incidents = Incidents.find(query).fetch()
     console.timeEnd('fetch incidents') if ENABLE_PROFILING
+  @response.setHeader('Keep-Alive', 'timeout=1000')
   @response.setHeader('Access-Control-Allow-Origin', '*')
   @response.setHeader('Content-Type', 'application/json')
-  @response.statusCode = 200
-  @response.end(JSON.stringify({
+  responseData = {
     events: events.map (event) =>
       if not event
         return null
@@ -573,7 +573,9 @@ Router.route("/api/events-with-resolved-data", where: "server")
       else
         result.locations = countryCodeToCount
       return result
-  }))
+  }
+  @response.statusCode = 200
+  @response.end(JSON.stringify(responseData))
 
 
 ###
@@ -593,15 +595,16 @@ Router.route("/api/reprocess-article-date-range", where: "server")
   }).fetch()
   if articles.length > 1000
     return @response.end("Too many articles to process.")
-  articles.forEach (article)->
-    Meteor.call('getArticleEnhancementsAndUpdate', article._id, {
-      hideLogs: true
-      priority: false
-      reprocess: true
-    }, (error)->
-      if error
-        console.log article
-        console.log error
-    )
+  _.defer ()->
+    articles.forEach (article)->
+      Meteor.call('getArticleEnhancementsAndUpdate', article._id, {
+        hideLogs: true
+        priority: false
+        reprocess: true
+      }, (error)->
+        if error
+          console.log article
+          console.log error
+      )
   @response.statusCode = 200
   @response.end("Processing #{articles.length} articles...")
