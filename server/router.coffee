@@ -595,16 +595,17 @@ Router.route("/api/reprocess-article-date-range", where: "server")
   }).fetch()
   if articles.length > 1000
     return @response.end("Too many articles to process.")
-  _.defer ()->
-    articles.forEach (article)->
+  articles.forEach (article) ->
+    Meteor.defer ->
       Meteor.call('getArticleEnhancementsAndUpdate', article._id, {
         hideLogs: true
         priority: false
         reprocess: true
-      }, (error)->
+      }, (error) ->
         if error
           console.log article
           console.log error
+        console.log(article._id + " processed")
       )
   @response.statusCode = 200
   @response.end("Processing #{articles.length} articles...")
