@@ -17,45 +17,9 @@ import {
   mapLocationsToMaxSubIntervals
 } from '/imports/incidentResolution/incidentResolution'
 import LocationTree from '/imports/incidentResolution/LocationTree'
+import diseaseURIToActivePeriod from '/imports/diseaseURIToActivePeriod'
 import { _ } from 'meteor/underscore'
 
-# Active period is based on the post symptom period of contagiousness.
-# Median values are preferred. If a range is given the midpoint is used.
-ACTIVE_PERIOD_BY_DISEASE =
-  # Cholera
-  'http://purl.obolibrary.org/obo/DOID_1498': 3
-  # Yellow Fever
-  'http://purl.obolibrary.org/obo/DOID_9682': 5
-  # Listeriosis
-  'http://purl.obolibrary.org/obo/DOID_11573': 21
-  # Poliomyelitis
-  'http://purl.obolibrary.org/obo/DOID_4953': 9
-  # Measles
-  'http://purl.obolibrary.org/obo/DOID_8622': 4
-  # HIV
-  'http://purl.obolibrary.org/obo/DOID_526': 90
-  # Ebola
-  'http://purl.obolibrary.org/obo/DOID_4325': 14
-  # Marburg
-  'http://purl.obolibrary.org/obo/DOID_4327': 14
-  # SARS
-  'http://purl.obolibrary.org/obo/DOID_2945': 25
-  # MERS
-  'https://www.wikidata.org/wiki/Q16654806': 12
-  # Smallpox
-  'http://purl.obolibrary.org/obo/DOID_8736': (5 * 7)
-  # Monkeypox
-  'http://purl.obolibrary.org/obo/DOID_3292': (3 * 7)
-  # Varicella
-  'http://purl.obolibrary.org/obo/DOID_8659': 8
-  # Anthrax
-  'http://purl.obolibrary.org/obo/DOID_7427': 7
-  # Plague (pneumonic form)
-  'http://purl.obolibrary.org/obo/DOID_10398': 5
-  # Typhoid
-  'http://purl.obolibrary.org/obo/DOID_13258': 85
-  # Human Influenza (information not seperate for A and B)
-  'http://purl.obolibrary.org/obo/DOID_8469': 7
 
 sum = (list) ->
   list.reduce((sofar, x) ->
@@ -378,14 +342,14 @@ Router.route("/api/events-with-resolved-data", where: "server")
         end: dateRange.end
       }
       if (@request.query.activeCases + "").toLowerCase() == "true"
-        event.caseLengthDays = ACTIVE_PERIOD_BY_DISEASE[event.diseases?[0]?.id] or 7
+        event.activePeriodDays = diseaseURIToActivePeriod[event.diseases?[0]?.id] or 7
         extendedStartDate = new Date(dateRange.start)
         # Incidents from an extended date range are included to determine the
         # initial number of active cases at the beginning of the intended date range.
         # Assuming the half life of all cases is the case length, less than 10%
         # of the cases from before the extended date range would still be active
         # in the original date range.
-        extendedStartDate.setUTCDate(extendedStartDate.getUTCDate() - (4 * event.caseLengthDays))
+        extendedStartDate.setUTCDate(extendedStartDate.getUTCDate() - (4 * event.activePeriodDays))
         event.resolvedDateRange.start = extendedStartDate
       query['dateRange.start'] = $lt: event.resolvedDateRange.end
       query['dateRange.end'] = $gt: event.resolvedDateRange.start
@@ -401,7 +365,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
         return null
       dailyDecayRate = 1.0
       if (@request.query.activeCases + "").toLowerCase() == "true"
-        dailyDecayRate = Math.pow(.5, (1 / event.caseLengthDays))
+        dailyDecayRate = Math.pow(.5, (1 / event.activePeriodDays))
       console.time('create differentials') if ENABLE_PROFILING
       baseIncidents = []
       constrainingIncidents = []
@@ -595,8 +559,8 @@ Router.route("/api/reprocess-article-date-range", where: "server")
   }).fetch()
   if articles.length > 1000
     return @response.end("Too many articles to process.")
-  articles.forEach (article) ->
-    Meteor.defer ->
+  Meteor.defer ->
+    utils.forEachAsync(articles, (article, next, done) ->
       Meteor.call('getArticleEnhancementsAndUpdate', article._id, {
         hideLogs: true
         priority: false
@@ -605,7 +569,10 @@ Router.route("/api/reprocess-article-date-range", where: "server")
         if error
           console.log article
           console.log error
-        console.log(article._id + " processed")
+          return next()
+        console.log(article._id + " reprocessed")
+        next()
       )
+    )
   @response.statusCode = 200
   @response.end("Processing #{articles.length} articles...")
