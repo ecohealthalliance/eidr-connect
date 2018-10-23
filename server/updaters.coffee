@@ -10,7 +10,7 @@ import Feeds from '/imports/collections/feeds'
 import Constants from '/imports/constants.coffee'
 import { regexEscape } from '/imports/utils'
 
-DATA_VERSION = 20
+DATA_VERSION = 21
 AppMetadata = new Meteor.Collection('appMetadata')
 priorDataVersion = AppMetadata.findOne(property: "dataVersion")?.value
 
@@ -120,12 +120,6 @@ module.exports = ->
     $set: type: 'specify'
   }, multi: true)
 
-  console.log 'Updating incidents - removing alternate locations...'
-  Incidents.find('locations.alternateNames': $exists: true).forEach (i) ->
-    i.locations.forEach (l) ->
-      delete l.alternateNames
-    Incidents.update i._id, i
-
   console.log 'Resolving known user specified diseases'
   Incidents.update({
     'resolvedDisease.id': "userSpecifiedDisease:Hand, Foot, and Mouth Disease"
@@ -148,6 +142,19 @@ module.exports = ->
       'resolvedDisease.id': 'http://purl.obolibrary.org/obo/DOID_9537'
       'resolvedDisease.text': 'Lassa fever'
   }, multi: true)
+
+  console.log 'Updating incidents - removing extra location properties...'
+  Incidents.find('locations.rawNames': $exists: true).forEach (i) ->
+    i.locations.forEach (l) ->
+      delete l.alternateNames
+      delete l.rawNames
+      delete l.asciiName
+      delete l.cc2
+      delete l.elevation
+      delete l.dem
+      delete l.timezone
+      delete l.modificationDate
+    Incidents.update i._id, i
 
   AppMetadata.upsert({property: "dataVersion"}, $set: {value: DATA_VERSION})
   console.log "database update complete"

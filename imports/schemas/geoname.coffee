@@ -45,25 +45,3 @@ module.exports = new SimpleSchema
   "population":
     type: Number
     optional: true
-  # TODO: Remove these properties.
-  "asciiName":
-    type: String
-    optional: true
-  "rawNames":
-    type: [String]
-    optional: true
-  "cc2":
-    type: String
-    optional: true
-  "elevation":
-    type: String
-    optional: true
-  "dem":
-    type: String
-    optional: true
-  "timezone":
-    type: String
-    optional: true
-  "modificationDate":
-    type: String
-    optional: true

@@ -6,7 +6,6 @@ import notify from '/imports/ui/notification'
 import { stageModals } from '/imports/ui/modals'
 import { annotateContentWithIncidents,
   buildAnnotatedIncidentSnippet } from '/imports/ui/annotation'
-import { createIncidentReportsFromEnhancements } from '/imports/nlp'
 
 # determines if the user should be prompted before leaving the current modal
 #
@@ -99,11 +98,9 @@ Template.suggestedIncidentsModal.onRendered ->
           @loading.set(false)
           @content.set(enhancements.source.cleanContent.content)
     else
-      incidents = createIncidentReportsFromEnhancements enhancements,
-        acceptByDefault: true
       @loading.set(false)
       @content.set(enhancements.source.cleanContent.content)
-      incidents.forEach (incident) =>
+      enhancements.incidents.forEach (incident) =>
         @incidentsCollection.insert(incident)
 
 Template.suggestedIncidentsModal.onDestroyed ->

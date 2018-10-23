@@ -31,6 +31,8 @@ module.exports = ->
     diseaseId = diseaseGroup.resolvedDisease.id
     (diseaseToSubtypes[diseaseId] or []).forEach (subtypeId) ->
       diseaseToParents[subtypeId] = (diseaseToParents[subtypeId] or []).concat([diseaseId])
+  for key, value of diseaseToParents
+    diseaseToParents[key] = value.sort((a, b) -> diseaseToSubtypes[a].length - diseaseToSubtypes[b].length)
   myIncidents.forEach (incident) ->
     disease = incident.resolvedDisease
     (diseaseToParents[disease.id] or []).concat([disease.id]).forEach (diseaseId) ->
@@ -49,6 +51,11 @@ module.exports = ->
       eventName += ' ' + capitalize(disease.text)
     parentDiseases = diseaseToParents[disease.id]
     AutoEvents.upsert 'diseases.id': disease.id,
+      # The event disease's parent diseases sorted by position in the heirarchy
+      # so the top disease comes last.
+      # Note that only diseases with corresponding auto-events are included.
+      # This is leveraged to determine whether parent events exist that contain
+      # the cases of a given auto-event and prevent double counting.
       parentDiseases: parentDiseases
       eventName: eventName
       diseases: [disease]

@@ -30,6 +30,12 @@ def lookup_geoname(name):
     result = resp.json()["hits"][0]["_source"]
     del result["alternateNames"]
     del result["rawNames"]
+    del result["asciiName"]
+    del result["cc2"]
+    del result["elevation"]
+    del result["dem"]
+    del result["timezone"]
+    del result["modificationDate"]
     return result
 
 

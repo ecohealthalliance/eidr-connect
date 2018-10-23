@@ -438,5 +438,4 @@ describe 'Incident Resolution', ->
       locations: [lome]
     }]
     result = removeOutlierIncidents(baseIncidents, [])
-    console.log(result)
     chai.assert.equal(result.length, 6)

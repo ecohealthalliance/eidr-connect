@@ -3,7 +3,6 @@ import AutoEvents from '/imports/collections/autoEvents'
 import Articles from '/imports/collections/articles'
 import Incidents from '/imports/collections/incidentReports'
 import utils from '/imports/utils'
-import { createIncidentReportsFromEnhancements } from '/imports/nlp'
 import PromedPosts from '/imports/collections/promedPosts'
 import convertAllIncidentsToDifferentials from '/imports/incidentResolution/convertAllIncidentsToDifferentials'
 import {
@@ -192,8 +191,6 @@ Router.route("/api/process-document", {where: "server"})
     if error
       @response.statusCode = 400
       return @response.end(JSON.stringify(error))
-    incidents = createIncidentReportsFromEnhancements enhancements,
-      acceptByDefault: true
     @response.setHeader('Access-Control-Allow-Origin', '*')
     @response.statusCode = 200
     @response.end(JSON.stringify(

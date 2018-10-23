@@ -26,7 +26,7 @@ Meteor.publish 'mapIncidents', (incidentIds) ->
     }
 
 Meteor.publish 'articleIncidents', (articleId) ->
-  check(articleId, Match.Maybe(String))
+  check(articleId, String)
   Incidents.find
     articleId: articleId
     deleted: $in: [null, false]
