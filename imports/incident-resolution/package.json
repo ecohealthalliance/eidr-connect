@@ -1,0 +1,17 @@
+{
+  "name": "incident-resolution",
+  "private": true,
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "install": "coffee --compile --output lib/ src/"
+  },
+  "dependencies": {
+    "coffeescript": "^1.6.3",
+    "underscore": "^1.8.3"
+  },
+  "author": "",
+  "license": "ISC"
+}

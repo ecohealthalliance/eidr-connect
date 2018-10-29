@@ -1,4 +1,4 @@
-import regionToCountries from '/imports/regionToCountries.json'
+regionToCountries = require('../regionToCountries.json')
 
 locationContains = (locationA, locationB) ->
   props = [
@@ -49,7 +49,7 @@ locationsToLocationTree = (locations) ->
 
 # A tree of geoname locations where a node is the parent of another
 # node if it's location contains the other node's location.
-export default class LocationTree
+class LocationTree
   constructor: (@value, @children=[]) ->
     if @value != "ROOT"
       if not @value?.id
@@ -109,3 +109,4 @@ export default class LocationTree
 
 LocationTree.from = locationsToLocationTree
 LocationTree.locationContains = locationContains
+module.exports = LocationTree

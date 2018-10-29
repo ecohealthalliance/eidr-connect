@@ -2,7 +2,6 @@
 *~
 thumbs.db
 
-node_modules/
 .promed-post-enhancer/node_modules/
 
 settings-dev.json

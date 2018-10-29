@@ -4,8 +4,11 @@ import Articles from '/imports/collections/articles'
 import Incidents from '/imports/collections/incidentReports'
 import utils from '/imports/utils'
 import PromedPosts from '/imports/collections/promedPosts'
-import convertAllIncidentsToDifferentials from '/imports/incidentResolution/convertAllIncidentsToDifferentials'
-import {
+import diseaseURIToActivePeriod from '/imports/diseaseURIToActivePeriod'
+import { _ } from 'meteor/underscore'
+{
+  LocationTree,
+  convertAllIncidentsToDifferentials,
   differentialIncidentsToSubIntervals,
   removeOutlierIncidents,
   createSupplementalIncidents,
@@ -14,11 +17,7 @@ import {
   dailyRatesToActiveCases,
   subIntervalsToDailyRates,
   mapLocationsToMaxSubIntervals
-} from '/imports/incidentResolution/incidentResolution'
-import LocationTree from '/imports/incidentResolution/LocationTree'
-import diseaseURIToActivePeriod from '/imports/diseaseURIToActivePeriod'
-import { _ } from 'meteor/underscore'
-
+} = require('incident-resolution')
 
 sum = (list) ->
   list.reduce((sofar, x) ->
@@ -198,6 +197,8 @@ Router.route("/api/process-document", {where: "server"})
       incidents: incidents
     ))
 
+Worker = require("tiny-worker")
+workerThread = new Worker(require('./worker.js'))
 ###
 @api {post} resolve-incidents Resolve a set of potentially overlapping incidents into
                               single case or death count values over each location and time interval.
@@ -247,27 +248,21 @@ Router.route("/api/process-document", {where: "server"})
 ###
 Router.route("/api/resolve-incidents", where: "server")
 .post ->
-  try
-    incidentsWithoutOutliers = removeOutlierIncidents(@request.body, [])
-    differentials = convertAllIncidentsToDifferentials(incidentsWithoutOutliers)
-  catch e
-    @response.statusCode = 400
-    return @response.end("Invalid incidents: " + e)
-  # Require a single type of incident
-  if _.findWhere(differentials, type: 'cases') and _.findWhere(differentials, type: 'deaths')
-    @response.statusCode = 400
-    return @response.end("The submitted incidents must all be of a single type, either case counts or death counts.")
-  subIntervals = differentialIncidentsToSubIntervals(differentials)
-  extendSubIntervalsWithValues(differentials, subIntervals)
-  @response.setHeader('Access-Control-Allow-Origin', '*')
-  @response.statusCode = 200
-  @response.end(JSON.stringify(subIntervals.map((s) ->
-    start: new Date(s.start)
-    end: new Date(s.end)
-    location: _.omit(s.location, 'alternateNames')
-    incidentIds: s.incidentIds
-    value: s.value
-  )))
+  workerThread.postMessage(@request.body)
+  workerThread.onmessage = ({data}) =>
+    if data.error
+      @response.statusCode = 400
+      @response.end(data.error)
+      return
+    @response.setHeader('Access-Control-Allow-Origin', '*')
+    @response.statusCode = 200
+    @response.end(JSON.stringify(data.result.map((s) ->
+      start: new Date(s.start)
+      end: new Date(s.end)
+      location: _.omit(s.location, 'alternateNames')
+      incidentIds: s.incidentIds
+      value: s.value
+    )))
 
 ###
 @api {post} events-with-resolved-data Return the resolved cases for a set of
@@ -356,57 +351,16 @@ Router.route("/api/events-with-resolved-data", where: "server")
   @response.setHeader('Keep-Alive', 'timeout=1000')
   @response.setHeader('Access-Control-Allow-Origin', '*')
   @response.setHeader('Content-Type', 'application/json')
-  responseData = {
-    events: events.map (event) =>
-      if not event
-        return null
-      dailyDecayRate = 1.0
-      if (@request.query.activeCases + "").toLowerCase() == "true"
-        dailyDecayRate = Math.pow(.5, (1 / event.activePeriodDays))
-      console.time('create differentials') if ENABLE_PROFILING
-      baseIncidents = []
-      constrainingIncidents = []
-      event.incidents.map (incident) ->
-        if incident.constraining
-          constrainingIncidents.push incident
-        else
-          baseIncidents.push incident
-      console.time('remove outliers') if ENABLE_PROFILING
-      incidentsWithoutOutliers = removeOutlierIncidents(
-        baseIncidents,
-        constrainingIncidents
-      )
-      console.timeEnd('remove outliers') if ENABLE_PROFILING
-      console.time('create supplemental incidents') if ENABLE_PROFILING
-      supplementalIncidents = createSupplementalIncidents(
-        incidentsWithoutOutliers,
-        constrainingIncidents
-      )
-      console.timeEnd('create supplemental incidents') if ENABLE_PROFILING
-      allDifferentials = convertAllIncidentsToDifferentials(
-        incidentsWithoutOutliers
-      ).concat(supplementalIncidents)
-      differentials = _.where(allDifferentials, type: 'cases')
-      .filter (differential) ->
-        if differential.startDate > event.resolvedDateRange.end
-          console.log "Incident outside of date range:", differential
-          return false
-        if differential.endDate < event.resolvedDateRange.start
-          console.log "Incident outside of date range:", differential
-          return false
-        return true
-      .map (differential) ->
-        if event.resolvedDateRange
-          differential = differential.truncated(event.resolvedDateRange)
-        differential
-      .filter (differential) ->
-        differential.duration > 0
-      subIntervals = differentialIncidentsToSubIntervals(differentials)
-      console.timeEnd('create differentials') if ENABLE_PROFILING
-      console.time('resolve') if ENABLE_PROFILING
-      extendSubIntervalsWithValues(differentials, subIntervals)
-      console.timeEnd('resolve') if ENABLE_PROFILING
-
+  utils.mapAsync(events, ((event, next) =>
+    if not event
+      return next(null)
+    workerThread.postMessage(event)
+    workerThread.onmessage = ({data}) =>
+      if data.error
+        @response.statusCode = 400
+        @response.end(data.error)
+        return
+      subIntervals = data.result
       maxDate = null
       minDate = null
       subIntervals.forEach (subInt) ->
@@ -418,16 +372,20 @@ Router.route("/api/events-with-resolved-data", where: "server")
         startDate: @request.query.startDate or minDate
         endDate: @request.query.endDate or maxDate
       }
-
+  
       locationTree = LocationTree.from(subIntervals.map (x) -> x.location)
       locToMaxSubIntervals = mapLocationsToMaxSubIntervals(locationTree, subIntervals)
-
+  
       topLocations = locationTree.children.map (x) -> x.value
       maxSubintervalsForTopLocations = []
       for locId, maxSubintervals of locToMaxSubIntervals
         location = locationTree.getLocationById(locId)
         if location in topLocations
           maxSubintervalsForTopLocations = maxSubintervalsForTopLocations.concat(maxSubintervals)
+
+      dailyDecayRate = 1.0
+      if (@request.query.activeCases + "").toLowerCase() == "true"
+        dailyDecayRate = Math.pow(.5, (1 / event.activePeriodDays))
 
       locationToTotals = _.chain(locToMaxSubIntervals)
         .pairs()
@@ -443,14 +401,14 @@ Router.route("/api/events-with-resolved-data", where: "server")
         .object()
         .value()
       countryCodeToCount = {}
-
+  
       for topLocation in topLocations
         # If the country code appeared before, it is because the top locations
         # are not at the country level, so values with the same country code
         # can be combined to get the count for the country.
         prevTotal = countryCodeToCount[topLocation.countryCode] or 0
         countryCodeToCount[topLocation.countryCode] = prevTotal + locationToTotals[topLocation.id]
-
+  
       console.time('compute active cases for overall timeseries') if ENABLE_PROFILING
       overallTimeseries = subIntervalsToActiveCases(
         maxSubintervalsForTopLocations,
@@ -509,7 +467,7 @@ Router.route("/api/events-with-resolved-data", where: "server")
                 }
               )
               result
-
+  
             dailyRates[0].forEach ([day, rate]) ->
               childSum = sum(dailyRates.slice(1).map (ratesForLocation2) ->
                 for [day2, rate2] in ratesForLocation2
@@ -524,8 +482,9 @@ Router.route("/api/events-with-resolved-data", where: "server")
               #   return 0
               # )
               console.log day, "top location rate:", rate, "total child rate:", childSum
-
-            throw new Error("Invalid Tree")
+  
+            @response.statusCode = 400
+            @response.end("Invalid tree")
           return {
             location: value
             value: locationToTotals[value.id]
@@ -533,11 +492,13 @@ Router.route("/api/events-with-resolved-data", where: "server")
           }
       else
         result.locations = countryCodeToCount
-      return result
-  }
-  @response.statusCode = 200
-  @response.end(JSON.stringify(responseData))
-
+      next(result)
+  ), (result) =>
+    @response.statusCode = 200
+    @response.end(JSON.stringify(
+      events: result
+    ))
+  )
 
 ###
 @api {post} reprocess-article-date-range

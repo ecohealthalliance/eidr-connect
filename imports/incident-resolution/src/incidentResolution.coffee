@@ -1,6 +1,7 @@
-import LocationTree from './LocationTree'
-import Solver from './LPSolver'
-import convertAllIncidentsToDifferentials from './convertAllIncidentsToDifferentials'
+LocationTree = require('./LocationTree')
+Solver = require('./LPSolver')
+convertAllIncidentsToDifferentials = require('./convertAllIncidentsToDifferentials')
+_ = require('underscore')
 
 MILLIS_PER_DAY = 1000 * 60 * 60 * 24
 
@@ -780,14 +781,18 @@ mapLocationsToMaxSubIntervals = (locationTree, subIntervals) ->
     .object()
     .value()
 
-export intervalToEndpoints = intervalToEndpoints
-export differentialIncidentsToSubIntervals = differentialIncidentsToSubIntervals
-export subIntervalsToLP = subIntervalsToLP
-export extendSubIntervalsWithValues = extendSubIntervalsWithValues
-export removeOutlierIncidents = removeOutlierIncidents
-export createSupplementalIncidents = createSupplementalIncidents
-export subIntervalsToActiveCases = subIntervalsToActiveCases
-export dailyRatesToActiveCases = dailyRatesToActiveCases
-export subIntervalsToDailyRates = subIntervalsToDailyRates
-export enumerateDateRange =  enumerateDateRange
-export mapLocationsToMaxSubIntervals = mapLocationsToMaxSubIntervals
+module.exports = {
+  intervalToEndpoints: intervalToEndpoints
+  differentialIncidentsToSubIntervals: differentialIncidentsToSubIntervals
+  subIntervalsToLP: subIntervalsToLP
+  extendSubIntervalsWithValues: extendSubIntervalsWithValues
+  removeOutlierIncidents: removeOutlierIncidents
+  createSupplementalIncidents: createSupplementalIncidents
+  subIntervalsToActiveCases: subIntervalsToActiveCases
+  dailyRatesToActiveCases: dailyRatesToActiveCases
+  subIntervalsToDailyRates: subIntervalsToDailyRates
+  enumerateDateRange:  enumerateDateRange
+  mapLocationsToMaxSubIntervals: mapLocationsToMaxSubIntervals
+  convertAllIncidentsToDifferentials: convertAllIncidentsToDifferentials
+  LocationTree: LocationTree
+}

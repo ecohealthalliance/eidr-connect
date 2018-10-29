@@ -1,8 +1,8 @@
 import EventIncidents from '/imports/collections/eventIncidents'
 import regionToCountries from '/imports/regionToCountries.json'
-import {
+{
   removeOutlierIncidents
-} from '/imports/incidentResolution/incidentResolution'
+} = 'incident-resolution'
 
 formatDateForInput = (date) ->
   unless date

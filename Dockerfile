@@ -30,6 +30,8 @@ RUN groupadd meteor && adduser --ingroup meteor --home /home/meteor meteor
 RUN chown -R meteor:meteor /eidr-connect
 USER meteor
 
+RUN cd imports/incident-resolution && meteor npm link
+RUN meteor npm link incident-resolution
 RUN meteor npm install
 RUN meteor build /home/meteor/build --directory
 WORKDIR /home/meteor/build/bundle/programs/server

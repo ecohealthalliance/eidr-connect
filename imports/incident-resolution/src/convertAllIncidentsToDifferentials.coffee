@@ -1,6 +1,7 @@
-import LocationTree from './LocationTree'
-import regionToCountries from '/imports/regionToCountries.json'
-import countryISOToGeoname from '/imports/countryISOToGeoname.json'
+LocationTree = require('./LocationTree')
+regionToCountries = require('../regionToCountries.json')
+countryISOToGeoname = require('../countryISOToGeoname.json')
+_ = require('underscore')
 
 MILLIS_PER_DAY = 1000 * 60 * 60 * 24
 

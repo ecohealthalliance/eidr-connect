@@ -1,14 +1,14 @@
 import EventIncidents from '/imports/collections/eventIncidents'
 import { formatLocation } from '/imports/utils'
-import convertAllIncidentsToDifferentials from '/imports/incidentResolution/convertAllIncidentsToDifferentials.coffee'
-import {
+import MapHelpers from '/imports/ui/mapMarkers.coffee'
+import Constants from '/imports/constants'
+{
+  LocationTree,
+  convertAllIncidentsToDifferentials
   differentialIncidentsToSubIntervals,
   extendSubIntervalsWithValues,
   createSupplementalIncidents
-} from '/imports/incidentResolution/incidentResolution.coffee'
-import LocationTree from '/imports/incidentResolution/LocationTree.coffee'
-import MapHelpers from '/imports/ui/mapMarkers.coffee'
-import Constants from '/imports/constants'
+} = require('incident-resolution')
 
 Template.eventAffectedAreas.onCreated ->
   @maxCount = new ReactiveVar()
