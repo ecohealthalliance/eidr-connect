@@ -43,6 +43,7 @@ RUN chown -R meteor:meteor /home/meteor/eidr-connect
 USER meteor
 
 # Install npm dependencies
+RUN meteor list
 RUN cd imports/incident-resolution && meteor npm link
 RUN meteor npm link incident-resolution
 RUN meteor npm install
