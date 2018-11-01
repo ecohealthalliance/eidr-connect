@@ -1,4 +1,5 @@
-import solverExport from 'javascript-lp-solver'
+solverExport = require('javascript-lp-solver')
+_ = require('underscore')
 # When the solver is imported for the browser it uses the global namespace
 # instead of exporting a handle.
 if _.isEmpty solverExport
@@ -6,4 +7,4 @@ if _.isEmpty solverExport
 else
   Solver = solverExport
 
-export default Solver
+module.exports = Solver

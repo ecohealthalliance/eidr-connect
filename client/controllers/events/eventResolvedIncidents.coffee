@@ -1,13 +1,14 @@
 import Rickshaw from 'meteor/eidr:rickshaw.min'
-import convertAllIncidentsToDifferentials from '/imports/incidentResolution/convertAllIncidentsToDifferentials'
-import {
+import EventIncidents from '/imports/collections/eventIncidents'
+import Constants from '/imports/constants'
+{
+  LocationTree,
+  convertAllIncidentsToDifferentials
   differentialIncidentsToSubIntervals,
   extendSubIntervalsWithValues,
   createSupplementalIncidents
-} from '/imports/incidentResolution/incidentResolution'
-import LocationTree from '/imports/incidentResolution/LocationTree'
-import EventIncidents from '/imports/collections/eventIncidents'
-import Constants from '/imports/constants'
+} = require('incident-resolution')
+
 
 sortComponentTreeChildren = (componentTree) ->
   componentTree.children = _.sortBy(componentTree.children, (x) -> -x.associatedObject.value)

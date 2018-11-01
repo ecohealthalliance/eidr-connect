@@ -357,10 +357,15 @@ export eventToIncidentQuery = (event) ->
     query['species.id'] = $in: event.species.map (x) -> x.id
   query
 
-export forEachAsync = (list, func, done)->
+mapAsync = (list, func, done)->
   if list.length > 0
-    func(list[0], ->
-      forEachAsync(list.slice(1), func, done)
-    , done)
+    nextCb = (result)->
+      mapAsync(list.slice(1), func, (nextResults)->
+        done([result].concat(nextResults))
+      )
+    func(list[0], nextCb, done)
   else
-    done()
+    done([])
+
+export mapAsync = mapAsync
+export forEachAsync = mapAsync

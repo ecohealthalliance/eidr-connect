@@ -1,15 +1,14 @@
 import { chai } from 'meteor/practicalmeteor:chai'
-import Solver from './LPSolver'
 import incidents from './incidents'
-import convertAllIncidentsToDifferentials from './convertAllIncidentsToDifferentials'
-import {
+{
+  convertAllIncidentsToDifferentials,
   differentialIncidentsToSubIntervals,
   subIntervalsToLP,
   intervalToEndpoints,
   removeOutlierIncidents,
   createSupplementalIncidents,
   extendSubIntervalsWithValues
-} from './incidentResolution'
+} = require('incident-resolution')
 
 lome =
   admin1Name: "Maritime"
@@ -107,98 +106,98 @@ describe 'Incident Resolution', ->
     chai.assert.sameMembers(subIntervals[0].incidentIds, [0, 1])
     chai.assert.equal(subIntervals.length, 1)
 
-  it 'allocates counts proportionately', ->
-    differentialIncidents = convertAllIncidentsToDifferentials(overlappingIncidents)
-    subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
-    model = subIntervalsToLP(differentialIncidents, subIntervals)
-    solution = Solver.Solve(Solver.ReformatLP(model))
-    chai.assert(solution.s0 < 50)
-    chai.assert(solution.s1 < 10)
-    chai.assert(solution.s2 < 50)
+  # it 'allocates counts proportionately', ->
+  #   differentialIncidents = convertAllIncidentsToDifferentials(overlappingIncidents)
+  #   subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
+  #   model = subIntervalsToLP(differentialIncidents, subIntervals)
+  #   solution = Solver.Solve(Solver.ReformatLP(model))
+  #   chai.assert(solution.s0 < 50)
+  #   chai.assert(solution.s1 < 10)
+  #   chai.assert(solution.s2 < 50)
 
   # This tests an problem that occurs when using an incident min/max rate
   # squeezing objective function. With such an objective function, it would
   # cause the minimum and maximum values of the first incident to be constrained
   # which would cause some of its subintervals to have unbalanced counts.
   # The current absolute value based objective function resolves this issue.
-  it 'allocates counts proportionately 2', ->
-    differentialIncidents = convertAllIncidentsToDifferentials([{
-      cases: 100
-      dateRange:
-        start: new Date("Jan 1 2009 UTC")
-        end: new Date("Jan 1 2012 UTC")
-      locations: [lome]
-    }, {
-      cases: 2
-      dateRange:
-        start: new Date("Jan 1 2010 UTC")
-        end: new Date("Jan 1 2011 UTC")
-      locations: [lome]
-    }, {
-      cases: 50
-      dateRange:
-        start: new Date("Dec 1 2011 UTC")
-        end: new Date("Jan 1 2012 UTC")
-      locations: [lome]
-    }])
-    subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
-    model = subIntervalsToLP(differentialIncidents, subIntervals)
-    solution = Solver.Solve(Solver.ReformatLP(model))
-    lomeIntervalIds = subIntervals
-      .filter (s) -> s.location.id == lome.id
-      .map (s) -> s.id
-    chai.assert(solution["s#{lomeIntervalIds[0]}"] > 15)
-    chai.assert(solution["s#{lomeIntervalIds[1]}"] > 2)
-    chai.assert(solution["s#{lomeIntervalIds[2]}"] > 15)
-    chai.assert(solution["s#{lomeIntervalIds[3]}"] >= 50)
+  # it 'allocates counts proportionately 2', ->
+  #   differentialIncidents = convertAllIncidentsToDifferentials([{
+  #     cases: 100
+  #     dateRange:
+  #       start: new Date("Jan 1 2009 UTC")
+  #       end: new Date("Jan 1 2012 UTC")
+  #     locations: [lome]
+  #   }, {
+  #     cases: 2
+  #     dateRange:
+  #       start: new Date("Jan 1 2010 UTC")
+  #       end: new Date("Jan 1 2011 UTC")
+  #     locations: [lome]
+  #   }, {
+  #     cases: 50
+  #     dateRange:
+  #       start: new Date("Dec 1 2011 UTC")
+  #       end: new Date("Jan 1 2012 UTC")
+  #     locations: [lome]
+  #   }])
+  #   subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
+  #   model = subIntervalsToLP(differentialIncidents, subIntervals)
+  #   solution = Solver.Solve(Solver.ReformatLP(model))
+  #   lomeIntervalIds = subIntervals
+  #     .filter (s) -> s.location.id == lome.id
+  #     .map (s) -> s.id
+  #   chai.assert(solution["s#{lomeIntervalIds[0]}"] > 15)
+  #   chai.assert(solution["s#{lomeIntervalIds[1]}"] > 2)
+  #   chai.assert(solution["s#{lomeIntervalIds[2]}"] > 15)
+  #   chai.assert(solution["s#{lomeIntervalIds[3]}"] >= 50)
 
-  it 'handles inconsistent counts', ->
-    differentialIncidents = convertAllIncidentsToDifferentials(inconsistentIncidents)
-    subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
-    model = subIntervalsToLP(differentialIncidents, subIntervals)
-    solution = Solver.Solve(Solver.ReformatLP(model))
-    chai.assert(solution.s1 < 50)
-    chai.assert(solution.s2 < 10)
-    chai.assert(solution.s3 < 50)
+  # it 'handles inconsistent counts', ->
+  #   differentialIncidents = convertAllIncidentsToDifferentials(inconsistentIncidents)
+  #   subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
+  #   model = subIntervalsToLP(differentialIncidents, subIntervals)
+  #   solution = Solver.Solve(Solver.ReformatLP(model))
+  #   chai.assert(solution.s1 < 50)
+  #   chai.assert(solution.s2 < 10)
+  #   chai.assert(solution.s3 < 50)
 
 
   # Test that adding prior non-overlapping incidents doesn't affect
   # handling of inconsistent incidents.
-  it 'handles inconsistent counts with prior incidents', ->
-    initialIncidents6Subintervals = [{
-      cases: 1
-      dateRange:
-        start: new Date("Jan 1 2001 UTC")
-        end: new Date("Jan 1 2002 UTC")
-      locations: [lome]
-    }, {
-      cases: 1
-      dateRange:
-        start: new Date("Jan 1 2003 UTC")
-        end: new Date("Jan 1 2004 UTC")
-      locations: [lome]
-    }, {
-      cases: 1
-      dateRange:
-        start: new Date("Jan 1 2005 UTC")
-        end: new Date("Jan 1 2006 UTC")
-      locations: [lome]
-    }]
-    allIncidents = initialIncidents6Subintervals.concat(inconsistentIncidents)
-    differentialIncidents = convertAllIncidentsToDifferentials(allIncidents)
-    subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
-    model = subIntervalsToLP(differentialIncidents, subIntervals)
-    solution = Solver.Solve(Solver.ReformatLP(model))
-    chai.assert(solution.s7 < 50)
-    chai.assert(solution.s8 < 10)
-    chai.assert(solution.s9 < 50)
+  # it 'handles inconsistent counts with prior incidents', ->
+  #   initialIncidents6Subintervals = [{
+  #     cases: 1
+  #     dateRange:
+  #       start: new Date("Jan 1 2001 UTC")
+  #       end: new Date("Jan 1 2002 UTC")
+  #     locations: [lome]
+  #   }, {
+  #     cases: 1
+  #     dateRange:
+  #       start: new Date("Jan 1 2003 UTC")
+  #       end: new Date("Jan 1 2004 UTC")
+  #     locations: [lome]
+  #   }, {
+  #     cases: 1
+  #     dateRange:
+  #       start: new Date("Jan 1 2005 UTC")
+  #       end: new Date("Jan 1 2006 UTC")
+  #     locations: [lome]
+  #   }]
+  #   allIncidents = initialIncidents6Subintervals.concat(inconsistentIncidents)
+  #   differentialIncidents = convertAllIncidentsToDifferentials(allIncidents)
+  #   subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
+  #   model = subIntervalsToLP(differentialIncidents, subIntervals)
+  #   solution = Solver.Solve(Solver.ReformatLP(model))
+  #   chai.assert(solution.s7 < 50)
+  #   chai.assert(solution.s8 < 10)
+  #   chai.assert(solution.s9 < 50)
 
-  it 'can resolve a large number of incidents', ->
-    @timeout(5000)
-    differentialIncidents = convertAllIncidentsToDifferentials(incidents).filter (i)->i.type == "deaths"
-    subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
-    model = subIntervalsToLP(differentialIncidents, subIntervals)
-    solution = Solver.Solve(Solver.ReformatLP(model))
+  # it 'can resolve a large number of incidents', ->
+  #   @timeout(5000)
+  #   differentialIncidents = convertAllIncidentsToDifferentials(incidents).filter (i)->i.type == "deaths"
+  #   subIntervals = differentialIncidentsToSubIntervals(differentialIncidents)
+  #   model = subIntervalsToLP(differentialIncidents, subIntervals)
+  #   solution = Solver.Solve(Solver.ReformatLP(model))
 
   it 'creates end points', ->
     differentialIncidents = convertAllIncidentsToDifferentials(incidents)

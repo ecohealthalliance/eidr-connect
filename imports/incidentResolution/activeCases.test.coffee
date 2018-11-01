@@ -1,7 +1,8 @@
 import { chai } from 'meteor/practicalmeteor:chai'
 import incidents from './incidents'
-import convertAllIncidentsToDifferentials from './convertAllIncidentsToDifferentials'
-import {
+{
+  LocationTree,
+  convertAllIncidentsToDifferentials,
   differentialIncidentsToSubIntervals,
   subIntervalsToLP,
   intervalToEndpoints,
@@ -12,8 +13,8 @@ import {
   subIntervalsToDailyRates,
   enumerateDateRange,
   mapLocationsToMaxSubIntervals
-} from './incidentResolution'
-import LocationTree from './LocationTree.coffee'
+} = require('incident-resolution')
+
 
 lome =
   admin1Name: "Maritime"
