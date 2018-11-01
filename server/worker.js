@@ -7,12 +7,12 @@ module.exports = function () {
       var event = data;
       Object.keys(event);
       var baseIncidents = [];
-      var constrainingIncidents = event.constrainingIncidents || [];
+      var constrainingIncidents = _.clone(event.constrainingIncidents) || [];
       (event.incidents || []).map(function(incident) {
         if (incident.constraining) {
-          return constrainingIncidents.push(incident);
+          constrainingIncidents.push(incident);
         } else {
-          return baseIncidents.push(incident);
+          baseIncidents.push(incident);
         }
       });
       if (ENABLE_PROFILING) console.time('remove outliers');
