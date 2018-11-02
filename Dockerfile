@@ -37,6 +37,10 @@ RUN meteor npm install
 RUN meteor build /home/meteor/build --directory
 WORKDIR /home/meteor/build/bundle/programs/server
 RUN npm install
+# The worker thread does not have access to the npm modules bundled with the app.
+# In order for the worker to import the incident-resolution lib it needs to be
+# installed into the budled app's node modules.
+RUN meteor npm install /eidr-connect/imports/incident-resolution
 WORKDIR /
 
 #Switch back to root user
