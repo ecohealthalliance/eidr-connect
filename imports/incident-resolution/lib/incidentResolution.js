@@ -298,6 +298,9 @@
     });
     differentialIncidents.forEach(function(incident, incidentId) {
       var incidentSubs, j, len, results, subInterval;
+      if (!incident) {
+        return;
+      }
       incidentSubs = IncidentToSELs[incidentId];
       if (!incidentSubs) {
         console.log("Error: No subintervals for", incidentId);
@@ -460,7 +463,7 @@
   };
 
   removeOutlierIncidentsSingleType = function(incidents, constrainingIncidents) {
-    var excessCounts, incidentsByLocationId, iteration, locationIdToParent, myLocationTree, nextLayer, nodeLayer, outlierIncidentIds, subIntervals, subIntsByStart;
+    var excessCounts, incidentsByLocationId, iteration, locationIdToParent, myLocationTree, nextLayer, nodeLayer, subIntervals, subIntsByStart;
     incidentsByLocationId = _.groupBy(incidents, function(x) {
       return x.locations[0].id;
     });
@@ -527,9 +530,15 @@
       });
     }));
     iteration = 0;
-    while (incidents.length > 0 && iteration < 3) {
-      outlierIncidentIds = new Set();
-      subIntervals = differentialIncidentsToSubIntervals(incidents);
+    subIntervals = differentialIncidentsToSubIntervals(incidents);
+    subIntsByStart = _.chain(subIntervals).groupBy('start').pairs().map(function(arg) {
+      var start, subIntGroup;
+      start = arg[0], subIntGroup = arg[1];
+      return [parseInt(start), subIntGroup];
+    }).sortBy(function(x) {
+      return x[0];
+    }).value();
+    while (incidents.length > 0) {
       subIntervals.forEach(function(subInt) {
         var duration, end, incident, incidentId, incidentIds, j, k, len, lowerMedian, sortedValues, start, v, values, valuesByIncident;
         start = subInt.start, end = subInt.end, incidentIds = subInt.incidentIds, duration = subInt.duration;
@@ -537,7 +546,7 @@
         for (j = 0, len = incidentIds.length; j < len; j++) {
           incidentId = incidentIds[j];
           incident = incidents[incidentId];
-          if (incident.__virtualIncident) {
+          if (!incident || incident.__virtualIncident) {
             continue;
           }
           valuesByIncident[incidentId] = incident.rate * duration;
@@ -566,13 +575,6 @@
         })());
       });
       extendSubIntervalsWithValues(incidents, subIntervals);
-      subIntsByStart = _.chain(subIntervals).groupBy('start').pairs().map(function(arg) {
-        var start, subIntGroup;
-        start = arg[0], subIntGroup = arg[1];
-        return [parseInt(start), subIntGroup];
-      }).sortBy(function(x) {
-        return x[0];
-      }).value();
       excessCounts = 0;
       constrainingIncidents.forEach(function(cIncident) {
         var containedSubInts, difference, incidentId, incidentToMarginalValue, incidentToTotalCASIM, incidentToTotalValue, incidentsRemoved, incidentsSortedByCASIM, j, l, len, len1, len2, m, marginalValueRemoved, ref, ref1, resolvedSum, results, subInterval, value;
@@ -597,7 +599,7 @@
             for (incidentId in incidentToTotalValue) {
               value = incidentToTotalValue[incidentId];
               if (value > cIncident.count) {
-                outlierIncidentIds.add(parseInt(incidentId));
+                incidents[parseInt(incidentId)] = null;
                 incidentsRemoved = true;
               }
             }
@@ -629,7 +631,7 @@
           results = [];
           for (m = 0, len2 = incidentsSortedByCASIM.length; m < len2; m++) {
             incidentId = incidentsSortedByCASIM[m];
-            outlierIncidentIds.add(incidentId);
+            incidents[incidentId] = null;
             marginalValueRemoved += incidentToMarginalValue[incidentId];
             if (marginalValueRemoved >= difference) {
               break;
@@ -643,12 +645,11 @@
       if (excessCounts === 0) {
         break;
       }
-      incidents = incidents.filter(function(x) {
-        return !outlierIncidentIds.has(x.id);
-      });
       iteration++;
     }
-    return incidents;
+    return incidents.filter(function(x) {
+      return x;
+    });
   };
 
   mergeSubIntervals = function(subIntervals) {

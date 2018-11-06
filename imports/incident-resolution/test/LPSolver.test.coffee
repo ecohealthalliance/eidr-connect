@@ -1,5 +1,5 @@
 import { chai } from 'meteor/practicalmeteor:chai'
-import Solver from './LPSolver'
+import Solver from '../lib/LPSolver'
 
 describe 'Linear Program Solver', ->
 

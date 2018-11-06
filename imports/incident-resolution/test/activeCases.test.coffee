@@ -13,7 +13,7 @@ import incidents from './incidents'
   subIntervalsToDailyRates,
   enumerateDateRange,
   mapLocationsToMaxSubIntervals
-} = require('incident-resolution')
+} = require('../index')
 
 
 lome =
