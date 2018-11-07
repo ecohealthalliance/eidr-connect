@@ -489,6 +489,30 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
     .map ([start, subIntGroup]) -> [parseInt(start), subIntGroup]
     .sortBy (x) -> x[0]
     .value()
+  # Remove redundant constraining incidents:
+  # Group sub-intervals by incident
+  constrainingSubIntervalsByIncident = constrainingIncidents.map () -> []
+  constrainingSubIntervals = differentialIncidentsToSubIntervals(constrainingIncidents)
+  constrainingSubIntervals.forEach (subInterval) ->
+    subInterval.incidentIds.forEach (incidentId) ->
+      constrainingSubIntervalsByIncident[incidentId].push(subInterval)
+  # Find the intersection of the incidentIds of the subintervals in each group
+  intersectionsByIncident = constrainingSubIntervalsByIncident.map (subIntervalGroup) ->
+    _.intersection.apply(null, subIntervalGroup.map (subInterval) -> subInterval.incidentIds)
+  # If the intersection is larger than 1 the other incidents contain the grouping incident.
+  # If an incident has a value greater than those that contain it, remove it, it is redundant.
+  constrainingIncidents = _.zip(constrainingIncidents, intersectionsByIncident)
+    .map ([constrainingIncident, intersection], incidentId) ->
+      remove = false
+      _.without(intersection, incidentId).forEach (containingIncidentId) ->
+        if constrainingIncidents[containingIncidentId].count < constrainingIncident.count
+          remove = true
+      if not remove
+        return Object.create(constrainingIncident)
+    .filter (x) -> x
+  constrainingIncidents.forEach (cIncident) ->
+    cIncident.containedSubIntervals = getContainedSubIntervals(cIncident, subIntsByStart)
+    cIncident.topLevelSubIntervals = getTopLevelSubIntervals(cIncident.containedSubIntervals)
   while incidents.length > 0
     # Compute CASIM for each sub-interval
     # CASIM = count above sub-interval median
@@ -518,18 +542,21 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
       # decrease if the incident were removed (after all the greater incidents).
       # It is not necessarily equal because the overlapping incidents 
       # for child locations are not factored in.
+      valueLastIndex = {}
+      sortedValues.forEach (value, index) ->
+        valueLastIndex[value] = index
       subInt.__marginalValueByIncident = _.object(
-        [k, v - sortedValues[sortedValues.indexOf(v) - 1]] for k, v of valuesByIncident
+        [k, v - sortedValues[valueLastIndex[v] - 1]] for k, v of valuesByIncident
       )
     extendSubIntervalsWithValues(incidents, subIntervals)
     excessCounts = 0
     constrainingIncidents.forEach (cIncident) ->
+      containedSubInts = cIncident.containedSubIntervals
       # Compute a resolved count for sub-intervals that occur at a time/location
       # that overlaps the constraining incident.
       # If it exceeds the constraining incident, remove the incidents with
       # the highest CASIM values.
-      containedSubInts = getContainedSubIntervals(cIncident, subIntsByStart)
-      resolvedSum = sum(getTopLevelSubIntervals(containedSubInts).map (subInt) -> subInt.value)
+      resolvedSum = sum(cIncident.topLevelSubIntervals.map (subInt) -> subInt.value)
       difference = resolvedSum - cIncident.count
       if difference > 0
         excessCounts += 1
@@ -556,11 +583,12 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
         incidentToTotalCASIM = {}
         incidentToMarginalValue = {}
         for subInterval in containedSubInts
+          marginalValueByIncident = subInterval.__marginalValueByIncident
           for incidentId, value of subInterval.__CASIMByIncident
             incidentToTotalCASIM[incidentId] = (incidentToTotalCASIM[incidentId] || 0) + value
             incidentToMarginalValue[incidentId] = (
               incidentToMarginalValue[incidentId] || 0
-            ) + subInterval.__marginalValueByIncident[incidentId]
+            ) + marginalValueByIncident[incidentId]
         incidentsSortedByCASIM = _.chain(incidentToTotalCASIM)
           .pairs()
           .map ([k, v]) -> [parseInt(k), v]

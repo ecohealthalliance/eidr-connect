@@ -463,7 +463,7 @@
   };
 
   removeOutlierIncidentsSingleType = function(incidents, constrainingIncidents) {
-    var excessCounts, incidentsByLocationId, iteration, locationIdToParent, myLocationTree, nextLayer, nodeLayer, subIntervals, subIntsByStart;
+    var constrainingSubIntervals, constrainingSubIntervalsByIncident, excessCounts, incidentsByLocationId, intersectionsByIncident, iteration, locationIdToParent, myLocationTree, nextLayer, nodeLayer, subIntervals, subIntsByStart;
     incidentsByLocationId = _.groupBy(incidents, function(x) {
       return x.locations[0].id;
     });
@@ -538,9 +538,42 @@
     }).sortBy(function(x) {
       return x[0];
     }).value();
+    constrainingSubIntervalsByIncident = constrainingIncidents.map(function() {
+      return [];
+    });
+    constrainingSubIntervals = differentialIncidentsToSubIntervals(constrainingIncidents);
+    constrainingSubIntervals.forEach(function(subInterval) {
+      return subInterval.incidentIds.forEach(function(incidentId) {
+        return constrainingSubIntervalsByIncident[incidentId].push(subInterval);
+      });
+    });
+    intersectionsByIncident = constrainingSubIntervalsByIncident.map(function(subIntervalGroup) {
+      return _.intersection.apply(null, subIntervalGroup.map(function(subInterval) {
+        return subInterval.incidentIds;
+      }));
+    });
+    constrainingIncidents = _.zip(constrainingIncidents, intersectionsByIncident).map(function(arg, incidentId) {
+      var constrainingIncident, intersection, remove;
+      constrainingIncident = arg[0], intersection = arg[1];
+      remove = false;
+      _.without(intersection, incidentId).forEach(function(containingIncidentId) {
+        if (constrainingIncidents[containingIncidentId].count < constrainingIncident.count) {
+          return remove = true;
+        }
+      });
+      if (!remove) {
+        return Object.create(constrainingIncident);
+      }
+    }).filter(function(x) {
+      return x;
+    });
+    constrainingIncidents.forEach(function(cIncident) {
+      cIncident.containedSubIntervals = getContainedSubIntervals(cIncident, subIntsByStart);
+      return cIncident.topLevelSubIntervals = getTopLevelSubIntervals(cIncident.containedSubIntervals);
+    });
     while (incidents.length > 0) {
       subIntervals.forEach(function(subInt) {
-        var duration, end, incident, incidentId, incidentIds, j, k, len, lowerMedian, sortedValues, start, v, values, valuesByIncident;
+        var duration, end, incident, incidentId, incidentIds, j, k, len, lowerMedian, sortedValues, start, v, valueLastIndex, values, valuesByIncident;
         start = subInt.start, end = subInt.end, incidentIds = subInt.incidentIds, duration = subInt.duration;
         valuesByIncident = {};
         for (j = 0, len = incidentIds.length; j < len; j++) {
@@ -564,12 +597,16 @@
           }
           return results;
         })());
+        valueLastIndex = {};
+        sortedValues.forEach(function(value, index) {
+          return valueLastIndex[value] = index;
+        });
         return subInt.__marginalValueByIncident = _.object((function() {
           var results;
           results = [];
           for (k in valuesByIncident) {
             v = valuesByIncident[k];
-            results.push([k, v - sortedValues[sortedValues.indexOf(v) - 1]]);
+            results.push([k, v - sortedValues[valueLastIndex[v] - 1]]);
           }
           return results;
         })());
@@ -577,9 +614,9 @@
       extendSubIntervalsWithValues(incidents, subIntervals);
       excessCounts = 0;
       constrainingIncidents.forEach(function(cIncident) {
-        var containedSubInts, difference, incidentId, incidentToMarginalValue, incidentToTotalCASIM, incidentToTotalValue, incidentsRemoved, incidentsSortedByCASIM, j, l, len, len1, len2, m, marginalValueRemoved, ref, ref1, resolvedSum, results, subInterval, value;
-        containedSubInts = getContainedSubIntervals(cIncident, subIntsByStart);
-        resolvedSum = sum(getTopLevelSubIntervals(containedSubInts).map(function(subInt) {
+        var containedSubInts, difference, incidentId, incidentToMarginalValue, incidentToTotalCASIM, incidentToTotalValue, incidentsRemoved, incidentsSortedByCASIM, j, l, len, len1, len2, m, marginalValueByIncident, marginalValueRemoved, ref, ref1, resolvedSum, results, subInterval, value;
+        containedSubInts = cIncident.containedSubIntervals;
+        resolvedSum = sum(cIncident.topLevelSubIntervals.map(function(subInt) {
           return subInt.value;
         }));
         difference = resolvedSum - cIncident.count;
@@ -611,11 +648,12 @@
           incidentToMarginalValue = {};
           for (l = 0, len1 = containedSubInts.length; l < len1; l++) {
             subInterval = containedSubInts[l];
+            marginalValueByIncident = subInterval.__marginalValueByIncident;
             ref1 = subInterval.__CASIMByIncident;
             for (incidentId in ref1) {
               value = ref1[incidentId];
               incidentToTotalCASIM[incidentId] = (incidentToTotalCASIM[incidentId] || 0) + value;
-              incidentToMarginalValue[incidentId] = (incidentToMarginalValue[incidentId] || 0) + subInterval.__marginalValueByIncident[incidentId];
+              incidentToMarginalValue[incidentId] = (incidentToMarginalValue[incidentId] || 0) + marginalValueByIncident[incidentId];
             }
           }
           incidentsSortedByCASIM = _.chain(incidentToTotalCASIM).pairs().map(function(arg) {
