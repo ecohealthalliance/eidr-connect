@@ -1,6 +1,6 @@
 import { chai } from 'meteor/practicalmeteor:chai'
 import incidents from './incidents.coffee'
-{ LocationTree } = require('incident-resolution')
+{ LocationTree } = require('../index')
 
 describe 'LocationTree', ->
   it 'deduplicates locations', ->

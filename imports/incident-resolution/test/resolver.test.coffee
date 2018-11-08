@@ -8,7 +8,7 @@ import incidents from './incidents'
   removeOutlierIncidents,
   createSupplementalIncidents,
   extendSubIntervalsWithValues
-} = require('incident-resolution')
+} = require('../index')
 
 lome =
   admin1Name: "Maritime"

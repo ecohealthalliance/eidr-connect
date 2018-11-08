@@ -256,6 +256,8 @@ extendSubIntervalsWithValuesTS = (differentialIncidents, subIntervals) ->
     SEToLocationTree[key] = LocationTree.from(locations)
   subIntervalRates = subIntervals.map(-> [])
   differentialIncidents.forEach((incident, incidentId) ->
+    if not incident
+      return
     incidentSubs = IncidentToSELs[incidentId]
     if not incidentSubs
       console.log "Error: No subintervals for", incidentId
@@ -480,9 +482,38 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
   # Iteratively remove incidents until the constraining incidents are not
   # exceeded or the iteration limit is exceeded.
   iteration = 0
-  while incidents.length > 0 and iteration < 3
-    outlierIncidentIds = new Set()
-    subIntervals = differentialIncidentsToSubIntervals(incidents)
+  subIntervals = differentialIncidentsToSubIntervals(incidents)
+  subIntsByStart = _.chain(subIntervals)
+    .groupBy('start')
+    .pairs()
+    .map ([start, subIntGroup]) -> [parseInt(start), subIntGroup]
+    .sortBy (x) -> x[0]
+    .value()
+  # Remove redundant constraining incidents:
+  # Group sub-intervals by incident
+  constrainingSubIntervalsByIncident = constrainingIncidents.map () -> []
+  constrainingSubIntervals = differentialIncidentsToSubIntervals(constrainingIncidents)
+  constrainingSubIntervals.forEach (subInterval) ->
+    subInterval.incidentIds.forEach (incidentId) ->
+      constrainingSubIntervalsByIncident[incidentId].push(subInterval)
+  # Find the intersection of the incidentIds of the subintervals in each group
+  intersectionsByIncident = constrainingSubIntervalsByIncident.map (subIntervalGroup) ->
+    _.intersection.apply(null, subIntervalGroup.map (subInterval) -> subInterval.incidentIds)
+  # If the intersection is larger than 1 the other incidents contain the grouping incident.
+  # If an incident has a value greater than those that contain it, remove it, it is redundant.
+  constrainingIncidents = _.zip(constrainingIncidents, intersectionsByIncident)
+    .map ([constrainingIncident, intersection], incidentId) ->
+      remove = false
+      _.without(intersection, incidentId).forEach (containingIncidentId) ->
+        if constrainingIncidents[containingIncidentId].count < constrainingIncident.count
+          remove = true
+      if not remove
+        return Object.create(constrainingIncident)
+    .filter (x) -> x
+  constrainingIncidents.forEach (cIncident) ->
+    cIncident.containedSubIntervals = getContainedSubIntervals(cIncident, subIntsByStart)
+    cIncident.topLevelSubIntervals = getTopLevelSubIntervals(cIncident.containedSubIntervals)
+  while incidents.length > 0
     # Compute CASIM for each sub-interval
     # CASIM = count above sub-interval median
     # The "lower" median is used so we have an upper bound on the cases that
@@ -495,7 +526,7 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
       for incidentId in incidentIds
         incident = incidents[incidentId]
         # Exclude virtual incidents from the incident value distribution.
-        if incident.__virtualIncident
+        if not incident or incident.__virtualIncident
           continue
         valuesByIncident[incidentId] = incident.rate * duration
       values = _.values(valuesByIncident).concat([0])
@@ -511,24 +542,21 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
       # decrease if the incident were removed (after all the greater incidents).
       # It is not necessarily equal because the overlapping incidents 
       # for child locations are not factored in.
+      valueLastIndex = {}
+      sortedValues.forEach (value, index) ->
+        valueLastIndex[value] = index
       subInt.__marginalValueByIncident = _.object(
-        [k, v - sortedValues[sortedValues.indexOf(v) - 1]] for k, v of valuesByIncident
+        [k, v - sortedValues[valueLastIndex[v] - 1]] for k, v of valuesByIncident
       )
     extendSubIntervalsWithValues(incidents, subIntervals)
-    subIntsByStart = _.chain(subIntervals)
-      .groupBy('start')
-      .pairs()
-      .map ([start, subIntGroup]) -> [parseInt(start), subIntGroup]
-      .sortBy (x) -> x[0]
-      .value()
     excessCounts = 0
     constrainingIncidents.forEach (cIncident) ->
+      containedSubInts = cIncident.containedSubIntervals
       # Compute a resolved count for sub-intervals that occur at a time/location
       # that overlaps the constraining incident.
       # If it exceeds the constraining incident, remove the incidents with
       # the highest CASIM values.
-      containedSubInts = getContainedSubIntervals(cIncident, subIntsByStart)
-      resolvedSum = sum(getTopLevelSubIntervals(containedSubInts).map (subInt) -> subInt.value)
+      resolvedSum = sum(cIncident.topLevelSubIntervals.map (subInt) -> subInt.value)
       difference = resolvedSum - cIncident.count
       if difference > 0
         excessCounts += 1
@@ -541,7 +569,7 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
           incidentsRemoved = false
           for incidentId, value of incidentToTotalValue
             if value > cIncident.count
-              outlierIncidentIds.add(parseInt(incidentId))
+              incidents[parseInt(incidentId)] = null
               incidentsRemoved = true
           if incidentsRemoved
             return
@@ -555,11 +583,12 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
         incidentToTotalCASIM = {}
         incidentToMarginalValue = {}
         for subInterval in containedSubInts
+          marginalValueByIncident = subInterval.__marginalValueByIncident
           for incidentId, value of subInterval.__CASIMByIncident
             incidentToTotalCASIM[incidentId] = (incidentToTotalCASIM[incidentId] || 0) + value
             incidentToMarginalValue[incidentId] = (
               incidentToMarginalValue[incidentId] || 0
-            ) + subInterval.__marginalValueByIncident[incidentId]
+            ) + marginalValueByIncident[incidentId]
         incidentsSortedByCASIM = _.chain(incidentToTotalCASIM)
           .pairs()
           .map ([k, v]) -> [parseInt(k), v]
@@ -568,15 +597,14 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
           .value()
         marginalValueRemoved = 0
         for incidentId in incidentsSortedByCASIM
-          outlierIncidentIds.add(incidentId)
+          incidents[incidentId] = null
           marginalValueRemoved += incidentToMarginalValue[incidentId]
           if marginalValueRemoved >= difference
             break
     if excessCounts == 0
       break
-    incidents = incidents.filter (x) -> not outlierIncidentIds.has(x.id)
     iteration++
-  return incidents
+  return incidents.filter (x) -> x
 
 # Merge adjacent sub-intervals.
 mergeSubIntervals = (subIntervals) ->
