@@ -56,6 +56,7 @@ Template.curatedEvent.helpers
   
       name: templateName
       data:
+        eventType: "userEvent"
         isUserEvent: true
         event: event
         filterQuery: instance.filterQuery

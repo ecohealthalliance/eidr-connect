@@ -2,7 +2,7 @@ import EventIncidents from '/imports/collections/eventIncidents'
 import regionToCountries from '/imports/regionToCountries.json'
 {
   removeOutlierIncidents
-} = 'incident-resolution'
+} = require('incident-resolution')
 
 formatDateForInput = (date) ->
   unless date

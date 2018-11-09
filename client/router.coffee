@@ -90,7 +90,7 @@ Router.route "/curator-inbox",
   onBeforeAction: ->
     redirectIfNotAuthorized(@, ['admin', 'curator'])
 
-Router.route "/event-inbox/:_id",
+Router.route "/event-inbox/:eventType/:_id",
   name: 'event-inbox'
   title: 'Event Inbox'
 

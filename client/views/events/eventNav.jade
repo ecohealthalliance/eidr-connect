@@ -27,9 +27,8 @@ template(name="eventNav")
             span
               i.fa.fa-info-circle
               span Details
-        if showReferences
-          li(class="{{checkActive 'references'}}")
-            a.references(href="{{pathFor route=route _id=id _view='references'}}")
-              span
-                i.fa.fa-book
-                span References
+        li(class="{{checkActive 'references'}}")
+          a.references(href="{{pathFor route=route _id=id _view='references'}}")
+            span
+              i.fa.fa-book
+              span References

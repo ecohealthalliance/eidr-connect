@@ -8,12 +8,13 @@ template(name="eventInbox")
     .curator-inbox-sources.pane.pane-l.curator-inbox--pane
       .curator-source-details--header
         h2 Event Documents
-        .curator-inbox-options
-          a.option.add-document.plain-focus.small(
-            data-toggle="tooltip"
-            title="Add New Document"
-            tabindex="0")
-            i.fa.fa-plus(aria-hidden="true")
+        if eq eventType "userEvent"
+          .curator-inbox-options
+            a.option.add-document.plain-focus.small(
+              data-toggle="tooltip"
+              title="Add New Document"
+              tabindex="0")
+              i.fa.fa-plus(aria-hidden="true")
 
       if isReady
         .curator-inbox-source-list

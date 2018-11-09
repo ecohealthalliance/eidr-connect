@@ -46,70 +46,124 @@ Meteor.publish 'userEvents', () ->
       eventName: 1
       lastIncidentDate: 1
 
-Meteor.publishComposite 'userEvent', (eventId) ->
-  find: ->
-    UserEvents.find(_id: eventId)
-  children: [
-    {
-      collectionName: 'users'
-      find: (event) ->
-        Meteor.users.find({
-          _id: $in: [event.createdByUserId, event.lastModifiedByUserId]
-        }, {
-          fields:
-            'profile.name': 1
-        })
-    }, {
-      collectionName: 'eventIncidents'
-      find: (event) ->
-        incidentIds = _.pluck(event.incidents, 'id')
-        Incidents.find
-          _id: $in: incidentIds
-          deleted: $in: [null, false]
-        , limit: INCIDENT_LIMIT
-    }, {
-      collectionName: 'articles'
-      find: (event) ->
-        incidents = Incidents.find(_id: $in: _.pluck(event.incidents, 'id'))
-        Articles.find
-          $or: [
-            {_id: $in: _.pluck(incidents.fetch(), 'articleId')}
-            {userEventIds: event._id}
-          ]
-          deleted: {$in: [null, false]}
-    }
-  ]
+Meteor.publishComposite 'userEvent', (params) ->
+  includeAllArticleData = false
+  if _.isObject(params)
+    {eventId, includeAllArticleData} = params
+  else
+    eventId = params
+  {
+    find: ->
+      UserEvents.find(_id: eventId)
+    children: [
+      {
+        collectionName: 'users'
+        find: (event) ->
+          Meteor.users.find({
+            _id: $in: [event.createdByUserId, event.lastModifiedByUserId]
+          }, {
+            fields:
+              'profile.name': 1
+          })
+      }, {
+        collectionName: 'eventIncidents'
+        find: (event) ->
+          incidentIds = _.pluck(event.incidents, 'id')
+          Incidents.find
+            _id: $in: incidentIds
+            deleted: $in: [null, false]
+          , limit: INCIDENT_LIMIT
+      }, {
+        collectionName: 'articles'
+        find: (event) ->
+          incidents = Incidents.find(_id: $in: _.pluck(event.incidents, 'id'))
+          Articles.find({
+            $or: [
+              {_id: $in: _.pluck(incidents.fetch(), 'articleId')}
+              {userEventIds: event._id}
+            ]
+            deleted: {$in: [null, false]}
+          }, if includeAllArticleData then {} else {
+            fields:
+              enhancements: 0
+              content: 0
+          })
+      }
+    ]
+  }
 
-Meteor.publishComposite 'smartEvent', (eventId) ->
-  find: ->
-    SmartEvents.find(_id: eventId)
-  children: [
-    {
-      collectionName: 'users'
-      find: (event) ->
-        Meteor.users.find({
-          _id: $in: [event.createdByUserId, event.lastModifiedByUserId]
-        }, {
-          fields:
-            'profile.name': 1
-        })
-    }, {
-      collectionName: 'eventIncidents'
-      find: (event) ->
-        Incidents.find(utils.eventToIncidentQuery(event), limit: INCIDENT_LIMIT)
-    }
-  ]
+Meteor.publishComposite 'smartEvent', (params) ->
+  includeAllArticleData = false
+  if _.isObject(params)
+    {eventId, includeAllArticleData} = params
+  else
+    eventId = params
+  {
+    find: ->
+      SmartEvents.find(_id: eventId)
+    children: [
+      {
+        collectionName: 'users'
+        find: (event) ->
+          Meteor.users.find({
+            _id: $in: [event.createdByUserId, event.lastModifiedByUserId]
+          }, {
+            fields:
+              'profile.name': 1
+          })
+      }, {
+        collectionName: 'eventIncidents'
+        find: (event) ->
+          Incidents.find(utils.eventToIncidentQuery(event), limit: INCIDENT_LIMIT)
+      }, {
+        collectionName: 'articles'
+        find: (event) ->
+          incidents = Incidents.find(utils.eventToIncidentQuery(event), fields: {articleId: 1})
+          Articles.find({
+            $or: [
+              {_id: $in: _.pluck(incidents.fetch(), 'articleId')}
+            ]
+            deleted: {$in: [null, false]}
+          }, if includeAllArticleData then {} else {
+            fields:
+              enhancements: 0
+              content: 0
+          })
+      }
+    ]
+  }
 
-Meteor.publishComposite 'autoEvent', (eventId) ->
-  find: ->
-    AutoEvents.find(_id: eventId)
-  children: [
-    {
-      collectionName: 'eventIncidents'
-      find: (event) ->
-        Incidents.find(utils.eventToIncidentQuery(event), limit: INCIDENT_LIMIT)
-    }
-  ]
+Meteor.publishComposite 'autoEvent', (params) ->
+  includeAllArticleData = false
+  if _.isObject(params)
+    {eventId, includeAllArticleData} = params
+  else
+    eventId = params
+  {
+    find: ->
+      AutoEvents.find(_id: eventId)
+    children: [
+      {
+        collectionName: 'eventIncidents'
+        find: (event) ->
+          Incidents.find(utils.eventToIncidentQuery(event), limit: INCIDENT_LIMIT)
+      }, {
+        collectionName: 'articles'
+        find: (event) ->
+          incidents = Incidents.find(utils.eventToIncidentQuery(event), fields: {articleId: 1})
+          Articles.find({
+            $or: [
+              {_id: $in: _.pluck(incidents.fetch(), 'articleId')}
+            ]
+            deleted: {$in: [null, false]}
+          }, if includeAllArticleData then {} else {
+            fields:
+              enhancements: 0
+              content: 0
+          })
+      }
+    ]
+  }
 
 ReactiveTable.publish 'smartEvents', SmartEvents, deleted: $in: [null, false]
 

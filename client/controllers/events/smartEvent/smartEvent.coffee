@@ -49,11 +49,14 @@ Template.smartEvent.helpers
         'eventIncidentReports'
       when 'details'
         'eventDetails'
+      when 'references'
+        'eventReferences'
       else
         currentView
 
     name: templateName
     data:
+      eventType: "smartEvent"
       event: SmartEvents.findOne(instance.eventId.get())
       filterQuery: instance.filterQuery
       selectedIncidentTypes: instance.selectedIncidentTypes

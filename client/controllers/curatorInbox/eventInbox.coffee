@@ -35,7 +35,10 @@ Template.eventInbox.onRendered ->
       @selectedSourceId.set(firstSource._id)
     @ready.set(true)
 
-  @subscribe "userEvent", Router.current().params._id, @selectFirstUnreviewed
+  @subscribe Router.current().params.eventType, {
+    eventId: Router.current().params._id,
+    includeAllArticleData: true
+  }, @selectFirstUnreviewed
 
 Template.eventInbox.onDestroyed ->
   $('.inlineRangePicker').off('mouseleave')

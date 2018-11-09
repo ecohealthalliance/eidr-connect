@@ -32,11 +32,14 @@ Template.autoEvent.helpers
         'eventIncidentReports'
       when 'details'
         'autoEventDetails'
+      when 'references'
+        'eventReferences'
       else
         currentView
 
     name: templateName
     data:
+      eventType: "autoEvent"
       event: AutoEvents.findOne(instance.eventId.get())
       filterQuery: instance.filterQuery
       selectedIncidentTypes: instance.selectedIncidentTypes

@@ -17,7 +17,7 @@ template(name="curatedEvent")
             selectedIncidentTypes=selectedIncidentTypes)
         .event--content-container
           nav.event--navigation
-            +eventNav route="curated-event" id=userEvent._id showReferences=true
+            +eventNav route="curated-event" id=userEvent._id
           .event--content
             if filterableView
               if noFilterMatches
