@@ -248,6 +248,7 @@ workerThread = new Worker(require('./worker.js'))
 ###
 Router.route("/api/resolve-incidents", where: "server")
 .post ->
+  @response.setTimeout(0)
   workerThread.postMessage(@request.body)
   workerThread.onmessage = ({data}) =>
     if data.error
@@ -288,6 +289,7 @@ Router.route("/api/resolve-incidents", where: "server")
 ###
 Router.route("/api/events-with-resolved-data", where: "server")
 .get ->
+  @response.setTimeout(0)
   eventIds = @request.query.ids
   if _.isString(@request.query.ids)
     eventIds = [@request.query.ids]
