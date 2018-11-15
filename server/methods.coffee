@@ -86,7 +86,7 @@ getArticleEnhancements = (article, options=null) ->
     api_key: Constants.GRITS_API_KEY
     returnSourceContent: true
     priority: options.priority != false
-    use_infection_annotator: options.useInfectionAnnotator or false
+    use_infection_annotator: options.useInfectionAnnotator or true
     include_incidents: true
   if article.publishDate or article.addedDate
     params.content_date = moment.utc(
