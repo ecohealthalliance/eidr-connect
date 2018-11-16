@@ -1,7 +1,7 @@
 import json
 import pandas as pd
 import requests
-from StringIO import StringIO
+from io import StringIO
 import re
 
 continent_names = {
@@ -23,7 +23,7 @@ continent_geonameids = {
     "AN": "6255152",
 }
 response = requests.get("http://download.geonames.org/export/dump/countryInfo.txt")
-country_table = pd.read_csv(StringIO(re.split(r'^#[^\n]*$', response.content, flags=re.M)[-1]),
+country_table = pd.read_csv(StringIO(re.split(r'^#[^\n]*$', response.content.decode("utf-8"), flags=re.M)[-1]),
                             sep='\t',
                             header=None,
                             names=[
@@ -67,6 +67,29 @@ regionToCountries["7729885"] = {
         "GH",
         "GM",
         "GN",
+        "GW",
+        "LR",
+        "ML",
+        "MR",
+        "NE",
+        "NG",
+        "SH",
+        "SL",
+        "SN",
+        "TG",
+    ]
+}
+
+regionToCountries["7729883"] = {
+    "name": "Northern Europe",
+    "countryISOs": [
+        "FO",
+        "AX",
+        "SE",
+        "NO",
+        "IS",
+        "FI",
+        "DK",
         "GW",
         "LR",
         "ML",
