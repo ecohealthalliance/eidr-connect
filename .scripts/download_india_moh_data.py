@@ -80,6 +80,7 @@ if __name__ == "__main__":
         for week_num, period in enumerate(week_periods):
             week_num = week_num + 1
             filename = "%02d%s.pdf" % (week_num, period.to_period().start_time.year)
+            print("Processing:" + filename)
             url = "http://idsp.nic.in/WriteReadData/l892s/" + filename
             filepath = os.path.join(args.download_dir, filename)
             if not os.path.exists(filepath):
@@ -90,8 +91,12 @@ if __name__ == "__main__":
                 if pdftotext_result != 0:
                     print("Removing invalid pdf: " + filepath)
                     os.remove(filepath)
-                    break
-            with open(filepath.replace(".pdf", ".txt")) as f:
+                    continue
+            textfilepath = filepath.replace(".pdf", ".txt")
+            if not os.path.exists(textfilepath):
+                print("Could not find file: " + textfilepath)
+                continue
+            with open(textfilepath) as f:
                 regex = re.compile(
                     r"(\w{2,}\/\w{2,}\/\d{4}/\d+/\d+)\s+"
                     r"(?P<state>\S(.+\n)+)\s+"
