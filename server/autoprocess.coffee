@@ -13,7 +13,8 @@ module.exports = ->
       enhancements: $exists: false
     ,
       'enhancements.diagnoserVersion': $lt: '0.4.2'
-    ]
+    ],
+    reviewed: $in: [null, false]
   }, {
     limit: 20
     sort:

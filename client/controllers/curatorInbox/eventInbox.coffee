@@ -3,6 +3,7 @@ import UserEvents from '/imports/collections/userEvents'
 import { debounceCheckTop, keyboardSelect } from '/imports/utils'
 
 Template.eventInbox.onCreated ->
+  @subscribe('userEvents')
   @ready = new ReactiveVar(false)
   @filtering = new ReactiveVar(false)
   @selectedSourceId = new ReactiveVar(null)
