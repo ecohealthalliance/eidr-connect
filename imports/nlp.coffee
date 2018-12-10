@@ -256,7 +256,9 @@ export createIncidentReportsFromEnhancements = (enhancements, options={}) ->
     incidents.push(incident)
   incidents = incidents.concat((
     enhancements.structuredIncidents or []
-  ).map (incident) ->
+  ).filter (incident) ->
+    incident.dateRange and incident.location
+  .map (incident) ->
     result =
       accepted: Boolean(acceptByDefault)
       annotations:

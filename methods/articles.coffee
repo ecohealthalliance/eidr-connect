@@ -99,3 +99,4 @@ Meteor.methods
       Articles.update _id: id,
         $set:
           reviewed: reviewed
+          reviewedDate: new Date()

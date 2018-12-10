@@ -32,6 +32,9 @@ articleSchema = new SimpleSchema
   reviewed:
     type: Boolean
     optional: true
+  reviewedDate:
+    type: Date
+    optional: true
   enhancements:
     type: Object
     optional: true
