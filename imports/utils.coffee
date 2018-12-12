@@ -48,17 +48,26 @@ checkIncidentTypeValue = (form, input) ->
 
 export incidentReportFormToIncident = (form) ->
   $form = $(form)
+  incidentType = form.type.value
+  incidentStatus = $form.find('input[name="incidentStatus"]:checked').val()
+
   if $form.find('#singleDate').hasClass('active')
     rangeType = 'day'
     $pickerContainer = $form.find('#singleDatePicker')
-  else
+  else if $form.find('#preciseRange').hasClass('active')
     rangeType = 'precise'
     $pickerContainer = $form.find('#rangePicker')
+  else
+    rangeType = 'none'
 
-  picker = $pickerContainer.data('daterangepicker')
-
-  incidentType = form.type.value
-  incidentStatus = $form.find('input[name="incidentStatus"]:checked').val()
+  dateRange = null
+  if rangeType != 'none'
+    picker = $pickerContainer.data('daterangepicker')
+    dateRange = 
+      type: rangeType
+      start: moment.utc(picker.startDate.format("YYYY-MM-DD")).toDate()
+      end: moment.utc(picker.endDate.format("YYYY-MM-DD")).toDate()
+      cumulative: incidentType.startsWith("cumulative")
 
   incident =
     type: incidentType
@@ -68,11 +77,7 @@ export incidentReportFormToIncident = (form) ->
     status: incidentStatus
     species: null
     resolvedDisease: null
-    dateRange:
-      type: rangeType
-      start: moment.utc(picker.startDate.format("YYYY-MM-DD")).toDate()
-      end: moment.utc(picker.endDate.format("YYYY-MM-DD")).toDate()
-      cumulative: incidentType.startsWith("cumulative")
+    dateRange: dateRange
 
   switch incidentType || ''
     when 'caseCount'

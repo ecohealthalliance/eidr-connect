@@ -11,6 +11,8 @@ Template.suggestedIncidentModal.onRendered ->
     $snippet = $('.snippet--text')
     if $snippet.height() > formHeight
       $snippet.css('max-height', formHeight)
+    initialScrollTop = $snippet.scrollTop()
+    $snippet.scrollTop(Math.max(@$('.snippet--text .annotation-text:first').position().top + initialScrollTop - 100, 0))
 
 Template.suggestedIncidentModal.onCreated ->
   @showBackdrop = @data.showBackdrop

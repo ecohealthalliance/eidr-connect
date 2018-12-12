@@ -106,17 +106,14 @@ export annotateContentWithIncidents = (content, incidents, selectedAnnotationId,
 # @return {String} html with annotation spans added
 ###
 export buildAnnotatedIncidentSnippet = (content, incident) ->
-  PADDING_CHARACTERS = 30
   incidentAnnotations = []
   for type, typeAnnotations of incident.annotations
     typeAnnotations.forEach (annotation) ->
       incidentAnnotations.push
         type: type
         textOffsets: annotation.textOffsets
-  startingIndex = _.min(incidentAnnotations.map (a)-> a.textOffsets[0])
-  startingIndex = Math.max(startingIndex - PADDING_CHARACTERS, 0)
-  endingIndex = _.max(incidentAnnotations.map (a)-> a.textOffsets[1])
-  endingIndex = Math.min(endingIndex + PADDING_CHARACTERS, content.length - 1)
+  startingIndex = 0
+  endingIndex = content.length - 1
   annotateContent content, incidentAnnotations,
     startingIndex: startingIndex
     endingIndex: endingIndex

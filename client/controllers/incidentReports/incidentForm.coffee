@@ -47,7 +47,8 @@ Template.incidentForm.onCreated ->
     if incident.dateRange
       @incidentData.dateRange = incident.dateRange
       @dateRangeType.set(incident.dateRange.type)
-
+    else
+      @dateRangeType.set('none')
     cases = @incidentData.cases
     deaths = @incidentData.deaths
     specify = @incidentData.specify
@@ -85,7 +86,7 @@ Template.incidentForm.onRendered ->
   @$('[data-toggle=tooltip]').tooltip
     container: 'body'
   datePickerOptions = {}
-  if @incidentData.dateRange.start and @incidentData.dateRange.end
+  if @incidentData?.dateRange?.start and @incidentData?.dateRange?.end
     datePickerOptions.startDate = moment(moment.utc(@incidentData.dateRange.start).format("YYYY-MM-DD"))
     datePickerOptions.endDate = moment(moment.utc(@incidentData.dateRange.end).format("YYYY-MM-DD"))
   createInlineDateRangePicker(@$('#rangePicker'), datePickerOptions)
@@ -100,7 +101,10 @@ Template.incidentForm.onRendered ->
       @$('#add-incident').parsley().reset()
 
   @autorun =>
-    switch @incidentType.get()
+    incidentType = @incidentType.get()
+    if @dateRangeType.curValue == 'none'
+      return
+    switch incidentType
       when 'activeCount' then @dateRangeType.set("day")
       when 'cumulativeCaseCount' then @dateRangeType.set("day")
       when 'cumulativeDeathCount' then @dateRangeType.set("day")
@@ -136,6 +140,10 @@ Template.incidentForm.helpers
 
   dayTabClass: ->
     if Template.instance().dateRangeType.get() is 'day'
+      'active'
+
+  noDateTabClass: ->
+    if Template.instance().dateRangeType.get() is 'none'
       'active'
 
   rangeTabClass: ->
@@ -266,6 +274,10 @@ Template.incidentForm.events
   'click .date-range': (event, instance) ->
     removeSuggestedProperties(instance, ['dateRange'])
     instance.dateRangeType.set('precise')
+
+  'click .no-date': (event, instance) ->
+    removeSuggestedProperties(instance, ['dateRange'])
+    instance.dateRangeType.set('none')
 
   'submit form': (event, instance) ->
     event.preventDefault()

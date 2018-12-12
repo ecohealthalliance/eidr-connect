@@ -58,6 +58,7 @@ IncidentReportSchema = new SimpleSchema
     optional: true
   dateRange:
     type: Object
+    optional: true
   "dateRange.type":
     type: String
     allowedValues: ["day","precise"]

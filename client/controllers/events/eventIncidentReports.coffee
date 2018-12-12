@@ -141,7 +141,7 @@ Template.eventIncidentReports.helpers
         label: 'Date'
         fn: (value, object, key) -> formatDateRange(object.dateRange)
         sortFn: (value, object) ->
-          +new Date(object.dateRange.end)
+          +new Date(object.dateRange?.end)
       }
     ]
 
@@ -297,9 +297,9 @@ Template.eventIncidentReports.events
           if incident.approximate
             properties.push "Approximate"
           startDate = null
-          if not incident.dateRange.cumulative
-            startDate = moment.utc(incident.dateRange.start).format("YYYY-MM-DD")
-          endDate = moment.utc(incident.dateRange.end).format("YYYY-MM-DD")
+          if not incident.dateRange?.cumulative
+            startDate = moment.utc(incident.dateRange?.start).format("YYYY-MM-DD")
+          endDate = moment.utc(incident.dateRange?.end).format("YYYY-MM-DD")
           article = Articles.findOne(incident.articleId)
           feed = Feeds.findOne(article?.feedId)
 

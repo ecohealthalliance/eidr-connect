@@ -31,7 +31,6 @@ $modal-transition-time-opacity = .25s
   &[class*='off-canvas']
   &[class*='staged'] .modal-dialog
   &.transitioned
-    transition transform $modal-transition-time ease-in-out, opacity $modal-transition-time-opacity ease-in-out
     opacity 1
   &.off-canvas--left
     transform translate(-100%, 0) scale(.9)
@@ -46,8 +45,6 @@ $modal-transition-time-opacity = .25s
       opacity 0
   &[class*='off-canvas']
   &[class*='staged']
-    + .modal-backdrop
-      transition opacity .4s
     .modal-dialog
       &::before
         full-width()
@@ -56,8 +53,6 @@ $modal-transition-time-opacity = .25s
         background-color transparent
         z-index $top-layer
         border-radius 4px
-        transition-delay .5s
-        transition background-color .5s ease-in-out
         pointer-events none
     &:not(.in)
       .modal-dialog

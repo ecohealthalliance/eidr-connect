@@ -37,7 +37,7 @@ module.exports = ->
   UserEvents.find(creationDate: $lte: new Date("Dec 1 2016")).map (event) ->
     incidents = Incidents.find _id: $in: _.pluck(event.incidents, "id")
     incidents.map (incident) ->
-      if incident.dateRange.cumulative
+      if incident.dateRange?.cumulative
         return
       if incident.modifiedDate
         return
@@ -55,6 +55,8 @@ module.exports = ->
   console.log "Removing incidents with invalid dates..."
   invalidDateIncidents = []
   Incidents.find().map (incident) ->
+    if not incident.dateRange
+      return
     if incident.dateRange.end < incident.dateRange.start
       invalidDateIncidents.push(incident._id)
   console.log "Removing #{invalidDateIncidents.length} incidents"

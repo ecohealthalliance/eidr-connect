@@ -38,7 +38,7 @@ module.exports = ->
     (diseaseToParents[disease.id] or []).concat([disease.id]).forEach (diseaseId) ->
       diseaseGroup = diseaseGroups[diseaseId + ":" + incident.species.id]
       if diseaseGroup
-        if incident.dateRange.end > diseaseGroup.lastIncidentDate or not diseaseGroup.lastIncidentDate
+        if (incident.dateRange?.end and incident.dateRange.end > diseaseGroup.lastIncidentDate) or not diseaseGroup.lastIncidentDate
           diseaseGroup.lastIncidentDate = incident.dateRange.end
         diseaseGroup.incidentCount++
   for id, diseaseGroup of diseaseGroups

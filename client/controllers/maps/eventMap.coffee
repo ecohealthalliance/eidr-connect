@@ -116,7 +116,7 @@ Template.eventMap.onRendered ->
           eventCopy = _.clone(event)
           eventCopy.mostRecentIncident = _.chain(location.incidents)
             .filter (i)-> i.userEventId == event._id
-            .sortBy (i)-> i.dateRange.start
+            .sortBy (i)-> i.dateRange?.start
             .value()[0]
           eventCopy
 

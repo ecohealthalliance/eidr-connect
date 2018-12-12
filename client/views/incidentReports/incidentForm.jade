@@ -119,6 +119,16 @@ template(name="incidentForm")
                 aria-controls="date range"
                 role="tab"
                 data-toggle="tab") Date Range
+          li.with-info-tooltip.no-date(
+            role="presentation"
+            class="{{noDateTabClass}}"
+            data-toggle="tooltip"
+            data-placement="top"
+            title='For incidents where a date could not be determined.')
+            a(
+              href="#noDate"
+              role="tab"
+              data-toggle="tab") No Date
 
         .tab-content
           #singleDate.tab-pane(role="tabpanel" class="{{dayTabClass}}")
@@ -137,7 +147,7 @@ template(name="incidentForm")
           selectId="incident-location-select2"
           multiple=true
           values=locations
-          required=true
+          required=false
           errorContainer=".location-group"
           classHandler=".location-group"
           errorMessage="Please select a location."
