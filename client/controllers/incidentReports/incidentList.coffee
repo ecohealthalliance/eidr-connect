@@ -57,6 +57,19 @@ Template.incidentList.onRendered ->
       unless Incidents.findOne(query)
         @selectedIncidents.remove(id: query._id)
 
+  @autorun =>
+    incident = Incidents.findOne(_id: Router.current().params.incidentId)
+    if incident
+      source = @data.source
+      snippetHtml = buildAnnotatedIncidentSnippet(source.enhancements.source.cleanContent.content, incident, false)
+      Modal.show 'suggestedIncidentModal',
+        incident: incident
+        incidentText: Spacebars.SafeString(snippetHtml)
+        articleId: source._id
+        userEventId: null
+        offCanvasStartPosition: 'top'
+        showBackdrop: true
+
 Template.incidentList.helpers
   incidents: ->
     instance = Template.instance()

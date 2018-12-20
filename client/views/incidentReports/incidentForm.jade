@@ -237,6 +237,10 @@ template(name="incidentForm")
         else
           span #{incidentData.addedDate}
 
+      .incident-url
+        i Incident URL:
+        a(href="{{pathFor route='curator-inbox-article' articleId=incidentData.articleId incidentId=incidentData._id}}") {{urlFor route='curator-inbox-article' articleId=incidentData.articleId incidentId=incidentData._id}}
+
 template(name="documentInputLabel")
   label.control-label.with-info-tooltip(
     data-toggle="tooltip"

@@ -82,6 +82,15 @@ Router.route "/events/:_view",
   name: 'events'
   title: 'Events'
 
+Router.route "/curator-inbox/article/:articleId/:incidentId",
+  name: 'curator-inbox-article'
+  template: 'curatorInbox'
+  title: 'Curator Inbox'
+  waitOn: ->
+    Meteor.subscribe('user')
+  onBeforeAction: ->
+    redirectIfNotAuthorized(@, ['admin', 'curator'])
+
 Router.route "/curator-inbox",
   name: 'curator-inbox'
   title: 'Curator Inbox'

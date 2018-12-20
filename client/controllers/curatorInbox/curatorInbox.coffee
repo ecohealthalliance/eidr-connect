@@ -128,6 +128,11 @@ Template.curatorInbox.onRendered ->
     if calendar
       updateCalendarSelection(calendar, range)
 
+    articleId = Router.current().params.articleId
+
+    if articleId
+      query = _id: articleId
+
     @subscribe "articles", query, =>
       unReviewedQuery = _.extend({reviewed: $in: [false, null]}, query)
       firstSource = Articles.findOne(unReviewedQuery, sorting)

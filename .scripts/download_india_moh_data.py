@@ -9,48 +9,8 @@ import subprocess
 import pandas as pd
 import os
 import pymongo
-import functools
-try:
-    from functools import lru_cache
-except ImportError:
-    from backports.functools_lru_cache import lru_cache
+from .utils import clean, lookup_geoname, lookup_disease
 
-GRITS_URL = os.environ.get("GRITS_URL", "https://grits.eha.io")
-
-
-def clean(s):
-    return re.sub(r"\s+", " ", s).strip()
-
-
-@lru_cache()
-def lookup_geoname(name):
-    resp = requests.get(GRITS_URL + "/api/geoname_lookup/api/lookup", params={
-        "q": name
-    })
-    result = resp.json()["hits"][0]["_source"]
-    del result["alternateNames"]
-    del result["rawNames"]
-    del result["asciiName"]
-    del result["cc2"]
-    del result["elevation"]
-    del result["dem"]
-    del result["timezone"]
-    del result["modificationDate"]
-    return result
-
-
-@lru_cache()
-def lookup_disease(name):
-    resp = requests.get(GRITS_URL + "/api/v1/disease_ontology/lookup", params={
-        "q": name
-    })
-    result = resp.json()
-    first_result = next(iter(result["result"]), None)
-    if first_result:
-        return {
-            "id": first_result["id"],
-            "text": first_result["label"]
-        }
 
 if __name__ == "__main__":
     import argparse
