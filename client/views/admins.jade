@@ -34,7 +34,7 @@ template(name="adminUser")
           i.fa.fa-plus(aria-hidden="true")
           span Curator
       unless isCurrentUser
-        if isInRole "admin"
+        if isAdmin
           button.btn.btn-primary.remove-admin
             i.fa.fa-check(aria-hidden="true")
             span Admin

@@ -3,13 +3,13 @@ UserEvents = require '/imports/collections/userEvents.coffee'
 Articles = require '/imports/collections/articles.coffee'
 UserEventSchema = require '/imports/schemas/userEvent.coffee'
 
-checkPermission = (userId) ->
+checkEventEditPermission = (userId) ->
   if not Roles.userIsInRole(userId, ['admin'])
-    throw new Meteor.Error('auth', 'User does not have permission to create incidents')
+    throw new Meteor.Error('auth', 'User does not have permission to create events.')
 
 Meteor.methods
   upsertUserEvent: (userEvent) ->
-    checkPermission(@userId)
+    checkEventEditPermission(@userId)
     user = Meteor.user()
     now = new Date()
     eventName = userEvent.eventName
@@ -29,7 +29,7 @@ Meteor.methods
         createdByUserName: user.profile.name
 
   deleteUserEvent: (id) ->
-    checkPermission(@userId)
+    checkEventEditPermission(@userId)
     updateOperator =
       $set:
         deleted: true

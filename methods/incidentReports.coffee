@@ -3,13 +3,13 @@ import Incidents from '/imports/collections/incidentReports.coffee'
 import UserEvents from '/imports/collections/userEvents.coffee'
 import Articles from '/imports/collections/articles.coffee'
 
-checkPermission = (userId) ->
-  if not Roles.userIsInRole(userId, ['admin'])
-    throw new Meteor.Error('auth', 'User does not have permission to create incidents')
+checkIncidentEditPermission = (userId) ->
+  if not Roles.userIsInRole(userId, ['admin', 'curator'])
+    throw new Meteor.Error('auth', 'User does not have permission to create incidents.')
 
 Meteor.methods
   addIncidentReport: (incident, userEventId) ->
-    checkPermission(@userId)
+    checkIncidentEditPermission(@userId)
     user = Meteor.user()
     incidentReportSchema.validate(incident)
     incident.addedByUserId = user._id
@@ -21,7 +21,7 @@ Meteor.methods
     return newId
 
   editIncidentReport: (incident) ->
-    checkPermission(@userId)
+    checkIncidentEditPermission(@userId)
     user = Meteor.user()
     incidentReportSchema.validate(incident)
 
@@ -55,12 +55,12 @@ Meteor.methods
     return incident._id
 
   addIncidentReports: (incidents, userEventId) ->
-    checkPermission(@userId)
+    checkIncidentEditPermission(@userId)
     incidents.map (incident) ->
       Meteor.call('addIncidentReport', incident, userEventId)
 
   deleteIncidents: (incidentIds) ->
-    checkPermission(@userId)
+    checkIncidentEditPermission(@userId)
     user = Meteor.user()
     Incidents.update({
       _id: $in: incidentIds
@@ -91,7 +91,7 @@ Meteor.methods
       Meteor.call('editUserEventLastIncidentDate', userEventId)
 
   removeIncidentFromEvent: (incidentId, userEventId) ->
-    checkPermission(@userId)
+    checkIncidentEditPermission(@userId)
     event = UserEvents.findOne(userEventId)
     if event
       _incidents = _.filter event.incidents, (incident) ->
@@ -102,7 +102,7 @@ Meteor.methods
       Meteor.call('editUserEventLastIncidentDate', userEventId)
 
   addIncidentToEvent: (userEventId, incidentId) ->
-    checkPermission(@userId)
+    checkIncidentEditPermission(@userId)
     eventWithIncident = UserEvents.findOne
       _id: userEventId
       'incidents.id': incidentId
@@ -117,7 +117,7 @@ Meteor.methods
       Meteor.call('editUserEventLastIncidentDate', userEventId)
 
   addIncidentsToEvent: (incidentIds, userEventId, source) ->
-    checkPermission(@userId)
+    checkIncidentEditPermission(@userId)
     existingSource = Articles.findOne(source._id)
     # If document is in collection associate with event, otherwise add to Articles
     # collection and associate
