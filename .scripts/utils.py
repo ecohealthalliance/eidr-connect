@@ -20,10 +20,7 @@ def clean(s):
 def lookup_geoname(name):
     resp = requests.get(GRITS_URL + "/api/geoname_lookup/api/lookup", params={
         "q": name
-    },
-    # This is needed for testing while eha.io is down.
-    headers={'Host': 'grits.eha.io'}, verify=False
-    )
+    })
     result = json.loads(resp.text)["hits"][0]["_source"]
     del result["alternateNames"]
     del result["rawNames"]
@@ -42,11 +39,7 @@ def lookup_disease(name):
         return None
     resp = requests.get(GRITS_URL + "/api/v1/disease_ontology/lookup", params={
         "q": name
-    },
-    # This is needed for testing while eha.io is down.
-    headers={'Host': 'grits.eha.io'}, verify=False
-    )
-    #print(resp.content)
+    })
     result = resp.json()
     first_result = next(iter(result["result"]), None)
     if first_result:
