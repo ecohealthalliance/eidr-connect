@@ -170,13 +170,13 @@ module.exports = ->
     }]
     sourceFeed:
       $exists: false
-    dataVersion: $ne: 22
-    dateRange: $exists: true
+    dataVersion: $lt: 22
+    'dateRange.end': $exists: true
   ).forEach (i) ->
     if not i.dateRange.end?.getDate
       return
     i.dateRange.end.setDate(i.dateRange.end.getDate() + 1)
-    i.dataVersion = 22
+    i.dataVersion = DATA_VERSION
     Incidents.update i._id, i
 
   AppMetadata.upsert({property: "dataVersion"}, $set: {value: DATA_VERSION})
