@@ -68,6 +68,13 @@ IncidentReportSchema = new SimpleSchema
   "dateRange.start":
     type: Date
     optional: true
+  # Date ranges are internally represented as the interval ending at the end
+  # datetime, although when presented to the user the end date is the last
+  # day in the interval. For instance, the user will see "Jan 1 - Jan 3"
+  # in date-pickers when the internal date-range has datetimes Jan 1 00:00 to Jan 4 00:00.
+  # People tend to think of date ranges as including the final date, but
+  # time interval computations done internally can be simplified by making
+  # the end datetime the interval's endpoint.
   "dateRange.end":
     type: Date
     optional: true
@@ -155,6 +162,9 @@ IncidentReportSchema = new SimpleSchema
     optional: true
   constraining:
     type: Boolean
+    optional: true
+  dataVersion:
+    type: Number
     optional: true
 
 module.exports = IncidentReportSchema

@@ -66,7 +66,10 @@ export incidentReportFormToIncident = (form) ->
     dateRange = 
       type: rangeType
       start: moment.utc(picker.startDate.format("YYYY-MM-DD")).toDate()
-      end: moment.utc(picker.endDate.format("YYYY-MM-DD")).toDate()
+      # Add a day because the human formatted date ranges include the last
+      # day in the range while in the internal representation the end is the
+      # time interval's end-point.
+      end: moment.utc(picker.endDate.format("YYYY-MM-DD")).add(1, 'days').toDate()
       cumulative: incidentType.startsWith("cumulative")
 
   incident =
@@ -266,18 +269,17 @@ export formatDateRange = (dateRange, readable) ->
   DATE_FORMAT = "MMM D, YYYY"
   if not dateRange or not (dateRange.start or dateRange.end)
     return
-  if not dateRange.start or dateRange.cumulative
-    return "on or before " + moment.utc(dateRange.end).format(DATE_FORMAT)
   if not dateRange.end
     return "on or after " + moment.utc(dateRange.start).format(DATE_FORMAT)
-  start = moment.utc(dateRange.start)
   # Formatted date ranges include the final date in the range.
   # Ex: "June 1 - June 2" goes from the start of June 1 to the end of June 2.
   # The end timestamp in the range will be at the start of the next day.
   # A minute is subtracted from it so that it is on the final day in the range
   # when it is formatted.
   end = moment.utc(dateRange.end).subtract(1, 'minute')
-
+  if not dateRange.start or dateRange.cumulative
+    return "on or before " + moment.utc(end).format(DATE_FORMAT)
+  start = moment.utc(dateRange.start)
   type = dateRange.type or "precise"
   if start.format(DATE_FORMAT) == end.format(DATE_FORMAT)
     type = "day"
