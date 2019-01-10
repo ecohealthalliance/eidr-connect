@@ -9,7 +9,7 @@ import subprocess
 import pandas as pd
 import os
 import pymongo
-from .utils import clean, lookup_geoname, lookup_disease
+from utils import clean, lookup_geoname, lookup_disease
 
 
 if __name__ == "__main__":
