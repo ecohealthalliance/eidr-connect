@@ -13,6 +13,9 @@ module.exports = ->
       enhancements: $exists: false
     ,
       'enhancements.diagnoserVersion': $lt: '0.4.2'
+    ,
+      'enhancements.diagnoserVersion': $lt: '0.4.4'
+      title: /\bMERS\b/
     ],
     reviewed: $in: [null, false]
   }, {

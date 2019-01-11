@@ -135,7 +135,10 @@ Template.curatorInbox.onRendered ->
 
     @subscribe "articles", query, =>
       unReviewedQuery = _.extend({reviewed: $in: [false, null]}, query)
-      firstSource = Articles.findOne(unReviewedQuery, sorting)
+      if articleId
+        firstSource = Articles.findOne()
+      else
+        firstSource = Articles.findOne(unReviewedQuery, sorting)
       if firstSource
         @selectedSourceId.set(firstSource._id)
       @filtering.set(false)
