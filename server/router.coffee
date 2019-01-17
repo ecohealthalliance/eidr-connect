@@ -349,6 +349,16 @@ Router.route("/api/events-with-resolved-data", where: "server")
       query['dateRange.end'] = $gt: event.resolvedDateRange.start
     console.time('fetch incidents') if ENABLE_PROFILING
     event.incidents = Incidents.find(query).fetch()
+    if (@request.query.onlyUseSourcesBeforeEndDate + "").toLowerCase() == "true"
+      articleIds = {}
+      event.incidents.forEach (incident) ->
+        articleIds[incident.articleId] = true
+      validArticleIds = Articles.find({
+        _id: $in: Object.keys(articleIds)
+        publishDate: $lte: dateRange.end
+      }).map (x) -> x._id
+      query.articleId = $in: validArticleIds
+      event.incidents = Incidents.find(query).fetch()
     console.timeEnd('fetch incidents') if ENABLE_PROFILING
   @response.setHeader('Keep-Alive', 'timeout=1000')
   @response.setHeader('Access-Control-Allow-Origin', '*')
