@@ -396,8 +396,11 @@
     }, []);
   };
 
-  removeOutlierIncidents = function(originalIncidents, constrainingIncidents) {
+  removeOutlierIncidents = function(originalIncidents, constrainingIncidents, params) {
     var analysableIncidents, diseases, nonAnalysableIncidents, result;
+    if (params == null) {
+      params = {};
+    }
     nonAnalysableIncidents = [];
     analysableIncidents = [];
     originalIncidents.forEach(function(incident) {
@@ -420,12 +423,12 @@
         var ref;
         return ((ref = x.resolvedDisease) != null ? ref.id : void 0) === disease;
       };
-      return result = result.concat(removeOutlierIncidentsSingleDisease(analysableIncidents.filter(diseaseMatch), constrainingIncidents.filter(diseaseMatch)));
+      return result = result.concat(removeOutlierIncidentsSingleDisease(analysableIncidents.filter(diseaseMatch), constrainingIncidents.filter(diseaseMatch), params));
     });
     return result.concat(nonAnalysableIncidents);
   };
 
-  removeOutlierIncidentsSingleDisease = function(originalIncidents, constrainingIncidents) {
+  removeOutlierIncidentsSingleDisease = function(originalIncidents, constrainingIncidents, params) {
     var incidents, partitions, resultingConfirmed, resultingDeaths, resultingIncidents;
     incidents = convertAllIncidentsToDifferentials(originalIncidents);
     constrainingIncidents = convertAllIncidentsToDifferentials(constrainingIncidents.filter(function(incident) {
@@ -447,22 +450,22 @@
       return partitions[incident.type][status].push(incident);
     });
     resultingIncidents = [];
-    resultingIncidents = removeOutlierIncidentsSingleType(resultingIncidents.concat(partitions["deaths"]["confirmed"]), constrainingIncidents);
+    resultingIncidents = removeOutlierIncidentsSingleType(resultingIncidents.concat(partitions["deaths"]["confirmed"]), constrainingIncidents, params);
     resultingDeaths = removeOutlierIncidentsSingleType(resultingIncidents.concat(partitions["deaths"]["unconfirmed"]), constrainingIncidents.filter(function(x) {
       return x.status !== "confirmed";
-    }));
+    }), params);
     resultingConfirmed = removeOutlierIncidentsSingleType(resultingIncidents.concat(partitions["cases"]["confirmed"]), constrainingIncidents.filter(function(x) {
       return x.type === "cases";
-    }));
+    }), params);
     resultingIncidents = removeOutlierIncidentsSingleType(_.union(resultingDeaths, resultingConfirmed, partitions["cases"]["unconfirmed"]), constrainingIncidents.filter(function(x) {
       return x.type === "cases" && x.status !== "confirmed";
-    }));
+    }), params);
     return _.chain(resultingIncidents).filter(function(x) {
       return !x.__virtualIncident;
     }).pluck('originalIncidents').flatten(true).value();
   };
 
-  removeOutlierIncidentsSingleType = function(incidents, constrainingIncidents) {
+  removeOutlierIncidentsSingleType = function(incidents, constrainingIncidents, params) {
     var constrainingSubIntervals, constrainingSubIntervalsByIncident, excessCounts, incidentsByLocationId, intersectionsByIncident, iteration, locationIdToParent, myLocationTree, nextLayer, nodeLayer, subIntervals, subIntsByStart;
     incidentsByLocationId = _.groupBy(incidents, function(x) {
       return x.locations[0].id;
@@ -487,7 +490,7 @@
             incident90thPercentile = sortedIncidents[idx90thPercentile];
             incidentsToKeep = sortedIncidents.slice(0, idx90thPercentile);
             sortedIncidents.slice(idx90thPercentile).forEach(function(incident) {
-              if (incident.rate < incident90thPercentile.rate * 10) {
+              if (incident.rate < incident90thPercentile.rate * (params.outlierMultiple || 10)) {
                 return incidentsToKeep.push(incident);
               }
             });
@@ -510,9 +513,14 @@
     constrainingIncidents = constrainingIncidents.concat(incidents.filter(function(x) {
       return x.cumulative && x.count >= 1;
     }).map(function(x) {
-      var result;
+      var durationCoef, result;
       result = Object.create(x);
-      result.count = Math.floor(x.count * 1.3);
+      durationCoef = Math.min(x.duration, 20) / 100;
+      if (x.originalIncidents[1].cases) {
+        result.count = Math.floor(Math.max(x.originalIncidents[0].cases * durationCoef, x.count * 1.3));
+      } else {
+        result.count = Math.floor(Math.max(x.originalIncidents[0].deaths * durationCoef, x.count * 1.3));
+      }
       return result;
     }));
     constrainingIncidents = _.chain(constrainingIncidents).map(function(x) {
@@ -573,7 +581,7 @@
     });
     while (incidents.length > 0) {
       subIntervals.forEach(function(subInt) {
-        var duration, end, incident, incidentId, incidentIds, j, k, len, lowerMedian, sortedValues, start, v, valueLastIndex, values, valuesByIncident;
+        var duration, end, incident, incidentId, incidentIds, j, k, len, lowerMedian, marginalValueByIncident, priorValue, sortedValues, sortedValuesByIncident, start, v, values, valuesByIncident;
         start = subInt.start, end = subInt.end, incidentIds = subInt.incidentIds, duration = subInt.duration;
         valuesByIncident = {};
         for (j = 0, len = incidentIds.length; j < len; j++) {
@@ -597,19 +605,18 @@
           }
           return results;
         })());
-        valueLastIndex = {};
-        sortedValues.forEach(function(value, index) {
-          return valueLastIndex[value] = index;
+        sortedValuesByIncident = _.chain(valuesByIncident).pairs().sortBy(function(x) {
+          return x[1];
+        }).value();
+        priorValue = 0;
+        marginalValueByIncident = {};
+        sortedValuesByIncident.forEach(function(arg, index) {
+          var incidentId, value;
+          incidentId = arg[0], value = arg[1];
+          marginalValueByIncident[incidentId] = value - priorValue;
+          return priorValue = value;
         });
-        return subInt.__marginalValueByIncident = _.object((function() {
-          var results;
-          results = [];
-          for (k in valuesByIncident) {
-            v = valuesByIncident[k];
-            results.push([k, v - sortedValues[valueLastIndex[v] - 1]]);
-          }
-          return results;
-        })());
+        return subInt.__marginalValueByIncident = marginalValueByIncident;
       });
       extendSubIntervalsWithValues(incidents, subIntervals);
       excessCounts = 0;
@@ -620,6 +627,10 @@
           return subInt.value;
         }));
         difference = resolvedSum - cIncident.count;
+        if (params.debugLogging) {
+          console.log(cIncident);
+          console.log(difference + " = " + resolvedSum + " - " + cIncident.count);
+        }
         if (difference > 0) {
           excessCounts += 1;
           if (iteration === 0) {
@@ -631,6 +642,9 @@
                 value = ref[incidentId];
                 incidentToTotalValue[incidentId] = (incidentToTotalValue[incidentId] || 0) + value;
               }
+            }
+            if (params.debugLogging) {
+              console.log(incidentToTotalValue);
             }
             incidentsRemoved = false;
             for (incidentId in incidentToTotalValue) {
@@ -665,10 +679,17 @@
           }).map(function(x) {
             return x[0];
           }).value();
+          if (params.debugLogging) {
+            console.log(incidentToTotalValue);
+            console.log(incidentToMarginalValue);
+          }
           marginalValueRemoved = 0;
           results = [];
           for (m = 0, len2 = incidentsSortedByCASIM.length; m < len2; m++) {
             incidentId = incidentsSortedByCASIM[m];
+            if (params.debugLogging) {
+              console.log(incidentId);
+            }
             incidents[incidentId] = null;
             marginalValueRemoved += incidentToMarginalValue[incidentId];
             if (marginalValueRemoved >= difference) {

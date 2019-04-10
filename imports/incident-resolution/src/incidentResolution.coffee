@@ -330,7 +330,7 @@ getTopLevelSubIntervals = (subInts) ->
 # Remove incidents that cause the resolved number of cases to exceed
 # the numbers given in the constraining incidents, cumulative incidents
 # that are inconsistent, and incidents that far exceed the typical case rate.
-removeOutlierIncidents = (originalIncidents, constrainingIncidents) ->
+removeOutlierIncidents = (originalIncidents, constrainingIncidents, params={}) ->
   nonAnalysableIncidents = []
   analysableIncidents = []
   originalIncidents.forEach (incident)->
@@ -352,11 +352,12 @@ removeOutlierIncidents = (originalIncidents, constrainingIncidents) ->
     result = result.concat(
       removeOutlierIncidentsSingleDisease(
         analysableIncidents.filter(diseaseMatch),
-        constrainingIncidents.filter(diseaseMatch))
+        constrainingIncidents.filter(diseaseMatch),
+        params)
     )
   return result.concat(nonAnalysableIncidents)
 
-removeOutlierIncidentsSingleDisease = (originalIncidents, constrainingIncidents) ->
+removeOutlierIncidentsSingleDisease = (originalIncidents, constrainingIncidents, params) ->
   incidents = convertAllIncidentsToDifferentials(originalIncidents)
   constrainingIncidents = convertAllIncidentsToDifferentials(constrainingIncidents.filter (incident)->
     not incident.min
@@ -379,16 +380,20 @@ removeOutlierIncidentsSingleDisease = (originalIncidents, constrainingIncidents)
   resultingIncidents = []
   resultingIncidents = removeOutlierIncidentsSingleType(
     resultingIncidents.concat(partitions["deaths"]["confirmed"]),
-    constrainingIncidents)
+    constrainingIncidents,
+    params)
   resultingDeaths = removeOutlierIncidentsSingleType(
     resultingIncidents.concat(partitions["deaths"]["unconfirmed"]),
-    constrainingIncidents.filter (x) -> x.status != "confirmed")
+    constrainingIncidents.filter((x) -> x.status != "confirmed"),
+    params)
   resultingConfirmed = removeOutlierIncidentsSingleType(
     resultingIncidents.concat(partitions["cases"]["confirmed"]),
-    constrainingIncidents.filter (x) -> x.type == "cases")
+    constrainingIncidents.filter((x) -> x.type == "cases"),
+    params)
   resultingIncidents = removeOutlierIncidentsSingleType(
     _.union(resultingDeaths, resultingConfirmed, partitions["cases"]["unconfirmed"]),
-    constrainingIncidents.filter (x) -> x.type == "cases" and x.status != "confirmed")
+    constrainingIncidents.filter((x) -> x.type == "cases" and x.status != "confirmed"),
+    params)
   return _.chain(resultingIncidents)
     .filter (x) -> not x.__virtualIncident
     .pluck('originalIncidents')
@@ -397,10 +402,9 @@ removeOutlierIncidentsSingleDisease = (originalIncidents, constrainingIncidents)
 
 # This is the core of the outlier incident remove routine.
 # It is designed to work only on a single type of differential,
-# so the calling removeOutlierIncidents function must
-# convert the original incidents into differential incidents and parition
-# them into the correct groups.
-removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
+# so the caller must convert the original incidents into differential incidents
+# and parition them into the correct groups.
+removeOutlierIncidentsSingleType = (incidents, constrainingIncidents, params) ->
   # Remove incidents that exceed the 90th percentile of rates for their feature
   # type by more than 10x.
   incidentsByLocationId = _.groupBy(incidents, (x) -> x.locations[0].id)
@@ -420,7 +424,7 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
           incident90thPercentile = sortedIncidents[idx90thPercentile]
           incidentsToKeep = sortedIncidents.slice(0, idx90thPercentile)
           sortedIncidents.slice(idx90thPercentile).forEach (incident) ->
-            if incident.rate < incident90thPercentile.rate * 10
+            if incident.rate < incident90thPercentile.rate * (params.outlierMultiple or 10)
               incidentsToKeep.push(incident)
           incidentsByLocationId[node.value.id] = incidentsToKeep
           break
@@ -436,10 +440,11 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
     .flatten(true)
     .uniq()
     .value()
-  # Create constraining incidents from differences in cumulative incidents + 30%
-  # A hightened threshold is used to account for error in cumulative incident
-  # counts.
-  # A constraining incidents may cause the cumulative incident it was created
+  # Create additional constraining incidents from differences in cumulative
+  # incidents. A hightened threshold is used to account for error in cumulative
+  # incident counts. The greater of a duration based proportional increase over the fist
+  # incident or 120% of the difference between the incidents is used as the constraint.
+  # A constraining incident may cause the cumulative incident it was created
   # from to be removed as an outlier. This behaviour may be suprising, but it
   # is intentional. If a cumulative incident contains incidents that exceed
   # its case rate for even short intervals, then the sum of the resolved cases
@@ -454,7 +459,15 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
       .filter (x) -> x.cumulative and x.count >= 1
       .map (x) ->
         result = Object.create(x)
-        result.count = Math.floor(x.count * 1.3)
+        durationCoef = Math.min(x.duration, 20) / 100
+        if x.originalIncidents[1].cases
+          result.count = Math.floor(Math.max(
+            x.originalIncidents[0].cases * durationCoef,
+            x.count * 1.3))
+        else
+          result.count = Math.floor(Math.max(
+            x.originalIncidents[0].deaths * durationCoef,
+            x.count * 1.3))
         result
   )
   # When a constraining incident has more than one location this creates a
@@ -542,12 +555,13 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
       # decrease if the incident were removed (after all the greater incidents).
       # It is not necessarily equal because the overlapping incidents 
       # for child locations are not factored in.
-      valueLastIndex = {}
-      sortedValues.forEach (value, index) ->
-        valueLastIndex[value] = index
-      subInt.__marginalValueByIncident = _.object(
-        [k, v - sortedValues[valueLastIndex[v] - 1]] for k, v of valuesByIncident
-      )
+      sortedValuesByIncident = _.chain(valuesByIncident).pairs().sortBy((x)->x[1]).value()
+      priorValue = 0
+      marginalValueByIncident = {}
+      sortedValuesByIncident.forEach ([incidentId, value], index) ->
+        marginalValueByIncident[incidentId] = value - priorValue
+        priorValue = value
+      subInt.__marginalValueByIncident = marginalValueByIncident
     extendSubIntervalsWithValues(incidents, subIntervals)
     excessCounts = 0
     constrainingIncidents.forEach (cIncident) ->
@@ -558,6 +572,9 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
       # the highest CASIM values.
       resolvedSum = sum(cIncident.topLevelSubIntervals.map (subInt) -> subInt.value)
       difference = resolvedSum - cIncident.count
+      if params.debugLogging
+        console.log cIncident
+        console.log "#{difference} = #{resolvedSum} - #{cIncident.count}"
       if difference > 0
         excessCounts += 1
         if iteration == 0
@@ -566,6 +583,8 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
           for subInterval in containedSubInts
             for incidentId, value of subInterval.__valuesByIncident
               incidentToTotalValue[incidentId] = (incidentToTotalValue[incidentId] || 0) + value
+          if params.debugLogging
+            console.log incidentToTotalValue
           incidentsRemoved = false
           for incidentId, value of incidentToTotalValue
             if value > cIncident.count
@@ -573,7 +592,7 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
               incidentsRemoved = true
           if incidentsRemoved
             return
-        # Remove incidents until the total CASIM of the removed incidents
+        # Remove incidents until the marginal value of the removed incidents
         # is greater than or equal to the excess resolved count.
         # Since many incidents could cause the resolved count to exceed
         # the constraining incident's count, removing the top incidents
@@ -595,8 +614,13 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents) ->
           .sortBy (x) -> -x[1]
           .map (x) -> x[0]
           .value()
+        if params.debugLogging
+          console.log incidentToTotalValue
+          console.log incidentToMarginalValue
         marginalValueRemoved = 0
         for incidentId in incidentsSortedByCASIM
+          if params.debugLogging
+            console.log incidentId
           incidents[incidentId] = null
           marginalValueRemoved += incidentToMarginalValue[incidentId]
           if marginalValueRemoved >= difference

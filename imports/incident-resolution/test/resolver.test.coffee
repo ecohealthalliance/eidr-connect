@@ -8,7 +8,7 @@ import incidents from './incidents'
   removeOutlierIncidents,
   createSupplementalIncidents,
   extendSubIntervalsWithValues
-} = require('../index')
+} = require('../src/incidentResolution.coffee')
 
 lome =
   admin1Name: "Maritime"
