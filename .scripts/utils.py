@@ -16,6 +16,14 @@ def clean(s):
     return re.sub(r"\s+", " ", s).strip()
 
 
+def clean_disease_name(s):
+    s = re.sub(r"^(Highly Pathogenic|Virulent|Suspected)", "", s, re.I)
+    s = re.sub(r"\(.*\)", "", s)
+    s = re.sub(r"\[.*\]", "", s)
+    s = re.sub(" Serotype .+$", "", s, re.I)
+    return clean(s)
+
+
 @lru_cache()
 def lookup_geoname(name):
     resp = requests.get(GRITS_URL + "/api/geoname_lookup/api/lookup", params={

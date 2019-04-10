@@ -5,7 +5,7 @@ import requests
 import datetime
 import os
 import pymongo
-from utils import clean, lookup_geoname, lookup_disease
+from utils import clean, clean_disease_name, lookup_geoname, lookup_disease
 
 
 if __name__ == "__main__":
@@ -35,7 +35,7 @@ if __name__ == "__main__":
         if not geoname:
             print("Location not found:" + item['country_name'])
             continue
-        disease_name = clean(item['disease_name'].split('(')[0])
+        disease_name = clean_disease_name(item['disease_name'].split('(')[0])
         resolved_disease = lookup_disease(disease_name)
         if not resolved_disease:
             if disease_name.lower() == "cchf":
@@ -55,6 +55,7 @@ if __name__ == "__main__":
             end_date = datetime.datetime.strptime(i2['interval__end_time'], "%Y-%m-%dT%H:%M:%SZ")
             # Round end_date up to start of next day
             end_date = datetime.datetime(end_date.year, end_date.month, end_date.day) + datetime.timedelta(1)
+            print(resolved_disease)
             db.stagingIncidents.insert_one({
                 "sourceFeed": str(feed["_id"]),
                 "constraining": True,

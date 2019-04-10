@@ -5,7 +5,6 @@ module.exports = function () {
   self.onmessage = function({data}) {
     try {
       var event = data;
-      Object.keys(event);
       var baseIncidents = [];
       var constrainingIncidents = _.clone(event.constrainingIncidents) || [];
       (event.incidents || []).map(function(incident) {
@@ -16,15 +15,21 @@ module.exports = function () {
         }
       });
       if (ENABLE_PROFILING) console.time('remove outliers');
-      var incidentsWithoutOutliers = IRLib.removeOutlierIncidents(baseIncidents, constrainingIncidents);
+      var incidentsWithoutOutliers = IRLib.removeOutlierIncidents(baseIncidents, constrainingIncidents, event.params || {});
       if (ENABLE_PROFILING) console.timeEnd('remove outliers');
       if (ENABLE_PROFILING) console.time('create supplemental incidents');
       var supplementalIncidents = IRLib.createSupplementalIncidents(incidentsWithoutOutliers, constrainingIncidents);
       if (ENABLE_PROFILING) console.timeEnd('create supplemental incidents');
       if (ENABLE_PROFILING) console.time('create differentials');
       var allDifferentials = IRLib.convertAllIncidentsToDifferentials(incidentsWithoutOutliers).concat(supplementalIncidents);
+      if (ENABLE_PROFILING) {
+        console.log("baseIncidents: " + baseIncidents.length);
+        console.log("constrainingIncidents: " + constrainingIncidents.length);
+        console.log("incidentsWithoutOutliers: " + incidentsWithoutOutliers.length);
+        console.log("supplementalIncidents: " + supplementalIncidents.length);
+      }
       var differentials = _.where(allDifferentials, {
-        type: 'cases'
+        type: event.incidentType || 'cases'
       }).filter(function(differential) {
         if(!event.resolvedDateRange) return true;
         if (differential.startDate > event.resolvedDateRange.end) {
@@ -47,6 +52,14 @@ module.exports = function () {
       if (ENABLE_PROFILING) console.time('resolve');
       IRLib.extendSubIntervalsWithValues(differentials, subIntervals);
       if (ENABLE_PROFILING) console.timeEnd('resolve');
+      subIntervals.forEach(function(subInterval){
+        subInterval.originalIncidentIds = [];
+        subInterval.incidentIds.forEach(function(incidentId){
+          differentials[incidentId].originalIncidents.forEach(function(originalIncident){
+            subInterval.originalIncidentIds.push(event.incidents.indexOf(originalIncident));
+          });
+        });
+      });
       return postMessage({
         result: subIntervals
       });

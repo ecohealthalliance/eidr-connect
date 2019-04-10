@@ -261,7 +261,10 @@ Router.route("/api/resolve-incidents", where: "server")
       start: new Date(s.start)
       end: new Date(s.end)
       location: _.omit(s.location, 'alternateNames')
-      incidentIds: s.incidentIds
+      # The incident ids only include those that apply directly to the location.
+      # If incidents at child locations increased the value over of a sub-interval
+      # their ids will not be shown.
+      originalIncidentIds: s.originalIncidentIds
       value: s.value
     )))
 

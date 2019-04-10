@@ -95,7 +95,7 @@ module.exports = ->
     resp.data.fact.forEach (fact) ->
       if fact.dim.GHO == "Number of incident tuberculosis cases"
         parsedValues = /(\d+) \[(\d+)\-(\d+)\]/.exec(fact.Value)
-        if parsedValues.length == 4
+        if parsedValues?.length == 4
           [noop1, noop2, minValue, maxValue] = parsedValues
           [true, false].forEach (useMin) ->
             Incidents.insert
