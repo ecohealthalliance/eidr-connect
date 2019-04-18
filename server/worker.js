@@ -15,7 +15,11 @@ module.exports = function () {
         }
       });
       if (ENABLE_PROFILING) console.time('remove outliers');
-      var incidentsWithoutOutliers = IRLib.removeOutlierIncidents(baseIncidents, constrainingIncidents, event.params || {});
+      var incidentsWithoutOutliers = IRLib.removeOutlierIncidents(
+        baseIncidents,
+        constrainingIncidents,
+        event.params || {}
+      );
       if (ENABLE_PROFILING) console.timeEnd('remove outliers');
       if (ENABLE_PROFILING) console.time('create supplemental incidents');
       var supplementalIncidents = IRLib.createSupplementalIncidents(incidentsWithoutOutliers, constrainingIncidents);

@@ -7,7 +7,8 @@ import incidents from './incidents'
   intervalToEndpoints,
   removeOutlierIncidents,
   createSupplementalIncidents,
-  extendSubIntervalsWithValues
+  extendSubIntervalsWithValues,
+  convertAllIncidentsToDifferentials
 } = require('../src/incidentResolution.coffee')
 
 lome =
@@ -51,7 +52,7 @@ describe 'Incident Resolution', ->
 
   it 'converts incidents to the correct number of differential incident intervals', ->
     differentialIncidents = convertAllIncidentsToDifferentials(incidents)
-    chai.assert.equal(differentialIncidents.length, 285)
+    chai.assert.equal(differentialIncidents.length, 282)
 
   it 'handles outlier cumulative counts', ->
     differentialIncidents = convertAllIncidentsToDifferentials([
@@ -438,3 +439,98 @@ describe 'Incident Resolution', ->
     }]
     result = removeOutlierIncidents(baseIncidents, [])
     chai.assert.equal(result.length, 6)
+
+  it 'can ignore inconsistent cumulative incidents', ->
+    baseIncidents = [{
+      cases: 1
+      dateRange:
+        end: new Date("Oct 10 2010 UTC")
+        cumulative: true
+      locations: [lome]
+    }, {
+      cases: 3
+      dateRange:
+        end: new Date("Nov 11 2010 UTC")
+        cumulative: true
+      locations: [lome]
+    }, {
+      cases: 9
+      dateRange:
+        end: new Date("Nov 12 2010 UTC")
+        cumulative: true
+      locations: [lome]
+    }, {
+      cases: 5
+      dateRange:
+        end: new Date("Nov 29 2010 UTC")
+        cumulative: true
+      locations: [lome]
+    }, {
+      cases: 7
+      dateRange:
+        end: new Date("Dec 10 2010 UTC")
+        cumulative: true
+      locations: [lome]
+    }, {
+      cases: 8
+      dateRange:
+        end: new Date("Dec 11 2010 UTC")
+        cumulative: true
+      locations: [lome]
+    }, {
+      cases: 9
+      dateRange:
+        end: new Date("Dec 12 2010 UTC")
+        cumulative: true
+      locations: [lome]
+    }, {
+      cases: 11
+      dateRange:
+        end: new Date("Dec 22 2010 UTC")
+        cumulative: true
+      locations: [lome]
+    }, {
+      cases: 1
+      dateRange:
+        end: new Date("Dec 22 2011 UTC")
+        cumulative: true
+      locations: [lome]
+    }, {
+      cases: 3
+      dateRange:
+        end: new Date("Jan 1 2012 UTC")
+        cumulative: true
+      locations: [lome]
+    }, {
+      cases: 3
+      dateRange:
+        end: new Date("Jan 2 2012 UTC")
+        cumulative: true
+      locations: [lome]
+    }, {
+      cases: 5
+      dateRange:
+        end: new Date("Jan 5 2012 UTC")
+        cumulative: true
+      locations: [lome]
+    }, {
+      cases: 7
+      dateRange:
+        end: new Date("Jan 11 2012 UTC")
+        cumulative: true
+      locations: [lome]
+    }, {
+      cases: 8
+      dateRange:
+        end: new Date("Jan 17 2012 UTC")
+        cumulative: true
+      locations: [lome]
+    }, {
+      cases: 12
+      dateRange:
+        end: new Date("Jan 21 2012 UTC")
+        cumulative: true
+      locations: [lome]
+    }]
+    result = convertAllIncidentsToDifferentials(baseIncidents)
+    chai.assert.equal(result.length, 12)
