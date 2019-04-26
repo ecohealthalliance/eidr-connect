@@ -94,7 +94,7 @@ getArticleEnhancements = (article, options=null) ->
     post_data.content_date = moment.utc(
       article.publishDate or article.addedDate
     ).utc().format("YYYY-MM-DDTHH:mm:ss")
-  if options.reprocess and article.enhancements.source
+  if options.reprocess and article.enhancements?.source
     post_data.cleanContent = article.enhancements.source.cleanContent
     post_data.englishTranslation = article.enhancements.source.cleanContent
   else if article.content
@@ -233,7 +233,7 @@ Meteor.methods
       return enhancements
     catch e
       enhancements = { error: "" + e }
-      if priorEnhancements.source
+      if priorEnhancements?.source
         enhancements.source = priorEnhancements.source
       Articles.update _id: articleId,
         $set:
