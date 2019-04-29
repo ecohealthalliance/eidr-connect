@@ -128,36 +128,34 @@ Meteor.startup ->
         startDate: moment().subtract(2, 'days').toDate()
         endDate: new Date()
       )
+
+      feeds = Feeds.find(rss: true).fetch()
+      for feed in feeds
+        console.log "Reading feed: " + feed.url
+        response = HTTP.get(feed.url)
+        $xml = cheerio.load(response.content, xml: xml: true)
+        rssItems = Array.from($xml('item').map (idx)->
+          $item = $xml('item').eq(idx)
+          {
+            title: $item.find('title').text()
+            link: $item.find('link').text()
+            pubDate: $item.find('pubDate').text()
+          }
+        )
+        rssItems.forEach (item) ->
+          if not Articles.findOne(url: item.link)
+            # Normalize post for display/subscription
+            normalizedPost =
+              url: item.link
+              addedDate: new Date()
+              publishDate: new Date(item.pubDate)
+              publishDateTZ: "UTC"
+              title: item.title
+              reviewed: false
+              feedId: feed._id
+            console.log "Adding post: " + item.link
+            Articles.insert(normalizedPost)
     , 5 * 60 * 60 * 1000
-
-
-    #for feed in Feeds.findOne(promedId: post.feedId)?._id
-    feeds = Feeds.find(rss: true).fetch()
-    for feed in feeds
-      console.log "Reading feed: " + feed.url
-      response = HTTP.get(feed.url)
-      $xml = cheerio.load(response.content, xml: xml: true)
-      rssItems = Array.from($xml('item').map (idx)->
-        $item = $xml('item').eq(idx)
-        {
-          title: $item.find('title').text()
-          link: $item.find('link').text()
-          pubDate: $item.find('pubDate').text()
-        }
-      )
-      rssItems.forEach (item) ->
-        if not Articles.findOne(url: item.link)
-          # Normalize post for display/subscription
-          normalizedPost =
-            url: item.link
-            addedDate: new Date()
-            publishDate: new Date(item.pubDate)
-            publishDateTZ: "UTC"
-            title: item.title
-            reviewed: false
-            feedId: feed._id
-          console.log "Adding post: " + item.link
-          Articles.insert(normalizedPost)
 
     console.log "Syncing structured data feeds"
     syncStructuredFeeds()
