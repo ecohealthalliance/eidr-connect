@@ -27,9 +27,11 @@ if __name__ == "__main__":
     feed = db.feeds.find_one({"url": feed_url})
     assert len(str(feed['_id'])) > 5
     # TODO: Get subregions for each country and request diseases w/ that??
-    resp = requests.get("https://epiarchive.bsvgateway.org/api/country-diseases/")
+    resp = requests.get("https://epiarchive.bsvgateway.org/api/country-diseases/", params={
+        'limit': 2000
+    })
     country_diseases = resp.json()
-    for item in country_diseases:
+    for item in country_diseases['results']:
         #print(item['country_name'], item['disease_name'])
         geoname = lookup_geoname(item['country_name'])
         if not geoname:
