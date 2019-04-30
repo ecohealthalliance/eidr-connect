@@ -119,10 +119,10 @@ Template.curatorInbox.onRendered ->
 
     @query.set(query)
 
-    Meteor.call 'fetchPromedPosts', range, (err) ->
-      if err
-        notify('error', err.reason)
-        return
+    # Meteor.call 'fetchPromedPosts', range, (err) ->
+    #   if err
+    #     notify('error', err.reason)
+    #     return
 
     calendar = $('#date-picker').data('daterangepicker')
     if calendar

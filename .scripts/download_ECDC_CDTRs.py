@@ -6,6 +6,7 @@ import datetime
 import subprocess
 import os
 import pymongo
+from bson.objectid import ObjectId
 from bs4 import BeautifulSoup
 
 if __name__ == "__main__":
@@ -38,16 +39,17 @@ if __name__ == "__main__":
     item_iter = ECDC_data_generator()
     title, url, date = next(item_iter, (None, None, None,))
     if url:
-        db.feeds.update_one({
-            "url": FEED_URL
-        }, {
-            "$set": {
+        feed = db.feeds.find_one({ "url": FEED_URL })
+        if feed:
+            feed_id = feed['_id']
+        else:
+            feed_id = str(ObjectId())
+            db.feeds.insert({
+                "_id": feed_id,
                 "url": FEED_URL,
                 "title": 'ECDC COMMUNICABLE DISEASE THREATS REPORTS',
                 "addedDate": datetime.datetime.now()
-            }
-        }, upsert=True)
-        feed = db.feeds.find_one({ "url": FEED_URL })
+            })
         while url:
             print("Processing: " + url)
             base, filename = os.path.split(url)
@@ -77,16 +79,27 @@ if __name__ == "__main__":
             with open(textfilepath) as f:
                 text = f.read()
                 summary_section = "\n\n\n" + text.split('II. Detailed reports')[0]
-                split_subsections = re.split(r"(.{5,})\nOpening date", summary_section)[1:]
+                split_subsections = re.split(r"((?:.{3,}\n){1,3})Opening date", summary_section)[1:]
                 for section_title, section in zip(split_subsections[0::2], split_subsections[1::2]):
-                    article_data = {
-                      "content": section.strip(),
-                      "addedDate": datetime.datetime.now(),
-                      "publishDate": date,
-                      "publishDateTZ": "UTC",
-                      "title": str(title) + ': ' + section_title.strip(),
-                      "reviewed": False,
-                      "feedId": 1 feed._id
-                    }
-                    Articles.insert(article_data)
+                    section_title = section_title.strip()
+                    section_title = section_title.replace('±', ' ')
+                    section_title = re.sub("\s{1,}", " ", section_title)
+                    full_title = str(title) + ': ' + section_title
+                    content = section_title + '\nOpening date' + section.strip()
+                    existing_article = db.articles.find_one({
+                        "title": full_title,
+                        "feedId": feed_id
+                    })
+                    if not existing_article:
+                        article_data = {
+                            "_id": str(ObjectId()),
+                            "content": content,
+                            "addedDate": datetime.datetime.now(),
+                            "publishDate": date,
+                            "publishDateTZ": "UTC",
+                            "title": full_title,
+                            "reviewed": False,
+                            "feedId": feed_id
+                        }
+                        db.articles.insert(article_data)
             title, url, date = next(item_iter, None)

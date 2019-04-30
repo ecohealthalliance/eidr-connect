@@ -120,7 +120,7 @@ getArticleEnhancements = (article, options=null) ->
     if result.data.error
       throw new Meteor.Error("grits-error", result.data.error)
     enhancements = result.data
-    if options.reprocess and article.enhancements.source
+    if options.reprocess and article.enhancements?.source
       enhancements.source = article.enhancements.source
     enhancements.features.forEach (f) ->
       if f.type == 'location'
