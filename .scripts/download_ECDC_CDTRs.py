@@ -9,6 +9,8 @@ import os
 import pymongo
 from bson.objectid import ObjectId
 from bs4 import BeautifulSoup
+import six
+import io
 
 if __name__ == "__main__":
     import argparse
@@ -44,7 +46,7 @@ if __name__ == "__main__":
         if feed:
             feed_id = feed['_id']
         else:
-            feed_id = str(ObjectId())
+            feed_id = six.text_type(ObjectId())
             db.feeds.insert({
                 "_id": feed_id,
                 "url": FEED_URL,
@@ -77,15 +79,15 @@ if __name__ == "__main__":
             if not os.path.exists(textfilepath):
                 print("Could not find file: " + textfilepath)
                 break
-            with open(textfilepath) as f:
+            with io.open(textfilepath, encoding='utf-8') as f:
                 text = f.read()
                 summary_section = "\n\n\n" + text.split('II. Detailed reports')[0]
                 split_subsections = re.split(r"((?:.{3,}\n){1,3})Opening date", summary_section)[1:]
                 for section_title, section in zip(split_subsections[0::2], split_subsections[1::2]):
                     section_title = section_title.strip()
-                    section_title = section_title.replace('±', ' ')
+                    section_title = section_title.replace(u'±', ' ')
                     section_title = re.sub("\s{1,}", " ", section_title)
-                    full_title = str(title) + ': ' + section_title
+                    full_title = '%s: %s' % (title, section_title,)
                     content = section_title + '\nOpening date' + section.strip()
                     existing_article = db.articles.find_one({
                         "title": full_title,
@@ -93,7 +95,7 @@ if __name__ == "__main__":
                     })
                     if not existing_article:
                         article_data = {
-                            "_id": str(ObjectId()),
+                            "_id": six.text_type(ObjectId()),
                             "content": content,
                             "addedDate": datetime.datetime.now(),
                             "publishDate": date,
