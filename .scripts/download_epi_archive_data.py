@@ -57,7 +57,6 @@ if __name__ == "__main__":
             end_date = datetime.datetime.strptime(i2['interval__end_time'], "%Y-%m-%dT%H:%M:%SZ")
             # Round end_date up to start of next day
             end_date = datetime.datetime(end_date.year, end_date.month, end_date.day) + datetime.timedelta(1)
-            print(resolved_disease)
             db.stagingIncidents.insert_one({
                 "sourceFeed": str(feed["_id"]),
                 "constraining": True,
