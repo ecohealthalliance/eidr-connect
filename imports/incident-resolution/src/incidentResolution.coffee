@@ -454,20 +454,22 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents, params) ->
   # accounting of the cases that occurred, so using them rather than the
   # cumulative incident can make sense as long as they have lower CASIM scores
   # (see CASIM definition below).
+  cumulativeIncidentConstraintMultiple = params.cumulativeIncidentConstraintMultiple or 1.3
+  cumulativeIncidentDurationConstraintMultiple = params.cumulativeIncidentDurationConstraintMultiple or 1.0
   constrainingIncidents = constrainingIncidents.concat(
     incidents
       .filter (x) -> x.cumulative and x.count >= 1
       .map (x) ->
         result = Object.create(x)
-        durationCoef = Math.min(x.duration, 20) / 100
+        durationCoef = cumulativeIncidentDurationConstraintMultiple * Math.min(x.duration, 20) / 100
         if x.originalIncidents[1].cases
           result.count = Math.floor(Math.max(
             x.originalIncidents[0].cases * durationCoef,
-            x.count * 1.3))
+            x.count * cumulativeIncidentConstraintMultiple))
         else
           result.count = Math.floor(Math.max(
             x.originalIncidents[0].deaths * durationCoef,
-            x.count * 1.3))
+            x.count * cumulativeIncidentConstraintMultiple))
         result
   )
   # When a constraining incident has more than one location this creates a

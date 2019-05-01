@@ -105,4 +105,4 @@ if __name__ == "__main__":
                             "feedId": feed_id
                         }
                         db.articles.insert(article_data)
-            title, url, date = next(item_iter, None)
+            title, url, date = next(item_iter, (None, None, None,))

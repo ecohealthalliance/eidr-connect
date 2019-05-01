@@ -466,7 +466,7 @@
   };
 
   removeOutlierIncidentsSingleType = function(incidents, constrainingIncidents, params) {
-    var constrainingSubIntervals, constrainingSubIntervalsByIncident, excessCounts, incidentsByLocationId, intersectionsByIncident, iteration, locationIdToParent, myLocationTree, nextLayer, nodeLayer, subIntervals, subIntsByStart;
+    var constrainingSubIntervals, constrainingSubIntervalsByIncident, cumulativeIncidentConstraintMultiple, cumulativeIncidentDurationConstraintMultiple, excessCounts, incidentsByLocationId, intersectionsByIncident, iteration, locationIdToParent, myLocationTree, nextLayer, nodeLayer, subIntervals, subIntsByStart;
     incidentsByLocationId = _.groupBy(incidents, function(x) {
       return x.locations[0].id;
     });
@@ -510,16 +510,18 @@
       nodeLayer = nextLayer;
     }
     incidents = _.chain(incidentsByLocationId).values().flatten(true).uniq().value();
+    cumulativeIncidentConstraintMultiple = params.cumulativeIncidentConstraintMultiple || 1.3;
+    cumulativeIncidentDurationConstraintMultiple = params.cumulativeIncidentDurationConstraintMultiple || 1.0;
     constrainingIncidents = constrainingIncidents.concat(incidents.filter(function(x) {
       return x.cumulative && x.count >= 1;
     }).map(function(x) {
       var durationCoef, result;
       result = Object.create(x);
-      durationCoef = Math.min(x.duration, 20) / 100;
+      durationCoef = cumulativeIncidentDurationConstraintMultiple * Math.min(x.duration, 20) / 100;
       if (x.originalIncidents[1].cases) {
-        result.count = Math.floor(Math.max(x.originalIncidents[0].cases * durationCoef, x.count * 1.3));
+        result.count = Math.floor(Math.max(x.originalIncidents[0].cases * durationCoef, x.count * cumulativeIncidentConstraintMultiple));
       } else {
-        result.count = Math.floor(Math.max(x.originalIncidents[0].deaths * durationCoef, x.count * 1.3));
+        result.count = Math.floor(Math.max(x.originalIncidents[0].deaths * durationCoef, x.count * cumulativeIncidentConstraintMultiple));
       }
       return result;
     }));
