@@ -405,6 +405,11 @@ removeOutlierIncidentsSingleDisease = (originalIncidents, constrainingIncidents,
 # so the caller must convert the original incidents into differential incidents
 # and parition them into the correct groups.
 removeOutlierIncidentsSingleType = (incidents, constrainingIncidents, params) ->
+  # Remove single day incidents with high counts.
+  # This will have some false positives but reduces error
+  # from incorrectly identified date ranges enough to be worth it.
+  incidents = incidents.filter (incident)->
+    not(incident.cumulative and incident.duration <= 1 and incident.count > 5)
   # Remove incidents that exceed the 90th percentile of rates for their feature
   # type by more than 10x.
   incidentsByLocationId = _.groupBy(incidents, (x) -> x.locations[0].id)
@@ -531,10 +536,6 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents, params) ->
   while incidents.length > 0
     # Compute CASIM for each sub-interval
     # CASIM = count above sub-interval median
-    # The "lower" median is used so we have an upper bound on the cases that
-    # will be removed by removing the incident. The median is "lower" in that
-    # if the size of the set is even, the smaller of the middle values is used
-    # rather than their mid-point.
     subIntervals.forEach (subInt) ->
       { start, end, incidentIds, duration } = subInt
       valuesByIncident = {}
@@ -546,10 +547,14 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents, params) ->
         valuesByIncident[incidentId] = incident.rate * duration
       values = _.values(valuesByIncident).concat([0])
       sortedValues = values.sort()
-      lowerMedian = sortedValues[Math.ceil(values.length / 2) - 1]
+      idx = Math.floor(values.length / 2)
+      if sortedValues.length % 2 == 0
+        median = (sortedValues[idx - 1] + sortedValues[idx]) / 2
+      else
+        median = sortedValues[idx]
       subInt.__valuesByIncident = valuesByIncident
       subInt.__CASIMByIncident = _.object(
-        [k, Math.max(0, v - lowerMedian)] for k, v of valuesByIncident
+        [k, Math.max(0, v - median)] for k, v of valuesByIncident
       )
       # The marginal value of an incident is the difference between it's value
       # and the next largest incident value.
@@ -574,8 +579,8 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents, params) ->
       # the highest CASIM values.
       resolvedSum = sum(cIncident.topLevelSubIntervals.map (subInt) -> subInt.value)
       difference = resolvedSum - cIncident.count
-      if params.debugLogging
-        console.log cIncident
+      if params.debugLogLevel > 0
+        console.log "Constraining incident: #{cIncident.count}, #{cIncident.startDate.toDateString()} to #{cIncident.endDate.toDateString()}"
         console.log "#{difference} = #{resolvedSum} - #{cIncident.count}"
       if difference > 0
         excessCounts += 1
@@ -585,7 +590,7 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents, params) ->
           for subInterval in containedSubInts
             for incidentId, value of subInterval.__valuesByIncident
               incidentToTotalValue[incidentId] = (incidentToTotalValue[incidentId] || 0) + value
-          if params.debugLogging
+          if params.debugLogLevel > 0
             console.log incidentToTotalValue
           incidentsRemoved = false
           for incidentId, value of incidentToTotalValue
@@ -616,12 +621,11 @@ removeOutlierIncidentsSingleType = (incidents, constrainingIncidents, params) ->
           .sortBy (x) -> -x[1]
           .map (x) -> x[0]
           .value()
-        if params.debugLogging
-          console.log incidentToTotalValue
+        if params.debugLogLevel > 0
           console.log incidentToMarginalValue
         marginalValueRemoved = 0
         for incidentId in incidentsSortedByCASIM
-          if params.debugLogging
+          if params.debugLogLevel > 0
             console.log incidentId
           incidents[incidentId] = null
           marginalValueRemoved += incidentToMarginalValue[incidentId]

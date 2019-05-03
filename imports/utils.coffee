@@ -223,10 +223,13 @@ export incidentTypeWithCountAndDisease = (incident) ->
   deaths = incident.deaths
   specify = incident.specify
   disease = incident.resolvedDisease?.text
+  cumulativeStr = ""
+  if incident.dateRange.cumulative
+    cumulativeStr = "cumulative "
   if cases >= 0
-    text = "#{cases} #{pluralize('case', cases, false)}"
+    text = "#{cases} #{cumulativeStr}#{pluralize('case', cases, false)}"
   else if deaths >= 0
-    text = "#{deaths} #{pluralize('death', deaths, false)}"
+    text = "#{deaths} #{cumulativeStr}#{pluralize('death', deaths, false)}"
   else if specify
     text = specify
   else

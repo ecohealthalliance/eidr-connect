@@ -467,6 +467,9 @@
 
   removeOutlierIncidentsSingleType = function(incidents, constrainingIncidents, params) {
     var constrainingSubIntervals, constrainingSubIntervalsByIncident, cumulativeIncidentConstraintMultiple, cumulativeIncidentDurationConstraintMultiple, excessCounts, incidentsByLocationId, intersectionsByIncident, iteration, locationIdToParent, myLocationTree, nextLayer, nodeLayer, subIntervals, subIntsByStart;
+    incidents = incidents.filter(function(incident) {
+      return !(incident.cumulative && incident.duration <= 1 && incident.count > 5);
+    });
     incidentsByLocationId = _.groupBy(incidents, function(x) {
       return x.locations[0].id;
     });
@@ -583,7 +586,7 @@
     });
     while (incidents.length > 0) {
       subIntervals.forEach(function(subInt) {
-        var duration, end, incident, incidentId, incidentIds, j, k, len, lowerMedian, marginalValueByIncident, priorValue, sortedValues, sortedValuesByIncident, start, v, values, valuesByIncident;
+        var duration, end, idx, incident, incidentId, incidentIds, j, k, len, marginalValueByIncident, median, priorValue, sortedValues, sortedValuesByIncident, start, v, values, valuesByIncident;
         start = subInt.start, end = subInt.end, incidentIds = subInt.incidentIds, duration = subInt.duration;
         valuesByIncident = {};
         for (j = 0, len = incidentIds.length; j < len; j++) {
@@ -596,14 +599,19 @@
         }
         values = _.values(valuesByIncident).concat([0]);
         sortedValues = values.sort();
-        lowerMedian = sortedValues[Math.ceil(values.length / 2) - 1];
+        idx = Math.floor(values.length / 2);
+        if (sortedValues.length % 2 === 0) {
+          median = (sortedValues[idx - 1] + sortedValues[idx]) / 2;
+        } else {
+          median = sortedValues[idx];
+        }
         subInt.__valuesByIncident = valuesByIncident;
         subInt.__CASIMByIncident = _.object((function() {
           var results;
           results = [];
           for (k in valuesByIncident) {
             v = valuesByIncident[k];
-            results.push([k, Math.max(0, v - lowerMedian)]);
+            results.push([k, Math.max(0, v - median)]);
           }
           return results;
         })());
@@ -629,8 +637,8 @@
           return subInt.value;
         }));
         difference = resolvedSum - cIncident.count;
-        if (params.debugLogging) {
-          console.log(cIncident);
+        if (params.debugLogLevel > 0) {
+          console.log("Constraining incident: " + cIncident.count + ", " + (cIncident.startDate.toDateString()) + " to " + (cIncident.endDate.toDateString()));
           console.log(difference + " = " + resolvedSum + " - " + cIncident.count);
         }
         if (difference > 0) {
@@ -645,7 +653,7 @@
                 incidentToTotalValue[incidentId] = (incidentToTotalValue[incidentId] || 0) + value;
               }
             }
-            if (params.debugLogging) {
+            if (params.debugLogLevel > 0) {
               console.log(incidentToTotalValue);
             }
             incidentsRemoved = false;
@@ -681,15 +689,14 @@
           }).map(function(x) {
             return x[0];
           }).value();
-          if (params.debugLogging) {
-            console.log(incidentToTotalValue);
+          if (params.debugLogLevel > 0) {
             console.log(incidentToMarginalValue);
           }
           marginalValueRemoved = 0;
           results = [];
           for (m = 0, len2 = incidentsSortedByCASIM.length; m < len2; m++) {
             incidentId = incidentsSortedByCASIM[m];
-            if (params.debugLogging) {
+            if (params.debugLogLevel > 0) {
               console.log(incidentId);
             }
             incidents[incidentId] = null;
