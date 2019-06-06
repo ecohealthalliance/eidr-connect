@@ -17,10 +17,15 @@ def clean(s):
 
 
 def clean_disease_name(s):
-    s = re.sub(r"^(Highly Pathogenic|Virulent|Suspected)", "", s, re.I)
+    # Modifiers that make case counts more specific need to be treated
+    # specially because constraining counts for the general disease cannot be
+    # created from them.
+    # s = re.sub(r"^(Highly Pathogenic|Virulent|Suspected)", "", s, re.I)
+    # s = re.sub(" Serotype .+$", "", s, re.I)
+    # Remove hyphens
+    s = re.sub(r"\-", "", s)
     s = re.sub(r"\(.*\)", "", s)
     s = re.sub(r"\[.*\]", "", s)
-    s = re.sub(" Serotype .+$", "", s, re.I)
     return clean(s)
 
 

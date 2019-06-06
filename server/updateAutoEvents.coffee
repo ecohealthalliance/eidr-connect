@@ -2,6 +2,7 @@ import Incidents from '/imports/collections/incidentReports'
 import AutoEvents from '/imports/collections/autoEvents'
 import {capitalize} from '/imports/utils'
 import diseaseToSubtypes from '/imports/diseaseToSubtypes.json'
+import getCannonicalDiseaseURI from '/imports/getCannonicalDiseaseURI'
 
 module.exports = ->
   startDate = moment().subtract(2, 'years').toDate()
@@ -17,6 +18,7 @@ module.exports = ->
     incident.species.id == 'tsn:180092'
   myIncidents.forEach (incident) ->
     disease = incident.resolvedDisease
+    disease.id = getCannonicalDiseaseURI(disease.id)
     if disease.id == 'http://purl.obolibrary.org/obo/DOID_0050117'
       # Do not create event for disease by infectious agent because it will
       # contain too many incidents.
