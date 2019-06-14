@@ -185,4 +185,4 @@ Template.curatorSourceDetails.events
       'getArticleEnhancementsAndUpdate',
       instance.selectedSourceId.get(),
       reprocess: true
-    )
+    , (error) -> alert(error))

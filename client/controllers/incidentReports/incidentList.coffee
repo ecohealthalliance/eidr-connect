@@ -57,8 +57,13 @@ Template.incidentList.onRendered ->
       unless Incidents.findOne(query)
         @selectedIncidents.remove(id: query._id)
 
+  @incidentShowing = null
   @autorun =>
     incident = Incidents.findOne(_id: Router.current().params.incidentId)
+    if @incidentShowing == Router.current().params.incidentId
+      # Prevent the modal from re-opening on reactive data change.
+      return
+    @incidentShowing = Router.current().params.incidentId
     if incident
       source = @data.source
       snippetHtml = buildAnnotatedIncidentSnippet(source.enhancements.source.cleanContent.content, incident, false)
