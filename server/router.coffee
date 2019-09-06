@@ -203,7 +203,20 @@ workerThread = new Worker(require('./worker.js'))
 @api {post} resolve-incidents Resolve a set of potentially overlapping incidents into
                               single case or death count values over each location and time interval.
 @apiParamExample {json} Request-Example:
-    [
+
+  {
+    "params": {
+        "outlierMultiple": 5,
+        "cumulativeIncidentConstraintMultiple": 1.3,
+        "cumulativeIncidentDurationConstraintMultiple": 0.2
+    },
+    resolvedDateRange: {
+        start: "2014-04-09T00:00:00.000Z",
+        end: "2014-04-09T23:59:59.999Z"
+    },
+    incidentType: "deaths",
+    constrainingIncidents: [],
+    incidents: [
       {
         "deaths": 1,
         "locations": [{
@@ -224,6 +237,8 @@ workerThread = new Worker(require('./worker.js'))
         }
       }
     ]
+  }
+
 @apiSuccessExample {json} Success-Response:
     [
       {
