@@ -63,8 +63,10 @@ IncidentReportSchema = new SimpleSchema
     type: String
     allowedValues: ["day","precise"]
     optional: true
-  # Datetimes are treated as offset naive so the look the same from any
+  # Datetimes are treated as offset naive so the look they same from any
   # browser client and match the dates in their source documents.
+  # Internally this is done by working in UTC time since there
+  # is no timezone-naive datetime type.
   "dateRange.start":
     type: Date
     optional: true
